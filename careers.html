@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Careers — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="A Million Jobs for a Million Filipinos. Explore open positions and apply online at CNT Promo & Ads Specialists, Inc." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+
+  <style>
+  :root{
+    --red:#C8102E; --red-deep:#A50D24; --red-lt:#E5213F; --red-pale:#FFF0F2; --red-muted:#F5C6CE;
+    --charcoal:#1A1A1A; --dark:#111; --white:#fff; --off-white:#FAFAFA;
+    --gray-50:#F5F5F5; --gray-100:#EBEBEB; --gray-200:#D6D6D6;
+    --gray-400:#9CA3AF; --gray-600:#6B7280; --gray-800:#222;
+    --text-main:#111; --text-sub:#555;
+    --radius-sm:8px; --radius-md:16px; --radius-lg:28px;
+    --shadow-sm:0 2px 8px rgba(0,0,0,.06); --shadow-md:0 8px 32px rgba(0,0,0,.10);
+    --shadow-lg:0 24px 64px rgba(0,0,0,.13); --shadow-red:0 8px 32px rgba(200,16,46,.25);
+    --transition:.3s cubic-bezier(.25,.46,.45,.94);
+    --font-display:'Plus Jakarta Sans',sans-serif; --font-body:'Inter',sans-serif;
+    --max-w:1200px; --gutter:clamp(20px,5vw,64px);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font-body);color:var(--text-main);background:var(--off-white);-webkit-font-smoothing:antialiased}
+  img{display:block;max-width:100%;height:auto}
+  a{text-decoration:none;color:inherit}
+  ul{list-style:none}
+  button{cursor:pointer;border:none;background:none;font-family:inherit}
+  input,select,textarea{font-family:var(--font-body)}
+  .container{width:min(var(--max-w),100% - var(--gutter)*2);margin-inline:auto}
+  .font-display{font-family:var(--font-display)}
+
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:900;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--gray-100)}
+  .nav-container{width:min(var(--max-w),100% - var(--gutter)*2);margin-inline:auto;display:flex;align-items:center;justify-content:space-between;height:72px}
+  .nav-logo img{height:40px}
+  .nav-links{display:flex;gap:1.9rem;align-items:center}
+  .nav-link{font-size:.9rem;font-weight:500;color:var(--charcoal);transition:color var(--transition);position:relative}
+  .nav-link:hover,.nav-link.active{color:var(--red)}
+  .nav-link.active::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--red);border-radius:2px}
+  .btn-nav{padding:.6rem 1.3rem;border-radius:99px;background:var(--charcoal);color:#fff;font-size:.85rem;font-weight:600;transition:var(--transition)}
+  .btn-nav:hover{background:var(--red)}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--charcoal),#000);color:#fff;padding:clamp(48px,7vw,84px) 0;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-6%;top:-40%;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.32),transparent 62%)}
+  .hero-inner{position:relative;z-index:2;max-width:780px}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--red-lt);margin-bottom:1rem}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--red-lt)}
+  .hero h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.4rem);font-weight:800;line-height:1.06;letter-spacing:-.02em}
+  .hero h1 em{font-style:normal;color:var(--red-lt)}
+  .hero p{margin-top:1.2rem;font-size:clamp(.98rem,1.4vw,1.12rem);color:rgba(255,255,255,.72);max-width:560px;line-height:1.7}
+  .hero-search{margin-top:2rem;max-width:520px;display:flex;align-items:center;gap:10px;background:#fff;border-radius:99px;padding:6px 6px 6px 20px;box-shadow:var(--shadow-md)}
+  .hero-search input{flex:1;border:none;outline:none;font-size:.95rem;padding:10px 0;color:var(--text-main)}
+  .hero-search button{background:var(--red);color:#fff;border-radius:99px;padding:11px 22px;font-weight:600;font-size:.9rem}
+
+  /* LAYOUT */
+  .board{padding:clamp(40px,6vw,72px) 0 100px}
+  .layout{display:grid;grid-template-columns:250px 1fr;gap:40px;align-items:start}
+
+  /* FILTER SIDEBAR */
+  .sidebar{position:sticky;top:96px}
+  .filter-group{margin-bottom:28px}
+  .filter-group h4{font-family:var(--font-display);font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);margin-bottom:12px}
+  .filter-item{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:8px 12px;border-radius:8px;font-size:.9rem;color:var(--text-sub);transition:var(--transition);margin-bottom:2px}
+  .filter-item:hover{background:var(--gray-50);color:var(--charcoal)}
+  .filter-item.active{background:var(--red-pale);color:var(--red-deep);font-weight:600}
+  .filter-item .count{font-size:.75rem;color:var(--gray-400);background:var(--gray-50);border-radius:99px;padding:2px 8px;min-width:26px;text-align:center}
+  .filter-item.active .count{background:#fff;color:var(--red)}
+
+  /* JOB LIST */
+  .list-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:26px}
+  .list-head h2{font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--charcoal)}
+  .list-head span{font-size:.9rem;color:var(--gray-600)}
+  .list-head b{color:var(--red)}
+  .group{margin-bottom:34px}
+  .group-title{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--charcoal);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--gray-100)}
+  .group-title .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .group-title .n{margin-left:auto;font-size:.78rem;font-weight:600;color:var(--gray-400)}
+  .job-row{display:flex;align-items:center;gap:18px;padding:18px 20px;background:#fff;border:1px solid var(--gray-100);border-radius:var(--radius-md);margin-bottom:10px;cursor:pointer;transition:var(--transition);position:relative}
+  .job-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);border-radius:3px 0 0 3px;transform:scaleY(0);transform-origin:center;transition:var(--transition)}
+  .job-row:hover{border-color:var(--red-muted);box-shadow:var(--shadow-sm);transform:translateX(3px)}
+  .job-row:hover::before{transform:scaleY(1)}
+  .job-row .main{flex:1;min-width:0}
+  .job-row .title{font-family:var(--font-display);font-size:1.08rem;font-weight:700;color:var(--charcoal)}
+  .job-row .snippet{font-size:.85rem;color:var(--text-sub);margin-top:4px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .job-row .meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:9px;font-size:.8rem;color:var(--gray-600)}
+  .job-row .meta span{display:inline-flex;align-items:center;gap:5px}
+  .job-row .meta svg{width:14px;height:14px;color:var(--red)}
+  .job-row .go{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+  .openpill{font-size:.72rem;font-weight:700;color:var(--red-deep);background:var(--red-pale);border-radius:99px;padding:5px 11px;white-space:nowrap}
+  .arrow{color:var(--red);font-size:1.1rem}
+
+  .state{text-align:center;padding:70px 20px;color:var(--gray-600)}
+  .spinner{width:38px;height:38px;border:3px solid var(--gray-100);border-top-color:var(--red);border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .notice{background:var(--red-pale);border:1px solid var(--red-muted);color:var(--red-deep);border-radius:var(--radius-md);padding:13px 17px;font-size:.85rem;margin-bottom:22px;display:flex;gap:10px;align-items:flex-start}
+  .notice svg{width:18px;height:18px;flex-shrink:0;margin-top:1px}
+
+  /* DETAIL VIEW */
+  #view-detail{display:none}
+  .detail-head{background:linear-gradient(135deg,var(--charcoal),#000);color:#fff;padding:36px 0}
+  .backlink{display:inline-flex;align-items:center;gap:7px;font-size:.85rem;color:rgba(255,255,255,.7);margin-bottom:20px;transition:var(--transition)}
+  .backlink:hover{color:#fff}
+  .backlink svg{width:16px;height:16px}
+  .detail-head .client{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--red-lt)}
+  .detail-head h1{font-family:var(--font-display);font-size:clamp(1.7rem,4vw,2.7rem);font-weight:800;line-height:1.1;margin-top:6px}
+  .detail-meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;font-size:.9rem;color:rgba(255,255,255,.8)}
+  .detail-meta span{display:inline-flex;align-items:center;gap:7px}
+  .detail-meta svg{width:16px;height:16px;color:var(--red-lt)}
+  .btn-apply-top{margin-top:22px;display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;font-weight:600;font-size:.95rem;padding:13px 28px;border-radius:99px;transition:var(--transition)}
+  .btn-apply-top:hover{background:var(--red-lt);box-shadow:var(--shadow-red)}
+
+  .detail-body{padding:clamp(40px,6vw,68px) 0 90px}
+  .detail-grid{display:grid;grid-template-columns:1fr 320px;gap:48px;align-items:start}
+  .prose h3{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--charcoal);margin:30px 0 12px}
+  .prose h3:first-child{margin-top:0}
+  .prose p{font-size:.97rem;line-height:1.75;color:var(--text-sub);margin-bottom:12px}
+  .prose ul.bullets{margin:6px 0 8px}
+  .prose ul.bullets li{position:relative;padding-left:26px;margin-bottom:10px;font-size:.95rem;line-height:1.6;color:var(--text-sub)}
+  .prose ul.bullets li::before{content:"";position:absolute;left:4px;top:8px;width:8px;height:8px;border-radius:2px;background:var(--red);transform:rotate(45deg)}
+  .tag-title{display:inline-block;font-family:var(--font-display);font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--red-deep);background:var(--red-pale);padding:5px 12px;border-radius:99px;margin:26px 0 12px}
+
+  .apply-card{position:sticky;top:96px;background:#fff;border:1px solid var(--gray-100);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);overflow:hidden}
+  .apply-card .cap{background:var(--red);color:#fff;padding:16px 22px;font-family:var(--font-display);font-weight:700;font-size:1.02rem}
+  .apply-card .inner{padding:20px 22px 24px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:.76rem;font-weight:600;color:var(--charcoal);margin-bottom:6px}
+  .field label .req{color:var(--red)}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:11px 13px;font-size:.88rem;outline:none;transition:border-color var(--transition);background:#fff}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red)}
+  .field textarea{resize:vertical;min-height:70px}
+  .filebox{border:1.5px dashed var(--gray-200);border-radius:var(--radius-sm);padding:14px;text-align:center;cursor:pointer;transition:var(--transition);font-size:.82rem;color:var(--gray-600)}
+  .filebox:hover{border-color:var(--red);background:var(--red-pale)}
+  .filebox.has{border-color:var(--red);color:var(--charcoal);background:var(--red-pale)}
+  .filebox svg{width:20px;height:20px;color:var(--red);margin:0 auto 5px}
+  .btn-submit{width:100%;background:var(--red);color:#fff;font-weight:600;font-size:.92rem;padding:13px;border-radius:99px;margin-top:6px;transition:var(--transition)}
+  .btn-submit:hover{background:var(--red-deep)}
+  .btn-submit:disabled{opacity:.6;cursor:not-allowed}
+  .form-msg{font-size:.8rem;margin-top:11px;padding:10px 13px;border-radius:var(--radius-sm);display:none}
+  .form-msg.err{display:block;background:#FEE2E2;color:#B91C1C}
+  .success{text-align:center;padding:24px 6px}
+  .success .check{width:58px;height:58px;border-radius:50%;background:#DCFCE7;color:#16A34A;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+  .success .check svg{width:30px;height:30px}
+  .success h4{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--charcoal)}
+  .success p{color:var(--text-sub);margin-top:8px;font-size:.86rem;line-height:1.55}
+
+  /* FOOTER */
+  footer{background:var(--charcoal);color:rgba(255,255,255,.75)}
+  .footer-top{padding:60px 0 36px}
+  .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px}
+  .footer-logo{height:50px;filter:brightness(0) invert(1);margin-bottom:16px}
+  .footer-brand p{font-size:.87rem;line-height:1.7;max-width:340px}
+  .footer-col h5{font-family:var(--font-display);color:#fff;font-size:.93rem;margin-bottom:13px}
+  .footer-col ul li{margin-bottom:9px}
+  .footer-col a{font-size:.85rem;transition:color var(--transition)}
+  .footer-col a:hover{color:var(--red-lt)}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding:20px 0;font-size:.8rem;color:rgba(255,255,255,.5)}
+  .footer-bottom .container{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .footer-red-bar{height:4px;background:linear-gradient(90deg,var(--red-deep),var(--red-lt))}
+
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr}
+    .sidebar{position:static;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:16px;background:#fff;border:1px solid var(--gray-100);border-radius:var(--radius-md);margin-bottom:26px}
+    .detail-grid{grid-template-columns:1fr}
+    .apply-card{position:static;order:-1}
+    .footer-grid{grid-template-columns:1fr;gap:28px}
+  }
+  @media(max-width:600px){.nav-links{display:none}.sidebar{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="CNT Home">
+        <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo & Ads Specialists, Inc." />
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#about" class="nav-link">About</a></li>
+        <li><a href="index.html#services" class="nav-link">Services</a></li>
+        <li><a href="index.html#industries" class="nav-link">Industries</a></li>
+        <li><a href="careers.html" class="nav-link active">Careers</a></li>
+      </ul>
+      <div class="nav-actions"><a href="index.html#contact" class="btn-nav">Contact Us</a></div>
+    </div>
+  </nav>
+
+  <!-- ================= LIST VIEW ================= -->
+  <div id="view-list">
+    <header class="hero">
+      <div class="container hero-inner">
+        <span class="eyebrow">Join CNT</span>
+        <h1>A Million Jobs for a <em>Million Filipinos.</em></h1>
+        <p>Your next opportunity starts below. Browse our open positions across leading client brands and apply online in minutes — no account needed.</p>
+        <div class="hero-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+          <input id="q" type="text" placeholder="Search a role or client…" />
+          <button onclick="document.getElementById('board').scrollIntoView({behavior:'smooth'})">Search</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="board" id="board">
+      <div class="container">
+        <div id="config-notice" class="notice" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          <span><b>Preview mode.</b> Showing sample positions. Once Supabase is configured, live openings load here and applications save to your ATS.</span>
+        </div>
+
+        <div class="layout">
+          <aside class="sidebar">
+            <div class="filter-group">
+              <h4>Location</h4>
+              <div id="filter-location"></div>
+            </div>
+            <div class="filter-group">
+              <h4>Positions</h4>
+              <div id="filter-position"></div>
+            </div>
+          </aside>
+
+          <section>
+            <div class="list-head">
+              <h2>Open Positions</h2>
+              <span id="results-count"></span>
+            </div>
+            <div id="groups"></div>
+            <div id="list-state"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= DETAIL VIEW ================= -->
+  <div id="view-detail">
+    <header class="detail-head">
+      <div class="container">
+        <a class="backlink" href="careers.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All open positions</a>
+        <div class="client" id="d-client">CLIENT</div>
+        <h1 id="d-title">Role</h1>
+        <div class="detail-meta">
+          <span id="d-location"></span>
+          <span id="d-salary"></span>
+          <span id="d-openings"></span>
+        </div>
+        <button class="btn-apply-top" onclick="document.getElementById('apply-anchor').scrollIntoView({behavior:'smooth'})">Apply for this position →</button>
+      </div>
+    </header>
+
+    <main class="detail-body">
+      <div class="container">
+        <div class="detail-grid">
+          <div class="prose" id="d-prose"></div>
+
+          <div class="apply-card" id="apply-anchor">
+            <div class="cap">Apply now</div>
+            <div class="inner" id="apply-inner">
+              <form id="apply-form" novalidate>
+                <div class="field"><label>Full name <span class="req">*</span></label><input name="name" type="text" required placeholder="Juan Dela Cruz" /></div>
+                <div class="field"><label>Mobile number <span class="req">*</span></label><input name="phone" type="tel" required placeholder="+63 9XX XXX XXXX" /></div>
+                <div class="field"><label>Email address <span class="req">*</span></label><input name="email" type="email" required placeholder="you@email.com" /></div>
+                <div class="field"><label>Years of experience</label>
+                  <select name="experience"><option value="">Select…</option><option>No experience</option><option>Less than 1 year</option><option>1–2 years</option><option>3–5 years</option><option>5+ years</option></select>
+                </div>
+                <div class="field"><label>How did you hear about us?</label>
+                  <select name="source"><option value="Website">Company Website</option><option>JobStreet</option><option>Indeed</option><option>Facebook</option><option>LinkedIn</option><option>Kalibrr</option><option>Referral</option><option>Walk-in</option><option>Other</option></select>
+                </div>
+                <div class="field"><label>Resume / CV <span class="req">*</span></label>
+                  <label class="filebox" id="filebox">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    <div id="filebox-text">Upload PDF or DOC (max 5 MB)</div>
+                    <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx" hidden required />
+                  </label>
+                </div>
+                <div class="field"><label>Cover note <span style="color:var(--gray-400);font-weight:400">(optional)</span></label><textarea name="cover_note" placeholder="Why are you a great fit?"></textarea></div>
+                <button type="submit" class="btn-submit" id="submit-btn">Submit application</button>
+                <div class="form-msg" id="form-msg"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <img src="https://uploads.onecompiler.io/43d4zm644/44t7ga3md/CNT%20Promo%20&%20Ads%20Specialists,%20Inc.%202.png" alt="CNT" class="footer-logo" />
+            <p>A Million Jobs for a Million Filipinos. CNT Promo &amp; Ads Specialists, Inc. — connecting exceptional talent with leading organizations since 2009.</p>
+          </div>
+          <div class="footer-col"><h5>Company</h5><ul>
+            <li><a href="index.html#about">About Us</a></li>
+            <li><a href="index.html#projects">Success Stories</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+            <li><a href="careers.html">Careers</a></li>
+          </ul></div>
+          <div class="footer-col"><h5>For Applicants</h5><ul>
+            <li><a href="careers.html">Browse Jobs</a></li>
+            <li><a href="index.html#industries">Industries</a></li>
+            <li><a href="index.html#contact">Get in Touch</a></li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>© 2025 CNT Promo &amp; Ads Specialists, Inc. All rights reserved. | DOLE Licensed Employment Agency</p>
+        <p>A Million Jobs for a Million Filipinos.</p>
+      </div>
+    </div>
+    <div class="footer-red-bar"></div>
+  </footer>
+
+  <script>
+  'use strict';
+
+  const SEED_JOBS = [
+    {id:1,role:'Merchandiser',client:'SONY',location:'Manila',salary_range:'17,000-19,000',openings:5,priority:'high'},
+    {id:2,role:'Brand Ambassador',client:'SONY',location:'Tarlac',salary_range:'16,000-18,000',openings:3,priority:'normal'},
+    {id:3,role:'Store Supervisor',client:'SONY',location:'Bulacan',salary_range:'23,000-26,000',openings:2,priority:'urgent'},
+    {id:4,role:'Product Demonstrator',client:'SONY',location:'Pampanga',salary_range:'15,500-17,000',openings:4,priority:'normal'},
+    {id:5,role:'Sales Promoter',client:'HAIER',location:'Manila',salary_range:'14,500-16,500',openings:6,priority:'high'},
+    {id:6,role:'Brand Ambassador',client:'HAIER',location:'Cavite',salary_range:'16,000-18,000',openings:3,priority:'normal'},
+    {id:7,role:'Area Supervisor',client:'HAIER',location:'Pangasinan',salary_range:'26,000-30,000',openings:1,priority:'urgent'},
+    {id:8,role:'Merchandiser',client:'HAIER',location:'Batangas',salary_range:'15,500-17,500',openings:4,priority:'normal'},
+    {id:9,role:'Product Demonstrator',client:'HISENSE',location:'Manila',salary_range:'15,000-17,000',openings:5,priority:'high'},
+    {id:10,role:'Trade Marketing Specialist',client:'HISENSE',location:'Pampanga',salary_range:'28,000-35,000',openings:2,priority:'normal'},
+    {id:11,role:'In-Store Activator',client:'HISENSE',location:'Cavite',salary_range:'14,000-16,000',openings:3,priority:'normal'},
+    {id:12,role:'Sales Promoter',client:'URC',location:'Manila',salary_range:'14,500-16,000',openings:8,priority:'urgent'},
+    {id:13,role:'Area Supervisor',client:'URC',location:'Tarlac',salary_range:'25,000-28,000',openings:2,priority:'high'},
+    {id:14,role:'Field Sales Representative',client:'URC',location:'Bulacan',salary_range:'20,000-24,000',openings:4,priority:'high'},
+    {id:15,role:'Trade Marketing Specialist',client:'URC',location:'Batangas',salary_range:'28,000-32,000',openings:2,priority:'normal'},
+    {id:16,role:'Product Demonstrator',client:'SKYWORTH',location:'Manila',salary_range:'14,500-16,500',openings:5,priority:'normal'},
+    {id:17,role:'Sales Promoter',client:'SKYWORTH',location:'Pampanga',salary_range:'14,000-16,000',openings:4,priority:'high'},
+    {id:18,role:'Merchandiser',client:'SKYWORTH',location:'Tarlac',salary_range:'15,500-17,000',openings:3,priority:'normal'},
+    {id:19,role:'Sales Promoter',client:'UNCLE JOHNS',location:'Batangas',salary_range:'13,500-15,500',openings:4,priority:'normal'},
+    {id:20,role:'In-Store Activator',client:'UNCLE JOHNS',location:'Manila',salary_range:'14,000-16,000',openings:3,priority:'high'},
+    {id:21,role:'Logistics Coordinator',client:'UNCLE JOHNS',location:'Bulacan',salary_range:'18,000-22,000',openings:2,priority:'normal'},
+    {id:22,role:'Sales Promoter',client:'Cinderella',location:'Manila',salary_range:'14,500-16,000',openings:6,priority:'high'},
+    {id:23,role:'Store Supervisor',client:'Cinderella',location:'Manila',salary_range:'22,000-26,000',openings:2,priority:'urgent'},
+    {id:24,role:'Brand Ambassador',client:'Cinderella',location:'Cavite',salary_range:'15,500-18,000',openings:3,priority:'normal'},
+  ];
+
+  const CLIENT_COLORS = {SONY:'#0b3d91',HAIER:'#c8102e',HISENSE:'#00843d',URC:'#e4002b',SKYWORTH:'#6d28d9',"UNCLE JOHNS":'#b45309',Cinderella:'#db2777'};
+
+  /* Role content templates → Odoo-style detail sections */
+  const ROLE_INFO = {
+    'Merchandiser':{summary:'Ensure our client’s products are well-stocked, correctly priced and attractively displayed to maximize sales across assigned retail outlets.',
+      resp:['Maintain product displays, shelves and planograms to client standards','Monitor stock levels and coordinate replenishment with store staff','Set up promotional materials and verify pricing accuracy','Track competitor activity and submit regular field reports','Build strong working relationships with store personnel'],
+      must:['At least high school / senior high school graduate','Willing to do daily fieldwork and stand for long hours','Keen eye for detail and well-organized']},
+    'Sales Promoter':{summary:'Actively promote and sell our client’s products to shoppers, hit sales targets, and deliver a great in-store experience.',
+      resp:['Approach and engage customers to promote products','Achieve daily and monthly sales quotas','Explain product features, benefits and promos','Keep the selling area clean, stocked and presentable','Report daily sales and inventory movement'],
+      must:['At least high school / senior high school graduate','Confident, energetic and customer-oriented','Willing to work retail hours, weekends and holidays']},
+    'Brand Ambassador':{summary:'Represent our client’s brand with professionalism, drive product awareness, and create memorable experiences that build customer loyalty.',
+      resp:['Champion the brand image at retail and activation sites','Engage shoppers and communicate key brand messages','Support product launches, sampling and demos','Gather customer feedback and market insights','Ensure branding and merchandising standards are met'],
+      must:['At least high school / senior high school graduate','Pleasing personality with strong communication skills','Presentable and comfortable engaging the public']},
+    'Product Demonstrator':{summary:'Demonstrate product features live to shoppers, answer questions, and convert interest into sales at assigned outlets.',
+      resp:['Perform live product demonstrations to customers','Highlight features, usage and value of products','Drive trial, sampling and on-the-spot sales','Maintain a clean and well-stocked demo area','Report demo results and customer reactions'],
+      must:['At least high school / senior high school graduate','Outgoing, articulate and persuasive','Willing to work on-site at malls / retail outlets']},
+    'In-Store Activator':{summary:'Bring in-store campaigns to life — run activations, engage shoppers, and boost brand visibility and sales at the point of purchase.',
+      resp:['Execute in-store activations and promotional events','Drive foot traffic and shopper engagement','Set up and maintain activation booths and materials','Coordinate with store management on activities','Report activation performance and shopper feedback'],
+      must:['At least high school / senior high school graduate','High-energy, sociable and proactive','Willing to work flexible retail schedules']},
+    'Store Supervisor':{summary:'Lead the store team, hit sales targets, and ensure smooth day-to-day operations and excellent customer service.',
+      resp:['Supervise, schedule and motivate store staff','Drive store sales performance against targets','Oversee inventory, merchandising and cash handling','Ensure high standards of customer service','Prepare sales, stock and manpower reports'],
+      must:['At least 2 years of retail supervisory experience','Strong leadership and people-management skills','Willing to be assigned on-site full time']},
+    'Area Supervisor':{summary:'Oversee multiple outlets within your area, coach field teams, and ensure sales targets and standards are consistently met.',
+      resp:['Manage and coach merchandisers / promoters across outlets','Ensure sales targets and coverage plans are achieved','Conduct regular store visits and audits','Coordinate manpower, deployment and reports','Build relationships with client and store partners'],
+      must:['At least 2–3 years of supervisory / field experience','Willing to travel within the assigned area','Strong leadership, reporting and analytical skills']},
+    'Trade Marketing Specialist':{summary:'Plan and execute trade marketing programs that grow brand presence, drive sell-out, and strengthen client partnerships.',
+      resp:['Develop and roll out trade marketing programs','Analyze sell-out data and shopper trends','Coordinate promo, display and channel activities','Manage POSM deployment and effectiveness','Report on program ROI and market insights'],
+      must:['Bachelor’s degree in Marketing, Business or related field','1–3 years trade / brand marketing experience','Strong analytical and coordination skills']},
+    'Field Sales Representative':{summary:'Grow sales in your assigned territory by servicing accounts, opening new outlets, and ensuring product availability.',
+      resp:['Achieve territory sales and distribution targets','Service existing accounts and open new outlets','Ensure product availability, visibility and pricing','Collect orders and coordinate deliveries','Submit route, sales and competitor reports'],
+      must:['At least high school graduate; college level an advantage','With sales / distribution experience preferred','Willing to do daily fieldwork within the territory']},
+    'Logistics Coordinator':{summary:'Coordinate the flow of goods — deliveries, inventory and documentation — to keep operations running smoothly.',
+      resp:['Coordinate deliveries, dispatch and returns','Monitor and reconcile inventory levels','Maintain accurate logistics documentation','Liaise with warehouse, suppliers and stores','Report on stock movement and delivery performance'],
+      must:['At least a vocational / college graduate','With warehouse or logistics experience preferred','Organized, detail-oriented and systems-literate']},
+  };
+  const NICE_TO_HAVE = ['Previous experience in retail, FMCG or a similar field','Basic knowledge of MS Office or mobile reporting apps','Resides near the assigned location'];
+  const WE_OFFER = ['Government-mandated benefits (SSS, PhilHealth, Pag-IBIG, 13th month)','Competitive salary with allowances and incentives','Clear path to regularization and career growth','Training and development with CNT and our client partners'];
+
+  const sb = window.getSupabase();
+  let ALL_JOBS = [];
+  let activeJob = null;
+  let curFilter = { location:'all', position:'all', q:'' };
+  const PRI_RANK = { urgent:0, high:1, normal:2 };
+
+  const $ = (s)=>document.querySelector(s);
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function formatSalary(s){ if(!s) return 'Competitive'; const p=String(s).replace(/₱/g,'').split('-').map(x=>x.trim()).filter(Boolean); return p.length===2?'₱'+p[0]+' - ₱'+p[1]:'₱'+p.join(''); }
+  const pinSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+  const cashSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
+  const usersSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>';
+
+  /* ---------- LOAD ---------- */
+  async function loadJobs(){
+    $('#list-state').innerHTML='<div class="state"><div class="spinner"></div>Loading open positions…</div>';
+    if(sb){
+      const { data, error } = await sb.from('jobs').select('*').eq('status','open');
+      if(error){ console.error(error); ALL_JOBS=SEED_JOBS.slice(); }
+      else ALL_JOBS=data||[];
+    } else { ALL_JOBS=SEED_JOBS.slice(); $('#config-notice').style.display='flex'; }
+    $('#list-state').innerHTML='';
+    buildFilters();
+    route();
+  }
+
+  /* ---------- FILTERS ---------- */
+  function buildFilters(){
+    const locs={}, poss={};
+    ALL_JOBS.forEach(j=>{ locs[j.location]=(locs[j.location]||0)+1; poss[j.role]=(poss[j.role]||0)+1; });
+    const locHtml=[`<button class="filter-item ${curFilter.location==='all'?'active':''}" data-type="location" data-val="all">All Locations <span class="count">${ALL_JOBS.length}</span></button>`]
+      .concat(Object.keys(locs).sort().map(l=>`<button class="filter-item ${curFilter.location===l?'active':''}" data-type="location" data-val="${esc(l)}">${esc(l)} <span class="count">${locs[l]}</span></button>`));
+    const posHtml=[`<button class="filter-item ${curFilter.position==='all'?'active':''}" data-type="position" data-val="all">All Positions <span class="count">${ALL_JOBS.length}</span></button>`]
+      .concat(Object.keys(poss).sort().map(p=>`<button class="filter-item ${curFilter.position===p?'active':''}" data-type="position" data-val="${esc(p)}">${esc(p)} <span class="count">${poss[p]}</span></button>`));
+    $('#filter-location').innerHTML=locHtml.join('');
+    $('#filter-position').innerHTML=posHtml.join('');
+    document.querySelectorAll('.filter-item').forEach(b=>b.addEventListener('click',()=>{
+      curFilter[b.dataset.type]=b.dataset.val; buildFilters(); renderList();
+    }));
+  }
+
+  /* ---------- LIST ---------- */
+  function renderList(){
+    const q=curFilter.q.toLowerCase();
+    let list=ALL_JOBS.filter(j=>{
+      const mq=!q||(j.role+' '+j.client).toLowerCase().includes(q);
+      const ml=curFilter.location==='all'||j.location===curFilter.location;
+      const mp=curFilter.position==='all'||j.role===curFilter.position;
+      return mq&&ml&&mp;
+    });
+    $('#results-count').innerHTML=`<b>${list.length}</b> open position${list.length!==1?'s':''}`;
+    if(!list.length){ $('#groups').innerHTML=''; $('#list-state').innerHTML='<div class="state">No positions match your filters. Try broadening your search.</div>'; return; }
+    $('#list-state').innerHTML='';
+    // flat list — client/account is hidden here, revealed only on the job detail page
+    list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
+    $('#groups').innerHTML=list.map(j=>{
+      const info=ROLE_INFO[j.role];
+      const snip=info?info.summary:'Join the CNT team and grow your career with a leading brand.';
+      return `<div class="job-row" data-id="${j.id}">
+        <div class="main">
+          <div class="title">${esc(j.role)}</div>
+          <div class="snippet">${esc(snip)}</div>
+          <div class="meta"><span>${pinSvg}${esc(j.location)}</span><span>${esc(formatSalary(j.salary_range))}</span></div>
+        </div>
+        <div class="go"><span class="openpill">${(+j.openings||1)} opening${(+j.openings||1)!==1?'s':''}</span><span class="arrow">→</span></div>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.job-row').forEach(r=>r.addEventListener('click',()=>gotoJob(+r.dataset.id)));
+  }
+
+  $('#q').addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); renderList(); });
+
+  /* ---------- ROUTER ---------- */
+  function gotoJob(id){ history.pushState({id},'', 'careers.html?job='+id); route(); window.scrollTo({top:0}); }
+  window.addEventListener('popstate',route);
+  function route(){
+    const id=new URLSearchParams(location.search).get('job');
+    if(id && ALL_JOBS.some(j=>String(j.id)===String(id))){ showDetail(ALL_JOBS.find(j=>String(j.id)===String(id))); }
+    else { showList(); }
+  }
+  function showList(){ $('#view-detail').style.display='none'; $('#view-list').style.display='block'; renderList(); }
+
+  /* ---------- DETAIL ---------- */
+  function bullets(arr){ return '<ul class="bullets">'+arr.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>'; }
+  function showDetail(job){
+    activeJob=job;
+    $('#view-list').style.display='none';
+    $('#view-detail').style.display='block';
+    $('#d-client').textContent=job.client;
+    $('#d-title').textContent=job.role;
+    $('#d-location').innerHTML=pinSvg+' '+esc(job.location);
+    $('#d-salary').innerHTML=esc(formatSalary(job.salary_range))+' /mo';
+    $('#d-openings').innerHTML=usersSvg+' '+(+job.openings||1)+' opening'+((+job.openings||1)!==1?'s':'');
+    const info=ROLE_INFO[job.role]||{summary:'Join the CNT team and grow your career with one of the Philippines’ leading brands.',resp:['Support day-to-day operations at the assigned outlet','Deliver excellent customer service','Meet assigned targets and standards'],must:['At least high school / senior high school graduate','Willing to be assigned on-site','Reliable and hardworking']};
+    const lines=(t)=>{ const a=t?String(t).split('\n').map(s=>s.trim()).filter(Boolean):[]; return a.length?a:null; };
+    const about = (job.about&&job.about.trim()) ? job.about.trim() : info.summary;
+    const resp  = lines(job.responsibilities) || info.resp;
+    const must  = lines(job.must_have)        || info.must;
+    const nice  = lines(job.nice_to_have)     || NICE_TO_HAVE;
+    const offer = lines(job.we_offer)         || WE_OFFER;
+    $('#d-prose').innerHTML=`
+      <h3>About the role</h3>
+      <p>${esc(about)}</p>
+      <p>This is a <b>${esc(job.role)}</b> position for <b>${esc(job.client)}</b>, based in <b>${esc(job.location)}</b>, offered through CNT Promo &amp; Ads Specialists, Inc. — a DOLE-licensed employment agency. We currently have <b>${(+job.openings||1)}</b> opening${(+job.openings||1)!==1?'s':''} for this role.</p>
+      <span class="tag-title">Responsibilities</span>
+      ${bullets(resp)}
+      <span class="tag-title">Must have</span>
+      ${bullets(must)}
+      <span class="tag-title">Nice to have</span>
+      ${bullets(nice)}
+      <span class="tag-title">What we offer</span>
+      ${bullets(offer)}`;
+    resetForm();
+    document.title=job.role+' ('+job.client+') — CNT Careers';
+  }
+
+  /* ---------- APPLY ---------- */
+  function resetForm(){
+    const f=$('#apply-form'); if(!f) return; f.reset(); f.style.display='';
+    document.querySelector('#apply-inner .success')?.remove();
+    $('#filebox').classList.remove('has'); $('#filebox-text').textContent='Upload PDF or DOC (max 5 MB)';
+    const m=$('#form-msg'); m.className='form-msg'; m.textContent='';
+    $('#submit-btn').disabled=false; $('#submit-btn').textContent='Submit application';
+  }
+  document.getElementById('resume').addEventListener('change',function(){
+    const file=this.files[0];
+    if(file){ $('#filebox').classList.add('has'); $('#filebox-text').textContent=file.name+' ('+(file.size/1048576).toFixed(1)+' MB)'; }
+  });
+  function showMsg(t){ const m=$('#form-msg'); m.textContent=t; m.className='form-msg err'; }
+
+  document.getElementById('apply-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const f=e.target, ri=$('#resume');
+    const name=f.name.value.trim(), email=f.email.value.trim(), phone=f.phone.value.trim(), file=ri.files[0];
+    if(!name||!email||!phone){ showMsg('Please fill in your name, email and mobile number.'); return; }
+    if(!file){ showMsg('Please attach your resume / CV.'); return; }
+    if(file.size>5*1048576){ showMsg('Your file is larger than 5 MB.'); return; }
+    if(!sb){ showMsg('Applications are not live yet — Supabase must be configured first.'); return; }
+    const btn=$('#submit-btn'); btn.disabled=true; btn.textContent='Submitting…';
+    try{
+      const safe=file.name.replace(/[^\w.\-]/g,'_');
+      const path=`${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safe}`;
+      const up=await sb.storage.from('resumes').upload(path,file,{cacheControl:'3600',upsert:false});
+      if(up.error) throw up.error;
+      const ins=await sb.from('applications').insert({
+        job_id:activeJob.id??null, name, email, phone,
+        role:activeJob.role, client:activeJob.client, location:activeJob.location,
+        experience:f.experience.value||null, source:f.source.value||'Website',
+        cover_note:f.cover_note.value.trim()||null, resume_url:path, stage:'new'
+      });
+      if(ins.error) throw ins.error;
+      f.style.display='none';
+      const d=document.createElement('div'); d.className='success';
+      d.innerHTML=`<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h4>Application received!</h4>
+        <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b> (${esc(activeJob.client)}) has been submitted. Our team will review it and reach out if you’re a match.</p>`;
+      $('#apply-inner').appendChild(d);
+    }catch(err){ console.error(err); btn.disabled=false; btn.textContent='Submit application'; showMsg('Something went wrong: '+(err.message||'please try again.')); }
+  });
+
+  loadJobs();
+  </script>
+</body>
+</html>
