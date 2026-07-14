@@ -179,22 +179,13 @@
     <div class="hidden md:block h-5 w-px bg-slate-200"></div>
     <span class="hidden md:block text-[11px] font-semibold text-slate-400 tracking-wide">Applicant Tracking System · CNT</span>
   </div>
-  <div class="flex items-center gap-2">
-    <div class="relative">
-      <span class="material-icons-outlined absolute left-2.5 top-2 text-slate-400" style="font-size:15px;">search</span>
-      <input type="text" id="global-search" placeholder="Search applicants, roles…" oninput="handleGlobalSearch(this.value)"
-        class="pl-8 pr-3 py-1.5 bg-slate-100 rounded-lg text-xs w-56 border border-slate-200 transition">
-    </div>
-    <button onclick="openCreateApplicationModal()" class="flex items-center gap-1 bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm cursor-pointer">
-      <span class="material-icons-outlined" style="font-size:14px;">person_add</span> Add Applicant
+  <div class="flex items-center gap-2 flex-wrap justify-end">
+    <div id="hdr-filters" class="flex items-center gap-1.5 flex-wrap justify-end"></div>
+    <div class="h-5 w-px bg-slate-200 hidden md:block"></div>
+    <button id="btn-add-applicant" onclick="openCreateApplicationModal()" class="flex items-center gap-1 bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm cursor-pointer">
+      <span class="material-icons-outlined" style="font-size:14px;">person_add</span><span class="hidden sm:inline">Add Applicant</span>
     </button>
-    <button onclick="showToast('5 new notifications', 'info')" class="relative p-1.5 text-slate-400 hover:text-red-700 transition cursor-pointer rounded-lg hover:bg-slate-100">
-      <span class="material-icons-outlined" style="font-size:20px;">notifications</span>
-      <span class="absolute top-0.5 right-0.5 bg-red-600 text-white text-[8px] px-1 rounded-full leading-tight">5</span>
-    </button>
-    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center cursor-pointer ring-2 ring-red-50 hover:ring-red-200 transition" onclick="showToast('Profile settings', 'info')">
-      <span class="text-red-800 font-bold text-xs">HR</span>
-    </div>
+    <div id="hdr-actions" class="flex items-center gap-2"></div>
   </div>
 </header>
 
@@ -202,7 +193,7 @@
 
   <aside id="sidebar" class="sidebar bg-white border-r border-slate-200 flex flex-col overflow-hidden no-print" style="height:calc(100vh - 52px);position:sticky;top:52px;">
 
-    <div class="p-3 border-b border-slate-100">
+    <div class="p-3 border-b border-slate-100" id="sidebar-filters">
       <p class="nav-label">Quick Filters</p>
       <div class="mt-1 space-y-2">
 
@@ -304,11 +295,6 @@
       </div>
     </nav>
 
-    <div class="p-3 border-t border-slate-100">
-      <button onclick="showToast('Help center opened', 'info')" class="sidenav-item w-full">
-        <span class="material-icons-outlined">help_outline</span><span>Help &amp; Docs</span>
-      </button>
-    </div>
   </aside>
 
   <main class="flex-1 overflow-y-auto custom-scroll p-5" style="height:calc(100vh - 52px);" id="main-content">
@@ -2293,7 +2279,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       stage:r.stage||'new', phone:r.phone||'', email:r.email||'',
       source:r.source||'Website', salary:'', notes:r.cover_note||'',
       appliedDate:r.applied_date||(r.created_at?String(r.created_at).slice(0,10):''),
-      experience:r.experience||'', resumePath:r.resume_url||null
+      experience:r.experience||'', resumePath:r.resume_url||null,
+      client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null
     };
   }
 
@@ -2329,7 +2316,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     const _origTRM = triggerResumeModal;
     triggerResumeModal = function(id){
       _origTRM(id);
-      showUploadedResume(findApplicant(id));
+      const a=findApplicant(id);
+      showUploadedResume(a);
+      renderEndorsement(a);
     };
   }
 
@@ -2620,13 +2609,61 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'<div id="cnt-bell-panel" style="display:none;position:absolute;right:0;top:40px;width:320px;max-height:430px;overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:400;">'
       +'<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;"><span style="font-weight:700;font-size:13px;color:#0f172a;">Notifications</span><button id="cnt-bell-clear" style="font-size:11px;color:#7f1d1d;font-weight:600;cursor:pointer;">Mark all read</button></div>'
       +'<div id="cnt-bell-list"></div></div>';
-    const right = header.lastElementChild || header;
-    right.insertBefore(wrap, right.firstChild);
+    (document.getElementById('hdr-actions')||header).appendChild(wrap);
     document.getElementById('cnt-bell').addEventListener('click',(e)=>{ e.stopPropagation(); const p=document.getElementById('cnt-bell-panel'); const open=p.style.display==='block'; p.style.display=open?'none':'block'; if(!open) renderBell(); });
     document.getElementById('cnt-bell-clear').addEventListener('click',(e)=>{ e.stopPropagation(); markAllRead(); });
     document.addEventListener('click',(e)=>{ const w=document.getElementById('cnt-bell-wrap'); const p=document.getElementById('cnt-bell-panel'); if(p && w && !w.contains(e.target)) p.style.display='none'; });
     if(typeof Notification!=='undefined' && Notification.permission==='default'){ try{ Notification.requestPermission(); }catch(e){} }
     renderBell();
+  }
+
+  // ── Client Endorsement (Step 7): endorse → client approve / reject ──
+  function _endorseBadge(st){
+    const m={ approved:['#166534','#dcfce7','Client Approved'], rejected:['#b91c1c','#fee2e2','Client Rejected'], endorsed:['#b45309','#fef3c7','Endorsed — awaiting client'], none:['#64748b','#f1f5f9','Not yet endorsed'] };
+    const x=m[st]||m.none;
+    return '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;color:'+x[0]+';background:'+x[1]+';white-space:nowrap;">'+x[2]+'</span>';
+  }
+  function renderEndorsement(app){
+    const tab=document.getElementById('tab-profile'); if(!tab) return;
+    let panel=document.getElementById('cnt-endorse-panel');
+    if(!panel){ panel=document.createElement('div'); panel.id='cnt-endorse-panel'; panel.style.cssText='margin-bottom:14px;'; tab.insertBefore(panel, tab.firstChild); }
+    if(!app){ panel.innerHTML=''; return; }
+    const st=app.client_status||'none';
+    const canEndorse=['super_admin','recruiter','recruitment_supervisor','account_officer'].includes(currentRole);
+    let actions='';
+    if(canEndorse){
+      const btn=(bg,label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:#fff;background:'+bg+';border:none;">'+label+'</button>';
+      if(st==='none'||st==='rejected') actions+=btn('#7f1d1d','Endorse to client','endorse');
+      if(st==='endorsed'||st==='approved'||st==='rejected') actions+=btn('#16a34a','Client approved','approve')+btn('#dc2626','Client rejected','reject');
+    }
+    panel.innerHTML='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">'
+      +'<div style="display:flex;align-items:center;gap:8px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">verified_user</span><span style="font-weight:700;font-size:12.5px;color:#0f172a;">Client Endorsement</span></div>'
+      +_endorseBadge(st)+'</div>'
+      +((app.client_reason&&st==='rejected')?'<div style="font-size:12px;color:#b91c1c;margin-top:9px;background:#fef2f2;padding:8px 10px;border-radius:8px;">Reason: '+_escN(app.client_reason)+'</div>':'')
+      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(canEndorse?'':'<div style="font-size:11.5px;color:#94a3b8;margin-top:8px;">View only for your role.</div>'))
+      +'</div>';
+    panel.querySelectorAll('.cnt-endo-btn').forEach(b=>b.addEventListener('click',()=>{
+      const fn=b.dataset.fn;
+      if(fn==='endorse') setClientStatus(app,'endorsed');
+      else if(fn==='approve') setClientStatus(app,'approved');
+      else if(fn==='reject'){ const r=prompt('Reason for client rejection (optional):'); if(r===null) return; setClientStatus(app,'rejected',r); }
+    }));
+  }
+  async function setClientStatus(app, status, reason){
+    const now=new Date().toISOString();
+    const patch={ client_status:status };
+    if(status==='endorsed') patch.endorsed_at=now;
+    if(status==='approved'||status==='rejected') patch.decided_at=now;
+    if(reason!==undefined) patch.client_reason=reason||null;
+    Object.assign(app, patch);
+    if(sb && app._web && app._sid){
+      const { error }=await sb.from('applications').update(patch).eq('id',app._sid);
+      if(error){ if(window.showToast) showToast('Save failed: '+error.message,'error'); return; }
+    }
+    logAudit('client_'+status,'applicant', app._sid||app.id, app.name+(reason?' — '+reason:''));
+    if(window.showToast) showToast(app.name+' — '+(status==='endorsed'?'endorsed to client':'client '+status),'success');
+    renderEndorsement(app);
   }
 
   function showLogin(){ const o=document.getElementById('cnt-login'); if(o) o.style.display='flex'; }
@@ -2663,17 +2700,30 @@ document.addEventListener('DOMContentLoaded',()=>{
     const allowed = ROLE_MODULES[currentRole] || ROLE_MODULES['recruiter'];
     const map = { dashboard:'nav-dashboard', request:'nav-request', applications:'nav-applications', job:'nav-job', 'talent-pool':'nav-talent-pool', interviews:'nav-interviews', onboarding:'nav-onboarding', reports:'nav-reports' };
     Object.keys(map).forEach(mod=>{ const el=document.getElementById(map[mod]); if(el) el.style.display = allowed.includes(mod) ? '' : 'none'; });
+    const canAdd = ['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
+    const addBtn=document.getElementById('btn-add-applicant'); if(addBtn) addBtn.style.display = canAdd ? '' : 'none';
     if(typeof currentView!=='undefined' && !allowed.includes(currentView) && typeof switchView==='function'){ switchView(allowed[0]||'dashboard'); }
   }
 
   function injectRoleBadge(){
     if(document.getElementById('cnt-rolebadge')) return;
-    const header=document.querySelector('header'); if(!header) return;
-    const right=header.lastElementChild||header;
+    const host=document.getElementById('hdr-actions'); if(!host) return;
     const b=document.createElement('div'); b.id='cnt-rolebadge';
-    b.style.cssText='display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;margin:0 6px;';
+    b.style.cssText='display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;margin:0 4px;';
     b.innerHTML='<span style="font-weight:600;color:#334155;font-size:12px;">'+_escN(currentUserName||'—')+'</span><span style="color:#7f1d1d;font-weight:700;font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;">'+_escN(roleLabel(currentRole))+'</span>';
-    right.insertBefore(b, right.firstChild);
+    host.appendChild(b);
+  }
+
+  function relocateFilters(){
+    const host=document.getElementById('hdr-filters'); if(!host || host.dataset.done) return;
+    ['client-dropdown-wrap','filter-location','filter-role','filter-stage'].forEach(id=>{
+      const el=document.getElementById(id); if(!el) return;
+      if(id==='client-dropdown-wrap'){ el.style.width='150px'; }
+      else { el.classList.remove('w-full'); el.style.maxWidth='150px'; }
+      host.appendChild(el);
+    });
+    const sf=document.getElementById('sidebar-filters'); if(sf) sf.style.display='none';
+    host.dataset.done='1';
   }
 
   function showRevoked(){
@@ -2800,14 +2850,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     await loadCurrentUser();
     if(currentRole==='no_access'){ showRevoked(); return; }
     applyRoleScoping();
+    relocateFilters();
     buildClientDropdown();
     await loadApplications();
     await loadHiringRequests();
     await loadJobsFromBackend();
     renderAll();
-    injectLogout();
     injectBell();
     injectRoleBadge();
+    injectLogout();
     injectAdminNav();
     setupLiveUpdates();
     logAudit('login','session',null,null);
@@ -2848,7 +2899,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     btn.className='text-slate-400 hover:text-red-800 transition cursor-pointer p-1 rounded-lg hover:bg-slate-100';
     btn.title='Sign out'; btn.innerHTML='<span class="material-icons-outlined">logout</span>';
     btn.onclick=async()=>{ if(sb) await sb.auth.signOut(); location.reload(); };
-    (header.lastElementChild||header).appendChild(btn);
+    (document.getElementById('hdr-actions')||header).appendChild(btn);
   }
 
   function showDemoBanner(){
