@@ -2710,8 +2710,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     }).join('');
     panel.innerHTML='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">timeline</span><span style="font-weight:700;font-size:12.5px;color:#0f172a;">Contract → Deployment → New Hire</span></div>'
-      +rows+'</div>';
+      +rows
+      +(canDo?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;"><button class="cnt-print-dep" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>Deployment Notice</button><button class="cnt-print-nh" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>New Hire Report</button></div>':'')
+      +'</div>';
     panel.querySelectorAll('.cnt-ms-btn').forEach(b=>b.addEventListener('click',()=>setMilestone(app,b.dataset.f)));
+    const pd=panel.querySelector('.cnt-print-dep'); if(pd) pd.addEventListener('click',()=>printDeploymentNotice(app));
+    const pn=panel.querySelector('.cnt-print-nh'); if(pn) pn.addEventListener('click',()=>printNewHirePacket(app));
   }
   async function setMilestone(app, field){
     const val = app[field] ? null : new Date().toISOString();
@@ -2721,6 +2725,143 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(window.showToast) showToast(app.name+' — '+field.replace(/_at$/,'').replace(/_/g,' ')+(val?' recorded':' cleared'),'success');
     renderWorkflow(app);
   }
+
+  // ── Phase 4: KPI dashboard · SLA/aging · recruiter scorecard ──
+  function _kpiCard(label, value, sub, color){
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:13px 15px;flex:1;min-width:132px;">'
+      +'<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;">'+label+'</div>'
+      +'<div style="font-size:22px;font-weight:800;color:'+(color||'#0f172a')+';margin-top:3px;line-height:1.1;">'+value+'</div>'
+      +(sub?'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">'+sub+'</div>':'')+'</div>';
+  }
+  function renderKPIs(){
+    const dash=document.getElementById('view-dashboard'); if(!dash) return;
+    let panel=document.getElementById('cnt-kpi-panel');
+    if(!panel){ panel=document.createElement('div'); panel.id='cnt-kpi-panel'; panel.style.cssText='margin-bottom:20px;'; dash.insertBefore(panel, dash.firstChild); }
+    const apps=(typeof getAllApplicants==='function')?getAllApplicants():[];
+    const hr=(typeof hiringRequests!=='undefined')?hiringRequests:[];
+    const today=new Date(); today.setHours(0,0,0,0);
+    const totalMRF=hr.length, filled=hr.filter(r=>r.status==='Filled').length, openMRF=hr.filter(r=>r.status==='Open'||r.status==='Pending').length;
+    const fillRate=totalMRF?Math.round(filled/totalMRF*100):0;
+    const overdue=hr.filter(r=>r.deadline && new Date(r.deadline)<today && r.status!=='Filled');
+    const active=apps.filter(a=>a.stage!=='pool'&&a.stage!=='rejected').length;
+    const approved=apps.filter(a=>a.client_status==='approved').length, rejected=apps.filter(a=>a.client_status==='rejected').length, endorsed=apps.filter(a=>a.client_status==='endorsed').length;
+    const apprRate=(approved+rejected)?Math.round(approved/(approved+rejected)*100):0;
+    const deployed=apps.filter(a=>a.deployed_at).length;
+    let ttfSum=0, ttfN=0;
+    apps.forEach(a=>{ if(a.deployed_at && a.appliedDate){ const d=(new Date(a.deployed_at)-new Date(a.appliedDate))/86400000; if(d>=0){ ttfSum+=d; ttfN++; } } });
+    const avgTTF=ttfN?Math.round(ttfSum/ttfN):0;
+    let html='<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+      +_kpiCard('Open MRFs', openMRF, filled+' filled', '#7f1d1d')
+      +_kpiCard('Fill rate', fillRate+'%', totalMRF+' total', '#16a34a')
+      +_kpiCard('Active pipeline', active, endorsed+' endorsed', '#0f172a')
+      +_kpiCard('Client approval', apprRate+'%', approved+' ✓ · '+rejected+' ✗', '#4338ca')
+      +_kpiCard('Deployed', deployed, 'this cycle', '#0f766e')
+      +_kpiCard('Avg time-to-fill', avgTTF?avgTTF+'d':'—', 'applied → deployed', '#b45309')
+      +'</div>';
+    if(overdue.length){
+      html+='<div style="margin-top:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;">'
+        +'<span class="material-icons-outlined" style="color:#dc2626;font-size:18px;">warning</span>'
+        +'<span style="font-size:12.5px;color:#991b1b;font-weight:700;">'+overdue.length+' MRF'+(overdue.length!==1?'s':'')+' past deadline:</span>'
+        +'<span style="font-size:12px;color:#b91c1c;">'+overdue.slice(0,5).map(r=>_escN(r.id+' · '+r.role)).join('  ·  ')+(overdue.length>5?'  +'+(overdue.length-5)+' more':'')+'</span></div>';
+    }
+    if(['super_admin','recruitment_manager','recruitment_supervisor'].includes(currentRole)){
+      const byRec={};
+      hr.forEach(r=>{ const k=r.assigned_name||'Unassigned'; if(!byRec[k])byRec[k]={total:0,open:0,filled:0}; byRec[k].total++; if(r.status==='Filled')byRec[k].filled++; else byRec[k].open++; });
+      const keys=Object.keys(byRec).sort((a,b)=>(a==='Unassigned')-(b==='Unassigned')||a.localeCompare(b));
+      if(keys.length){
+        html+='<div style="margin-top:14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">'
+          +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:9px;display:flex;align-items:center;gap:7px;"><span class="material-icons-outlined" style="font-size:16px;color:#7f1d1d;">groups</span>Recruiter Workload (MRFs)</div>'
+          +'<div style="display:flex;flex-direction:column;gap:7px;">'
+          +keys.map(k=>'<div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;"><span style="color:'+(k==='Unassigned'?'#94a3b8':'#334155')+';font-weight:'+(k==='Unassigned'?'400':'600')+';">'+_escN(k)+'</span><span style="color:#64748b;">'+byRec[k].open+' open · '+byRec[k].filled+' filled · <b style="color:#0f172a;">'+byRec[k].total+'</b> total</span></div>').join('')
+          +'</div></div>';
+      }
+    }
+    panel.innerHTML=html;
+  }
+  if (typeof renderAll === 'function'){
+    const _origRenderAllKPI = renderAll;
+    renderAll = function(){ _origRenderAllKPI(); try{ renderKPIs(); }catch(e){ console.warn('kpi',e); } };
+  }
+  function notifyOverdueMRFs(){
+    if(typeof hiringRequests==='undefined') return;
+    const today=new Date(); today.setHours(0,0,0,0);
+    hiringRequests.filter(r=>r.deadline && new Date(r.deadline)<today && r.status!=='Filled').forEach(r=>{
+      addNotif({ key:'overdue-'+r.id, icon:'warning', html:'<b>MRF '+_escN(r.id)+'</b> is past its deadline', sub:_escN(r.role+' · '+r.account), ts:Date.now(), read:false });
+    });
+  }
+
+  // ── Printable documents: Deployment Notice · New Hire Report ──
+  function _printWindow(title, bodyHtml){
+    const w=window.open('','_blank','width=840,height=1000');
+    if(!w){ if(window.showToast) showToast('Allow pop-ups to print this document','error'); return; }
+    w.document.write('<!doctype html><html><head><title>'+title+'</title><style>'
+      +'*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:46px 54px;font-size:13px;line-height:1.6}'
+      +'.hd{display:flex;align-items:center;gap:14px;border-bottom:3px solid #7f1d1d;padding-bottom:14px;margin-bottom:20px}'
+      +'.hd img{height:46px}.hd .co{font-weight:800;font-size:16px;color:#7f1d1d}.hd .co small{display:block;font-weight:400;color:#666;font-size:11px}'
+      +'h1{font-size:19px;letter-spacing:.05em;text-align:center;margin:6px 0 18px;text-transform:uppercase}'
+      +'table.kv{width:100%;border-collapse:collapse;margin:12px 0}table.kv td{padding:7px 10px;border:1px solid #ddd;vertical-align:top}table.kv td.l{background:#f7f7f7;font-weight:700;width:34%;color:#444}'
+      +'.sec{font-weight:700;text-transform:uppercase;font-size:11.5px;color:#7f1d1d;letter-spacing:.05em;margin:20px 0 6px;border-bottom:1px solid #eee;padding-bottom:4px}'
+      +'.sign{display:flex;justify-content:space-between;gap:40px;margin-top:54px}.sign div{flex:1;text-align:center}.sign .line{border-top:1px solid #333;margin-top:42px;padding-top:5px;font-size:11px;color:#555}'
+      +'.foot{margin-top:36px;font-size:10px;color:#999;text-align:center;border-top:1px solid #eee;padding-top:10px}'
+      +'@media print{body{padding:26px 32px}}</style></head><body>'
+      +'<div class="hd"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png"><div class="co">CNT Promo &amp; Ads Specialists, Inc.<small>DOLE-Licensed Manpower &amp; Recruitment Agency</small></div></div>'
+      +bodyHtml+'<div class="foot">Generated by CNT ATS · '+new Date().toLocaleString('en-PH')+' · Confidential</div></body></html>');
+    w.document.close();
+    setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 450);
+  }
+  function _kv(label,val){ return '<tr><td class="l">'+label+'</td><td>'+_escN(val==null||val===''?'—':val)+'</td></tr>'; }
+  function printDeploymentNotice(app){
+    if(!app) return;
+    const body='<h1>Deployment Notification</h1>'
+      +'<table class="kv">'+_kv('Employee Name', app.name)+_kv('Position', app.role)+_kv('Client Account', app.account)+_kv('Deployment Location', app.location)
+      +_kv('Deployment Date', app.deployed_at?_fmtDate(app.deployed_at):'________________')+_kv('Contract Signed', app.contract_signed_at?_fmtDate(app.contract_signed_at):'—')+_kv('Orientation', app.oriented_at?_fmtDate(app.oriented_at):'—')+'</table>'
+      +'<p>This confirms that the above-named employee has completed the required pre-employment documents and is hereby deployed to the client account indicated, effective on the deployment date stated above.</p>'
+      +'<div class="sign"><div><div class="line">Recruiter / HR</div></div><div><div class="line">Account Officer</div></div><div><div class="line">Client Representative</div></div></div>';
+    _printWindow('Deployment Notice — '+app.name, body);
+    logAudit('print_deployment','applicant', app._sid||app.id, app.name);
+  }
+  function printNewHirePacket(app){
+    if(!app) return;
+    const dec = app.client_status==='approved' ? ('Approved'+(app.decided_at?' · '+_fmtDate(app.decided_at):'')) : (app.client_status||'—');
+    const body='<h1>New Hire Report</h1>'
+      +'<div class="sec">Employee Details</div><table class="kv">'+_kv('Name', app.name)+_kv('Position', app.role)+_kv('Client Account', app.account)+_kv('Location', app.location)+_kv('Contact No.', app.phone)+_kv('Email', app.email)+_kv('Source', app.source)+'</table>'
+      +'<div class="sec">Recruitment Timeline</div><table class="kv">'+_kv('Date Applied', app.appliedDate)+_kv('Endorsed to Client', app.endorsed_at?_fmtDate(app.endorsed_at):'—')+_kv('Client Decision', dec)+_kv('Contract Signed', app.contract_signed_at?_fmtDate(app.contract_signed_at):'—')+_kv('Orientation', app.oriented_at?_fmtDate(app.oriented_at):'—')+_kv('Deployed', app.deployed_at?_fmtDate(app.deployed_at):'—')+'</table>'
+      +'<p>Complete 201-file documents attached and submitted to the Account Officer.</p>'
+      +'<div class="sign"><div><div class="line">Prepared by (Recruiter)</div></div><div><div class="line">Received by (Account Officer)</div></div></div>';
+    _printWindow('New Hire Report — '+app.name, body);
+    logAudit('print_newhire','applicant', app._sid||app.id, app.name);
+  }
+
+  // ── CSV export ──
+  function _downloadCSV(rows, filename){
+    if(!rows.length){ if(window.showToast) showToast('Nothing to export yet','info'); return; }
+    const cols=Object.keys(rows[0]);
+    const esc=v=>{ v=(v==null?'':String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+    const csv=[cols.join(',')].concat(rows.map(r=>cols.map(c=>esc(r[c])).join(','))).join('\n');
+    const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  }
+  function exportApplicantsCSV(){
+    const apps=(typeof getAllApplicants==='function')?getAllApplicants():[];
+    const rows=apps.map(a=>({ Name:a.name, Position:a.role, Client:a.account, Location:a.location, Stage:(typeof getStageName==='function'?getStageName(a.stage):a.stage), Source:a.source, Applied:a.appliedDate, ClientStatus:a.client_status, Endorsed:a.endorsed_at?_fmtDate(a.endorsed_at):'', Contract:a.contract_signed_at?_fmtDate(a.contract_signed_at):'', Deployed:a.deployed_at?_fmtDate(a.deployed_at):'', Phone:a.phone, Email:a.email }));
+    _downloadCSV(rows, 'cnt-applicants-'+new Date().toISOString().slice(0,10)+'.csv'); logAudit('export','applicants',null, rows.length+' rows');
+  }
+  function exportMRFsCSV(){
+    const hr=(typeof hiringRequests!=='undefined')?hiringRequests:[];
+    const rows=hr.map(r=>({ MRF:r.id, Client:r.account, Position:r.role, Location:r.location, Type:r.type, Headcount:r.count, Priority:r.priority, Status:r.status, AssignedTo:r.assigned_name||'', Date:r.date, Deadline:r.deadline }));
+    _downloadCSV(rows, 'cnt-mrfs-'+new Date().toISOString().slice(0,10)+'.csv'); logAudit('export','mrfs',null, rows.length+' rows');
+  }
+  function injectReportsPanel(){
+    const rv=document.getElementById('view-reports'); if(!rv || document.getElementById('cnt-reports-export')) return;
+    const d=document.createElement('div'); d.id='cnt-reports-export'; d.style.cssText='margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;';
+    d.innerHTML='<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:3px;">Data Export</div><div style="font-size:12px;color:#64748b;margin-bottom:12px;">Download recruitment data as CSV — for management reporting, client billing, or DOLE compliance.</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+      +'<button onclick="cntExportApplicants()" style="display:inline-flex;align-items:center;gap:6px;background:#7f1d1d;color:#fff;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;border:none;"><span class="material-icons-outlined" style="font-size:16px;">download</span>Applicants CSV</button>'
+      +'<button onclick="cntExportMRFs()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#7f1d1d;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;border:1px solid #e2e8f0;"><span class="material-icons-outlined" style="font-size:16px;">download</span>MRFs CSV</button>'
+      +'</div>';
+    rv.insertBefore(d, rv.firstChild);
+  }
+  window.cntExportApplicants=exportApplicantsCSV; window.cntExportMRFs=exportMRFsCSV;
 
   function showLogin(){ const o=document.getElementById('cnt-login'); if(o) o.style.display='flex'; }
   function hideLogin(){ const o=document.getElementById('cnt-login'); if(o) o.style.display='none'; }
@@ -2733,7 +2874,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const ROLE_LABELS = { super_admin:'Super Admin', account_officer:'Account Officer', recruitment_manager:'Recruitment Manager', recruitment_supervisor:'Recruitment Supervisor', recruiter:'Recruiter' };
   const ROLE_MODULES = {
     super_admin:            ['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports'],
-    account_officer:        ['dashboard','request','reports'],
+    account_officer:        ['dashboard','request','applications','reports'],
     recruitment_manager:    ['dashboard','request','applications','reports'],
     recruitment_supervisor: ['dashboard','request','applications','interviews'],
     recruiter:              ['dashboard','applications','job','talent-pool','interviews','onboarding'],
@@ -2918,6 +3059,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     injectRoleBadge();
     injectLogout();
     injectAdminNav();
+    injectReportsPanel();
+    notifyOverdueMRFs();
     setupLiveUpdates();
     logAudit('login','session',null,null);
   }
