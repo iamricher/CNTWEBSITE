@@ -54,6 +54,23 @@ alter table public.applications
   add column if not exists kanban_state  text  default 'normal',
   add column if not exists activity      jsonb default '[]'::jsonb;
 
+-- Odoo applicant-form fields + reporting/offer alignment (additive)
+alter table public.applications
+  add column if not exists recruiter        text,
+  add column if not exists tags             text,
+  add column if not exists degree           text,
+  add column if not exists medium           text,
+  add column if not exists referred_by      text,
+  add column if not exists linkedin         text,
+  add column if not exists proposed_salary  text,
+  add column if not exists availability     date,
+  add column if not exists offer_validity   date;
+
+-- Odoo job-position fields (additive)
+alter table public.jobs
+  add column if not exists employment_type text default 'Full-Time',
+  add column if not exists recruiter        text;
+
 -- ────────────────────────────────────────────────────────────
 -- 2. ROW LEVEL SECURITY
 --    Public can APPLY and browse OPEN jobs, nothing else.

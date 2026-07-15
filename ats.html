@@ -737,6 +737,15 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Email</label><input type="email" id="app-email" placeholder="juan@email.com" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Source</label><select id="app-source" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="JobStreet">JobStreet</option><option value="Indeed">Indeed</option><option value="Facebook">Facebook</option><option value="Referral">Employee Referral</option><option value="Walk-in">Walk-in</option><option value="LinkedIn">LinkedIn</option><option value="Kalibrr">Kalibrr</option><option value="OLX">OLX</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Expected Salary</label><input type="text" id="app-salary" placeholder="e.g. ₱18,000" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Proposed Salary</label><input type="text" id="app-proposed-salary" placeholder="offer amount" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div class="col-span-2 pt-1"><div class="flex items-center gap-2 mb-1"><span class="material-icons-outlined text-slate-400" style="font-size:14px;">tune</span><span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Odoo details</span><div class="flex-1 h-px bg-slate-100"></div></div></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Recruiter</label><select id="app-recruiter" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="">Unassigned</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Degree</label><select id="app-degree" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="">—</option><option>High School</option><option>Vocational</option><option>Bachelor</option><option>Master</option><option>Doctoral</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Medium</label><input type="text" id="app-medium" placeholder="e.g. Organic, Paid ad, Email" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Referred By</label><input type="text" id="app-referred" placeholder="employee name" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">LinkedIn</label><input type="text" id="app-linkedin" placeholder="profile URL" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Availability</label><input type="date" id="app-availability" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Tags <span class="text-slate-400 font-normal normal-case">— comma-separated</span></label><input type="text" id="app-tags" placeholder="e.g. bilingual, driver's license, night shift" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Notes / Remarks</label><textarea id="app-notes" rows="2" placeholder="Add recruiter notes here…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
       </div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -787,7 +796,11 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Target Headcount</label><input type="number" id="job-needed" required min="1" value="5" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Salary Range</label><input type="text" id="job-salary" placeholder="₱15,000 – ₱20,000" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       </div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Priority</label><select id="job-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Priority</label><select id="job-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Employment Type</label><select id="job-employment" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Full-Time">Full-Time</option><option value="Project-based">Project-based</option><option value="Seasonal">Seasonal</option><option value="Part-Time">Part-Time</option><option value="Contract">Contract</option><option value="Internship">Internship</option></select></div>
+      </div>
+      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Recruiter <span class="text-slate-400 font-normal normal-case">— person accountable for this role</span></label><input id="job-recruiter" list="job-recruiter-list" autocomplete="off" placeholder="Assign a recruiter" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><datalist id="job-recruiter-list"></datalist></div>
 
       <div class="pt-3 mt-1 border-t border-slate-100"><p class="text-[11px] font-bold text-red-800 uppercase tracking-wide">Job Description <span class="text-slate-400 font-normal normal-case">— shown on the website (optional; leave blank to auto-generate)</span></p></div>
       <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">About the role</label><textarea id="job-about" rows="2" placeholder="Short overview of what this role is about…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
@@ -918,6 +931,7 @@
                   <span class="text-[10px] font-bold text-amber-600" id="resume-priority-label"></span>
                 </div>
                 <div id="resume-refused-banner" class="hidden mt-2 text-[11px] bg-slate-100 border border-slate-200 text-slate-600 rounded-lg px-3 py-1.5"></div>
+                <div id="resume-odoo-meta" class="hidden mt-2 flex flex-wrap items-center gap-1.5"></div>
               </div>
             </div>
             <div class="text-right text-xs text-slate-500 space-y-1">
@@ -928,9 +942,15 @@
           </div>
           <div id="offer-summary-box" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
             <div class="flex items-center gap-2 mb-2"><span class="material-icons-outlined text-emerald-700" style="font-size:18px;">verified</span><h4 class="font-bold text-emerald-800 text-sm">Job Offer Details</h4></div>
-            <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="grid grid-cols-3 gap-3 text-xs">
               <div class="bg-white rounded-lg p-3 border border-emerald-100"><p class="text-slate-400 font-semibold uppercase tracking-wider text-[10px] mb-0.5">Position Offered</p><p class="font-bold text-slate-900 text-sm" id="offer-position-display">—</p></div>
-              <div class="bg-white rounded-lg p-3 border border-emerald-100"><p class="text-slate-400 font-semibold uppercase tracking-wider text-[10px] mb-0.5">Offer Amount</p><p class="font-bold text-emerald-700 text-sm" id="offer-salary-display">—</p></div>
+              <div class="bg-white rounded-lg p-3 border border-emerald-100"><p class="text-slate-400 font-semibold uppercase tracking-wider text-[10px] mb-0.5">Proposed Salary</p><p class="font-bold text-emerald-700 text-sm" id="offer-salary-display">—</p></div>
+              <div class="bg-white rounded-lg p-3 border border-emerald-100"><p class="text-slate-400 font-semibold uppercase tracking-wider text-[10px] mb-0.5">Offer Valid Until</p><p class="font-bold text-slate-900 text-sm" id="offer-validity-display">—</p></div>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+              <input id="offer-proposed-input" placeholder="Proposed salary (e.g. ₱18,000)" class="flex-1 text-xs border border-emerald-200 rounded-lg px-3 py-1.5 bg-white">
+              <input id="offer-validity-input" type="date" class="text-xs border border-emerald-200 rounded-lg px-3 py-1.5 bg-white">
+              <button type="button" onclick="cntSaveOffer()" class="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg px-3 py-1.5 cursor-pointer whitespace-nowrap">Save offer</button>
             </div>
           </div>
         </div>
@@ -1726,15 +1746,24 @@ function renderJobPositions(){
           </div>
         </div>
         <h3 class="font-bold text-slate-900 text-sm mb-0.5 group-hover:text-red-800 transition">${job.role}</h3>
-        <p class="text-xs text-slate-400 mb-1 flex items-center gap-0.5"><span class="material-icons-outlined" style="font-size:12px;">location_on</span>${job.location}</p>
-        <p class="text-xs text-slate-500 mb-2 font-semibold">${job.salary||'Competitive'}</p>
+        <p class="text-xs text-slate-400 mb-1 flex items-center gap-0.5"><span class="material-icons-outlined" style="font-size:12px;">location_on</span>${job.location}${job.employment_type?` · ${job.employment_type}`:''}</p>
+        <p class="text-xs text-slate-500 mb-2 font-semibold">${job.salary||'Competitive'}${job.recruiter?` <span class="text-slate-300 font-normal">·</span> <span class="text-[10px] text-slate-400 font-normal">${job.recruiter}</span>`:''}</p>
         ${matchReq?`<div class="mb-2 flex items-center gap-1.5">${getCountdownChip(matchReq.deadline)}<span class="text-[10px] text-slate-400">to fill</span></div>`:''}
         <div class="mb-3">
           <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-500">Fill rate</span><span class="font-bold text-slate-700">${filled} / ${job.needed} HC</span></div>
           <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full transition-all" style="width:${pct}%;background:${pct>=100?'#10b981':accInfo?.color||'#64748b'}"></div></div>
           <div class="text-[10px] text-slate-400 mt-0.5">${pct}% filled</div>
         </div>
-        <div class="pt-2.5 border-t border-slate-100 text-[11px] text-red-700 font-bold text-right">View Pipeline →</div>
+        <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <button onclick="cntTogglePublish('${accId}','${job._sid||''}','${(job.role||'').replace(/'/g,"\\'")}','${(job.location||'').replace(/'/g,"\\'")}')" title="${job.status==='closed'?'Not published — click to publish':'Published to website — click to unpublish'}" class="flex items-center gap-1 cursor-pointer">
+              <span style="width:30px;height:16px;border-radius:99px;background:${job.status==='closed'?'#cbd5e1':'#10b981'};position:relative;display:inline-block;transition:.15s;"><span style="position:absolute;top:2px;left:${job.status==='closed'?'2px':'16px'};width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s;"></span></span>
+              <span class="text-[10px] font-bold ${job.status==='closed'?'text-slate-400':'text-emerald-600'}">${job.status==='closed'?'Not Published':'Published'}</span>
+            </button>
+            ${(job.status!=='closed'&&job._sid)?`<a href="careers.html?job=${job._sid}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-[10px] text-slate-400 hover:text-red-700 flex items-center gap-0.5" title="Open public job page">Job Page ↗</a>`:''}
+          </div>
+          <span class="text-[11px] text-red-700 font-bold">View Pipeline →</span>
+        </div>
       </div>`;
       rendered++;
     });
@@ -1921,6 +1950,7 @@ function openCreateApplicationModal(){
   document.getElementById('applicant-id').value='';
   document.getElementById('modal-title').textContent='Add Applicant';
   if(currentAccount!=='all')document.getElementById('app-account').value=currentAccount;
+  if(typeof populateRecruiterSelect==='function') populateRecruiterSelect('');
   document.getElementById('crud-modal').classList.remove('hidden');
 }
 function openEditModal(id){
@@ -1936,6 +1966,10 @@ function openEditModal(id){
   document.getElementById('app-salary').value=app.salary||'';
   document.getElementById('app-notes').value=app.notes||'';
   document.getElementById('app-stage').value=app.stage;
+  const _s=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  if(typeof populateRecruiterSelect==='function') populateRecruiterSelect(app.recruiter);
+  _s('app-proposed-salary',app.proposed_salary); _s('app-degree',app.degree); _s('app-medium',app.medium);
+  _s('app-referred',app.referred_by); _s('app-linkedin',app.linkedin); _s('app-availability',app.availability); _s('app-tags',app.tags);
   document.getElementById('modal-title').textContent='Edit Applicant — '+app.name;
   document.getElementById('crud-modal').classList.remove('hidden');
 }
@@ -1943,7 +1977,10 @@ function closeCrudModal(){document.getElementById('crud-modal').classList.add('h
 function handleFormSubmit(e){
   e.preventDefault();
   const id=document.getElementById('applicant-id').value;
-  const obj={name:document.getElementById('app-name').value,account:document.getElementById('app-account').value,location:document.getElementById('app-location').value,role:document.getElementById('app-role').value,phone:document.getElementById('app-phone').value,email:document.getElementById('app-email').value,source:document.getElementById('app-source').value,salary:document.getElementById('app-salary').value,notes:document.getElementById('app-notes').value,stage:document.getElementById('app-stage').value,appliedDate:new Date().toISOString().split('T')[0]};
+  const _v=id=>{const el=document.getElementById(id);return el?el.value:'';};
+  const obj={name:document.getElementById('app-name').value,account:document.getElementById('app-account').value,location:document.getElementById('app-location').value,role:document.getElementById('app-role').value,phone:document.getElementById('app-phone').value,email:document.getElementById('app-email').value,source:document.getElementById('app-source').value,salary:document.getElementById('app-salary').value,notes:document.getElementById('app-notes').value,stage:document.getElementById('app-stage').value,
+    recruiter:_v('app-recruiter'),proposed_salary:_v('app-proposed-salary'),degree:_v('app-degree'),medium:_v('app-medium'),referred_by:_v('app-referred'),linkedin:_v('app-linkedin'),availability:_v('app-availability'),tags:_v('app-tags')};
+  if(!id) obj.appliedDate=new Date().toISOString().split('T')[0];
   if(id){updateApplicant(id,obj);showToast(`Updated ${obj.name}`,'success');}
   else{const newId='app_'+Date.now();addApplicant({id:newId,...obj});showToast(`Added ${obj.name} to pipeline`,'success');}
   closeCrudModal();renderAll();
@@ -1999,10 +2036,12 @@ function handleJobSubmit(e){
   const needed=parseInt(document.getElementById('job-needed').value)||1;
   const salary=document.getElementById('job-salary').value;
   const priority=document.getElementById('job-priority').value;
+  const employment=(document.getElementById('job-employment')||{}).value||'Full-Time';
+  const recruiter=(document.getElementById('job-recruiter')||{}).value||'';
   if(!jobDatabase[account])jobDatabase[account]=[];
   const existing=jobDatabase[account].find(j=>j.role===role&&j.location===location);
-  if(existing){existing.needed=needed;existing.salary=salary;existing.priority=priority;showToast(`Updated ${role} for ${account}`,'success');}
-  else{jobDatabase[account].push({role,account,location,needed,salary,priority});showToast(`Posted: ${role} · ${account} · ${location}`,'success');}
+  if(existing){existing.needed=needed;existing.salary=salary;existing.priority=priority;existing.employment_type=employment;existing.recruiter=recruiter;showToast(`Updated ${role} for ${account}`,'success');}
+  else{jobDatabase[account].push({role,account,location,needed,salary,priority,employment_type:employment,recruiter,status:'open'});showToast(`Posted: ${role} · ${account} · ${location}`,'success');}
   closeJobModal();renderAll();
 }
 
@@ -2098,8 +2137,7 @@ function triggerResumeModal(id){
   const offerBox=document.getElementById('offer-summary-box');
   if(app.stage==='hired'){
     offerBtn.classList.remove('hidden');offerBox.classList.remove('hidden');
-    document.getElementById('offer-position-display').textContent=app.role;
-    document.getElementById('offer-salary-display').textContent=app.salary||'To be confirmed';
+    if(window.cntRenderOfferBox) cntRenderOfferBox(app);
   }else{offerBtn.classList.add('hidden');offerBox.classList.add('hidden');}
   renderAIScore(app);
   renderStrictResume(app);
@@ -2218,8 +2256,7 @@ function updateApplicantStageFromModal(newStage){
       if(newStage==='hired'){
         offerBtn.classList.remove('hidden');offerBox.classList.remove('hidden');
         const freshApp=findApplicant(currentViewedApplicantId);
-        document.getElementById('offer-position-display').textContent=freshApp?.role||'—';
-        document.getElementById('offer-salary-display').textContent=freshApp?.salary||'To be confirmed';
+        if(window.cntRenderOfferBox) cntRenderOfferBox(freshApp);
       }else{offerBtn.classList.add('hidden');offerBox.classList.add('hidden');}
     },
     ()=>{document.getElementById('resume-stage-select').value=oldStage;}
@@ -2241,6 +2278,9 @@ function generateOfferLetter(){
   const app=findApplicant(currentViewedApplicantId);if(!app)return;
   if(app.stage!=='hired'){showToast('Offer letter is only available for candidates in the Job Offer stage.','info');return;}
   const today=new Date().toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'});
+  const offerAmt=app.proposed_salary||app.salary||'As discussed';
+  let validUntil='';
+  { let v=app.offer_validity; if(!v){ const d=new Date(); d.setDate(d.getDate()+30); v=d.toISOString().slice(0,10); } try{ validUntil=new Date(v+'T00:00').toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'}); }catch(e){ validUntil=v; } }
   const content=document.getElementById('offer-letter-content');
   content.innerHTML=`
     <div class="border-b-2 border-slate-800 pb-4 mb-6 flex justify-between items-start">
@@ -2251,18 +2291,19 @@ function generateOfferLetter(){
     <p class="mb-4">We are pleased to inform you that you have been selected for the position of <strong>${app.role}</strong> under our client account <strong>${app.account}</strong> assigned at <strong>${app.location}</strong>.</p>
     <div class="my-5 p-4 bg-emerald-50 border border-emerald-200 rounded-xl grid grid-cols-2 gap-4 text-center">
       <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Position Offered</p><p class="text-base font-extrabold text-slate-900">${app.role}</p><p class="text-[11px] text-slate-500">${app.account} · ${app.location}</p></div>
-      <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Offer Amount</p><p class="text-base font-extrabold text-emerald-700">${app.salary||'As discussed'}</p><p class="text-[11px] text-slate-500">Monthly Basic Salary</p></div>
+      <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Offer Amount</p><p class="text-base font-extrabold text-emerald-700">${offerAmt}</p><p class="text-[11px] text-slate-500">Monthly Basic Salary</p></div>
     </div>
     <p class="mb-2 font-semibold text-slate-800 border-b pb-1 border-slate-200">Terms of Employment</p>
     <table class="w-full text-sm mb-4" style="border-collapse:collapse;">
       <tr><td class="py-1 text-slate-500 w-40">Position:</td><td class="font-semibold">${app.role}</td></tr>
       <tr><td class="py-1 text-slate-500">Client Account:</td><td class="font-semibold">${app.account}</td></tr>
       <tr><td class="py-1 text-slate-500">Location:</td><td class="font-semibold">${app.location}</td></tr>
-      <tr><td class="py-1 text-slate-500">Basic Salary:</td><td class="font-semibold">${app.salary||'As discussed'}</td></tr>
-      <tr><td class="py-1 text-slate-500">Start Date:</td><td class="font-semibold">${app.startDate||'To be confirmed'}</td></tr>
+      <tr><td class="py-1 text-slate-500">Basic Salary:</td><td class="font-semibold">${offerAmt}</td></tr>
+      <tr><td class="py-1 text-slate-500">Start Date:</td><td class="font-semibold">${app.availability||app.startDate||'To be confirmed'}</td></tr>
+      <tr><td class="py-1 text-slate-500">Offer Valid Until:</td><td class="font-semibold">${validUntil}</td></tr>
     </table>
     <p class="mb-4">This offer is subject to the submission of complete pre-employment requirements including NBI Clearance, Medical Certificate, SSS, PhilHealth, Pag-IBIG, TIN, PSA Birth Certificate, Diploma/TOR, and Barangay Clearance.</p>
-    <p class="mb-6">Please confirm your acceptance of this offer by signing below and returning a copy to our office within <strong>5 working days</strong>.</p>
+    <p class="mb-6">Please confirm your acceptance of this offer by signing below and returning a copy to our office on or before <strong>${validUntil}</strong>.</p>
     <div class="grid grid-cols-2 gap-8 mt-8">
       <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">HR Manager / Authorized Representative</p><p class="text-xs font-semibold">CNT Recruitment Services</p></div>
       <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">Candidate's Signature</p><p class="text-xs font-semibold">${app.name} · Date:</p></div>
@@ -2338,7 +2379,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       experience:r.experience||'', resumePath:r.resume_url||null,
       client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null,
       contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
-      priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[]
+      priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[],
+      recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||''
     };
   }
 
@@ -2418,20 +2460,21 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   async function loadJobsFromBackend(){
     if(!sb || typeof jobDatabase==='undefined') return;
-    const { data, error } = await sb.from('jobs').select('*').eq('status','open');
+    const { data, error } = await sb.from('jobs').select('*');   // all statuses — ATS shows published + unpublished
     if(error){ console.error('load jobs',error); return; }
     Object.keys(jobDatabase).forEach(k=>delete jobDatabase[k]);
     (data||[]).forEach(j=>{
       if(!jobDatabase[j.client]) jobDatabase[j.client]=[];
       jobDatabase[j.client].push({ _sid:j.id, role:j.role, account:j.client, location:j.location,
         needed:j.openings||1, salary:j.salary_range||'', priority:(j.priority||'normal').toLowerCase(),
-        about:j.about||'', responsibilities:j.responsibilities||'', must_have:j.must_have||'', nice_to_have:j.nice_to_have||'', we_offer:j.we_offer||'' });
+        about:j.about||'', responsibilities:j.responsibilities||'', must_have:j.must_have||'', nice_to_have:j.nice_to_have||'', we_offer:j.we_offer||'',
+        employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open' });
     });
   }
 
   if (typeof openCreateJobModal === 'function'){
     const _origOpenJob = openCreateJobModal;
-    openCreateJobModal = function(){ _editingJobSid=null; _origOpenJob(); };
+    openCreateJobModal = function(){ _editingJobSid=null; _origOpenJob(); if(window.cntFillJobRecruiters) cntFillJobRecruiters(); };
   }
 
   window.editJobPosition = function(sid){
@@ -2444,11 +2487,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('job-needed').value=job.needed;
     document.getElementById('job-salary').value=job.salary||'';
     document.getElementById('job-priority').value=(job.priority||'normal').toLowerCase();
+    { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time'; const jr=document.getElementById('job-recruiter'); if(jr) jr.value=job.recruiter||''; }
     document.getElementById('job-about').value=job.about||'';
     document.getElementById('job-responsibilities').value=job.responsibilities||'';
     document.getElementById('job-must').value=job.must_have||'';
     document.getElementById('job-nice').value=job.nice_to_have||'';
     document.getElementById('job-offer').value=job.we_offer||'';
+    if(window.cntFillJobRecruiters) cntFillJobRecruiters();
     _editingJobSid=sid;
     document.getElementById('job-modal').classList.remove('hidden');
   };
@@ -2482,6 +2527,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         must_have: document.getElementById('job-must').value || null,
         nice_to_have: document.getElementById('job-nice').value || null,
         we_offer: document.getElementById('job-offer').value || null,
+        employment_type: (document.getElementById('job-employment')||{}).value || 'Full-Time',
+        recruiter: (document.getElementById('job-recruiter')||{}).value || null,
         status: 'open'
       };
       _origJobSubmit(e);   // in-memory update + closeJobModal + renderAll
@@ -2524,7 +2571,15 @@ document.addEventListener('DOMContentLoaded',()=>{
         source: document.getElementById('app-source').value,
         salary: document.getElementById('app-salary').value,
         notes: document.getElementById('app-notes').value,
-        stage: document.getElementById('app-stage').value
+        stage: document.getElementById('app-stage').value,
+        recruiter:(document.getElementById('app-recruiter')||{}).value||'',
+        tags:(document.getElementById('app-tags')||{}).value||'',
+        degree:(document.getElementById('app-degree')||{}).value||'',
+        medium:(document.getElementById('app-medium')||{}).value||'',
+        referred_by:(document.getElementById('app-referred')||{}).value||'',
+        linkedin:(document.getElementById('app-linkedin')||{}).value||'',
+        proposed_salary:(document.getElementById('app-proposed-salary')||{}).value||'',
+        availability:(document.getElementById('app-availability')||{}).value||''
       };
       _origFormSubmit(e);   // existing in-memory add/update + renderAll
       if (sb && !isEdit && snap.name){
@@ -2533,7 +2588,9 @@ document.addEventListener('DOMContentLoaded',()=>{
             const { data, error } = await sb.from('applications').insert({
               name:snap.name, email:snap.email||null, phone:snap.phone||null,
               role:snap.role, client:snap.account, location:snap.location,
-              source:snap.source||'ATS', cover_note:snap.notes||null, stage:snap.stage||'new'
+              source:snap.source||'ATS', cover_note:snap.notes||null, stage:snap.stage||'new',
+              recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
+              referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null
             }).select('id').single();
             if(error) throw error;
             // reconcile: drop the temporary in-memory record, re-add as web-<id> so refetch won't duplicate it
@@ -2543,6 +2600,7 @@ document.addEventListener('DOMContentLoaded',()=>{
               addApplicant(mapRow({ id:data.id, name:snap.name, email:snap.email, phone:snap.phone,
                 role:snap.role, client:snap.account, location:snap.location,
                 source:snap.source||'ATS', cover_note:snap.notes, stage:snap.stage||'new',
+                recruiter:snap.recruiter, tags:snap.tags, degree:snap.degree, medium:snap.medium, referred_by:snap.referred_by, linkedin:snap.linkedin, proposed_salary:snap.proposed_salary, availability:snap.availability,
                 applied_date:new Date().toISOString().slice(0,10) }));
             }
             renderAll();
@@ -2555,7 +2613,9 @@ document.addEventListener('DOMContentLoaded',()=>{
           sb.from('applications').update({
             name:snap.name, email:snap.email||null, phone:snap.phone||null,
             role:snap.role, client:snap.account, location:snap.location,
-            cover_note:snap.notes||null, stage:snap.stage||app.stage
+            cover_note:snap.notes||null, stage:snap.stage||app.stage,
+            recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
+            referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null
           }).eq('id', app._sid).then(({error})=>{ if(error) console.error('applicant edit sync',error); else if(window.showToast) showToast('Changes saved to backend','success'); });
         }
       }
@@ -3384,6 +3444,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(reoB) reoB.classList.toggle('hidden', !isRef);
     const banner=document.getElementById('resume-refused-banner');
     if(banner){ if(isRef){ banner.classList.remove('hidden'); banner.innerHTML='<span class="font-bold">Refused</span>'+(app.refuse_reason?' — '+_e(app.refuse_reason):''); } else banner.classList.add('hidden'); }
+    const meta=document.getElementById('resume-odoo-meta');
+    if(meta){
+      const chips=[];
+      if(app.recruiter) chips.push('<span class="badge" style="background:#f1f5f9;color:#475569;"><span class="material-icons-outlined" style="font-size:11px;margin-right:2px;">person</span>'+_e(app.recruiter)+'</span>');
+      if(app.degree) chips.push('<span class="badge" style="background:#eef2ff;color:#4338ca;">'+_e(app.degree)+'</span>');
+      if(app.proposed_salary) chips.push('<span class="badge" style="background:#dcfce7;color:#166534;">Offer: '+_e(app.proposed_salary)+'</span>');
+      if(app.availability) chips.push('<span class="badge" style="background:#fef3c7;color:#b45309;">Avail: '+_e(app.availability)+'</span>');
+      (app.tags||'').split(',').map(t=>t.trim()).filter(Boolean).forEach(t=>chips.push('<span class="badge" style="background:#fce7f3;color:#9d174d;">'+_e(t)+'</span>'));
+      if(app.linkedin) chips.push('<a href="'+_e(app.linkedin)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="badge" style="background:#e0f2fe;color:#0369a1;text-decoration:none;">LinkedIn ↗</a>');
+      if(chips.length){ meta.innerHTML=chips.join(''); meta.classList.remove('hidden'); } else meta.classList.add('hidden');
+    }
     renderActivityList(app);
   }
   window.cntProfileExtras = cntProfileExtras;
@@ -3431,6 +3502,217 @@ document.addEventListener('DOMContentLoaded',()=>{
     const app=findApplicant(id); if(app) cntLogActivity(app,'email','Email drafted: '+subj);
     const m=document.getElementById('cnt-email-modal'); if(m) m.classList.add('hidden');
   };
+
+  // ══════════════════════════════════════════════════════════════
+  //  ODOO-STYLE RECRUITMENT REPORTING
+  //  Applicant Analysis · Source Analysis · Velocity · Team Performance
+  // ══════════════════════════════════════════════════════════════
+  let _reportTab='applicants';
+  function _outcome(a){
+    if(a.stage==='rejected') return 'refused';
+    if(a.stage==='hired'||a.stage==='onboarding'||a.deployed_at) return 'hired';
+    return 'in_progress';
+  }
+  function _reportData(){ return getAllApplicants().filter(a=>a.stage!=='pool'); }
+  function _daysInStage(a){
+    let last = a.appliedDate ? new Date(a.appliedDate+'T00:00').getTime() : null;
+    if(Array.isArray(a.activity)){ const st=a.activity.find(x=>x.type==='stage'); if(st){ const t=new Date(st.ts).getTime(); if(!isNaN(t)) last=t; } }
+    if(!last||isNaN(last)) return null;
+    return Math.max(0,(Date.now()-last)/86400000);
+  }
+  function _bar(pct,color){ return '<div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:'+Math.max(0,Math.min(100,pct))+'%;background:'+color+';"></div></div>'; }
+  function _pill(n,color,bg){ return '<span style="display:inline-block;min-width:26px;text-align:center;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;color:'+color+';background:'+bg+';">'+n+'</span>'; }
+  const _OUT_COLORS={ in_progress:['#1d4ed8','#dbeafe'], hired:['#166534','#dcfce7'], refused:['#b91c1c','#fee2e2'] };
+
+  window.cntReportTab=function(t){ _reportTab=t; renderOdooReports(); };
+
+  // Fill the applicant form's Recruiter dropdown from the loaded recruiters + current user
+  window.populateRecruiterSelect=function(selected){
+    const sel=document.getElementById('app-recruiter'); if(!sel) return;
+    const names=[];
+    (window.cntRecruiters||[]).forEach(u=>{ const n=u.full_name||u.email; if(n && names.indexOf(n)<0) names.push(n); });
+    if(window.cntUserName && names.indexOf(window.cntUserName)<0) names.unshift(window.cntUserName);
+    if(selected && names.indexOf(selected)<0) names.push(selected);
+    sel.innerHTML='<option value="">Unassigned</option>'+names.map(n=>'<option value="'+_e(n)+'"'+(selected===n?' selected':'')+'>'+_e(n)+'</option>').join('');
+    sel.value=selected||'';
+  };
+  window.cntFillJobRecruiters=function(){
+    const dl=document.getElementById('job-recruiter-list'); if(!dl) return;
+    const names=[]; (window.cntRecruiters||[]).forEach(u=>{ const n=u.full_name||u.email; if(n && names.indexOf(n)<0) names.push(n); });
+    if(window.cntUserName && names.indexOf(window.cntUserName)<0) names.unshift(window.cntUserName);
+    dl.innerHTML=names.map(n=>'<option>'+_e(n)+'</option>').join('');
+  };
+
+  // ── Offer box: proposed salary + validity date (Odoo Generate Offer) ──
+  function _defaultValidity(app){
+    if(app.offer_validity) return app.offer_validity;
+    const d=new Date(); d.setDate(d.getDate()+30); return d.toISOString().slice(0,10);
+  }
+  window.cntRenderOfferBox=function(app){
+    if(!app) return;
+    const pos=document.getElementById('offer-position-display'); if(pos) pos.textContent=app.role||'—';
+    const sal=document.getElementById('offer-salary-display'); if(sal) sal.textContent=app.proposed_salary||app.salary||'To be confirmed';
+    const val=_defaultValidity(app);
+    const vd=document.getElementById('offer-validity-display'); if(vd){ try{ vd.textContent=new Date(val+'T00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ vd.textContent=val; } }
+    const pin=document.getElementById('offer-proposed-input'); if(pin) pin.value=app.proposed_salary||'';
+    const vin=document.getElementById('offer-validity-input'); if(vin) vin.value=val;
+  };
+  window.cntSaveOffer=function(){
+    const app=findApplicant(currentViewedApplicantId); if(!app) return;
+    const proposed=(document.getElementById('offer-proposed-input')||{}).value||'';
+    const validity=(document.getElementById('offer-validity-input')||{}).value||'';
+    app.proposed_salary=proposed; app.offer_validity=validity;
+    updateApplicant(app.id,{proposed_salary:proposed,offer_validity:validity});
+    _persistApp(app,{proposed_salary:proposed||null,offer_validity:validity||null});
+    logAudit('offer','applicant',app._sid||app.id, app.name+' — '+proposed+(validity?' (valid to '+validity+')':''));
+    cntLogActivity(app,'email','Offer set: '+(proposed||'—')+(validity?', valid until '+validity:''));
+    cntRenderOfferBox(app);
+    if(window.showToast) showToast('Offer details saved','success');
+  };
+
+  // Publish / unpublish a job to the website (status open<->closed)
+  window.cntTogglePublish=function(accId,sid,role,location){
+    const arr=jobDatabase[accId]||[];
+    const job=arr.find(j=>(sid&&String(j._sid)===String(sid))||(j.role===role&&j.location===location));
+    if(!job) return;
+    job.status=(job.status==='closed')?'open':'closed';
+    if(sb && job._sid){ sb.from('jobs').update({ status:job.status }).eq('id',job._sid).then(({error})=>{ if(error){ console.error('publish',error); if(window.showToast) showToast('Publish sync failed','error'); } }); }
+    logAudit(job.status==='closed'?'job_unpublish':'job_publish','job',job._sid||accId,(job.role||'')+' · '+(job.account||accId));
+    if(window.showToast) showToast(job.status==='closed'?'Unpublished from website':'Published to website careers page','success');
+    if(typeof renderJobPositions==='function') renderJobPositions();
+  };
+
+  function injectOdooReports(){
+    const rv=document.getElementById('view-reports'); if(!rv || document.getElementById('cnt-odoo-reports')) return;
+    const node=document.createElement('div'); node.id='cnt-odoo-reports'; node.className='space-y-4';
+    if(rv.children.length>1) rv.insertBefore(node, rv.children[1]); else rv.appendChild(node);
+    // hide the legacy placeholder KPI cards / breakdown blocks (keep the header row)
+    Array.from(rv.children).forEach((c,i)=>{ if(c!==node && i>0) c.style.display='none'; });
+  }
+
+  function renderOdooReports(){
+    const node=document.getElementById('cnt-odoo-reports'); if(!node) return;
+    const data=_reportData();
+    const total=data.length;
+    const hired=data.filter(a=>_outcome(a)==='hired').length;
+    const refused=data.filter(a=>_outcome(a)==='refused').length;
+    const inprog=total-hired-refused;
+    const hireRate=(hired+refused)?Math.round(hired/(hired+refused)*100):0;
+    const kpi=(label,val,sub,color)=>'<div class="bg-white border border-slate-200 rounded-xl p-4"><div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">'+label+'</div><div class="text-2xl font-extrabold" style="color:'+color+'">'+val+'</div><div class="text-[10px] text-slate-400 mt-0.5">'+sub+'</div></div>';
+    const tabs=[['applicants','Applicant Analysis','how_to_reg'],['sources','Source Analysis','share'],['velocity','Velocity','speed'],['team','Team Performance','groups']];
+    const tabBtn=(k,lbl,ic)=>'<button onclick="cntReportTab(\''+k+'\')" class="px-3 py-2 text-xs font-bold rounded-lg cursor-pointer flex items-center gap-1 transition '+(_reportTab===k?'bg-red-800 text-white shadow-sm':'text-slate-500 hover:bg-slate-100')+'"><span class="material-icons-outlined" style="font-size:14px;">'+ic+'</span>'+lbl+'</button>';
+    let body='';
+    if(_reportTab==='applicants') body=_reportApplicants(data);
+    else if(_reportTab==='sources') body=_reportSources(data);
+    else if(_reportTab==='velocity') body=_reportVelocity(data);
+    else if(_reportTab==='team') body=_reportTeam(data);
+    node.innerHTML=
+      '<div class="grid grid-cols-2 md:grid-cols-5 gap-3">'
+        +kpi('Total applicants',total,'excl. talent pool','#0f172a')
+        +kpi('In progress',inprog,'active pipeline','#1d4ed8')
+        +kpi('Hired',hired,'offer / onboarding','#166534')
+        +kpi('Refused',refused,'not moving forward','#b91c1c')
+        +kpi('Hire rate',hireRate+'%','of decided','#7f1d1d')
+      +'</div>'
+      +'<div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">'
+        +'<div class="flex items-center gap-1 px-4 pt-3 pb-2 border-b border-slate-100 flex-wrap">'+tabs.map(t=>tabBtn(t[0],t[1],t[2])).join('')+'</div>'
+        +'<div class="p-5">'+body+'</div>'
+      +'</div>';
+  }
+
+  function _reportTable(head, rows){
+    const th='text-left padding font-bold';
+    return '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;min-width:520px;">'
+      +'<thead><tr>'+head.map((h,i)=>'<th style="text-align:'+(i===0?'left':'center')+';padding:8px 10px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;font-weight:700;border-bottom:1px solid #e2e8f0;">'+h+'</th>').join('')+'</tr></thead>'
+      +'<tbody>'+rows+'</tbody></table></div>';
+  }
+
+  // ── Applicant Analysis: position × outcome ──
+  function _reportApplicants(data){
+    const byRole={};
+    data.forEach(a=>{ const r=a.role||'—'; (byRole[r]=byRole[r]||{t:0,ip:0,h:0,rf:0}); byRole[r].t++; const o=_outcome(a); byRole[r][o==='in_progress'?'ip':o==='hired'?'h':'rf']++; });
+    const rows=Object.entries(byRole).sort((x,y)=>y[1].t-x[1].t).map(([role,c])=>{
+      const rate=(c.h+c.rf)?Math.round(c.h/(c.h+c.rf)*100):0;
+      return '<tr style="border-bottom:1px solid #f1f5f9;">'
+        +'<td style="padding:9px 10px;font-size:12.5px;font-weight:600;color:#0f172a;">'+_e(role)+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;font-weight:700;font-size:12.5px;color:#0f172a;">'+c.t+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.ip,_OUT_COLORS.in_progress[0],_OUT_COLORS.in_progress[1])+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.h,_OUT_COLORS.hired[0],_OUT_COLORS.hired[1])+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.rf,_OUT_COLORS.refused[0],_OUT_COLORS.refused[1])+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;font-size:12px;font-weight:700;color:#7f1d1d;">'+rate+'%</td></tr>';
+    }).join('')||'<tr><td colspan="6" style="padding:24px;text-align:center;color:#94a3b8;font-size:12px;">No applicants yet.</td></tr>';
+    // trend by applied month
+    const byMonth={};
+    data.forEach(a=>{ const m=(a.appliedDate||'').slice(0,7)||'—'; (byMonth[m]=byMonth[m]||{ip:0,h:0,rf:0}); const o=_outcome(a); byMonth[m][o==='in_progress'?'ip':o==='hired'?'h':'rf']++; });
+    const months=Object.keys(byMonth).filter(m=>m!=='—').sort().slice(-6);
+    const maxM=Math.max(1,...months.map(m=>byMonth[m].ip+byMonth[m].h+byMonth[m].rf));
+    const trend=months.length?('<div class="mt-6"><h4 class="text-xs font-bold text-slate-700 mb-3">Applicants over time</h4><div class="flex items-end gap-3" style="height:130px;">'
+      +months.map(m=>{ const d=byMonth[m]; const tot=d.ip+d.h+d.rf; const h=Math.round(tot/maxM*110);
+        return '<div class="flex-1 flex flex-col items-center justify-end gap-1"><div class="w-full flex flex-col-reverse rounded-t overflow-hidden" style="height:'+h+'px;min-height:2px;">'
+          +'<div style="background:'+_OUT_COLORS.in_progress[0]+';height:'+(tot?d.ip/tot*100:0)+'%;"></div>'
+          +'<div style="background:'+_OUT_COLORS.hired[0]+';height:'+(tot?d.h/tot*100:0)+'%;"></div>'
+          +'<div style="background:'+_OUT_COLORS.refused[0]+';height:'+(tot?d.rf/tot*100:0)+'%;"></div></div>'
+          +'<span class="text-[9px] text-slate-400">'+m.slice(5)+'/'+m.slice(2,4)+'</span></div>'; }).join('')
+      +'</div><div class="flex gap-4 mt-3 text-[10px] text-slate-500"><span class="flex items-center gap-1"><span style="width:9px;height:9px;border-radius:2px;background:'+_OUT_COLORS.in_progress[0]+';display:inline-block;"></span>In progress</span><span class="flex items-center gap-1"><span style="width:9px;height:9px;border-radius:2px;background:'+_OUT_COLORS.hired[0]+';display:inline-block;"></span>Hired</span><span class="flex items-center gap-1"><span style="width:9px;height:9px;border-radius:2px;background:'+_OUT_COLORS.refused[0]+';display:inline-block;"></span>Refused</span></div></div>'):'';
+    return '<p class="text-[11px] text-slate-400 mb-3">Applicants by position, broken down by outcome. Hire rate = hired ÷ (hired + refused).</p>'
+      +_reportTable(['Position','Applicants','In progress','Hired','Refused','Hire rate'],rows)+trend;
+  }
+
+  // ── Source Analysis: source × outcome, with medium drill ──
+  function _reportSources(data){
+    const bySrc={};
+    data.forEach(a=>{ const s=a.source||'Unknown'; (bySrc[s]=bySrc[s]||{t:0,h:0,rf:0,med:{}}); bySrc[s].t++; const o=_outcome(a); if(o==='hired')bySrc[s].h++; else if(o==='refused')bySrc[s].rf++; const md=a.medium||'Direct'; bySrc[s].med[md]=(bySrc[s].med[md]||0)+1; });
+    const max=Math.max(1,...Object.values(bySrc).map(v=>v.t));
+    const rows=Object.entries(bySrc).sort((x,y)=>y[1].t-x[1].t).map(([src,c])=>{
+      const mediums=Object.entries(c.med).sort((a,b)=>b[1]-a[1]).map(([m,n])=>'<span class="text-[10px] text-slate-400 mr-2">'+_e(m)+' ('+n+')</span>').join('');
+      return '<tr style="border-bottom:1px solid #f1f5f9;">'
+        +'<td style="padding:9px 10px;"><div class="font-semibold text-slate-800 text-[12.5px]">'+_e(src)+'</div><div class="mt-0.5">'+mediums+'</div></td>'
+        +'<td style="padding:9px 10px;width:38%;"><div class="flex items-center gap-2">'+_bar(c.t/max*100,'#7f1d1d')+'<span class="text-[11px] font-bold text-slate-700 w-6">'+c.t+'</span></div></td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.h,_OUT_COLORS.hired[0],_OUT_COLORS.hired[1])+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.rf,_OUT_COLORS.refused[0],_OUT_COLORS.refused[1])+'</td></tr>';
+    }).join('')||'<tr><td colspan="4" style="padding:24px;text-align:center;color:#94a3b8;font-size:12px;">No source data yet.</td></tr>';
+    return '<p class="text-[11px] text-slate-400 mb-3">Which channels bring in the most applicants and hires. Mediums are listed under each source.</p>'
+      +_reportTable(['Source / medium','Applicants','Hired','Refused'],rows);
+  }
+
+  // ── Velocity: average days in current stage, per stage ──
+  function _reportVelocity(data){
+    const perStage={};
+    PIPELINE_STAGES.forEach(s=>perStage[s.key]={sum:0,n:0});
+    data.forEach(a=>{ if(perStage[a.stage]){ const d=_daysInStage(a); if(d!=null){ perStage[a.stage].sum+=d; perStage[a.stage].n++; } } });
+    const avgs=PIPELINE_STAGES.map(s=>({s,avg:perStage[s.key].n?perStage[s.key].sum/perStage[s.key].n:0,n:perStage[s.key].n}));
+    const max=Math.max(1,...avgs.map(x=>x.avg));
+    const rows=avgs.map(x=>'<div class="flex items-center gap-3 mb-3"><div class="text-[11px] font-bold text-slate-600 w-28 shrink-0">'+x.s.short+'</div>'
+      +'<div class="flex-1 h-6 bg-slate-100 rounded-lg overflow-hidden"><div class="h-full rounded-lg flex items-center justify-end pr-2" style="width:'+(x.n?Math.max(x.avg/max*100,6):0)+'%;background:'+x.s.color+';">'+(x.n?'<span class="text-white text-[10px] font-bold">'+x.avg.toFixed(1)+'d</span>':'')+'</div></div>'
+      +'<div class="text-[10px] text-slate-400 w-16 text-right shrink-0">'+x.n+' appl.</div></div>').join('');
+    const overall=(()=>{ let s=0,n=0; data.forEach(a=>{const d=_daysInStage(a); if(d!=null){s+=d;n++;}}); return n?(s/n).toFixed(1):'0'; })();
+    return '<p class="text-[11px] text-slate-400 mb-4">Average days applicants have spent in their current stage — longer bars flag bottlenecks. Overall avg age in stage: <span class="font-bold text-slate-600">'+overall+' days</span>.</p>'+(rows||'<p class="text-center text-slate-400 text-xs py-6">No data.</p>');
+  }
+
+  // ── Team Performance: recruiter × outcome ──
+  function _reportTeam(data){
+    const byRec={};
+    data.forEach(a=>{ const r=a.recruiter||'Unassigned'; (byRec[r]=byRec[r]||{t:0,ip:0,h:0,rf:0}); byRec[r].t++; const o=_outcome(a); byRec[r][o==='in_progress'?'ip':o==='hired'?'h':'rf']++; });
+    const rows=Object.entries(byRec).sort((x,y)=>y[1].t-x[1].t).map(([rec,c])=>{
+      const rate=(c.h+c.rf)?Math.round(c.h/(c.h+c.rf)*100):0;
+      const init=(rec==='Unassigned'?'—':rec.split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase());
+      return '<tr style="border-bottom:1px solid #f1f5f9;">'
+        +'<td style="padding:9px 10px;"><div class="flex items-center gap-2"><span style="width:26px;height:26px;border-radius:50%;background:#7f1d1d;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">'+_e(init)+'</span><span class="font-semibold text-slate-800 text-[12.5px]">'+_e(rec)+'</span></div></td>'
+        +'<td style="text-align:center;padding:9px 10px;font-weight:700;font-size:12.5px;">'+c.t+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.ip,_OUT_COLORS.in_progress[0],_OUT_COLORS.in_progress[1])+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.h,_OUT_COLORS.hired[0],_OUT_COLORS.hired[1])+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(c.rf,_OUT_COLORS.refused[0],_OUT_COLORS.refused[1])+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;font-size:12px;font-weight:700;color:#7f1d1d;">'+rate+'%</td></tr>';
+    }).join('')||'<tr><td colspan="6" style="padding:24px;text-align:center;color:#94a3b8;font-size:12px;">No recruiter data yet.</td></tr>';
+    return '<p class="text-[11px] text-slate-400 mb-3">Applicants managed per recruiter (from the Recruiter field on each applicant), by outcome.</p>'
+      +_reportTable(['Recruiter','Applicants','In progress','Hired','Refused','Hire rate'],rows);
+  }
+
+  // Wrap the app's renderReports so the Odoo reports refresh with the view
+  if (typeof renderReports === 'function'){
+    const _origRR = renderReports;
+    renderReports = function(){ _origRR(); try{ injectOdooReports(); renderOdooReports(); }catch(e){ console.warn('odoo reports',e); } };
+  }
 
   // Bootstrap — called by the app's DOMContentLoaded handler
   window.cntBoot = function(){
