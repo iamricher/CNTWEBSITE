@@ -1458,7 +1458,7 @@ function renderApplicationsTable(pipeline){
       <td class="px-4 py-2.5 text-slate-600 text-xs">${a.role}</td>
       <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${a.account}</span></td>
       <td class="px-4 py-2.5 text-xs text-slate-400">${a.location}</td>
-      <td class="px-4 py-2.5"><span class="badge border ${getStageBadge(a.stage)}">${getStageName(a.stage)}</span></td>
+      <td class="px-4 py-2.5"><span class="badge border ${getStageBadge(a.stage)}">${getStageName(a.stage)}</span>${a.client_status==='approved'?'<span class="badge ml-1" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;">Client ✓</span>':a.client_status==='rejected'?'<span class="badge ml-1" style="background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;">Client ✗</span>':a.client_status==='endorsed'?'<span class="badge ml-1" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">Endorsed</span>':''}${a.deployed_at?'<span class="badge ml-1" style="background:#e0e7ff;color:#4338ca;border:1px solid #c7d2fe;">Deployed</span>':''}</td>
       <td class="px-4 py-2.5 text-xs text-slate-400">${a.source||'—'}</td>
       <td class="px-4 py-2.5 text-xs text-slate-400">${a.appliedDate||'—'}</td>
       <td class="px-4 py-2.5 text-xs text-slate-400 font-mono">${a.phone}</td>
@@ -1816,7 +1816,7 @@ function renderHiringRequests(){
     return `<tr>
       <td class="px-4 py-2.5 font-bold text-slate-700 text-xs">${r.id}</td>
       <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${r.account}</span></td>
-      <td class="px-4 py-2.5 text-xs font-semibold text-slate-800">${r.role}</td>
+      <td class="px-4 py-2.5 text-xs font-semibold text-slate-800">${r.role}${r.assigned_name?`<div class="text-[10px] text-slate-400 font-normal mt-0.5">→ ${r.assigned_name}</div>`:''}</td>
       <td class="px-4 py-2.5 text-xs text-slate-500">${r.location}</td>
       <td class="px-4 py-2.5 text-xs text-slate-500">${r.type}</td>
       <td class="px-4 py-2.5 text-center font-bold text-slate-700">${r.count}</td>
@@ -1825,6 +1825,7 @@ function renderHiringRequests(){
       <td class="px-4 py-2.5 text-xs text-slate-400">${r.date}</td>
       <td class="px-4 py-2.5">${getCountdownChip(r.deadline)}</td>
       <td class="px-4 py-2.5 text-right">
+        ${(window.cntRole==='super_admin'||window.cntRole==='recruitment_supervisor')?`<select onchange="cntAssignRequest('${r.id}', this.value, this.value?this.options[this.selectedIndex].text:'')" class="text-[11px] border border-slate-200 rounded px-1 py-0.5 mr-2 align-middle bg-white"><option value="">Assign…</option>${(window.cntRecruiters||[]).map(u=>`<option value="${u.id}"${r.assigned_to===u.id?' selected':''}>${u.full_name||u.email}</option>`).join('')}</select>`:''}
         <button onclick="approveRequest('${r.id}')" class="text-emerald-700 hover:underline text-[11px] font-bold cursor-pointer mr-2">Approve</button>
         <button onclick="fillRequest('${r.id}')" class="text-red-700 hover:underline text-[11px] font-bold cursor-pointer mr-2">Fill</button>
         <button onclick="deleteHiringRequest('${r.id}')" class="text-slate-400 hover:text-red-500 text-[11px] font-medium cursor-pointer">Remove</button>
@@ -2280,7 +2281,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       source:r.source||'Website', salary:'', notes:r.cover_note||'',
       appliedDate:r.applied_date||(r.created_at?String(r.created_at).slice(0,10):''),
       experience:r.experience||'', resumePath:r.resume_url||null,
-      client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null
+      client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null,
+      contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null
     };
   }
 
@@ -2319,6 +2321,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       const a=findApplicant(id);
       showUploadedResume(a);
       renderEndorsement(a);
+      renderWorkflow(a);
     };
   }
 
@@ -2517,6 +2520,22 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   // Hiring Requests → Supabase backend (load on start; persist submit + approve/fill)
+  let recruitersList=[];
+  async function loadRecruiters(){
+    if(!sb) return;
+    const { data } = await sb.from('profiles').select('id,full_name,email,role').in('role',['recruiter','recruitment_supervisor']);
+    recruitersList = data||[]; window.cntRecruiters = recruitersList;
+  }
+  async function assignRequest(reqId, uid, name){
+    const r=(typeof hiringRequests!=='undefined')?hiringRequests.find(x=>x.id===reqId):null; if(!r) return;
+    r.assigned_to=uid||null; r.assigned_name=uid?name:null; if(uid && r.status==='Pending') r.status='Open';
+    if(sb && r._sid){ const {error}=await sb.from('hiring_requests').update({ assigned_to:uid||null, assigned_name:uid?name:null, status:r.status }).eq('id',r._sid); if(error){ if(window.showToast) showToast('Assign failed: '+error.message,'error'); return; } }
+    logAudit('mrf_assign','hiring_request', r.id, name||'unassigned');
+    if(window.showToast) showToast('MRF '+r.id+(uid?' → '+name:' unassigned'),'success');
+    if(typeof renderHiringRequests==='function') renderHiringRequests();
+  }
+  window.cntAssignRequest = assignRequest;
+
   async function loadHiringRequests(){
     if(!sb || typeof hiringRequests==='undefined') return;
     const { data, error } = await sb.from('hiring_requests').select('*').order('created_at',{ascending:false});
@@ -2525,7 +2544,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(hiringRequests.some(x=>x.id===r.req_id)) return;
       hiringRequests.unshift({ id:r.req_id, _sid:r.id, account:r.account, role:r.role, location:r.location,
         type:r.type, count:r.count, priority:r.priority, status:r.status, date:r.date,
-        deadline:r.deadline||'', requestor:r.requestor||'', notes:r.notes||'' });
+        deadline:r.deadline||'', requestor:r.requestor||'', notes:r.notes||'', assigned_to:r.assigned_to||null, assigned_name:r.assigned_name||'' });
     });
   }
   if (typeof handleHiringRequestSubmit === 'function'){
@@ -2666,6 +2685,43 @@ document.addEventListener('DOMContentLoaded',()=>{
     renderEndorsement(app);
   }
 
+  // ── Contract → Deployment → New Hire Report milestones (Steps 8–10) ──
+  const _MILESTONES=[
+    {f:'contract_signed_at', label:'Contract Signed'},
+    {f:'oriented_at',        label:'Orientation Attended'},
+    {f:'deployed_at',        label:'Deployed to Client'},
+    {f:'newhire_reported_at',label:'New Hire Report Filed'},
+  ];
+  function _fmtDate(iso){ if(!iso) return ''; try{ return new Date(iso).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return String(iso).slice(0,10); } }
+  function renderWorkflow(app){
+    const tab=document.getElementById('tab-profile'); if(!tab) return;
+    let panel=document.getElementById('cnt-workflow-panel');
+    if(!panel){ panel=document.createElement('div'); panel.id='cnt-workflow-panel'; panel.style.cssText='margin-bottom:14px;';
+      const endo=document.getElementById('cnt-endorse-panel'); if(endo && endo.parentNode===tab) tab.insertBefore(panel, endo.nextSibling); else tab.insertBefore(panel, tab.firstChild); }
+    if(!app){ panel.innerHTML=''; return; }
+    const canDo=['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
+    const rows=_MILESTONES.map(m=>{
+      const done=!!app[m.f];
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc;">'
+        +'<div style="display:flex;align-items:center;gap:9px;"><span class="material-icons-outlined" style="font-size:17px;color:'+(done?'#16a34a':'#cbd5e1')+';">'+(done?'check_circle':'radio_button_unchecked')+'</span><span style="font-size:12.5px;font-weight:600;color:'+(done?'#0f172a':'#64748b')+';">'+m.label+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:8px;">'+(done?'<span style="font-size:11px;color:#94a3b8;">'+_fmtDate(app[m.f])+'</span>':'')
+        +(canDo?'<button class="cnt-ms-btn" data-f="'+m.f+'" style="font-size:11px;font-weight:600;padding:4px 11px;border-radius:7px;cursor:pointer;color:'+(done?'#64748b':'#fff')+';background:'+(done?'#f1f5f9':'#7f1d1d')+';border:none;">'+(done?'Undo':'Mark done')+'</button>':'')
+        +'</div></div>';
+    }).join('');
+    panel.innerHTML='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">timeline</span><span style="font-weight:700;font-size:12.5px;color:#0f172a;">Contract → Deployment → New Hire</span></div>'
+      +rows+'</div>';
+    panel.querySelectorAll('.cnt-ms-btn').forEach(b=>b.addEventListener('click',()=>setMilestone(app,b.dataset.f)));
+  }
+  async function setMilestone(app, field){
+    const val = app[field] ? null : new Date().toISOString();
+    const patch={}; patch[field]=val; Object.assign(app,patch);
+    if(sb && app._web && app._sid){ const {error}=await sb.from('applications').update(patch).eq('id',app._sid); if(error){ if(window.showToast) showToast('Save failed: '+error.message,'error'); return; } }
+    logAudit('milestone','applicant', app._sid||app.id, field+(val?' set':' cleared'));
+    if(window.showToast) showToast(app.name+' — '+field.replace(/_at$/,'').replace(/_/g,' ')+(val?' recorded':' cleared'),'success');
+    renderWorkflow(app);
+  }
+
   function showLogin(){ const o=document.getElementById('cnt-login'); if(o) o.style.display='flex'; }
   function hideLogin(){ const o=document.getElementById('cnt-login'); if(o) o.style.display='none'; }
 
@@ -2697,6 +2753,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   function applyRoleScoping(){
+    window.cntRole = currentRole;
     const allowed = ROLE_MODULES[currentRole] || ROLE_MODULES['recruiter'];
     const map = { dashboard:'nav-dashboard', request:'nav-request', applications:'nav-applications', job:'nav-job', 'talent-pool':'nav-talent-pool', interviews:'nav-interviews', onboarding:'nav-onboarding', reports:'nav-reports' };
     Object.keys(map).forEach(mod=>{ const el=document.getElementById(map[mod]); if(el) el.style.display = allowed.includes(mod) ? '' : 'none'; });
@@ -2854,6 +2911,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     buildClientDropdown();
     await loadApplications();
     await loadHiringRequests();
+    await loadRecruiters();
     await loadJobsFromBackend();
     renderAll();
     injectBell();
