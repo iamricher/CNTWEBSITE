@@ -27,6 +27,8 @@
   .kanban-col { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:12px; min-width:210px; flex:1; display:flex; flex-direction:column; }
   .kanban-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px; cursor:grab; transition:all .15s; }
   .kanban-card:hover { border-color:#fca5a5; box-shadow:0 2px 10px rgba(127,29,29,.08); }
+  .kanban-card .kmenu { opacity:0; transition:opacity .15s; }
+  .kanban-card:hover .kmenu { opacity:1; }
   .badge { display:inline-flex; align-items:center; padding:3px 8px; border-radius:99px; font-size:10px; font-weight:700; border:1px solid transparent; }
   .modal-overlay { animation: fadeIn .18s ease-out; }
   .modal-box { animation: slideUp .22s ease-out; }
@@ -1493,40 +1495,38 @@ function renderApplicationsTable(pipeline){
 
 function kanbanCardHtml(a, refused){
   const accColor=(ACCOUNTS.find(ac=>ac.id===a.account)?.color||'#64748b');
-  const dot={normal:['#cbd5e1','In progress'],ready:['#10b981','Ready for next stage'],blocked:['#ef4444','Blocked']}[a.kanban_state||'normal']||['#cbd5e1','In progress'];
-  const stars=[1,2,3].map(n=>`<span onclick="event.stopPropagation();cntSetPriority('${a.id}',${(a.priority||0)===n?0:n})" title="${['','Good','Very Good','Excellent'][n]}" class="cursor-pointer material-icons-outlined" style="font-size:14px;color:${(a.priority||0)>=n?'#f59e0b':'#e2e8f0'};">star</span>`).join('');
+  const dotMap={normal:['#cbd5e1','In progress'],ready:['#10b981','Ready for next stage'],blocked:['#ef4444','Blocked']};
+  const dot=dotMap[a.kanban_state||'normal']||dotMap.normal;
+  const initials=(a.account||'?').slice(0,2).toUpperCase();
+  const stars=[1,2,3].map(n=>`<span onclick="event.stopPropagation();cntSetPriority('${a.id}',${(a.priority||0)===n?0:n})" title="${['','Good','Very Good','Excellent'][n]}" class="cursor-pointer material-icons-outlined" style="font-size:15px;color:${(a.priority||0)>=n?'#f59e0b':'#e2e8f0'};">star</span>`).join('');
   if(refused){
-    return `<div class="kanban-card" style="opacity:.72;cursor:default;">
-      <div class="flex items-start justify-between mb-1">
-        <p class="font-bold text-slate-700 text-xs leading-tight line-through">${a.name}</p>
-        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-1 flex-shrink-0" style="background:${accColor}20;color:${accColor}">${a.account}</span>
-      </div>
-      <p class="text-[11px] text-slate-500 mb-1">${a.role}</p>
-      ${a.refuse_reason?`<div class="text-[10px] bg-slate-100 text-slate-500 rounded px-1.5 py-1 mb-2"><span class="font-semibold">Reason:</span> ${a.refuse_reason}</div>`:''}
-      <div class="mt-2 pt-2 border-t border-slate-100 flex gap-2 justify-end">
-        <button onclick="triggerResumeModal('${a.id}')" class="text-[10px] text-slate-500 font-semibold hover:underline cursor-pointer">View</button>
-        <button onclick="cntReopen('${a.id}')" class="text-[10px] text-emerald-700 font-bold hover:underline cursor-pointer">Reopen</button>
-      </div></div>`;
+    return `<div class="kanban-card" style="opacity:.72;cursor:pointer;border-left:3px solid #cbd5e1;" onclick="triggerResumeModal('${a.id}')">
+      <p class="font-bold text-slate-600 text-[13px] leading-tight line-through truncate mb-0.5">${a.name}</p>
+      <p class="text-[11px] text-slate-400 mb-1.5 truncate">${a.role} · ${a.account}</p>
+      ${a.refuse_reason?`<div class="text-[10px] bg-slate-100 text-slate-500 rounded-md px-2 py-1 mb-2"><span class="font-semibold">Refused:</span> ${a.refuse_reason}</div>`:''}
+      <div class="flex justify-end pt-1.5 border-t border-slate-100"><button onclick="event.stopPropagation();cntReopen('${a.id}')" class="text-[11px] text-emerald-700 font-bold hover:underline cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Reopen</button></div>
+    </div>`;
   }
-  return `<div class="kanban-card" draggable="true" ondragstart="drag(event,'${a.id}')">
-    <div class="flex items-start justify-between mb-1">
-      <div class="flex items-center gap-1.5 min-w-0">
-        <span onclick="event.stopPropagation();cntCycleKanbanState('${a.id}')" title="${dot[1]} — click to change" class="cursor-pointer flex-shrink-0" style="width:9px;height:9px;border-radius:50%;background:${dot[0]};display:inline-block;"></span>
-        <p class="font-bold text-slate-900 text-xs leading-tight truncate">${a.name}</p>
+  return `<div class="kanban-card" draggable="true" ondragstart="drag(event,'${a.id}')" onclick="triggerResumeModal('${a.id}')" style="border-left:3px solid ${accColor};">
+    <div class="flex items-start justify-between gap-1 mb-0.5">
+      <p class="font-bold text-slate-900 text-[13px] leading-tight truncate">${a.name}</p>
+      <span class="kmenu flex gap-1 flex-shrink-0">
+        <button onclick="event.stopPropagation();openEditModal('${a.id}')" title="Edit" class="text-slate-300 hover:text-slate-600 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:14px;">edit</span></button>
+        <button onclick="event.stopPropagation();cntOpenRefuse('${a.id}')" title="Refuse" class="text-slate-300 hover:text-red-600 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:14px;">block</span></button>
+      </span>
+    </div>
+    <p class="text-[11px] text-slate-500 mb-1.5 truncate">${a.role}</p>
+    <div class="flex items-center gap-1 flex-wrap mb-2">
+      <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:${accColor}18;color:${accColor}">${a.account}</span>
+      <span class="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">${a.location}</span>
+    </div>
+    ${a.interviewDate?`<div class="text-[10px] bg-indigo-50 text-indigo-700 rounded-md px-1.5 py-0.5 mb-2 font-semibold inline-flex items-center gap-1"><span class="material-icons-outlined" style="font-size:11px;">event</span>${fmtMonth(a.interviewDate)} ${fmtDay(a.interviewDate)} ${fmtTime(a.interviewTime)}</div>`:''}
+    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+      <span onclick="event.stopPropagation();cntCycleKanbanState('${a.id}')" title="${dot[1]} — click to change" class="cursor-pointer flex items-center flex-shrink-0"><span style="width:10px;height:10px;border-radius:50%;background:${dot[0]};display:inline-block;box-shadow:0 0 0 3px ${dot[0]}22;"></span></span>
+      <div class="flex items-center gap-1.5">
+        <span class="flex items-center">${stars}</span>
+        <span class="flex items-center justify-center flex-shrink-0" title="${a.account}" style="width:20px;height:20px;border-radius:50%;background:${accColor};color:#fff;font-size:8px;font-weight:700;">${initials}</span>
       </div>
-      <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-1 flex-shrink-0" style="background:${accColor}20;color:${accColor}">${a.account}</span>
-    </div>
-    <p class="text-[11px] text-slate-500 mb-1">${a.role}</p>
-    <p class="text-[10px] text-slate-400 mb-1.5">${a.location}</p>
-    <div class="flex items-center justify-between mb-1.5">
-      <div class="flex items-center">${stars}</div>
-      ${a.priority?`<span class="text-[9px] font-bold text-amber-600">${['','Good','Very Good','Excellent'][a.priority]}</span>`:''}
-    </div>
-    ${a.interviewDate?`<div class="text-[10px] bg-indigo-50 text-indigo-700 rounded px-1.5 py-0.5 mb-2 font-semibold">${fmtMonth(a.interviewDate)} ${fmtDay(a.interviewDate)} ${fmtTime(a.interviewTime)}</div>`:''}
-    <div class="mt-2 pt-2 border-t border-slate-100 flex gap-2 justify-end items-center">
-      <button onclick="triggerResumeModal('${a.id}')" class="text-[10px] text-red-700 font-bold hover:underline cursor-pointer">View</button>
-      <button onclick="openEditModal('${a.id}')" class="text-[10px] text-slate-500 font-semibold hover:underline cursor-pointer">Edit</button>
-      <button onclick="cntOpenRefuse('${a.id}')" class="text-[10px] text-slate-400 hover:text-red-600 font-semibold cursor-pointer">Refuse</button>
     </div>
   </div>`;
 }
@@ -3205,7 +3205,19 @@ document.addEventListener('DOMContentLoaded',()=>{
   //  activity timeline · stage-entry email drafts
   //  Overlays the existing 8-stage pipeline — no stage changes.
   // ══════════════════════════════════════════════════════════════
-  const REFUSE_REASONS = ["Doesn't fit the job requirements","Duplicate","Spam","Not interested anymore","Not qualifying"];
+  // Odoo's default refuse reasons, each mapped to its email template
+  const REFUSE_REASONS = [
+    { r:"Doesn't fit the job requirements", t:'refuse' },
+    { r:"Job already fulfilled",            t:'refuse' },
+    { r:"Duplicate",                        t:'refuse' },
+    { r:"Spam",                             t:'refuse' },
+    { r:"Refused by applicant: job fit",    t:'not_interested' },
+    { r:"Refused by applicant: salary",     t:'not_interested' }
+  ];
+  const REFUSE_EMAIL = {
+    refuse:         { name:'Recruitment: Refuse',                 s:'Your application with CNT — {role}', b:'Dear {name},\n\nThank you for your interest in the {role} position ({account}) and for the time you invested in our recruitment process.\n\nAfter careful consideration, we regret to inform you that we will not be moving forward with your application at this time. This decision is not a reflection of your abilities, and we encourage you to apply for future openings that match your profile.\n\nWe wish you every success in your career.\n\nBest regards,\nCNT Recruitment Team' },
+    not_interested: { name:'Recruitment: Not interested anymore', s:'Your application with CNT — {role}', b:'Dear {name},\n\nThank you for letting us know. We have noted that you are no longer pursuing the {role} position ({account}) at this time, and have closed your application accordingly.\n\nShould your circumstances change, we would be glad to hear from you again. We wish you all the best.\n\nBest regards,\nCNT Recruitment Team' }
+  };
   const PRIORITY_LABELS = ['Not rated','Good','Very Good','Excellent'];
   function _e(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -3272,8 +3284,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     const app=findApplicant(id); if(app && app.stage!=='rejected') cntOpenRefuse(id);
   };
 
-  // Refuse reason picker (small modal, built once)
+  // Refuse dialog — Odoo style: pick a reason → its email template loads → send toggle
   function _closeRefuseModal(){ const m=document.getElementById('cnt-refuse-modal'); if(m) m.classList.add('hidden'); }
+  function _refuseTemplateFor(idx){
+    if(idx==='custom') return REFUSE_EMAIL.refuse;
+    const t=(REFUSE_REASONS[idx]||REFUSE_REASONS[0]).t;
+    return REFUSE_EMAIL[t]||REFUSE_EMAIL.refuse;
+  }
+  window.cntRefuseReasonChange = function(id){
+    const sel=document.getElementById('cnt-refuse-reason'); if(!sel) return;
+    const app=findApplicant(id); if(!app) return;
+    const custom=document.getElementById('cnt-refuse-custom-wrap');
+    if(custom) custom.style.display = sel.value==='custom' ? 'block' : 'none';
+    const tpl=_refuseTemplateFor(sel.value==='custom'?'custom':parseInt(sel.value,10));
+    const nameEl=document.getElementById('cnt-refuse-tplname'); if(nameEl) nameEl.textContent=tpl.name;
+    const subj=document.getElementById('cnt-refuse-subj'); if(subj) subj.value=_fillTpl(tpl.s,app);
+    const body=document.getElementById('cnt-refuse-body'); if(body) body.value=_fillTpl(tpl.b,app);
+  };
+  window.cntToggleRefuseEmail = function(){
+    const on=document.getElementById('cnt-refuse-send').checked;
+    const panel=document.getElementById('cnt-refuse-email-panel');
+    if(panel) panel.style.opacity=on?'1':'.45', panel.style.pointerEvents=on?'auto':'none';
+  };
   window.cntOpenRefuse = function(id){
     const app=findApplicant(id); if(!app) return;
     let m=document.getElementById('cnt-refuse-modal');
@@ -3282,16 +3314,47 @@ document.addEventListener('DOMContentLoaded',()=>{
       m.className='hidden fixed inset-0 z-[400] flex items-center justify-center p-4';
       document.body.appendChild(m);
     }
+    const tpl0=_refuseTemplateFor(0);
     m.innerHTML='<div class="absolute inset-0 bg-slate-900/50" onclick="document.getElementById(\'cnt-refuse-modal\').classList.add(\'hidden\')"></div>'
-      +'<div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl z-10 border border-slate-200 overflow-hidden">'
-      +'<div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2"><span class="material-icons-outlined text-red-700" style="font-size:18px;">block</span><h3 class="font-bold text-sm text-slate-800">Refuse '+_e(app.name)+'</h3></div>'
-      +'<div class="p-4"><p class="text-[11px] text-slate-500 mb-3">Choose a reason. The candidate moves to the Refused column and stays on record.</p>'
-      +'<div class="space-y-2">'+REFUSE_REASONS.map(r=>'<button onclick="cntConfirmRefuse(\''+id+'\',this.dataset.r)" data-r="'+_e(r)+'" class="w-full text-left text-xs font-semibold text-slate-700 border border-slate-200 rounded-lg px-3 py-2.5 hover:border-red-300 hover:bg-red-50 transition cursor-pointer">'+_e(r)+'</button>').join('')+'</div>'
-      +'<div class="mt-3 pt-3 border-t border-slate-100"><input id="cnt-refuse-custom" placeholder="Other reason…" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 mb-2"><button onclick="var v=document.getElementById(\'cnt-refuse-custom\').value.trim(); if(v)cntConfirmRefuse(\''+id+'\',v);" class="w-full bg-slate-800 text-white text-xs font-semibold rounded-lg py-2 cursor-pointer hover:bg-slate-900">Refuse with custom reason</button></div>'
+      +'<div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl z-10 border border-slate-200 overflow-hidden">'
+      +'<div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-icons-outlined text-red-700" style="font-size:18px;">block</span><h3 class="font-bold text-sm text-slate-800">Refuse '+_e(app.name)+'</h3></div><button onclick="document.getElementById(\'cnt-refuse-modal\').classList.add(\'hidden\')" class="text-slate-400 hover:text-red-700 cursor-pointer"><span class="material-icons-outlined">close</span></button></div>'
+      +'<div class="p-4 space-y-3">'
+      +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Refuse Reason</label>'
+        +'<select id="cnt-refuse-reason" onchange="cntRefuseReasonChange(\''+id+'\')" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white">'
+        +REFUSE_REASONS.map((o,i)=>'<option value="'+i+'">'+_e(o.r)+'</option>').join('')
+        +'<option value="custom">Other reason…</option></select></div>'
+      +'<div id="cnt-refuse-custom-wrap" style="display:none;"><input id="cnt-refuse-custom" placeholder="Type a custom reason…" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
+      +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pt-1"><input type="checkbox" id="cnt-refuse-send" checked onchange="cntToggleRefuseEmail()" class="accent-red-800 w-4 h-4"> Send email to applicant</label>'
+      +'<div id="cnt-refuse-email-panel" class="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-3">'
+        +'<div class="flex items-center gap-2 text-[11px] text-slate-500"><span class="material-icons-outlined" style="font-size:13px;">description</span>Template: <span id="cnt-refuse-tplname" class="font-semibold text-slate-700">'+_e(tpl0.name)+'</span></div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">To</label><input value="'+_e(app.email||'')+'" readonly class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-500"></div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Subject</label><input id="cnt-refuse-subj" value="'+_e(_fillTpl(tpl0.s,app))+'" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white"></div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Message</label><textarea id="cnt-refuse-body" rows="7" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white resize-none leading-relaxed">'+_e(_fillTpl(tpl0.b,app))+'</textarea></div>'
+        +'<p class="text-[10px] text-slate-400">Nothing is sent automatically — refusing opens this in your mail app so you can review and send.</p>'
+      +'</div>'
+      +'<div class="flex justify-end gap-2 pt-1"><button onclick="document.getElementById(\'cnt-refuse-modal\').classList.add(\'hidden\')" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-4 py-2 hover:bg-slate-50 cursor-pointer">Cancel</button>'
+        +'<button onclick="cntDoRefuse(\''+id+'\')" class="text-xs font-semibold text-white bg-red-700 rounded-lg px-4 py-2 hover:bg-red-800 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">block</span>Refuse</button></div>'
       +'</div></div>';
     m.classList.remove('hidden');
   };
-  window.cntConfirmRefuse = function(id, reason){ _refuse(id, reason); };
+  window.cntDoRefuse = function(id){
+    const sel=document.getElementById('cnt-refuse-reason');
+    let reason;
+    if(sel && sel.value==='custom'){ reason=(document.getElementById('cnt-refuse-custom').value||'').trim()||'Other'; }
+    else { reason=REFUSE_REASONS[parseInt(sel?sel.value:'0',10)||0].r; }
+    const send=document.getElementById('cnt-refuse-send');
+    const wantEmail=send && send.checked;
+    const subj=(document.getElementById('cnt-refuse-subj')||{}).value||'';
+    const body=(document.getElementById('cnt-refuse-body')||{}).value||'';
+    const app=findApplicant(id);
+    _refuse(id, reason);
+    if(wantEmail && app){
+      cntLogActivity(app,'email','Refusal email drafted: '+subj);
+      window.location.href='mailto:'+encodeURIComponent(app.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+    }
+  };
+  // Back-compat (kanban drag → refuse): open the dialog
+  window.cntConfirmRefuse = function(id, reason){ if(reason){ _refuse(id, reason); } else cntOpenRefuse(id); };
 
   // ── Activity timeline render (profile) ──
   function renderActivityList(app){
