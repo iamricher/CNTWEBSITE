@@ -43,6 +43,17 @@ create table if not exists public.applications (
 
 create index if not exists applications_created_idx on public.applications (created_at desc);
 
+-- Odoo-style recruitment mechanics (additive — safe to re-run)
+--   priority      : 0=None 1=Good 2=Very Good 3=Excellent  (star evaluation)
+--   refuse_reason : structured reason when a candidate is refused
+--   kanban_state  : normal | ready | blocked                (card status dot)
+--   activity      : append-only timeline of events (jsonb)
+alter table public.applications
+  add column if not exists priority      int   default 0,
+  add column if not exists refuse_reason text,
+  add column if not exists kanban_state  text  default 'normal',
+  add column if not exists activity      jsonb default '[]'::jsonb;
+
 -- ────────────────────────────────────────────────────────────
 -- 2. ROW LEVEL SECURITY
 --    Public can APPLY and browse OPEN jobs, nothing else.
