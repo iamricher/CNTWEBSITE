@@ -590,8 +590,10 @@
           <span class="material-icons-outlined" style="font-size:15px;">add_box</span> Post Position
         </button>
       </div>
-      <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center gap-1 overflow-x-auto custom-scroll flex-wrap" id="job-client-tabs"></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="job-cards-container"></div>
+      <div class="flex gap-4 items-start">
+        <aside class="w-52 flex-shrink-0 bg-white border border-slate-200 rounded-xl p-3 space-y-4 hidden md:block" id="job-facets"></aside>
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-0" id="job-cards-container"></div>
+      </div>
     </div>
 
     <!-- TALENT POOL -->
@@ -1722,11 +1724,7 @@ function renderAnalyticsDashboard(pipeline, filtered) {
 function renderJobPositions(){
   const jc=document.getElementById('job-cards-container');
   if(!jc)return;
-  const tabs=document.getElementById('job-client-tabs');
-  if(tabs){
-    tabs.innerHTML=`<button class="tab-btn ${activeJobClientTab==='all'?'active':''}" onclick="setJobTab('all')">All Clients</button>`+
-      ACCOUNTS.map(a=>`<button class="tab-btn ${activeJobClientTab===a.id?'active':''}" onclick="setJobTab('${a.id}')">${a.label}</button>`).join('');
-  }
+  renderJobFacets();
   const locF=document.getElementById('filter-location').value;
   const roleF=document.getElementById('filter-role').value;
   const allClientIds=[...new Set([...ACCOUNTS.map(a=>a.id), ...Object.keys(jobDatabase)])];
@@ -1791,6 +1789,43 @@ function renderJobPositions(){
   if(!rendered)jc.innerHTML=`<div class="col-span-full bg-white rounded-xl border p-10 text-center text-slate-400 text-sm">No positions found. <button onclick="openCreateJobModal()" class="text-red-700 font-semibold hover:underline cursor-pointer">Post one now.</button></div>`;
 }
 function setJobTab(t){ activeJobClientTab=t; renderJobPositions(); }
+
+// Odoo-style faceted filter panel for Job Positions:
+//   Client (Odoo "Company") · Position (Odoo "Department") · Location
+function renderJobFacets(){
+  const el=document.getElementById('job-facets'); if(!el) return;
+  const all=[];
+  Object.keys(jobDatabase).forEach(k=>(jobDatabase[k]||[]).forEach(j=>all.push({account:j.account||k, role:j.role, location:j.location})));
+  const curClient=activeJobClientTab;
+  const curPos=(document.getElementById('filter-role')||{}).value||'all';
+  const curLoc=(document.getElementById('filter-location')||{}).value||'all';
+  const countBy=fn=>{ const m={}; all.forEach(j=>{ const v=fn(j); if(v==null||v==='') return; m[v]=(m[v]||0)+1; }); return m; };
+  const clients=countBy(j=>j.account), positions=countBy(j=>j.role), locations=countBy(j=>j.location);
+  const esc=s=>String(s==null?'':s).replace(/'/g,"\\'");
+  const section=(icon,title,items,cur,type)=>{
+    const rows=[['all','All',all.length]].concat(Object.keys(items).sort().map(k=>[k,k,items[k]]))
+      .map(([val,label,cnt])=>{
+        const active=(cur===val)||((cur==null||cur==='all')&&val==='all');
+        return `<button onclick="cntJobFacet('${type}','${esc(val)}')" class="w-full flex items-center justify-between text-left px-2.5 py-1.5 rounded-lg text-[12px] transition ${active?'bg-red-50 text-red-800 font-bold':'text-slate-600 hover:bg-slate-50'}">`
+          +`<span class="truncate">${label}</span><span class="ml-2 text-[10px] ${active?'text-red-700':'text-slate-400'} font-semibold flex-shrink-0">${cnt}</span></button>`;
+      }).join('');
+    return `<div><div class="flex items-center gap-1.5 px-1 mb-1.5"><span class="material-icons-outlined text-slate-400" style="font-size:14px;">${icon}</span><span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">${title}</span></div><div class="space-y-0.5">${rows}</div></div>`;
+  };
+  el.innerHTML=section('business','Client',clients,curClient,'client')
+    +section('badge','Position',positions,curPos,'position')
+    +section('location_on','Location',locations,curLoc,'location');
+}
+function _setSelect(id,value){
+  const sel=document.getElementById(id); if(!sel) return;
+  if(![...sel.options].some(o=>o.value===value)){ const o=document.createElement('option'); o.value=value; o.textContent=value; sel.appendChild(o); }
+  sel.value=value;
+}
+window.cntJobFacet=function(type,value){
+  if(type==='client'){ activeJobClientTab=value; }
+  else if(type==='position'){ _setSelect('filter-role',value); }
+  else if(type==='location'){ _setSelect('filter-location',value); }
+  renderJobPositions();
+};
 
 function renderTalentPool(pool){
   const tpt=document.getElementById('talent-pool-table');
