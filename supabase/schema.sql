@@ -71,6 +71,71 @@ alter table public.jobs
   add column if not exists employment_type text default 'Full-Time',
   add column if not exists recruiter        text;
 
+-- Interview stage consolidation: single 'interview' stage carries kind + round
+alter table public.applications
+  add column if not exists interview_date  date,
+  add column if not exists interview_time  text,
+  add column if not exists interview_type  text,   -- Phone / Face-to-Face / Video / Panel / Client / Final
+  add column if not exists interview_round text;   -- 1st / 2nd / 3rd / Final
+update public.applications set stage='interview', interview_round=coalesce(interview_round,'1st Interview'), interview_type=coalesce(interview_type,'Phone Interview')       where stage='phone';
+update public.applications set stage='interview', interview_round=coalesce(interview_round,'1st Interview'), interview_type=coalesce(interview_type,'Face-to-Face Interview') where stage='qualified';
+update public.applications set stage='interview', interview_round=coalesce(interview_round,'2nd Interview'), interview_type=coalesce(interview_type,'Panel Interview')        where stage='scheduled';
+
+-- ============================================================
+-- 5. ROLE-BASED SECURITY HARDENING
+--    Real authorization at the DB layer: only staff (a profile with a
+--    recognised role) can read applicant PII; managers manage users/deletes;
+--    new sign-ups are inert ('pending') until an admin grants a role.
+-- ============================================================
+create or replace function public.cnt_is_staff()
+returns boolean language sql stable security definer set search_path=public as $$
+  select exists(select 1 from public.profiles where id=auth.uid()
+    and role in ('super_admin','recruitment_manager','recruitment_supervisor','account_officer','recruiter'))
+$$;
+create or replace function public.cnt_is_manager()
+returns boolean language sql stable security definer set search_path=public as $$
+  select exists(select 1 from public.profiles where id=auth.uid()
+    and role in ('super_admin','recruitment_manager','recruitment_supervisor'))
+$$;
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path=public as $$
+begin
+  insert into public.profiles (id, email, full_name, role)
+  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'full_name',''), 'pending')
+  on conflict (id) do nothing;
+  return new;
+end $$;
+
+-- Applications: anyone may APPLY; only staff read/update; managers delete
+drop policy if exists "apps read authed" on public.applications;
+drop policy if exists "apps update authed" on public.applications;
+drop policy if exists "apps delete authed" on public.applications;
+create policy "apps read staff"   on public.applications for select to authenticated using (public.cnt_is_staff());
+create policy "apps update staff" on public.applications for update to authenticated using (public.cnt_is_staff()) with check (public.cnt_is_staff());
+create policy "apps delete mgr"   on public.applications for delete to authenticated using (public.cnt_is_manager());
+
+-- Jobs: public reads OPEN roles; staff read all + manage
+drop policy if exists "jobs read all authed" on public.jobs;
+drop policy if exists "jobs write authed"    on public.jobs;
+create policy "jobs read staff"  on public.jobs for select to authenticated using (public.cnt_is_staff());
+create policy "jobs write staff" on public.jobs for all    to authenticated using (public.cnt_is_staff()) with check (public.cnt_is_staff());
+
+-- Profiles: staff read; only managers create/change/remove (blocks self role-escalation)
+alter table public.profiles enable row level security;
+create policy "profiles read staff" on public.profiles for select to authenticated using (public.cnt_is_staff());
+create policy "profiles insert mgr" on public.profiles for insert to authenticated with check (public.cnt_is_manager());
+create policy "profiles update mgr" on public.profiles for update to authenticated using (public.cnt_is_manager()) with check (public.cnt_is_manager());
+create policy "profiles delete mgr" on public.profiles for delete to authenticated using (public.cnt_is_manager());
+
+-- Audit log: staff append + read; no update/delete policy => rows are immutable
+alter table public.audit_log enable row level security;
+create policy "audit insert staff" on public.audit_log for insert to authenticated with check (public.cnt_is_staff());
+create policy "audit read staff"   on public.audit_log for select to authenticated using (public.cnt_is_staff());
+
+-- Storage: applicants upload CVs; only staff download
+drop policy if exists "resumes read authed" on storage.objects;
+create policy "resumes read staff" on storage.objects for select to authenticated using (bucket_id='resumes' and public.cnt_is_staff());
+
 -- ────────────────────────────────────────────────────────────
 -- 2. ROW LEVEL SECURITY
 --    Public can APPLY and browse OPEN jobs, nothing else.

@@ -249,9 +249,7 @@
           <select id="filter-stage" onchange="renderAll()" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer">
             <option value="all">All Stages</option>
             <option value="new">Initial Screening</option>
-            <option value="phone">Phone Interview</option>
-            <option value="qualified">1st Interview</option>
-            <option value="scheduled">2nd Interview / Panel</option>
+            <option value="interview">Interview</option>
             <option value="exam">Pre-Employment Exam</option>
             <option value="bgcheck">Background Check</option>
             <option value="hired">Job Offer / Proposal</option>
@@ -320,7 +318,7 @@
           <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Initial Screening</p><h3 class="text-2xl font-extrabold text-slate-900" id="stat-new">0</h3><p class="text-[10px] text-slate-400 mt-0.5">applicants</p></div>
           <div class="stat-icon bg-red-50"><span class="material-icons-outlined text-red-600" style="font-size:20px;">how_to_reg</span></div>
         </div>
-        <div class="stat-card" onclick="quickJumpStage('qualified')">
+        <div class="stat-card" onclick="quickJumpStage('interview')">
           <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">For Interview</p><h3 class="text-2xl font-extrabold text-slate-900" id="stat-interview">0</h3><p class="text-[10px] text-slate-400 mt-0.5">candidates</p></div>
           <div class="stat-icon bg-indigo-50"><span class="material-icons-outlined text-indigo-500" style="font-size:20px;">record_voice_over</span></div>
         </div>
@@ -732,7 +730,7 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client Account <span class="text-red-500">*</span></label><select id="app-account" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm" onchange="updateJobOptions()"><option value="SONY">SONY</option><option value="HAIER">HAIER</option><option value="HISENSE">HISENSE</option><option value="URC">URC</option><option value="SKYWORTH">SKYWORTH</option><option value="UNCLE JOHNS">UNCLE JOHNS</option><option value="Cinderella">Cinderella</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location <span class="text-red-500">*</span></label><select id="app-location" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Manila">Manila (NCR)</option><option value="Tarlac">Tarlac</option><option value="Bulacan">Bulacan</option><option value="Pampanga">Pampanga</option><option value="Cavite">Cavite</option><option value="Pangasinan">Pangasinan</option><option value="Batangas">Batangas</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position Applied <span class="text-red-500">*</span></label><select id="app-role" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Sales Promoter</option><option>Merchandiser</option><option>Area Supervisor</option><option>Brand Ambassador</option><option>Trade Marketing Specialist</option><option>Field Sales Representative</option><option>Product Demonstrator</option><option>Store Supervisor</option><option>In-Store Activator</option><option>Content Marketer</option><option>Logistics Coordinator</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Stage</label><select id="app-stage" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="new">Initial Screening</option><option value="phone">Phone Interview</option><option value="qualified">1st Interview</option><option value="scheduled">2nd Interview / Panel</option><option value="exam">Pre-Employment Exam</option><option value="bgcheck">Background Check</option><option value="hired">Job Offer / Proposal</option><option value="onboarding">Onboarding</option><option value="pool">Talent Pool</option><option value="rejected">Not Qualified</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Stage</label><select id="app-stage" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="new">Initial Screening</option><option value="interview">Interview</option><option value="exam">Pre-Employment Exam</option><option value="bgcheck">Background Check</option><option value="hired">Job Offer / Proposal</option><option value="onboarding">Onboarding</option><option value="pool">Talent Pool</option><option value="rejected">Not Qualified</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Mobile <span class="text-red-500">*</span></label><input type="text" id="app-phone" required placeholder="+63 9XX XXX XXXX" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Email</label><input type="email" id="app-email" placeholder="juan@email.com" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Source</label><select id="app-source" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="JobStreet">JobStreet</option><option value="Indeed">Indeed</option><option value="Facebook">Facebook</option><option value="Referral">Employee Referral</option><option value="Walk-in">Walk-in</option><option value="LinkedIn">LinkedIn</option><option value="Kalibrr">Kalibrr</option><option value="OLX">OLX</option></select></div>
@@ -770,7 +768,10 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Date</label><input type="date" id="interview-date" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Time</label><input type="time" id="interview-time" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       </div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Interview Type</label><select id="interview-type" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Face-to-Face (On-site)</option><option>Video Call (Zoom/Google Meet)</option><option>Phone Screen</option><option>Panel Interview</option><option>Client Interview</option></select></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Round</label><select id="interview-round" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>1st Interview</option><option>2nd Interview</option><option>3rd Interview</option><option>Final Interview</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Kind of Interview</label><select id="interview-type" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Phone Interview</option><option>Face-to-Face Interview</option><option>Video Interview</option><option>Panel Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
+      </div>
       <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Interviewer</label><input type="text" id="interview-interviewer" placeholder="HR Manager / Account Manager" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Venue / Link</label><input type="text" id="interview-venue" placeholder="Office address or meeting link" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -863,9 +864,7 @@
           <select id="resume-stage-select" onchange="updateApplicantStageFromModal(this.value)"
             class="bg-white border border-slate-300 text-slate-700 text-xs font-bold rounded p-1 focus:outline-none cursor-pointer text-[11px]">
             <option value="new">Initial Screening</option>
-            <option value="phone">Phone Interview</option>
-            <option value="qualified">1st Interview</option>
-            <option value="scheduled">2nd Interview / Panel</option>
+            <option value="interview">Interview</option>
             <option value="exam">Pre-Employment Exam</option>
             <option value="bgcheck">Background Check</option>
             <option value="hired">Job Offer</option>
@@ -1228,6 +1227,7 @@ function getAllApplicants(){ return Object.values(accountData).flat(); }
 function getApplicantsForAccount(acc){ return acc==='all'?getAllApplicants():accountData[acc]||[]; }
 function getFilteredDataset(){
   const base = getApplicantsForAccount(currentAccount);
+  base.forEach(a=>{ const n=normStage(a.stage); if(n!==a.stage) a.stage=n; });   // fold legacy interview stages
   const loc  = document.getElementById('filter-location').value;
   const role = document.getElementById('filter-role').value;
   const stg  = document.getElementById('filter-stage').value;
@@ -1246,23 +1246,30 @@ function addApplicant(obj){ if(!accountData[obj.account])accountData[obj.account
 
 const PIPELINE_STAGES = [
   {key:'new',       label:'Initial Screening',short:'Screening',color:'#ef4444'},
-  {key:'phone',     label:'Phone Interview',  short:'Phone',    color:'#f97316'},
-  {key:'qualified', label:'1st Interview',    short:'1st Intv', color:'#8b5cf6'},
-  {key:'scheduled', label:'2nd Interview',    short:'2nd Intv', color:'#3b82f6'},
+  {key:'interview', label:'Interview',        short:'Interview',color:'#8b5cf6'},
   {key:'exam',      label:'Pre-Emp Exam',     short:'Exam',     color:'#06b6d4'},
   {key:'bgcheck',   label:'Background Check', short:'BGC',      color:'#6366f1'},
   {key:'hired',     label:'Job Offer',        short:'Offer',    color:'#10b981'},
   {key:'onboarding',label:'Onboarding',       short:'Onboard',  color:'#059669'},
 ];
 
+// Kinds of interview captured inside the single Interview stage
+const INTERVIEW_TYPES  = ['Phone Interview','Face-to-Face Interview','Video Interview','Panel Interview','Client Interview','Final Interview'];
+const INTERVIEW_ROUNDS = ['1st Interview','2nd Interview','3rd Interview','Final Interview'];
+
 function getStageName(s){
-  const m={new:'Initial Screening',phone:'Phone Interview',qualified:'1st Interview',scheduled:'2nd Interview',exam:'Pre-Emp Exam',bgcheck:'Background Check',hired:'Job Offer',onboarding:'Onboarding',pool:'Talent Pool',rejected:'Not Qualified'};
+  const m={new:'Initial Screening',interview:'Interview',exam:'Pre-Emp Exam',bgcheck:'Background Check',hired:'Job Offer',onboarding:'Onboarding',pool:'Talent Pool',rejected:'Not Qualified',
+    // legacy keys (pre-consolidation) still render correctly
+    phone:'Interview',qualified:'Interview',scheduled:'Interview'};
   return m[s]||s;
 }
 function getStageBadge(s){
-  const m={new:'bg-red-50 text-red-700 border-red-200',phone:'bg-orange-50 text-orange-700 border-orange-200',qualified:'bg-indigo-50 text-indigo-700 border-indigo-200',scheduled:'bg-blue-50 text-blue-700 border-blue-200',exam:'bg-cyan-50 text-cyan-700 border-cyan-200',bgcheck:'bg-violet-50 text-violet-700 border-violet-200',hired:'bg-emerald-50 text-emerald-700 border-emerald-200',onboarding:'bg-green-50 text-green-700 border-green-200',pool:'bg-amber-50 text-amber-700 border-amber-200',rejected:'bg-slate-100 text-slate-500 border-slate-200'};
+  const m={new:'bg-red-50 text-red-700 border-red-200',interview:'bg-violet-50 text-violet-700 border-violet-200',exam:'bg-cyan-50 text-cyan-700 border-cyan-200',bgcheck:'bg-indigo-50 text-indigo-700 border-indigo-200',hired:'bg-emerald-50 text-emerald-700 border-emerald-200',onboarding:'bg-green-50 text-green-700 border-green-200',pool:'bg-amber-50 text-amber-700 border-amber-200',rejected:'bg-slate-100 text-slate-500 border-slate-200',
+    phone:'bg-violet-50 text-violet-700 border-violet-200',qualified:'bg-violet-50 text-violet-700 border-violet-200',scheduled:'bg-violet-50 text-violet-700 border-violet-200'};
   return m[s]||'bg-slate-50 text-slate-700 border-slate-200';
 }
+// Normalise any legacy stage value to the consolidated key
+function normStage(s){ return (s==='phone'||s==='qualified'||s==='scheduled')?'interview':s; }
 
 function getCountdownChip(deadlineStr){
   if(!deadlineStr) return '<span class="text-slate-400 text-[10px]">No deadline</span>';
@@ -1318,9 +1325,10 @@ function toggleApplicationView(mode){
 function handleGlobalSearch(val){ searchQuery=val.trim().toLowerCase(); renderAll(); }
 
 function requestStageChange(id,targetStage,onSuccess,onCancel){
-  if(targetStage==='qualified'||targetStage==='scheduled'||targetStage==='phone'){
+  targetStage=normStage(targetStage);
+  if(targetStage==='interview'){
     pendingStageChange={id,targetStage,onSuccess,onCancel};
-    openInterviewModal(id,getStageName(targetStage));
+    openInterviewModal(id,'Interview');
   }else{
     executeStageChange(id,targetStage);
     if(onSuccess)onSuccess();
@@ -1345,7 +1353,7 @@ function renderAll(){
   setNavBadge('nav-badge-pool', pool.length);
   setNavBadge('nav-badge-onboard', onboarding.length);
   setNavBadge('nav-badge-req', (typeof hiringRequests!=='undefined')?hiringRequests.filter(r=>r.status==='Open'||r.status==='Pending').length:0);
-  const intCount=(counts.phone||0)+(counts.qualified||0)+(counts.scheduled||0);
+  const intCount=(counts.interview||0)+(counts.phone||0)+(counts.qualified||0)+(counts.scheduled||0);
   const examCount=(counts.exam||0)+(counts.bgcheck||0);
   document.getElementById('stat-new').textContent=counts.new||0;
   document.getElementById('stat-interview').textContent=intCount;
@@ -1540,6 +1548,7 @@ function kanbanCardHtml(a, refused){
       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:${accColor}18;color:${accColor}">${a.account}</span>
       <span class="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">${a.location}</span>
     </div>
+    ${(a.stage==='interview'&&(a.interviewType||a.interviewRound))?`<div class="text-[9px] bg-violet-50 text-violet-700 rounded px-1.5 py-0.5 mb-1.5 font-bold inline-flex items-center gap-1"><span class="material-icons-outlined" style="font-size:10px;">forum</span>${a.interviewRound?a.interviewRound.replace(' Interview',''):''}${(a.interviewRound&&a.interviewType)?' · ':''}${a.interviewType||''}</div>`:''}
     ${a.interviewDate?`<div class="text-[10px] bg-indigo-50 text-indigo-700 rounded-md px-1.5 py-0.5 mb-2 font-semibold inline-flex items-center gap-1"><span class="material-icons-outlined" style="font-size:11px;">event</span>${fmtMonth(a.interviewDate)} ${fmtDay(a.interviewDate)} ${fmtTime(a.interviewTime)}</div>`:''}
     <div class="flex items-center justify-between pt-2 border-t border-slate-100">
       <span onclick="event.stopPropagation();cntCycleKanbanState('${a.id}')" title="${dot[1]} — click to change" class="cursor-pointer flex items-center flex-shrink-0"><span style="width:10px;height:10px;border-radius:50%;background:${dot[0]};display:inline-block;box-shadow:0 0 0 3px ${dot[0]}22;"></span></span>
@@ -1613,7 +1622,7 @@ function renderAnalyticsDashboard(pipeline, filtered) {
     }).join('');
   }
   const screenCount = counts['new'] || 0;
-  const intCount    = (counts['qualified'] || 0) + (counts['scheduled'] || 0);
+  const intCount    = (counts['interview'] || 0) + (counts['qualified'] || 0) + (counts['scheduled'] || 0) + (counts['phone'] || 0);
   const offerCount  = counts['hired'] || 0;
   const onboardCount= counts['onboarding'] || 0;
   const s2i = screenCount > 0 ? Math.round((intCount / (screenCount + intCount)) * 100) + '%' : '—';
@@ -1689,8 +1698,8 @@ function renderAnalyticsDashboard(pipeline, filtered) {
       .filter(a => a.appliedDate)
       .sort((a, b) => b.appliedDate.localeCompare(a.appliedDate))
       .slice(0, 12);
-    const activityColors = {new:'#ef4444',phone:'#f97316',qualified:'#8b5cf6',scheduled:'#3b82f6',exam:'#06b6d4',bgcheck:'#6366f1',hired:'#10b981',onboarding:'#059669',pool:'#f59e0b',rejected:'#94a3b8'};
-    const activityIcons  = {new:'how_to_reg',phone:'phone',qualified:'record_voice_over',scheduled:'groups',exam:'assignment',bgcheck:'fact_check',hired:'verified',onboarding:'badge',pool:'auto_awesome',rejected:'cancel'};
+    const activityColors = {new:'#ef4444',interview:'#8b5cf6',phone:'#8b5cf6',qualified:'#8b5cf6',scheduled:'#8b5cf6',exam:'#06b6d4',bgcheck:'#6366f1',hired:'#10b981',onboarding:'#059669',pool:'#f59e0b',rejected:'#94a3b8'};
+    const activityIcons  = {new:'how_to_reg',interview:'forum',phone:'forum',qualified:'forum',scheduled:'forum',exam:'assignment',bgcheck:'fact_check',hired:'verified',onboarding:'badge',pool:'auto_awesome',rejected:'cancel'};
     anlFeed.innerHTML = feedItems.length ? feedItems.map(a => {
       const acc = ACCOUNTS.find(ac => ac.id === a.account);
       const col = activityColors[a.stage] || '#94a3b8';
@@ -1997,7 +2006,8 @@ function openInterviewModal(id,stageLabel){
   document.getElementById('interview-applicant-name').textContent=app.name+' · '+app.role+' ('+app.account+')';
   document.getElementById('interview-date').value=app.interviewDate||'';
   document.getElementById('interview-time').value=app.interviewTime||'';
-  document.getElementById('interview-type').value=app.interviewType||'Face-to-Face (On-site)';
+  document.getElementById('interview-type').value=app.interviewType||'Phone Interview';
+  { const rd=document.getElementById('interview-round'); if(rd) rd.value=app.interviewRound||'1st Interview'; }
   document.getElementById('interview-interviewer').value=app.interviewInterviewer||'';
   document.getElementById('interview-venue').value=app.interviewVenue||'';
   document.getElementById('interview-modal').classList.remove('hidden');
@@ -2012,11 +2022,14 @@ function handleInterviewSubmit(e){
   const date=document.getElementById('interview-date').value;
   const time=document.getElementById('interview-time').value;
   const type=document.getElementById('interview-type').value;
+  const round=(document.getElementById('interview-round')||{}).value||'1st Interview';
   const interviewer=document.getElementById('interview-interviewer').value;
   const venue=document.getElementById('interview-venue').value;
   const app=findApplicant(id);
   if(app){
-    updateApplicant(id,{interviewDate:date,interviewTime:time,interviewType:type,interviewInterviewer:interviewer,interviewVenue:venue});
+    updateApplicant(id,{interviewDate:date,interviewTime:time,interviewType:type,interviewRound:round,interviewInterviewer:interviewer,interviewVenue:venue});
+    if(window.cntPersistInterview) cntPersistInterview(app,{interview_date:date,interview_time:time,interview_type:type,interview_round:round});
+    if(window.cntLogActivity) cntLogActivity(app,'stage',round+' scheduled — '+type+(date?(' on '+date):''));
     if(pendingStageChange&&pendingStageChange.id===id){
       executeStageChange(id,pendingStageChange.targetStage);
       if(pendingStageChange.onSuccess)pendingStageChange.onSuccess();
@@ -2373,7 +2386,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       id:'web-'+r.id, _web:true, _sid:r.id,
       name:r.name, role:r.role||'General Application',
       account:r.client||'Website', location:r.location||'—',
-      stage:r.stage||'new', phone:r.phone||'', email:r.email||'',
+      stage:normStage(r.stage||'new'), phone:r.phone||'', email:r.email||'',
+      interviewDate:r.interview_date||'', interviewTime:r.interview_time||'', interviewType:r.interview_type||'', interviewRound:r.interview_round||'',
       source:r.source||'Website', salary:'', notes:r.cover_note||'',
       appliedDate:r.applied_date||(r.created_at?String(r.created_at).slice(0,10):''),
       experience:r.experience||'', resumePath:r.resume_url||null,
@@ -3005,8 +3019,9 @@ document.addEventListener('DOMContentLoaded',()=>{
       currentUserEmail = (user && user.email) || ''; currentUserId = (user && user.id) || '';
       const { data, error } = await sb.from('profiles').select('role,full_name,email').eq('id', user.id).maybeSingle();
       if(error){ console.error('profile fetch',error); currentRole='super_admin'; currentUserName=currentUserEmail; return; }  // fetch error → permissive (avoid lockout)
-      if(!data){ currentRole='no_access'; currentUserName=currentUserEmail; return; }   // profile removed → access revoked
+      if(!data){ currentRole='no_access'; currentUserName=currentUserEmail; return; }   // profile removed / not staff → access revoked
       currentRole = data.role || 'recruiter'; currentUserName = data.full_name || data.email || currentUserEmail;
+      if(currentRole==='pending'){ currentRole='no_access'; }   // new sign-up not yet granted a staff role
     }catch(e){ console.error('loadCurrentUser',e); currentRole='super_admin'; }
   }
 
@@ -3447,6 +3462,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const meta=document.getElementById('resume-odoo-meta');
     if(meta){
       const chips=[];
+      if(app.stage==='interview'&&(app.interviewRound||app.interviewType)) chips.push('<span class="badge" style="background:#f3e8ff;color:#6d28d9;"><span class="material-icons-outlined" style="font-size:11px;margin-right:2px;">forum</span>'+_e([app.interviewRound,app.interviewType].filter(Boolean).join(' · '))+'</span>');
       if(app.recruiter) chips.push('<span class="badge" style="background:#f1f5f9;color:#475569;"><span class="material-icons-outlined" style="font-size:11px;margin-right:2px;">person</span>'+_e(app.recruiter)+'</span>');
       if(app.degree) chips.push('<span class="badge" style="background:#eef2ff;color:#4338ca;">'+_e(app.degree)+'</span>');
       if(app.proposed_salary) chips.push('<span class="badge" style="background:#dcfce7;color:#166534;">Offer: '+_e(app.proposed_salary)+'</span>');
@@ -3569,6 +3585,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     cntRenderOfferBox(app);
     if(window.showToast) showToast('Offer details saved','success');
   };
+
+  // Persist interview scheduling fields to Supabase
+  window.cntPersistInterview=function(app,patch){ _persistApp(app,patch); };
 
   // Publish / unpublish a job to the website (status open<->closed)
   window.cntTogglePublish=function(accId,sid,role,location){
