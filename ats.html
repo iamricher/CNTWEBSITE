@@ -1754,7 +1754,7 @@ function renderJobPositions(){
         ${published?`<div style="position:absolute;top:0;right:0;width:104px;height:104px;overflow:hidden;pointer-events:none;border-top-right-radius:12px;"><div style="position:absolute;transform:rotate(45deg);background:#16a34a;color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;text-align:center;width:150px;top:20px;right:-42px;padding:3px 0;box-shadow:0 1px 3px rgba(0,0,0,.25);">PUBLISHED</div></div>`:''}
         <div class="p-4">
           <div class="flex items-start gap-2 mb-1">
-            <button onclick="event.stopPropagation();cntToggleFav('${accId}','${rc(job.role)}','${rc(job.location)}')" title="Mark as favorite" class="flex-shrink-0 mt-0.5 cursor-pointer leading-none"><span class="material-icons${isFav?'':'-outlined'}" style="font-size:17px;color:${isFav?'#f59e0b':'#cbd5e1'};">${isFav?'star':'star_border'}</span></button>
+            <button onclick="event.stopPropagation();cntToggleFav('${accId}','${rc(job.role)}','${rc(job.location)}')" title="Mark as favorite" class="flex-shrink-0 mt-0.5 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:17px;color:${isFav?'#f59e0b':'#cbd5e1'};">${isFav?'star':'star_border'}</span></button>
             <div class="min-w-0 flex-1">
               <h3 class="font-bold text-slate-900 text-[13px] leading-tight group-hover:text-red-800 transition">${job.role}</h3>
               <p class="text-[11px] text-slate-500 mt-0.5">${job.recruiter?job.recruiter:'<span class="text-slate-300">Unassigned recruiter</span>'}</p>
@@ -1769,11 +1769,11 @@ function renderJobPositions(){
             </div>`:''}
           </div>
           <div class="flex items-end justify-between gap-3 mt-3">
-            <button onclick="event.stopPropagation();quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}','new')" class="bg-red-800 hover:bg-red-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition cursor-pointer whitespace-nowrap shadow-sm">${newCount} New Application${newCount===1?'':'s'}</button>
+            <button onclick="event.stopPropagation();quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}',${newCount>0?"'new'":'null'})" class="bg-red-800 hover:bg-red-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition cursor-pointer whitespace-nowrap shadow-sm">${totalApps} Application${totalApps===1?'':'s'}${newCount>0?` · ${newCount} new`:''}</button>
             <div class="text-right leading-tight">
               <div class="text-[12px] font-bold text-slate-700">${toRecruit} To Recruit</div>
-              <div class="text-[11px] text-slate-500 mt-0.5">${totalApps} Application${totalApps===1?'':'s'}</div>
               <div class="text-[11px] mt-0.5 ${interviewCount>0?'text-amber-600 font-semibold':'text-slate-400'}">${interviewCount} In Interview</div>
+              <div class="text-[11px] text-emerald-600 mt-0.5">${hiredCount} Hired</div>
             </div>
           </div>
         </div>
