@@ -271,10 +271,6 @@
           <span class="material-icons-outlined">assignment</span><span>Hiring Requests</span>
           <span class="ml-auto bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 rounded-full" id="nav-badge-req" style="display:none">6</span>
         </div>
-        <div class="sidenav-item" id="nav-applications" onclick="switchView('applications')">
-          <span class="material-icons-outlined">people</span><span>Pipeline</span>
-          <span class="ml-auto bg-red-100 text-red-700 text-[10px] font-bold px-1.5 rounded-full" id="nav-badge-apps" style="display:none">0</span>
-        </div>
         <div class="sidenav-item" id="nav-job" onclick="switchView('job')">
           <span class="material-icons-outlined">work</span><span>Job Positions</span>
         </div>
@@ -417,7 +413,10 @@
     <!-- PIPELINE -->
     <div id="view-applications" class="hidden space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 gap-4">
-        <div><h2 class="text-lg font-bold text-slate-900">Applications Pipeline</h2><p class="text-xs text-slate-500">Full-cycle PH recruitment workflow</p></div>
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('job')" title="Back to Job Positions" class="flex-shrink-0 w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-red-800 hover:border-red-200 flex items-center justify-center cursor-pointer transition"><span class="material-icons-outlined" style="font-size:18px;">arrow_back</span></button>
+          <div><h2 class="text-lg font-bold text-slate-900">Applications Pipeline</h2><p class="text-xs text-slate-500" id="pipeline-context">Full-cycle PH recruitment workflow</p></div>
+        </div>
         <div class="flex items-center gap-2">
           <div class="bg-slate-100 p-0.5 rounded-lg flex items-center border border-slate-200">
             <button onclick="toggleApplicationView('list')" id="btn-view-list" class="px-3 py-1.5 bg-white shadow-sm text-red-800 rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer"><span class="material-icons-outlined" style="font-size:13px;">table_rows</span> List</button>
@@ -1742,36 +1741,48 @@ function renderJobPositions(){
     });
     const accInfo=ACCOUNTS.find(a=>a.id===accId);
     jobs.forEach(job=>{
-      const filled=(accountData[accId]||[]).filter(a=>a.role===job.role&&a.location===job.location&&a.stage!=='pool'&&a.stage!=='rejected').length;
-      const pct=Math.min(100,Math.round((filled/job.needed)*100));
-      const prioColor=job.priority==='urgent'?'bg-red-100 text-red-700':job.priority==='high'?'bg-amber-100 text-amber-700':'bg-slate-100 text-slate-500';
-      const matchReq=hiringRequests.find(r=>r.role===job.role&&r.account===job.account&&r.location===job.location&&(r.status==='Open'||r.status==='Pending'));
-      jc.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition cursor-pointer hover:border-slate-300 group" onclick="quickJump('${job.role}','${job.location}','${job.account}')">
-        <div class="flex justify-between items-start mb-3">
-          <span class="text-[11px] font-bold px-2 py-0.5 rounded-lg text-white" style="background:${accInfo?.color||'#64748b'}">${job.account}</span>
-          <div class="flex items-center gap-1.5">
-            <span class="priority-badge ${prioColor}">${job.priority}</span>
-            ${job._sid?`<button onclick="event.stopPropagation();editJobPosition(${job._sid})" title="Edit position" class="text-slate-300 hover:text-red-700 transition cursor-pointer p-0.5"><span class="material-icons-outlined" style="font-size:15px;">edit</span></button><button onclick="event.stopPropagation();deleteJobPosition(${job._sid})" title="Remove from website" class="text-slate-300 hover:text-red-700 transition cursor-pointer p-0.5"><span class="material-icons-outlined" style="font-size:15px;">delete_outline</span></button>`:''}
+      const appsForJob=(accountData[accId]||[]).filter(a=>a.role===job.role&&a.location===job.location);
+      const newCount=appsForJob.filter(a=>a.stage==='new').length;
+      const totalApps=appsForJob.filter(a=>a.stage!=='pool').length;
+      const hiredCount=appsForJob.filter(a=>a.stage==='hired'||a.stage==='onboarding'||a.deployed_at).length;
+      const interviewCount=appsForJob.filter(a=>a.stage==='interview').length;
+      const toRecruit=Math.max(0,(job.needed||1)-hiredCount);
+      const published=job.status!=='closed';
+      const isFav=job.favorite||job.priority==='urgent';
+      const rc=s=>String(s==null?'':s).replace(/'/g,"\\'");
+      jc.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl hover:shadow-md transition cursor-pointer hover:border-slate-300 group" style="position:relative;" onclick="quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}')">
+        ${published?`<div style="position:absolute;top:0;right:0;width:104px;height:104px;overflow:hidden;pointer-events:none;border-top-right-radius:12px;"><div style="position:absolute;transform:rotate(45deg);background:#16a34a;color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;text-align:center;width:150px;top:20px;right:-42px;padding:3px 0;box-shadow:0 1px 3px rgba(0,0,0,.25);">PUBLISHED</div></div>`:''}
+        <div class="p-4">
+          <div class="flex items-start gap-2 mb-1">
+            <button onclick="event.stopPropagation();cntToggleFav('${accId}','${rc(job.role)}','${rc(job.location)}')" title="Mark as favorite" class="flex-shrink-0 mt-0.5 cursor-pointer leading-none"><span class="material-icons${isFav?'':'-outlined'}" style="font-size:17px;color:${isFav?'#f59e0b':'#cbd5e1'};">${isFav?'star':'star_border'}</span></button>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-bold text-slate-900 text-[13px] leading-tight group-hover:text-red-800 transition">${job.role}</h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">${job.recruiter?job.recruiter:'<span class="text-slate-300">Unassigned recruiter</span>'}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">business</span>${job.account} <span class="text-slate-300">(${job.location})</span></p>
+            </div>
+            ${job._sid?`<div style="position:relative;" class="flex-shrink-0 mr-6">
+              <button onclick="event.stopPropagation();var m=this.nextElementSibling;m.style.display=m.style.display==='block'?'none':'block';" class="text-slate-300 hover:text-slate-600 cursor-pointer p-0.5 leading-none"><span class="material-icons-outlined" style="font-size:17px;">more_vert</span></button>
+              <div style="display:none;position:absolute;right:0;top:24px;z-index:30;background:#fff;border:1px solid #e2e8f0;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:130px;overflow:hidden;">
+                <button onclick="event.stopPropagation();this.parentElement.style.display='none';editJobPosition(${job._sid})" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-2"><span class="material-icons-outlined" style="font-size:14px;">edit</span>Edit</button>
+                <button onclick="event.stopPropagation();this.parentElement.style.display='none';deleteJobPosition(${job._sid})" class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 cursor-pointer flex items-center gap-2"><span class="material-icons-outlined" style="font-size:14px;">delete_outline</span>Remove</button>
+              </div>
+            </div>`:''}
+          </div>
+          <div class="flex items-end justify-between gap-3 mt-3">
+            <button onclick="event.stopPropagation();quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}','new')" class="bg-red-800 hover:bg-red-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition cursor-pointer whitespace-nowrap shadow-sm">${newCount} New Application${newCount===1?'':'s'}</button>
+            <div class="text-right leading-tight">
+              <div class="text-[12px] font-bold text-slate-700">${toRecruit} To Recruit</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${totalApps} Application${totalApps===1?'':'s'}</div>
+              <div class="text-[11px] mt-0.5 ${interviewCount>0?'text-amber-600 font-semibold':'text-slate-400'}">${interviewCount} In Interview</div>
+            </div>
           </div>
         </div>
-        <h3 class="font-bold text-slate-900 text-sm mb-0.5 group-hover:text-red-800 transition">${job.role}</h3>
-        <p class="text-xs text-slate-400 mb-1 flex items-center gap-0.5"><span class="material-icons-outlined" style="font-size:12px;">location_on</span>${job.location}${job.employment_type?` · ${job.employment_type}`:''}</p>
-        <p class="text-xs text-slate-500 mb-2 font-semibold">${job.salary||'Competitive'}${job.recruiter?` <span class="text-slate-300 font-normal">·</span> <span class="text-[10px] text-slate-400 font-normal">${job.recruiter}</span>`:''}</p>
-        ${matchReq?`<div class="mb-2 flex items-center gap-1.5">${getCountdownChip(matchReq.deadline)}<span class="text-[10px] text-slate-400">to fill</span></div>`:''}
-        <div class="mb-3">
-          <div class="flex justify-between text-[11px] mb-1"><span class="text-slate-500">Fill rate</span><span class="font-bold text-slate-700">${filled} / ${job.needed} HC</span></div>
-          <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full transition-all" style="width:${pct}%;background:${pct>=100?'#10b981':accInfo?.color||'#64748b'}"></div></div>
-          <div class="text-[10px] text-slate-400 mt-0.5">${pct}% filled</div>
-        </div>
-        <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
-            <button onclick="cntTogglePublish('${accId}','${job._sid||''}','${(job.role||'').replace(/'/g,"\\'")}','${(job.location||'').replace(/'/g,"\\'")}')" title="${job.status==='closed'?'Not published — click to publish':'Published to website — click to unpublish'}" class="flex items-center gap-1 cursor-pointer">
-              <span style="width:30px;height:16px;border-radius:99px;background:${job.status==='closed'?'#cbd5e1':'#10b981'};position:relative;display:inline-block;transition:.15s;"><span style="position:absolute;top:2px;left:${job.status==='closed'?'2px':'16px'};width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s;"></span></span>
-              <span class="text-[10px] font-bold ${job.status==='closed'?'text-slate-400':'text-emerald-600'}">${job.status==='closed'?'Not Published':'Published'}</span>
-            </button>
-            ${(job.status!=='closed'&&job._sid)?`<a href="careers.html?job=${job._sid}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-[10px] text-slate-400 hover:text-red-700 flex items-center gap-0.5" title="Open public job page">Job Page ↗</a>`:''}
-          </div>
-          <span class="text-[11px] text-red-700 font-bold">View Pipeline →</span>
+        <div class="px-4 py-2.5 border-t border-slate-100 flex items-center justify-between gap-2" onclick="event.stopPropagation()">
+          <button onclick="cntTogglePublish('${accId}','${job._sid||''}','${rc(job.role)}','${rc(job.location)}')" title="${published?'Published — click to unpublish':'Not published — click to publish'}" class="flex items-center gap-1.5 cursor-pointer">
+            <span style="width:30px;height:16px;border-radius:99px;background:${published?'#16a34a':'#cbd5e1'};position:relative;display:inline-block;transition:.15s;"><span style="position:absolute;top:2px;left:${published?'16px':'2px'};width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s;"></span></span>
+            <span class="text-[11px] font-semibold ${published?'text-emerald-700':'text-slate-400'}">${published?'Published':'Not Published'}</span>
+          </button>
+          ${job._sid?`<a href="careers.html?job=${job._sid}" target="_blank" rel="noopener" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1" title="Open public job page"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Job Page</a>`:'<span></span>'}
         </div>
       </div>`;
       rendered++;
@@ -1930,14 +1941,21 @@ function fmtMonth(d){if(!d)return 'TBD';return new Date(d+'T00:00').toLocaleStri
 function fmtDay(d){if(!d)return '--';return new Date(d+'T00:00').getDate().toString().padStart(2,'0');}
 function fmtTime(t){if(!t)return'TBD';const[h,m]=t.split(':');const hr=parseInt(h);const ap=hr>=12?'PM':'AM';return`${hr%12||12}:${m} ${ap}`;}
 
-function quickJump(role,location,account){
+function quickJump(role,location,account,stage){
   selectClient(account);
   document.getElementById('filter-location').value=location;
   document.getElementById('filter-role').value=role;
-  document.getElementById('filter-stage').value='all';
+  document.getElementById('filter-stage').value=stage||'all';
+  window.cntPipelineJob={role,location,account};
+  const ctx=document.getElementById('pipeline-context');
+  if(ctx) ctx.textContent=role+' · '+account+' · '+location;
   switchView('applications');
   toggleApplicationView('kanban');
-  showToast(`Viewing: ${role} · ${account} · ${location}`,'info');
+}
+// Favorite (star) toggle on a job card — client-side highlight
+function cntToggleFav(accId,role,location){
+  const job=(jobDatabase[accId]||[]).find(j=>j.role===role&&j.location===location);
+  if(job){ job.favorite=!job.favorite; renderJobPositions(); }
 }
 function quickJumpStage(stage){
   document.getElementById('filter-role').value='all';
