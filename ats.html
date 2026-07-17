@@ -244,71 +244,82 @@
           <button onclick="exportCSV()" class="flex items-center gap-1 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer">
             <span class="material-icons-outlined" style="font-size:14px;">download</span> Export
           </button>
+          <button onclick="window.print()" class="flex items-center gap-1 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer no-print">
+            <span class="material-icons-outlined" style="font-size:14px;">print</span> PDF
+          </button>
         </div>
       </div>
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        <div class="stat-card" onclick="quickJumpStage('new')">
-          <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Initial Screening</p><h3 class="text-2xl font-extrabold text-slate-900" id="stat-new">0</h3><p class="text-[10px] text-slate-400 mt-0.5">applicants</p></div>
-          <div class="stat-icon bg-red-50"><span class="material-icons-outlined text-red-600" style="font-size:20px;">how_to_reg</span></div>
-        </div>
-        <div class="stat-card" onclick="quickJumpStage('interview')">
-          <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">For Interview</p><h3 class="text-2xl font-extrabold text-slate-900" id="stat-interview">0</h3><p class="text-[10px] text-slate-400 mt-0.5">candidates</p></div>
-          <div class="stat-icon bg-indigo-50"><span class="material-icons-outlined text-indigo-500" style="font-size:20px;">record_voice_over</span></div>
-        </div>
-        <div class="stat-card" onclick="quickJumpStage('exam')">
-          <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Exam / BGC</p><h3 class="text-2xl font-extrabold text-slate-900" id="stat-exam">0</h3><p class="text-[10px] text-slate-400 mt-0.5">processing</p></div>
-          <div class="stat-icon bg-amber-50"><span class="material-icons-outlined text-amber-600" style="font-size:20px;">assignment_ind</span></div>
-        </div>
-        <div class="stat-card" onclick="quickJumpStage('hired')">
-          <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Job Offer / Hired</p><h3 class="text-2xl font-extrabold text-slate-900" id="stat-hired">0</h3><p class="text-[10px] text-slate-400 mt-0.5">near close</p></div>
-          <div class="stat-icon bg-emerald-50"><span class="material-icons-outlined text-emerald-600" style="font-size:20px;">verified</span></div>
-        </div>
+      <!-- Dynamic filters -->
+      <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center gap-2 flex-wrap mb-4 no-print" id="dash-filter-bar">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-0.5"><span class="material-icons-outlined" style="font-size:13px;">filter_list</span>Filter</span>
+        <select id="dash-f-client"   onchange="cntRenderDashboard()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:160px;"><option value="all">All Clients</option></select>
+        <select id="dash-f-recruiter" onchange="cntRenderDashboard()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:160px;"><option value="all">All Recruiters</option></select>
+        <select id="dash-f-position" onchange="cntRenderDashboard()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:170px;"><option value="all">All Positions</option></select>
+        <select id="dash-f-range"    onchange="cntRenderDashboard()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365" selected>Last 365 days</option>
+          <option value="all">All time</option>
+        </select>
+        <button onclick="cntDashClear()" class="ml-auto text-[11px] font-semibold text-slate-500 hover:text-red-700 border border-slate-200 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center gap-1 whitespace-nowrap"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Clear</button>
       </div>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div><h4 class="font-bold text-slate-800 text-sm">Recruitment Pipeline Funnel</h4><p class="text-[11px] text-slate-400 mt-0.5">CNT full-cycle recruitment stages</p></div>
+
+      <!-- 6 counters -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4" id="dash-kpis"></div>
+
+      <!-- 4 charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+            <h4 class="font-bold text-slate-800 text-sm">Applications by Job Position</h4>
+            <div class="flex items-center gap-2.5 text-[9px] text-slate-500">
+              <span class="flex items-center gap-1"><span style="width:8px;height:8px;border-radius:2px;background:#1d4ed8;display:inline-block;"></span>Ongoing</span>
+              <span class="flex items-center gap-1"><span style="width:8px;height:8px;border-radius:2px;background:#16a34a;display:inline-block;"></span>Hired</span>
+              <span class="flex items-center gap-1"><span style="width:8px;height:8px;border-radius:2px;background:#dc2626;display:inline-block;"></span>Refused</span>
+            </div>
+          </div>
+          <div class="p-5" id="chart-by-position"></div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100"><h4 class="font-bold text-slate-800 text-sm">Applications by Client</h4></div>
+          <div class="p-5" id="chart-by-client"></div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+            <div><h4 class="font-bold text-slate-800 text-sm">Applications by Stage</h4><p class="text-[11px] text-slate-400 mt-0.5">Click a stage to open it in the list</p></div>
             <button onclick="cntOpenPipelineList('all')" class="text-xs font-semibold text-red-700 hover:text-red-900 cursor-pointer">View All →</button>
           </div>
-          <div class="p-5" id="funnel-container"></div>
-          <div class="border-t border-slate-100 px-5 pb-5">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3 mt-4">Active Positions by Client</p>
-            <table class="w-full text-left text-xs">
-              <thead><tr class="text-slate-400 border-b border-slate-100"><th class="pb-2 font-semibold">Position</th><th class="pb-2 font-semibold">Client</th><th class="pb-2 font-semibold">Location</th><th class="pb-2 font-semibold text-center">Pipeline</th></tr></thead>
-              <tbody class="divide-y divide-slate-50 text-slate-700" id="dashboard-jobs-table"></tbody>
-            </table>
-          </div>
+          <div class="p-5" id="chart-by-stage"></div>
         </div>
-        <div class="flex flex-col gap-4">
-          <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden flex-1">
-            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h4 class="font-bold text-slate-800 text-sm">Upcoming Interviews</h4>
-              <span class="bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-full" id="dashboard-interview-count">0</span>
-            </div>
-            <div class="p-3 space-y-2" id="dashboard-interview-list"></div>
-            <div class="px-4 py-2.5 border-t border-slate-100 bg-slate-50 text-center">
-              <button onclick="switchView('interviews')" class="text-xs font-semibold text-slate-500 hover:text-red-700 transition cursor-pointer">Manage Schedule</button>
-            </div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h4 class="font-bold text-slate-800 text-sm">Pending Requests</h4>
-              <button onclick="switchView('request')" class="text-[10px] text-red-700 font-semibold cursor-pointer">View All →</button>
-            </div>
-            <div class="p-4 space-y-2" id="pending-requests-mini"></div>
-          </div>
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100"><h4 class="font-bold text-slate-800 text-sm">Applications by Employment Type</h4></div>
+          <div class="p-5" id="chart-by-type"></div>
         </div>
       </div>
+
+      <!-- All candidate list -->
       <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div><h4 class="font-bold text-slate-800 text-sm">Client Account Health</h4><p class="text-[11px] text-slate-400 mt-0.5">Pipeline depth per client — click to drill down</p></div>
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-[10px] text-slate-500">Healthy</span>
-            <span class="w-2 h-2 rounded-full bg-amber-400 ml-2"></span><span class="text-[10px] text-slate-500">Needs Attention</span>
-            <span class="w-2 h-2 rounded-full bg-red-400 ml-2"></span><span class="text-[10px] text-slate-500">Critical</span>
-          </div>
+          <div><h4 class="font-bold text-slate-800 text-sm">All Candidate List</h4><p class="text-[11px] text-slate-400 mt-0.5">Matching the filters above</p></div>
+          <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full" id="dash-cand-count">0</span>
         </div>
-        <div class="p-4 grid grid-cols-2 lg:grid-cols-4 gap-3" id="account-health-grid"></div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-2.5 font-semibold">Candidate</th>
+                <th class="px-4 py-2.5 font-semibold">Position</th>
+                <th class="px-4 py-2.5 font-semibold">Client</th>
+                <th class="px-4 py-2.5 font-semibold">Location</th>
+                <th class="px-4 py-2.5 font-semibold">Recruiter</th>
+                <th class="px-4 py-2.5 font-semibold">Stage</th>
+                <th class="px-4 py-2.5 font-semibold">Applied</th>
+                <th class="px-4 py-2.5 font-semibold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50" id="dash-candidate-list"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -1405,10 +1416,11 @@ function renderAll(){
   setNavBadge('nav-badge-req', (typeof hiringRequests!=='undefined')?hiringRequests.filter(r=>r.status==='Open'||r.status==='Pending').length:0);
   const intCount=(counts.interview||0)+(counts.phone||0)+(counts.qualified||0)+(counts.scheduled||0);
   const examCount=(counts.exam||0)+(counts.bgcheck||0);
-  document.getElementById('stat-new').textContent=counts.new||0;
-  document.getElementById('stat-interview').textContent=intCount;
-  document.getElementById('stat-exam').textContent=examCount;
-  document.getElementById('stat-hired').textContent=(counts.hired||0)+(counts.onboarding||0);
+  const setStat=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
+  setStat('stat-new',counts.new||0);
+  setStat('stat-interview',intCount);
+  setStat('stat-exam',examCount);
+  setStat('stat-hired',(counts.hired||0)+(counts.onboarding||0));
   const dashTitle=document.getElementById('dash-title');
   const dashSub=document.getElementById('dash-subtitle');
   if(dashTitle){
@@ -3034,10 +3046,12 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'<div style="font-size:22px;font-weight:800;color:'+(color||'#0f172a')+';margin-top:3px;line-height:1.1;">'+value+'</div>'
       +(sub?'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">'+sub+'</div>':'')+'</div>';
   }
+  // MRF operations KPIs — live on the Hiring Requests view (the dashboard has
+  // its own recruitment counters), so the two don't compete.
   function renderKPIs(){
-    const dash=document.getElementById('view-dashboard'); if(!dash) return;
+    const host=document.getElementById('view-request'); if(!host) return;
     let panel=document.getElementById('cnt-kpi-panel');
-    if(!panel){ panel=document.createElement('div'); panel.id='cnt-kpi-panel'; panel.style.cssText='margin-bottom:20px;'; dash.insertBefore(panel, dash.firstChild); }
+    if(!panel){ panel=document.createElement('div'); panel.id='cnt-kpi-panel'; panel.style.cssText='margin-bottom:16px;'; host.insertBefore(panel, host.children[1]||null); }
     const apps=(typeof getAllApplicants==='function')?getAllApplicants():[];
     const hr=(typeof hiringRequests!=='undefined')?hiringRequests:[];
     const today=new Date(); today.setHours(0,0,0,0);
@@ -4025,6 +4039,184 @@ document.addEventListener('DOMContentLoaded',()=>{
   if (typeof renderAll === 'function'){
     const _origRA_set = renderAll;
     renderAll = function(){ _origRA_set(); try{ renderSettings(); }catch(e){ console.warn('settings',e); } };
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  RECRUITMENT DASHBOARD  (dev_hr_recruitment_dashboard layout)
+  //  6 counters · 4 charts · dynamic filters · all-candidate list
+  // ══════════════════════════════════════════════════════════════
+  const _dv=id=>{ const el=document.getElementById(id); return el?el.value:'all'; };
+
+  function _dashJobs(){
+    const client=_dv('dash-f-client'), pos=_dv('dash-f-position');
+    const out=[];
+    Object.keys(jobDatabase||{}).forEach(k=>(jobDatabase[k]||[]).forEach(j=>{
+      const acc=j.account||k;
+      if(client!=='all' && acc!==client) return;
+      if(pos!=='all' && j.role!==pos) return;
+      out.push(Object.assign({_acc:acc},j));
+    }));
+    return out;
+  }
+  function _dashApps(){
+    const client=_dv('dash-f-client'), rec=_dv('dash-f-recruiter'), pos=_dv('dash-f-position'), range=_dv('dash-f-range');
+    const cutoff = (range==='all') ? null : (Date.now() - parseInt(range,10)*86400000);
+    return getAllApplicants().filter(a=>{
+      if(a.stage==='pool') return false;
+      if(client!=='all' && a.account!==client) return false;
+      if(pos!=='all' && a.role!==pos) return false;
+      if(rec!=='all' && (a.recruiter||'Unassigned')!==rec) return false;
+      if(cutoff){ const t=a.appliedDate?new Date(a.appliedDate+'T00:00').getTime():0; if(!t || t<cutoff) return false; }
+      return true;
+    });
+  }
+  // employment type comes from the matching job posting
+  function _empType(a){
+    const arr=jobDatabase[a.account]||[];
+    const j=arr.find(x=>x.role===a.role && x.location===a.location) || arr.find(x=>x.role===a.role);
+    return (j&&j.employment_type)||'Unspecified';
+  }
+
+  function _dashFillFilters(){
+    const apps=getAllApplicants();
+    const fill=(id,vals,allLabel)=>{
+      const sel=document.getElementById(id); if(!sel) return;
+      const cur=sel.value;
+      sel.innerHTML='<option value="all">'+allLabel+'</option>'+vals.map(v=>'<option value="'+_e(v)+'">'+_e(v)+'</option>').join('');
+      if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+    };
+    fill('dash-f-client', _taxNames('client'), 'All Clients');
+    fill('dash-f-position', _taxNames('position'), 'All Positions');
+    const recs=[...new Set(apps.map(a=>a.recruiter||'Unassigned'))].sort();
+    fill('dash-f-recruiter', recs, 'All Recruiters');
+  }
+
+  function _kpiTile(label,val,sub,color,icon){
+    return '<div class="bg-white border border-slate-200 rounded-xl p-3.5">'
+      +'<div class="flex items-start justify-between gap-2">'
+      +'<div style="min-width:0;"><p class="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider leading-tight">'+label+'</p>'
+      +'<h3 class="text-2xl font-extrabold mt-1" style="color:'+color+'">'+val+'</h3>'
+      +'<p class="text-[9.5px] text-slate-400 mt-0.5">'+sub+'</p></div>'
+      +'<span class="material-icons-outlined" style="font-size:17px;color:'+color+';opacity:.35;flex:none;">'+icon+'</span>'
+      +'</div></div>';
+  }
+  function _hbar(label,n,max,color,onclick,extra){
+    const w=n>0?Math.max(Math.round(n/max*100),5):0;
+    return '<div class="flex items-center gap-3 mb-2.5 '+(onclick?'cursor-pointer group':'')+'"'+(onclick?' onclick="'+onclick+'"':'')+'>'
+      +'<div class="text-[10px] font-bold text-slate-500 '+(onclick?'group-hover:text-red-700':'')+' uppercase tracking-wider shrink-0 truncate" style="width:104px;" title="'+_e(label)+'">'+_e(label)+'</div>'
+      +'<div class="flex-1 h-5 bg-slate-100 rounded-md overflow-hidden"><div style="width:'+w+'%;background:'+color+';height:100%;border-radius:6px;transition:width .6s ease;"></div></div>'
+      +'<div class="text-[11px] font-bold text-slate-700 w-7 text-right shrink-0">'+n+'</div>'
+      +(extra?'<div class="text-[10px] text-slate-400 w-9 text-right shrink-0">'+extra+'</div>':'')
+      +'</div>';
+  }
+  function _emptyChart(msg){ return '<p class="text-[11px] text-slate-400 text-center py-8">'+msg+'</p>'; }
+
+  window.cntDashClear=function(){
+    ['dash-f-client','dash-f-recruiter','dash-f-position'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
+    const r=document.getElementById('dash-f-range'); if(r) r.value='365';
+    cntRenderDashboard();
+  };
+
+  window.cntRenderDashboard=function(){
+    if(!document.getElementById('dash-kpis')) return;
+    _dashFillFilters();
+    const apps=_dashApps(), jobs=_dashJobs();
+    const openJobs=jobs.filter(j=>j.status!=='closed');
+    const vacancy=openJobs.reduce((s,j)=>s+(j.needed||1),0);
+    const total=apps.length;
+    const hired=apps.filter(a=>_outcome(a)==='hired').length;
+    const refused=apps.filter(a=>_outcome(a)==='refused').length;
+    const review=total-hired-refused;
+    const conv=total?Math.round(hired/total*100):0;
+
+    // ── 6 counters ──
+    document.getElementById('dash-kpis').innerHTML=
+       _kpiTile('Open Job Positions',openJobs.length,'published','#0f172a','work')
+      +_kpiTile('Total Vacancy',vacancy,'headcount to fill','#b45309','group_add')
+      +_kpiTile('Applications Received',total,'from candidates','#1d4ed8','description')
+      +_kpiTile('Application in Review',review,'still ongoing','#7c3aed','pending_actions')
+      +_kpiTile('Hired Candidates',hired,'offer / onboarding','#166534','verified')
+      +_kpiTile('Conversion Ratio',conv+'%','hired ÷ applications','#7f1d1d','trending_up');
+
+    // ── Chart 1: by job position × status (stacked) ──
+    const byPos={};
+    apps.forEach(a=>{ const r=a.role||'—'; (byPos[r]=byPos[r]||{t:0,h:0,rf:0,ip:0}); byPos[r].t++;
+      const o=_outcome(a); byPos[r][o==='hired'?'h':o==='refused'?'rf':'ip']++; });
+    const posRows=Object.entries(byPos).sort((x,y)=>y[1].t-x[1].t).slice(0,8);
+    const posMax=Math.max(1,...posRows.map(r=>r[1].t));
+    document.getElementById('chart-by-position').innerHTML = posRows.length?posRows.map(([role,c])=>{
+      const w=Math.max(Math.round(c.t/posMax*100),5);
+      const seg=(n,col)=>n?'<div style="width:'+(c.t?n/c.t*100:0)+'%;background:'+col+';height:100%;" title="'+n+'"></div>':'';
+      return '<div class="flex items-center gap-3 mb-2.5">'
+        +'<div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 truncate" style="width:104px;" title="'+_e(role)+'">'+_e(role)+'</div>'
+        +'<div class="flex-1 h-5 bg-slate-100 rounded-md overflow-hidden"><div style="width:'+w+'%;height:100%;display:flex;border-radius:6px;overflow:hidden;">'
+        +seg(c.ip,'#1d4ed8')+seg(c.h,'#16a34a')+seg(c.rf,'#dc2626')+'</div></div>'
+        +'<div class="text-[11px] font-bold text-slate-700 w-7 text-right shrink-0">'+c.t+'</div></div>';
+    }).join(''):_emptyChart('No applications for these filters.');
+
+    // ── Chart 2: by client ──
+    const byClient={};
+    apps.forEach(a=>{ const c=a.account||'—'; byClient[c]=(byClient[c]||0)+1; });
+    const clRows=Object.entries(byClient).sort((x,y)=>y[1]-x[1]);
+    const clMax=Math.max(1,...clRows.map(r=>r[1]));
+    document.getElementById('chart-by-client').innerHTML = clRows.length?clRows.map(([c,n])=>{
+      const col=(ACCOUNTS.find(a=>a.id===c)||{}).color||'#64748b';
+      return _hbar(c,n,clMax,col,null,Math.round(n/total*100)+'%');
+    }).join(''):_emptyChart('No applications for these filters.');
+
+    // ── Chart 3: state-wise (by stage) ──
+    const byStage={}; PIPELINE_STAGES.forEach(s=>byStage[s.key]=0);
+    apps.forEach(a=>{ if(byStage[a.stage]!==undefined) byStage[a.stage]++; });
+    const stMax=Math.max(1,...Object.values(byStage));
+    document.getElementById('chart-by-stage').innerHTML=PIPELINE_STAGES.map(s=>
+      _hbar(s.short,byStage[s.key]||0,stMax,s.color,"cntOpenPipelineList('"+s.key+"')",total?Math.round((byStage[s.key]||0)/total*100)+'%':'0%')
+    ).join('');
+
+    // ── Chart 4: by employment (contract) type ──
+    const byType={};
+    apps.forEach(a=>{ const t=_empType(a); byType[t]=(byType[t]||0)+1; });
+    const tyRows=Object.entries(byType).sort((x,y)=>y[1]-x[1]);
+    const tyMax=Math.max(1,...tyRows.map(r=>r[1]));
+    const TY_COLORS=['#4338ca','#0f766e','#b45309','#be185d','#0369a1','#64748b'];
+    document.getElementById('chart-by-type').innerHTML = tyRows.length?tyRows.map(([t,n],i)=>
+      _hbar(t,n,tyMax,TY_COLORS[i%TY_COLORS.length],null,Math.round(n/total*100)+'%')
+    ).join(''):_emptyChart('No applications for these filters.');
+
+    // ── All candidate list ──
+    const cnt=document.getElementById('dash-cand-count'); if(cnt) cnt.textContent=apps.length;
+    const tb=document.getElementById('dash-candidate-list');
+    if(tb){
+      const rows=apps.slice().sort((a,b)=>String(b.appliedDate||'').localeCompare(String(a.appliedDate||''))).slice(0,50);
+      tb.innerHTML=rows.length?rows.map(a=>{
+        const col=(ACCOUNTS.find(x=>x.id===a.account)||{}).color||'#64748b';
+        return '<tr class="hover:bg-slate-50">'
+          +'<td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal(\''+a.id+'\')">'+_e(a.name)+'</td>'
+          +'<td class="px-4 py-2.5 text-xs text-slate-600">'+_e(a.role||'—')+'</td>'
+          +'<td class="px-4 py-2.5"><span class="badge" style="background:'+col+'18;color:'+col+';">'+_e(a.account||'—')+'</span></td>'
+          +'<td class="px-4 py-2.5 text-xs text-slate-400">'+_e(a.location||'—')+'</td>'
+          +'<td class="px-4 py-2.5 text-xs text-slate-500">'+_e(a.recruiter||'—')+'</td>'
+          +'<td class="px-4 py-2.5"><span class="badge border '+getStageBadge(a.stage)+'">'+_e(getStageName(a.stage))+'</span></td>'
+          +'<td class="px-4 py-2.5 text-xs text-slate-400">'+_e(a.appliedDate||'—')+'</td>'
+          +'<td class="px-4 py-2.5 text-right whitespace-nowrap">'
+            +'<button onclick="triggerResumeModal(\''+a.id+'\')" class="text-red-700 hover:text-red-900 text-[11px] font-bold cursor-pointer mr-2">View</button>'
+            +(a.resumePath?'<button onclick="cntDownloadCV(\''+a.id+'\')" class="text-slate-500 hover:text-slate-800 text-[11px] font-medium cursor-pointer">CV</button>':'<span class="text-[11px] text-slate-300">No CV</span>')
+          +'</td></tr>';
+      }).join(''):'<tr><td colspan="8" class="px-4 py-10 text-center text-slate-400 text-xs">No candidates match these filters.</td></tr>';
+    }
+  };
+
+  // Download a candidate's CV from the private resumes bucket
+  window.cntDownloadCV=async function(id){
+    const app=findApplicant(id); if(!app||!app.resumePath) return;
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const { data, error } = await sb.storage.from('resumes').createSignedUrl(app.resumePath, 120);
+    if(error||!data){ if(window.showToast) showToast('Could not open CV: '+((error&&error.message)||''),'error'); return; }
+    window.open(data.signedUrl,'_blank','noopener');
+  };
+
+  if (typeof renderAll === 'function'){
+    const _origRA_dash = renderAll;
+    renderAll = function(){ _origRA_dash(); try{ cntRenderDashboard(); }catch(e){ console.warn('dashboard',e); } };
   }
 
   // Bootstrap — called by the app's DOMContentLoaded handler
