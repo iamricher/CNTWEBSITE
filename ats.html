@@ -3656,9 +3656,22 @@ document.addEventListener('DOMContentLoaded',()=>{
     const body=(document.getElementById('cnt-refuse-body')||{}).value||'';
     const app=findApplicant(id);
     _refuse(id, reason);
-    if(wantEmail && app){
-      cntLogActivity(app,'email','Refusal email drafted: '+subj);
-      window.location.href='mailto:'+encodeURIComponent(app.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+    if(wantEmail && app && app.email){
+      // Try a real send; fall back to the mail app if email isn't configured yet
+      (async()=>{
+        try{
+          const { data, error } = await sb.functions.invoke('send-email',{
+            body:{ to:app.email, subject:subj, text:body, kind:'refusal', applicant_ref:String(app._sid||app.id) }
+          });
+          if(error || (data&&data.error)) throw new Error((data&&data.error)||error.message);
+          cntLogActivity(app,'email','Refusal email sent to '+app.email);
+          if(window.showToast) showToast('Refusal email sent to '+app.email,'success');
+        }catch(e){
+          console.warn('refusal email fell back to mail app:',e.message);
+          cntLogActivity(app,'email','Refusal email drafted: '+subj);
+          window.location.href='mailto:'+encodeURIComponent(app.email)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+        }
+      })();
     }
   };
   // Back-compat (kanban drag → refuse): open the dialog
@@ -3734,9 +3747,10 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">To</label><input id="cnt-mail-to" value="'+_e(app.email||'')+'" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
       +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Subject</label><input id="cnt-mail-subj" value="'+_e(subject)+'" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
       +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Message</label><textarea id="cnt-mail-body" rows="9" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none leading-relaxed">'+_e(body)+'</textarea></div>'
-      +'<div class="flex items-center justify-between pt-1"><span class="text-[10px] text-slate-400">Nothing is sent automatically — copy it or open your mail app.</span>'
+      +'<div class="flex items-center justify-between pt-1 gap-2 flex-wrap"><span class="text-[10px] text-slate-400" id="cnt-mail-hint">Send goes out from CNT. Nothing is sent until you press Send.</span>'
       +'<div class="flex gap-2"><button onclick="cntCopyEmail()" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">content_copy</span>Copy</button>'
-      +'<button onclick="cntOpenMailApp(\''+id+'\')" class="text-xs font-semibold text-white bg-indigo-600 rounded-lg px-3 py-2 hover:bg-indigo-700 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Open in mail app</button></div></div>'
+      +'<button onclick="cntOpenMailApp(\''+id+'\')" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Mail app</button>'
+      +'<button id="cnt-mail-send" onclick="cntSendEmail(\''+id+'\')" class="text-xs font-semibold text-white bg-indigo-600 rounded-lg px-3 py-2 hover:bg-indigo-700 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">send</span>Send</button></div></div>'
       +'</div></div>';
     m.classList.remove('hidden');
   };
@@ -3750,6 +3764,41 @@ document.addEventListener('DOMContentLoaded',()=>{
     window.location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
     const app=findApplicant(id); if(app) cntLogActivity(app,'email','Email drafted: '+subj);
     const m=document.getElementById('cnt-email-modal'); if(m) m.classList.add('hidden');
+  };
+
+  // Real send, via the send-email Edge Function (staff-gated server-side)
+  window.cntSendEmail = async function(id){
+    const to=(document.getElementById('cnt-mail-to')||{}).value||'';
+    const subject=(document.getElementById('cnt-mail-subj')||{}).value||'';
+    const text=(document.getElementById('cnt-mail-body')||{}).value||'';
+    const hint=document.getElementById('cnt-mail-hint');
+    const btn=document.getElementById('cnt-mail-send');
+    if(!to.trim()){ if(window.showToast) showToast('No recipient address','error'); return; }
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const app=findApplicant(id);
+    if(!confirm('Send this email to '+to+'?\n\nSubject: '+subject)) return;
+    if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
+    try{
+      const { data, error } = await sb.functions.invoke('send-email',{
+        body:{ to, subject, text, kind:(app?getStageName(app.stage):'general'), applicant_ref:String((app&&(app._sid||app.id))||'') }
+      });
+      // supabase-js surfaces non-2xx as error; dig out the server's message
+      if(error){
+        let msg=error.message||'Send failed';
+        try{ const ctx=error.context&&await error.context.json(); if(ctx&&ctx.error) msg=ctx.error+(ctx.hint?(' — '+ctx.hint):''); }catch(_){}
+        throw new Error(msg);
+      }
+      if(data && data.error) throw new Error(data.error);
+      if(app) cntLogActivity(app,'email','Email sent to '+to+': '+subject);
+      if(window.showToast) showToast('Email sent to '+to,'success');
+      const m=document.getElementById('cnt-email-modal'); if(m) m.classList.add('hidden');
+    }catch(e){
+      console.error('send-email',e);
+      if(hint){ hint.textContent=e.message; hint.className='text-[10px] text-red-600 font-semibold'; }
+      if(window.showToast) showToast('Could not send: '+e.message,'error');
+    }finally{
+      if(btn){ btn.disabled=false; btn.innerHTML='<span class="material-icons-outlined" style="font-size:13px;">send</span>Send'; }
+    }
   };
 
   // ══════════════════════════════════════════════════════════════
