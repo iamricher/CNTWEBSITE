@@ -53,6 +53,16 @@ create table if not exists public.profiles (
   created_at timestamptz default now()
 );
 
+-- Master data managed by super admin (feeds every dropdown / facet)
+create table if not exists public.taxonomy (
+  id         bigint generated always as identity primary key,
+  kind       text not null check (kind in ('client','position','location')),
+  name       text not null,
+  color      text,                             -- client accent colour
+  created_at timestamptz default now(),
+  unique (kind, name)
+);
+
 -- Tamper-evident activity log (append-only via RLS below)
 create table if not exists public.audit_log (
   id          bigint generated always as identity primary key,
@@ -157,10 +167,11 @@ alter table public.applications enable row level security;
 alter table public.jobs         enable row level security;
 alter table public.profiles     enable row level security;
 alter table public.audit_log    enable row level security;
+alter table public.taxonomy     enable row level security;
 
 do $wipe$ declare p record; begin
   for p in select policyname, tablename from pg_policies
-           where schemaname='public' and tablename in ('applications','jobs','profiles','audit_log') loop
+           where schemaname='public' and tablename in ('applications','jobs','profiles','audit_log','taxonomy') loop
     execute format('drop policy if exists %I on public.%I', p.policyname, p.tablename);
   end loop;
 end $wipe$;
@@ -186,6 +197,10 @@ create policy "profiles delete mgr" on public.profiles for delete to authenticat
 create policy "audit insert staff" on public.audit_log for insert to authenticated with check (public.cnt_is_staff());
 create policy "audit read staff"   on public.audit_log for select to authenticated using (public.cnt_is_staff());
 
+-- Taxonomy (master data): staff read; only managers/super admin may change
+create policy "taxonomy read staff" on public.taxonomy for select to authenticated using (public.cnt_is_staff());
+create policy "taxonomy write mgr"  on public.taxonomy for all    to authenticated using (public.cnt_is_manager()) with check (public.cnt_is_manager());
+
 -- ────────────────────────────────────────────────────────────
 -- 5. RESUME STORAGE  (private bucket)
 --    Applicants upload CVs; only staff can download.
@@ -203,8 +218,24 @@ create policy "resumes read staff" on storage.objects
   for select to authenticated using (bucket_id='resumes' and public.cnt_is_staff());
 
 -- ────────────────────────────────────────────────────────────
--- 6. SEED OPEN POSITIONS  (only when the table is empty — never wipes live data)
+-- 6. SEED MASTER DATA + OPEN POSITIONS  (only when empty — never wipes live data)
 -- ────────────────────────────────────────────────────────────
+insert into public.taxonomy (kind, name, color)
+select * from (values
+  ('client','SONY','#1d4ed8'),('client','HAIER','#0f766e'),('client','HISENSE','#7c3aed'),
+  ('client','URC','#b91c1c'),('client','SKYWORTH','#0369a1'),('client','UNCLE JOHNS','#d97706'),
+  ('client','Cinderella','#be185d'),
+  ('position','Sales Promoter',null),('position','Merchandiser',null),('position','Area Supervisor',null),
+  ('position','Brand Ambassador',null),('position','Trade Marketing Specialist',null),
+  ('position','Field Sales Representative',null),('position','Product Demonstrator',null),
+  ('position','Store Supervisor',null),('position','In-Store Activator',null),
+  ('position','Content Marketer',null),('position','Logistics Coordinator',null),
+  ('location','Manila',null),('location','Tarlac',null),('location','Bulacan',null),
+  ('location','Pampanga',null),('location','Cavite',null),('location','Pangasinan',null),
+  ('location','Batangas',null)
+) v(kind,name,color)
+where not exists (select 1 from public.taxonomy);
+
 insert into public.jobs (role, client, location, salary_range, openings, priority)
 select * from (values
   ('Merchandiser',                'SONY',        'Manila',     '₱17,000-₱19,000', 5, 'high'),

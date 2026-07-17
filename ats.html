@@ -288,6 +288,9 @@
         <div class="sidenav-item" id="nav-reports" onclick="switchView('reports')">
           <span class="material-icons-outlined">bar_chart</span><span>Reports</span>
         </div>
+        <div class="sidenav-item" id="nav-settings" onclick="switchView('settings')" style="display:none">
+          <span class="material-icons-outlined">tune</span><span>Settings</span>
+        </div>
       </div>
     </nav>
 
@@ -331,7 +334,7 @@
         <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div><h4 class="font-bold text-slate-800 text-sm">Recruitment Pipeline Funnel</h4><p class="text-[11px] text-slate-400 mt-0.5">CNT full-cycle recruitment stages</p></div>
-            <button onclick="switchView('applications')" class="text-xs font-semibold text-red-700 hover:text-red-900 cursor-pointer">View All →</button>
+            <button onclick="cntOpenPipelineList('all')" class="text-xs font-semibold text-red-700 hover:text-red-900 cursor-pointer">View All →</button>
           </div>
           <div class="p-5" id="funnel-container"></div>
           <div class="border-t border-slate-100 px-5 pb-5">
@@ -428,8 +431,22 @@
           </button>
         </div>
       </div>
-      <div class="bg-white border border-slate-200 rounded-xl p-4 overflow-x-auto">
-        <div class="flex items-center gap-0 min-w-max" id="stage-progress-bar"></div>
+      <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center gap-2 flex-wrap" id="pipeline-filter-bar">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-0.5"><span class="material-icons-outlined" style="font-size:13px;">filter_list</span>Filter</span>
+        <div class="flex items-center gap-2 flex-wrap" id="pipeline-filters"></div>
+        <select id="filter-source" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
+          <option value="all">All Sources</option>
+          <option value="Website">Website</option>
+          <option value="JobStreet">JobStreet</option>
+          <option value="Indeed">Indeed</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Referral">Employee Referral</option>
+          <option value="Walk-in">Walk-in</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Kalibrr">Kalibrr</option>
+          <option value="ATS">ATS</option>
+        </select>
+        <button onclick="cntClearFilters()" class="ml-auto text-[11px] font-semibold text-slate-500 hover:text-red-700 border border-slate-200 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center gap-1 whitespace-nowrap"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Clear</button>
       </div>
 
       <div id="applications-list-container" class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
@@ -711,6 +728,54 @@
       <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100"><h4 class="font-bold text-slate-800 text-sm">Per-Client Breakdown</h4></div>
         <div class="p-4 grid grid-cols-2 lg:grid-cols-4 gap-3" id="reports-account-grid"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS (super admin) -->
+    <div id="view-settings" class="hidden space-y-4">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200">
+        <div class="flex items-center gap-2">
+          <span class="material-icons-outlined text-red-800" style="font-size:20px;">tune</span>
+          <div><h2 class="text-lg font-bold text-slate-900">Settings</h2><p class="text-xs text-slate-500">Master data — client accounts, job positions and locations used across the whole system</p></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+            <span class="material-icons-outlined text-slate-400" style="font-size:16px;">business</span>
+            <h4 class="font-bold text-slate-800 text-sm">Client Accounts</h4>
+            <span class="ml-auto text-[10px] font-bold text-slate-400" id="set-count-client">0</span>
+          </div>
+          <div class="p-3 border-b border-slate-100 flex gap-2">
+            <input id="set-new-client" placeholder="New client name…" class="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5">
+            <button onclick="cntTaxAdd('client')" class="bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap">Add</button>
+          </div>
+          <div class="p-2 max-h-80 overflow-y-auto custom-scroll" id="set-list-client"></div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+            <span class="material-icons-outlined text-slate-400" style="font-size:16px;">badge</span>
+            <h4 class="font-bold text-slate-800 text-sm">Job Positions</h4>
+            <span class="ml-auto text-[10px] font-bold text-slate-400" id="set-count-position">0</span>
+          </div>
+          <div class="p-3 border-b border-slate-100 flex gap-2">
+            <input id="set-new-position" placeholder="New position title…" class="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5">
+            <button onclick="cntTaxAdd('position')" class="bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap">Add</button>
+          </div>
+          <div class="p-2 max-h-80 overflow-y-auto custom-scroll" id="set-list-position"></div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+            <span class="material-icons-outlined text-slate-400" style="font-size:16px;">location_on</span>
+            <h4 class="font-bold text-slate-800 text-sm">Locations</h4>
+            <span class="ml-auto text-[10px] font-bold text-slate-400" id="set-count-location">0</span>
+          </div>
+          <div class="p-3 border-b border-slate-100 flex gap-2">
+            <input id="set-new-location" placeholder="New location…" class="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5">
+            <button onclick="cntTaxAdd('location')" class="bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap">Add</button>
+          </div>
+          <div class="p-2 max-h-80 overflow-y-auto custom-scroll" id="set-list-location"></div>
+        </div>
       </div>
     </div>
 
@@ -1232,10 +1297,13 @@ function getFilteredDataset(){
   const loc  = document.getElementById('filter-location').value;
   const role = document.getElementById('filter-role').value;
   const stg  = document.getElementById('filter-stage').value;
+  const src  = (document.getElementById('filter-source')||{}).value||'all';
   return base.filter(a=>{
     const ml = loc==='all'||a.location===loc;
     const mr = role==='all'||a.role===role;
     const ms = stg==='all'||a.stage===stg;
+    const mrc= src==='all'||(a.source||'')===src;
+    if(!mrc) return false;
     const mq = searchQuery===''||a.name.toLowerCase().includes(searchQuery)||a.role.toLowerCase().includes(searchQuery)||(a.account||'').toLowerCase().includes(searchQuery);
     return ml&&mr&&ms&&mq;
   });
@@ -1285,7 +1353,7 @@ function getCountdownChip(deadlineStr){
   return `<span class="countdown-chip ${cls}"><span class="material-icons-outlined" style="font-size:12px;">${icon}</span>${txt}</span>`;
 }
 
-const VIEWS=['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports'];
+const VIEWS=['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports','settings'];
 function switchView(v){
   currentView=v;
   VIEWS.forEach(name=>{
@@ -1394,8 +1462,8 @@ function renderFunnel(counts){
     const n=counts[s.key]||0;
     const pct=Math.round((n/total)*100);
     const w=n>0?Math.max(pct,6):0;
-    return `<div class="flex items-center gap-3 mb-2.5">
-      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider w-24 shrink-0">${s.short}</div>
+    return `<div class="flex items-center gap-3 mb-2.5 cursor-pointer group" onclick="cntOpenPipelineList('${s.key}')" title="View ${s.label} in list">
+      <div class="text-[10px] font-bold text-slate-500 group-hover:text-red-700 uppercase tracking-wider w-24 shrink-0 transition">${s.short}</div>
       <div class="flex-1 h-6 bg-slate-100 rounded-md overflow-hidden">
         <div class="funnel-bar animate-bar flex items-center justify-start" style="width:${w}%;background:${s.color};min-width:${n?'28px':'0'}">
           ${n>0?`<span class="text-white text-[10px] font-bold pl-2">${n}</span>`:''}
@@ -1992,12 +2060,18 @@ function cntToggleFav(accId,role,location){
   const job=(jobDatabase[accId]||[]).find(j=>j.role===role&&j.location===location);
   if(job){ job.favorite=!job.favorite; renderJobPositions(); }
 }
-function quickJumpStage(stage){
-  document.getElementById('filter-role').value='all';
-  document.getElementById('filter-location').value='all';
-  document.getElementById('filter-stage').value=stage;
+function quickJumpStage(stage){ cntOpenPipelineList(stage); }
+
+// Dashboard funnel / stat cards → full pipeline in LIST view (no board)
+function cntOpenPipelineList(stage){
+  ['filter-role','filter-location','filter-source'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
+  const st=document.getElementById('filter-stage'); if(st) st.value=stage||'all';
+  if(typeof selectClient==='function') selectClient('all');
+  window.cntPipelineJob=null;
+  const ctx=document.getElementById('pipeline-context');
+  if(ctx) ctx.textContent=(stage&&stage!=='all')?('All clients · '+getStageName(stage)):'All applicants · all clients';
   switchView('applications');
-  toggleApplicationView('kanban');
+  toggleApplicationView('list');
 }
 function activateFromPool(id){
   const app=findApplicant(id);
@@ -2753,7 +2827,47 @@ document.addEventListener('DOMContentLoaded',()=>{
     const r = (typeof hiringRequests!=='undefined') ? hiringRequests.find(x=>x.id===id) : null;
     if(sb && r && r._sid){ sb.from('hiring_requests').update({status}).eq('id',r._sid).then(({error})=>{ if(error) console.error('hr status sync',error); }); }
   }
-  if (typeof approveRequest === 'function'){ const _a=approveRequest; approveRequest=function(id){ _a(id); syncRequestStatus(id,'Open'); }; }
+  // Approving an MRF posts the position and publishes it to the website careers page
+  async function jobFromRequest(r){
+    if(!r || !r.account || !r.role) return;
+    const client=r.account, role=r.role, location=r.location||'';
+    if(!jobDatabase[client]) jobDatabase[client]=[];
+    const existing=jobDatabase[client].find(j=>j.role===role && j.location===location);
+    if(existing){
+      if(existing.status==='closed'){
+        existing.status='open';
+        if(sb && existing._sid) await sb.from('jobs').update({status:'open'}).eq('id',existing._sid);
+        if(window.showToast) showToast('Existing position re-published to the website','success');
+      } else if(window.showToast) showToast('Position already live on the website','info');
+      renderAll(); if(typeof renderJobPositions==='function') renderJobPositions();
+      return;
+    }
+    const needed=r.count||1, prio=(r.priority||'normal').toLowerCase();
+    const entry={ role, account:client, location, needed, salary:'', priority:prio,
+      employment_type:'Full-Time', recruiter:r.assigned_name||'', status:'open', about:r.notes||'' };
+    jobDatabase[client].push(entry);
+    if(sb){
+      try{
+        const { data, error } = await sb.from('jobs').insert({
+          role, client, location, openings:needed, priority:prio, salary_range:null,
+          about:r.notes||null, employment_type:'Full-Time', recruiter:r.assigned_name||null, status:'open'
+        }).select('id').single();
+        if(error) throw error;
+        entry._sid=data.id;
+        logAudit('job_from_request','job', data.id, role+' · '+client+' (from '+r.id+')');
+        if(window.showToast) showToast('“'+role+'” posted to the website careers page','success');
+      }catch(e){ console.error('job from request',e); if(window.showToast) showToast('Approved, but website post failed: '+(e.message||''),'error'); }
+    }
+    renderAll(); if(typeof renderJobPositions==='function') renderJobPositions();
+  }
+  if (typeof approveRequest === 'function'){
+    const _a=approveRequest;
+    approveRequest=function(id){
+      _a(id); syncRequestStatus(id,'Open');
+      const r=(typeof hiringRequests!=='undefined')?hiringRequests.find(x=>x.id===id):null;
+      if(r) jobFromRequest(r);
+    };
+  }
   if (typeof fillRequest === 'function'){ const _f=fillRequest; fillRequest=function(id){ _f(id); syncRequestStatus(id,'Filled'); }; }
   window.deleteHiringRequest = function(id){
     const r = (typeof hiringRequests!=='undefined') ? hiringRequests.find(x=>x.id===id) : null;
@@ -2826,13 +2940,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     const x=m[st]||m.none;
     return '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;color:'+x[0]+';background:'+x[1]+';white-space:nowrap;">'+x[2]+'</span>';
   }
+  // Client endorsement + deployment milestones only unlock at the Job Offer stage
+  function _atOfferStage(app){ return !!app && ['hired','onboarding'].includes(app.stage); }
+  function _offerLockNote(){
+    return '<div style="font-size:11.5px;color:#94a3b8;margin-top:10px;display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #f1f5f9;padding:8px 10px;border-radius:8px;">'
+      +'<span class="material-icons-outlined" style="font-size:14px;color:#cbd5e1;">lock</span>'
+      +'Unlocks once the candidate reaches the <b style="color:#64748b;font-weight:700;">Job Offer</b> stage.</div>';
+  }
   function renderEndorsement(app){
     const tab=document.getElementById('tab-profile'); if(!tab) return;
     let panel=document.getElementById('cnt-endorse-panel');
     if(!panel){ panel=document.createElement('div'); panel.id='cnt-endorse-panel'; panel.style.cssText='margin-bottom:14px;'; tab.insertBefore(panel, tab.firstChild); }
     if(!app){ panel.innerHTML=''; return; }
     const st=app.client_status||'none';
-    const canEndorse=['super_admin','recruiter','recruitment_supervisor','account_officer'].includes(currentRole);
+    const atOffer=_atOfferStage(app);
+    const canEndorse=atOffer && ['super_admin','recruiter','recruitment_supervisor','account_officer'].includes(currentRole);
     let actions='';
     if(canEndorse){
       const btn=(bg,label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:#fff;background:'+bg+';border:none;">'+label+'</button>';
@@ -2844,7 +2966,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'<div style="display:flex;align-items:center;gap:8px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">verified_user</span><span style="font-weight:700;font-size:12.5px;color:#0f172a;">Client Endorsement</span></div>'
       +_endorseBadge(st)+'</div>'
       +((app.client_reason&&st==='rejected')?'<div style="font-size:12px;color:#b91c1c;margin-top:9px;background:#fef2f2;padding:8px 10px;border-radius:8px;">Reason: '+_escN(app.client_reason)+'</div>':'')
-      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(canEndorse?'':'<div style="font-size:11.5px;color:#94a3b8;margin-top:8px;">View only for your role.</div>'))
+      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!atOffer?_offerLockNote():'<div style="font-size:11.5px;color:#94a3b8;margin-top:8px;">View only for your role.</div>'))
       +'</div>';
     panel.querySelectorAll('.cnt-endo-btn').forEach(b=>b.addEventListener('click',()=>{
       const fn=b.dataset.fn;
@@ -2883,7 +3005,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!panel){ panel=document.createElement('div'); panel.id='cnt-workflow-panel'; panel.style.cssText='margin-bottom:14px;';
       const endo=document.getElementById('cnt-endorse-panel'); if(endo && endo.parentNode===tab) tab.insertBefore(panel, endo.nextSibling); else tab.insertBefore(panel, tab.firstChild); }
     if(!app){ panel.innerHTML=''; return; }
-    const canDo=['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
+    const atOffer=_atOfferStage(app);
+    const canDo=atOffer && ['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
     const rows=_MILESTONES.map(m=>{
       const done=!!app[m.f];
       return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc;">'
@@ -2895,6 +3018,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     panel.innerHTML='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">timeline</span><span style="font-weight:700;font-size:12.5px;color:#0f172a;">Contract → Deployment → New Hire</span></div>'
       +rows
+      +(!atOffer?_offerLockNote():'')
       +(canDo?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;"><button class="cnt-print-dep" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>Deployment Notice</button><button class="cnt-print-nh" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>New Hire Report</button></div>':'')
       +'</div>';
     panel.querySelectorAll('.cnt-ms-btn').forEach(b=>b.addEventListener('click',()=>setMilestone(app,b.dataset.f)));
@@ -3057,7 +3181,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   let currentUserId = '';
   const ROLE_LABELS = { super_admin:'Super Admin', account_officer:'Account Officer', recruitment_manager:'Recruitment Manager', recruitment_supervisor:'Recruitment Supervisor', recruiter:'Recruiter' };
   const ROLE_MODULES = {
-    super_admin:            ['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports'],
+    super_admin:            ['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports','settings'],
     account_officer:        ['dashboard','request','applications','reports'],
     recruitment_manager:    ['dashboard','request','applications','reports'],
     recruitment_supervisor: ['dashboard','request','applications','interviews'],
@@ -3082,7 +3206,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     window.cntRole = currentRole;
     window.cntUserName = currentUserName || currentUserEmail || 'HR';
     const allowed = ROLE_MODULES[currentRole] || ROLE_MODULES['recruiter'];
-    const map = { dashboard:'nav-dashboard', request:'nav-request', applications:'nav-applications', job:'nav-job', 'talent-pool':'nav-talent-pool', interviews:'nav-interviews', onboarding:'nav-onboarding', reports:'nav-reports' };
+    const map = { dashboard:'nav-dashboard', request:'nav-request', job:'nav-job', 'talent-pool':'nav-talent-pool', interviews:'nav-interviews', onboarding:'nav-onboarding', reports:'nav-reports', settings:'nav-settings' };
     Object.keys(map).forEach(mod=>{ const el=document.getElementById(map[mod]); if(el) el.style.display = allowed.includes(mod) ? '' : 'none'; });
     const canAdd = ['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
     const addBtn=document.getElementById('btn-add-applicant'); if(addBtn) addBtn.style.display = canAdd ? '' : 'none';
@@ -3098,8 +3222,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     host.appendChild(b);
   }
 
+  // Filters live INSIDE the pipeline view (not the header, not the sidebar)
   function relocateFilters(){
-    const host=document.getElementById('hdr-filters'); if(!host || host.dataset.done) return;
+    const host=document.getElementById('pipeline-filters'); if(!host || host.dataset.done) return;
     ['client-dropdown-wrap','filter-location','filter-role','filter-stage'].forEach(id=>{
       const el=document.getElementById(id); if(!el) return;
       if(id==='client-dropdown-wrap'){ el.style.width='150px'; }
@@ -3107,8 +3232,18 @@ document.addEventListener('DOMContentLoaded',()=>{
       host.appendChild(el);
     });
     const sf=document.getElementById('sidebar-filters'); if(sf) sf.style.display='none';
+    const hf=document.getElementById('hdr-filters'); if(hf) hf.style.display='none';
     host.dataset.done='1';
   }
+  // Reset every pipeline filter
+  window.cntClearFilters=function(){
+    ['filter-location','filter-role','filter-stage','filter-source'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
+    if(typeof selectClient==='function') selectClient('all'); else if(typeof currentAccount!=='undefined') currentAccount='all';
+    if(typeof searchQuery!=='undefined') searchQuery='';
+    window.cntPipelineJob=null;
+    const ctx=document.getElementById('pipeline-context'); if(ctx) ctx.textContent='Full-cycle PH recruitment workflow';
+    renderAll();
+  };
 
   function showRevoked(){
     let o=document.getElementById('cnt-revoked');
@@ -3264,6 +3399,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(currentRole==='no_access'){ showRevoked(); return; }
     applyRoleScoping();
     relocateFilters();
+    await loadTaxonomy();          // master data first — feeds every dropdown
     buildClientDropdown();
     await loadApplications();
     await loadHiringRequests();
@@ -3784,6 +3920,124 @@ document.addEventListener('DOMContentLoaded',()=>{
   if (typeof renderReports === 'function'){
     const _origRR = renderReports;
     renderReports = function(){ _origRR(); try{ injectOdooReports(); renderOdooReports(); }catch(e){ console.warn('odoo reports',e); } };
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  SETTINGS — master data (clients · positions · locations)
+  //  Super-admin manages these; they feed every dropdown/facet.
+  // ══════════════════════════════════════════════════════════════
+  const TAX_KINDS=['client','position','location'];
+  const TAX_COLORS=['#1d4ed8','#0f766e','#7c3aed','#b91c1c','#0369a1','#d97706','#be185d','#4338ca','#047857','#9d174d'];
+  const ACCOUNT_META={}; ACCOUNTS.forEach(a=>{ ACCOUNT_META[a.id]={sub:a.sub,color:a.color,region:a.region}; });
+  const TAX_FALLBACK={
+    client:   ACCOUNTS.map(a=>a.id),
+    position: ['Sales Promoter','Merchandiser','Area Supervisor','Brand Ambassador','Trade Marketing Specialist','Field Sales Representative','Product Demonstrator','Store Supervisor','In-Store Activator','Content Marketer','Logistics Coordinator'],
+    location: ['Manila','Tarlac','Bulacan','Pampanga','Cavite','Pangasinan','Batangas']
+  };
+  window.cntTax={client:[],position:[],location:[]};
+
+  function _taxNames(kind){
+    const t=(window.cntTax[kind]||[]).map(x=>x.name);
+    return t.length ? [...new Set(t)].sort() : (TAX_FALLBACK[kind]||[]).slice();
+  }
+  function _taxInUse(kind,name){
+    let n=0;
+    Object.keys(jobDatabase||{}).forEach(k=>(jobDatabase[k]||[]).forEach(j=>{
+      if(kind==='client'   && (j.account===name||k===name)) n++;
+      if(kind==='position' && j.role===name) n++;
+      if(kind==='location' && j.location===name) n++;
+    }));
+    return n;
+  }
+
+  async function loadTaxonomy(){
+    if(!sb) return;
+    const { data, error } = await sb.from('taxonomy').select('*').order('name');
+    if(error){ console.warn('taxonomy load',error); return; }
+    const t={client:[],position:[],location:[]};
+    (data||[]).forEach(r=>{ if(t[r.kind]) t[r.kind].push({id:r.id,name:r.name,color:r.color}); });
+    window.cntTax=t;
+    if(t.client.length){   // taxonomy is the source of truth for client accounts
+      const rebuilt=t.client.map((c,i)=>{
+        const m=ACCOUNT_META[c.name]||{};
+        return { id:c.name, label:c.name, sub:m.sub||'Client account', color:c.color||m.color||TAX_COLORS[i%TAX_COLORS.length], region:m.region||'' };
+      });
+      ACCOUNTS.length=0; rebuilt.forEach(x=>ACCOUNTS.push(x));
+    }
+    repopulateTaxonomyUI();
+  }
+
+  function _fillSelect(id,values,allLabel){
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="all">'+allLabel+'</option>'+values.map(v=>'<option value="'+_escN(v)+'">'+_escN(v)+'</option>').join('');
+    if([...sel.options].some(o=>o.value===cur)) sel.value=cur; else sel.value='all';
+  }
+  function _fillPlain(id,values){
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    sel.innerHTML=values.map(v=>'<option value="'+_escN(v)+'">'+_escN(v)+'</option>').join('');
+    if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+  }
+  function _fillList(id,values){
+    const dl=document.getElementById(id); if(!dl) return;
+    dl.innerHTML=values.map(v=>'<option>'+_escN(v)+'</option>').join('');
+  }
+  function repopulateTaxonomyUI(){
+    const clients=_taxNames('client'), positions=_taxNames('position'), locations=_taxNames('location');
+    _fillSelect('filter-location',locations,'All Locations');
+    _fillSelect('filter-role',positions,'All Positions');
+    _fillPlain('app-account',clients); _fillPlain('app-location',locations); _fillPlain('app-role',positions);
+    _fillList('job-account-list',clients); _fillList('job-role-list',positions); _fillList('job-location-list',locations);
+    _fillPlain('req-account',clients); _fillPlain('req-role',positions); _fillPlain('req-location',locations);
+    if(typeof buildClientDropdown==='function') buildClientDropdown();
+  }
+
+  function renderSettings(){
+    TAX_KINDS.forEach(kind=>{
+      const el=document.getElementById('set-list-'+kind); if(!el) return;
+      const items=_taxNames(kind);
+      const cnt=document.getElementById('set-count-'+kind); if(cnt) cnt.textContent=items.length;
+      el.innerHTML=items.length?items.map(name=>{
+        const used=_taxInUse(kind,name);
+        return '<div class="cnt-set-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;">'
+          +'<span style="font-size:12.5px;color:#334155;font-weight:500;min-width:0;">'+_escN(name)
+          +(used?' <span style="font-size:9px;color:#94a3b8;font-weight:600;">· '+used+' job'+(used>1?'s':'')+'</span>':'')+'</span>'
+          +'<button onclick="cntTaxRemove(\''+kind+'\',\''+String(name).replace(/'/g,"\\'")+'\')" title="Remove" style="color:#cbd5e1;cursor:pointer;line-height:0;flex:none;"><span class="material-icons-outlined" style="font-size:15px;">delete_outline</span></button>'
+          +'</div>';
+      }).join(''):'<p style="font-size:11.5px;color:#94a3b8;padding:14px;text-align:center;">Nothing yet — add one above.</p>';
+    });
+  }
+  window.cntTaxAdd=async function(kind){
+    const input=document.getElementById('set-new-'+kind); if(!input) return;
+    const name=(input.value||'').trim();
+    if(!name){ if(window.showToast) showToast('Enter a name first','info'); return; }
+    if(_taxNames(kind).some(v=>v.toLowerCase()===name.toLowerCase())){ if(window.showToast) showToast('“'+name+'” already exists','info'); return; }
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const color = kind==='client' ? TAX_COLORS[_taxNames('client').length%TAX_COLORS.length] : null;
+    const { error } = await sb.from('taxonomy').insert({ kind, name, color });
+    if(error){ console.error('tax add',error); if(window.showToast) showToast('Add failed: '+error.message,'error'); return; }
+    logAudit('settings_add',kind,name,name);
+    input.value='';
+    await loadTaxonomy(); renderSettings(); renderAll();
+    if(window.showToast) showToast('“'+name+'” added','success');
+  };
+  window.cntTaxRemove=async function(kind,name){
+    const used=_taxInUse(kind,name);
+    const msg = used
+      ? '“'+name+'” is used by '+used+' job position'+(used>1?'s':'')+'. Remove it from the list anyway? Existing records keep their value.'
+      : 'Remove “'+name+'” from '+kind+'s?';
+    if(!confirm(msg)) return;
+    if(!sb) return;
+    const { error } = await sb.from('taxonomy').delete().eq('kind',kind).eq('name',name);
+    if(error){ console.error('tax remove',error); if(window.showToast) showToast('Remove failed: '+error.message,'error'); return; }
+    logAudit('settings_remove',kind,name,name);
+    await loadTaxonomy(); renderSettings(); renderAll();
+    if(window.showToast) showToast('“'+name+'” removed','info');
+  };
+  if (typeof renderAll === 'function'){
+    const _origRA_set = renderAll;
+    renderAll = function(){ _origRA_set(); try{ renderSettings(); }catch(e){ console.warn('settings',e); } };
   }
 
   // Bootstrap — called by the app's DOMContentLoaded handler
