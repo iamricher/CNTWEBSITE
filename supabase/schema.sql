@@ -53,6 +53,24 @@ create table if not exists public.profiles (
   created_at timestamptz default now()
 );
 
+-- Configurable pipeline stages (Odoo: stages are data, not code).
+-- `key` is the stable value stored in applications.stage — never rename it;
+-- rename `name`/`short` instead.
+create table if not exists public.stages (
+  id            bigint generated always as identity primary key,
+  key           text unique not null,
+  name          text not null,
+  short         text,
+  color         text default '#64748b',
+  sequence      int  default 0,
+  folded        boolean default false,        -- collapsed in the kanban
+  is_hired      boolean default false,        -- entering this stage means hired
+  email_subject text,                         -- auto-draft when a card enters
+  email_body    text,
+  requirements  text,                         -- internal notes for the stage
+  created_at    timestamptz default now()
+);
+
 -- Master data managed by super admin (feeds every dropdown / facet)
 create table if not exists public.taxonomy (
   id         bigint generated always as identity primary key,
@@ -186,10 +204,11 @@ alter table public.jobs         enable row level security;
 alter table public.profiles     enable row level security;
 alter table public.audit_log    enable row level security;
 alter table public.taxonomy     enable row level security;
+alter table public.stages       enable row level security;
 
 do $wipe$ declare p record; begin
   for p in select policyname, tablename from pg_policies
-           where schemaname='public' and tablename in ('applications','jobs','profiles','audit_log','taxonomy') loop
+           where schemaname='public' and tablename in ('applications','jobs','profiles','audit_log','taxonomy','stages') loop
     execute format('drop policy if exists %I on public.%I', p.policyname, p.tablename);
   end loop;
 end $wipe$;
@@ -219,6 +238,10 @@ create policy "audit read staff"   on public.audit_log for select to authenticat
 create policy "taxonomy read staff" on public.taxonomy for select to authenticated using (public.cnt_is_staff());
 create policy "taxonomy write mgr"  on public.taxonomy for all    to authenticated using (public.cnt_is_manager()) with check (public.cnt_is_manager());
 
+-- Stages: staff read; only managers/super admin may reconfigure the pipeline
+create policy "stages read staff" on public.stages for select to authenticated using (public.cnt_is_staff());
+create policy "stages write mgr"  on public.stages for all    to authenticated using (public.cnt_is_manager()) with check (public.cnt_is_manager());
+
 -- ────────────────────────────────────────────────────────────
 -- 5. RESUME STORAGE  (private bucket)
 --    Applicants upload CVs; only staff can download.
@@ -242,6 +265,18 @@ create policy "resumes delete mgr" on storage.objects
 -- ────────────────────────────────────────────────────────────
 -- 6. SEED MASTER DATA + OPEN POSITIONS  (only when empty — never wipes live data)
 -- ────────────────────────────────────────────────────────────
+-- Current pipeline, seeded only when empty
+insert into public.stages (key, name, short, color, sequence, folded, is_hired)
+select * from (values
+  ('new',       'Initial Screening','Screening','#ef4444',10,false,false),
+  ('interview', 'Interview',        'Interview','#8b5cf6',20,false,false),
+  ('exam',      'Pre-Emp Exam',     'Exam',     '#06b6d4',30,false,false),
+  ('bgcheck',   'Background Check', 'BGC',      '#6366f1',40,false,false),
+  ('hired',     'Job Offer',        'Offer',    '#10b981',50,false,true),
+  ('onboarding','Onboarding',       'Onboard',  '#059669',60,false,true)
+) v(key,name,short,color,sequence,folded,is_hired)
+where not exists (select 1 from public.stages);
+
 insert into public.taxonomy (kind, name, color)
 select * from (values
   ('client','SONY','#1d4ed8'),('client','HAIER','#0f766e'),('client','HISENSE','#7c3aed'),
