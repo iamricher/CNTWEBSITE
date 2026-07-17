@@ -57,7 +57,7 @@ const REQUIRED_IDS = [
   'filter-role', 'filter-location', 'filter-stage', 'client-dropdown-wrap',
   'job-facets', 'job-cards-container',
   'applications-list-container', 'applications-kanban-container',
-  'set-list-client', 'set-list-position', 'set-list-location',
+  'set-list-client', 'set-list-position', 'set-list-location', 'set-list-stages',
   'resume-modal', 'crud-modal', 'job-modal', 'interview-modal',
   // applicant form left / résumé right (Odoo Résumé Display)
   'profile-split', 'profile-left', 'profile-right', 'printable-resume',

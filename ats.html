@@ -770,6 +770,16 @@
         </div>
       </div>
 
+      <!-- Pipeline stages -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2 flex-wrap">
+          <span class="material-icons-outlined text-red-800" style="font-size:17px;">view_column</span>
+          <div><h4 class="font-bold text-slate-800 text-sm">Pipeline Stages</h4><p class="text-[11px] text-slate-400 mt-0.5">Rename, recolour and reorder your hiring steps. Renaming is safe — existing candidates keep their stage.</p></div>
+          <button onclick="cntStageEdit()" class="ml-auto bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1 whitespace-nowrap"><span class="material-icons-outlined" style="font-size:14px;">add</span>Add stage</button>
+        </div>
+        <div class="p-3" id="set-list-stages"></div>
+      </div>
+
       <!-- Data privacy (RA 10173) -->
       <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
@@ -1359,19 +1369,38 @@ const PIPELINE_STAGES = [
 const INTERVIEW_TYPES  = ['Phone Interview','Face-to-Face Interview','Video Interview','Panel Interview','Client Interview','Final Interview'];
 const INTERVIEW_ROUNDS = ['1st Interview','2nd Interview','3rd Interview','Final Interview'];
 
+// Stages are configurable data (public.stages). These derive from PIPELINE_STAGES,
+// which is rebuilt from the database at boot — so renaming/recolouring a stage in
+// Settings flows everywhere without touching code.
+const STAGE_SPECIALS = { pool:'Talent Pool', rejected:'Not Qualified' };
+const STAGE_LEGACY   = { phone:'Interview', qualified:'Interview', scheduled:'Interview' };
+
 function getStageName(s){
-  const m={new:'Initial Screening',interview:'Interview',exam:'Pre-Emp Exam',bgcheck:'Background Check',hired:'Job Offer',onboarding:'Onboarding',pool:'Talent Pool',rejected:'Not Qualified',
-    // legacy keys (pre-consolidation) still render correctly
-    phone:'Interview',qualified:'Interview',scheduled:'Interview'};
-  return m[s]||s;
+  const st=PIPELINE_STAGES.find(x=>x.key===s);
+  if(st) return st.label;
+  return STAGE_SPECIALS[s] || STAGE_LEGACY[s] || s;
 }
-function getStageBadge(s){
-  const m={new:'bg-red-50 text-red-700 border-red-200',interview:'bg-violet-50 text-violet-700 border-violet-200',exam:'bg-cyan-50 text-cyan-700 border-cyan-200',bgcheck:'bg-indigo-50 text-indigo-700 border-indigo-200',hired:'bg-emerald-50 text-emerald-700 border-emerald-200',onboarding:'bg-green-50 text-green-700 border-green-200',pool:'bg-amber-50 text-amber-700 border-amber-200',rejected:'bg-slate-100 text-slate-500 border-slate-200',
-    phone:'bg-violet-50 text-violet-700 border-violet-200',qualified:'bg-violet-50 text-violet-700 border-violet-200',scheduled:'bg-violet-50 text-violet-700 border-violet-200'};
-  return m[s]||'bg-slate-50 text-slate-700 border-slate-200';
+// Badge colours are emitted as real CSS classes (see applyStageStyles) so every
+// existing `class="badge border ${getStageBadge(...)}"` call site keeps working.
+function stageKeyClass(s){ return 'stage-badge-'+String(s||'').replace(/[^a-z0-9_-]/gi,'-'); }
+function getStageBadge(s){ return stageKeyClass(normStage(s)); }
+
+function applyStageStyles(){
+  let el=document.getElementById('cnt-stage-styles');
+  if(!el){ el=document.createElement('style'); el.id='cnt-stage-styles'; document.head.appendChild(el); }
+  const rule=(key,color)=>'.'+stageKeyClass(key)+'{background:'+color+'18;color:'+color+';border-color:'+color+'40;}';
+  el.textContent = PIPELINE_STAGES.map(s=>rule(s.key,s.color)).join('\n')
+    + '\n' + rule('pool','#b45309')
+    + '\n' + rule('rejected','#64748b')
+    + '\n.stage-badge-{background:#f8fafc;color:#64748b;border-color:#e2e8f0;}';
 }
-// Normalise any legacy stage value to the consolidated key
-function normStage(s){ return (s==='phone'||s==='qualified'||s==='scheduled')?'interview':s; }
+
+// Normalise any legacy stage value to a live one
+function normStage(s){
+  if(PIPELINE_STAGES.some(x=>x.key===s)) return s;
+  if(STAGE_LEGACY[s]) return 'interview';
+  return s;
+}
 
 function getCountdownChip(deadlineStr){
   if(!deadlineStr) return '<span class="text-slate-400 text-[10px]">No deadline</span>';
@@ -1662,6 +1691,10 @@ function kanbanCardHtml(a, refused){
     </div>
   </div>`;
 }
+// Stages the user has clicked open this session (folded stages expand on click)
+const _unfolded=new Set();
+function cntUnfoldStage(key){ _unfolded.add(key); renderKanban(getFilteredDataset().filter(a=>a.stage!=='pool'&&a.stage!=='rejected')); }
+
 function renderKanban(pipeline){
   const kc=document.getElementById('applications-kanban-container');
   if(!kc||kc.classList.contains('hidden'))return;
@@ -1679,6 +1712,21 @@ function renderKanban(pipeline){
            ${blocked?`<div style="flex:${blocked};background:#dc2626;" title="${blocked} blocked"></div>`:''}
          </div>`
       : `<div style="height:4px;border-radius:99px;background:#f1f5f9;margin:0 4px 10px;"></div>`;
+    // Folded stages collapse to a thin bar (Odoo folds e.g. Contract Signed).
+    // Click to expand; still a valid drop target while folded.
+    if(s.folded && !_unfolded.has(s.key)){
+      return `
+      <div class="kanban-col" id="kcol-${s.key}" style="min-width:44px;max-width:44px;background:#eef2f6;cursor:pointer;padding:12px 6px;"
+           onclick="cntUnfoldStage('${s.key}')" title="${s.label} — click to expand"
+           ondragover="allowDrop(event)" ondrop="drop(event,'${s.key}')">
+        <div class="flex flex-col items-center gap-2">
+          <span class="bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[10px] font-bold" id="kcount-${s.key}">0</span>
+          <span class="w-2 h-2 rounded-full" style="background:${s.color}"></span>
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" style="writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;">${s.short}</span>
+        </div>
+        <div id="col-${s.key}" style="display:none;"></div>
+      </div>`;
+    }
     return `
     <div class="kanban-col" id="kcol-${s.key}">
       <div class="flex items-center justify-between mb-2 px-1">
@@ -3025,8 +3073,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     const x=m[st]||m.none;
     return '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;color:'+x[0]+';background:'+x[1]+';white-space:nowrap;">'+x[2]+'</span>';
   }
-  // Client endorsement + deployment milestones only unlock at the Job Offer stage
-  function _atOfferStage(app){ return !!app && ['hired','onboarding'].includes(app.stage); }
+  // Client endorsement + deployment milestones unlock on any stage flagged
+  // "Hired stage" in Settings (falls back to the built-in offer stages).
+  function _atOfferStage(app){
+    if(!app) return false;
+    const hiredKeys=PIPELINE_STAGES.filter(s=>s.is_hired).map(s=>s.key);
+    return (hiredKeys.length?hiredKeys:['hired','onboarding']).includes(app.stage);
+  }
   function _offerLockNote(){
     return '<div style="font-size:11.5px;color:#94a3b8;margin-top:10px;display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #f1f5f9;padding:8px 10px;border-radius:8px;">'
       +'<span class="material-icons-outlined" style="font-size:14px;color:#cbd5e1;">lock</span>'
@@ -3480,7 +3533,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(currentRole==='no_access'){ showRevoked(); return; }
     applyRoleScoping();
     relocateFilters();
-    await loadTaxonomy();          // master data first — feeds every dropdown
+    await loadStages();            // pipeline definition first — everything renders off it
+    await loadTaxonomy();          // master data next — feeds every dropdown
     buildClientDropdown();
     await loadApplications();
     await loadHiringRequests();
@@ -3807,7 +3861,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   function _fillTpl(t, app){ return t.replace(/\{name\}/g,app.name||'').replace(/\{role\}/g,app.role||'the role').replace(/\{account\}/g,app.account||'CNT').replace(/\{location\}/g,app.location||''); }
   window.cntDraftEmail = function(id){
     const app=findApplicant(id); if(!app) return;
-    const tpl=STAGE_EMAIL[app.stage]||STAGE_EMAIL.new;
+    // A stage configured with its own template in Settings wins over the built-in one
+    const st=PIPELINE_STAGES.find(s=>s.key===app.stage);
+    const fallback=STAGE_EMAIL[app.stage]||STAGE_EMAIL.new;
+    const tpl={ s:(st&&st.email_subject)||fallback.s, b:(st&&st.email_body)||fallback.b };
     const subject=_fillTpl(tpl.s,app), body=_fillTpl(tpl.b,app);
     let m=document.getElementById('cnt-email-modal');
     if(!m){ m=document.createElement('div'); m.id='cnt-email-modal'; m.className='hidden fixed inset-0 z-[400] flex items-center justify-center p-4'; document.body.appendChild(m); }
@@ -4201,7 +4258,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   };
   if (typeof renderAll === 'function'){
     const _origRA_set = renderAll;
-    renderAll = function(){ _origRA_set(); try{ renderSettings(); }catch(e){ console.warn('settings',e); } };
+    renderAll = function(){ _origRA_set();
+      try{ renderSettings(); }catch(e){ console.warn('settings',e); }
+      try{ renderStagesSettings(); }catch(e){ console.warn('stages settings',e); }
+    };
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -4461,8 +4521,165 @@ document.addEventListener('DOMContentLoaded',()=>{
     console.error('[cnt] unhandled promise rejection', e.reason);
   });
 
+  // ══════════════════════════════════════════════════════════════
+  //  PIPELINE STAGES — configurable (public.stages)
+  //  The hard-coded PIPELINE_STAGES stays as a fallback so the app still
+  //  works if the table is missing or unreachable.
+  // ══════════════════════════════════════════════════════════════
+  const STAGE_COLORS=['#ef4444','#f97316','#f59e0b','#8b5cf6','#3b82f6','#06b6d4','#6366f1','#10b981','#059669','#be185d'];
+  function _slug(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40); }
+
+  async function loadStages(){
+    applyStageStyles();
+    if(!sb) return;
+    const { data, error } = await sb.from('stages').select('*').order('sequence');
+    if(error){ console.warn('stages load — using built-in pipeline',error); return; }
+    if(!data || !data.length) return;
+    PIPELINE_STAGES.length=0;
+    data.forEach(r=>PIPELINE_STAGES.push({
+      _id:r.id, key:r.key, label:r.name, short:r.short||r.name, color:r.color||'#64748b',
+      sequence:r.sequence||0, folded:!!r.folded, is_hired:!!r.is_hired,
+      email_subject:r.email_subject||'', email_body:r.email_body||'', requirements:r.requirements||''
+    }));
+    applyStageStyles();
+    fillStageSelects();
+  }
+
+  function fillStageSelects(){
+    const opts=PIPELINE_STAGES.map(s=>'<option value="'+_e(s.key)+'">'+_e(s.label)+'</option>').join('')
+      +'<option value="pool">Talent Pool</option><option value="rejected">Not Qualified</option>';
+    const fs=document.getElementById('filter-stage');
+    if(fs){ const cur=fs.value; fs.innerHTML='<option value="all">All Stages</option>'+opts;
+            fs.value=[...fs.options].some(o=>o.value===cur)?cur:'all'; }
+    ['app-stage','resume-stage-select'].forEach(id=>{
+      const el=document.getElementById(id); if(!el) return;
+      const cur=el.value; el.innerHTML=opts;
+      if([...el.options].some(o=>o.value===cur)) el.value=cur;
+    });
+  }
+
+  function renderStagesSettings(){
+    const el=document.getElementById('set-list-stages'); if(!el) return;
+    const counts={}; getAllApplicants().forEach(a=>{ counts[a.stage]=(counts[a.stage]||0)+1; });
+    const chip=(t,c,b)=>'<span style="font-size:8.5px;font-weight:800;color:'+c+';background:'+b+';padding:1px 6px;border-radius:99px;margin-left:5px;letter-spacing:.04em;">'+t+'</span>';
+    const btn=(fn,icon,title,dis)=>'<button '+(dis?'disabled':'')+' onclick="'+fn+'" title="'+title+'" style="width:26px;height:26px;border-radius:7px;border:1px solid #e2e8f0;color:'+(dis?'#e2e8f0':'#64748b')+';background:#fff;cursor:'+(dis?'default':'pointer')+';display:inline-flex;align-items:center;justify-content:center;flex:none;"><span class="material-icons-outlined" style="font-size:14px;">'+icon+'</span></button>';
+    el.innerHTML=PIPELINE_STAGES.map((s,i)=>{
+      const n=counts[s.key]||0;
+      return '<div style="display:flex;align-items:center;gap:9px;padding:9px 8px;border-bottom:1px solid #f8fafc;">'
+        +'<span style="width:11px;height:11px;border-radius:3px;background:'+s.color+';flex:none;"></span>'
+        +'<div style="min-width:0;flex:1;">'
+          +'<div style="font-size:12.5px;font-weight:600;color:#0f172a;">'+_e(s.label)
+            +(s.is_hired?chip('HIRED','#166534','#dcfce7'):'')
+            +(s.folded?chip('FOLDED','#64748b','#f1f5f9'):'')
+            +(s.email_subject?chip('EMAIL','#4338ca','#eef2ff'):'')+'</div>'
+          +'<div style="font-size:10px;color:#94a3b8;margin-top:1px;">'+_e(s.short||'')+' · '+n+' applicant'+(n!==1?'s':'')+'</div>'
+        +'</div>'
+        +btn('cntStageMove('+i+',-1)','arrow_upward','Move up',i===0)
+        +btn('cntStageMove('+i+',1)','arrow_downward','Move down',i===PIPELINE_STAGES.length-1)
+        +btn("cntStageEdit('"+s.key+"')",'edit','Edit stage',false)
+        +btn("cntStageDelete('"+s.key+"')",'delete_outline','Delete stage',false)
+        +'</div>';
+    }).join('')||'<p style="font-size:11.5px;color:#94a3b8;padding:14px;text-align:center;">No stages — add one above.</p>';
+  }
+
+  // ── Add / edit a stage ──
+  window.cntStageEdit=function(key){
+    const s=key?PIPELINE_STAGES.find(x=>x.key===key):null;
+    let m=document.getElementById('cnt-stage-modal');
+    if(!m){ m=document.createElement('div'); m.id='cnt-stage-modal'; m.className='hidden fixed inset-0 z-[400] flex items-center justify-center p-4'; document.body.appendChild(m); }
+    const v=(x)=>_e(x||'');
+    const swatches=STAGE_COLORS.map(c=>'<button type="button" onclick="document.getElementById(\'st-color\').value=\''+c+'\'" style="width:20px;height:20px;border-radius:5px;background:'+c+';cursor:pointer;border:2px solid '+((s&&s.color===c)?'#0f172a':'transparent')+';"></button>').join('');
+    m.innerHTML='<div class="absolute inset-0 bg-slate-900/50" onclick="document.getElementById(\'cnt-stage-modal\').classList.add(\'hidden\')"></div>'
+      +'<div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl z-10 border border-slate-200 overflow-hidden" style="max-height:92vh;display:flex;flex-direction:column;">'
+      +'<div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between"><h3 class="font-bold text-sm text-slate-800">'+(s?'Edit stage — '+v(s.label):'New stage')+'</h3>'
+        +'<button onclick="document.getElementById(\'cnt-stage-modal\').classList.add(\'hidden\')" class="text-slate-400 hover:text-red-700 cursor-pointer"><span class="material-icons-outlined">close</span></button></div>'
+      +'<div class="p-4 space-y-3 overflow-y-auto custom-scroll">'
+        +'<input type="hidden" id="st-key" value="'+v(s&&s.key)+'">'
+        +'<div class="grid grid-cols-2 gap-3">'
+          +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Stage name <span class="text-red-500">*</span></label><input id="st-name" value="'+v(s&&s.label)+'" placeholder="e.g. Client Interview" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
+          +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Short label</label><input id="st-short" value="'+v(s&&s.short)+'" placeholder="for the board column" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
+        +'</div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Colour</label>'
+          +'<div class="flex items-center gap-2 flex-wrap"><input id="st-color" value="'+v((s&&s.color)||'#8b5cf6')+'" class="text-xs border border-slate-200 rounded-lg px-3 py-2" style="width:110px;">'+swatches+'</div></div>'
+        +'<div class="flex items-center gap-5 pt-1">'
+          +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer"><input type="checkbox" id="st-folded" '+((s&&s.folded)?'checked':'')+' class="accent-red-800 w-4 h-4"> Folded in board</label>'
+          +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer"><input type="checkbox" id="st-hired" '+((s&&s.is_hired)?'checked':'')+' class="accent-red-800 w-4 h-4"> Hired stage</label>'
+        +'</div>'
+        +'<p class="text-[10px] text-slate-400 -mt-1">“Hired stage” marks the candidate as hired and unlocks Client Endorsement and the deployment milestones.</p>'
+        +'<div class="pt-2 border-t border-slate-100"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Auto email on entering this stage <span class="text-slate-400 font-normal normal-case">— optional</span></p>'
+          +'<input id="st-subj" value="'+v(s&&s.email_subject)+'" placeholder="Subject — use {name} {role} {account} {location}" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 mb-2">'
+          +'<textarea id="st-body" rows="4" placeholder="Message body — leave blank to use the built-in template" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(s&&s.email_body)+'</textarea></div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Requirements <span class="text-slate-400 font-normal normal-case">— internal note</span></label><textarea id="st-req" rows="2" placeholder="What must happen in this stage?" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(s&&s.requirements)+'</textarea></div>'
+      +'</div>'
+      +'<div class="px-4 py-3 border-t border-slate-100 flex justify-end gap-2">'
+        +'<button onclick="document.getElementById(\'cnt-stage-modal\').classList.add(\'hidden\')" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-4 py-2 hover:bg-slate-50 cursor-pointer">Cancel</button>'
+        +'<button onclick="cntStageSave()" class="text-xs font-semibold text-white bg-red-800 hover:bg-red-900 rounded-lg px-4 py-2 cursor-pointer">Save stage</button>'
+      +'</div></div>';
+    m.classList.remove('hidden');
+  };
+
+  window.cntStageSave=async function(){
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const key=(document.getElementById('st-key')||{}).value||'';
+    const name=((document.getElementById('st-name')||{}).value||'').trim();
+    if(!name){ if(window.showToast) showToast('Stage name is required','info'); return; }
+    const row={
+      name,
+      short:((document.getElementById('st-short')||{}).value||'').trim()||name,
+      color:((document.getElementById('st-color')||{}).value||'#8b5cf6').trim(),
+      folded:!!(document.getElementById('st-folded')||{}).checked,
+      is_hired:!!(document.getElementById('st-hired')||{}).checked,
+      email_subject:((document.getElementById('st-subj')||{}).value||'').trim()||null,
+      email_body:((document.getElementById('st-body')||{}).value||'').trim()||null,
+      requirements:((document.getElementById('st-req')||{}).value||'').trim()||null
+    };
+    let error;
+    if(key){
+      ({ error } = await sb.from('stages').update(row).eq('key',key));   // key never changes — records stay valid
+      if(!error) logAudit('stage_edit','stage',key,name);
+    } else {
+      let k=_slug(name)||('stage_'+Date.now());
+      if(PIPELINE_STAGES.some(s=>s.key===k)) k=k+'_'+Date.now().toString().slice(-4);
+      row.key=k;
+      row.sequence=(PIPELINE_STAGES.length?Math.max(...PIPELINE_STAGES.map(s=>s.sequence||0)):0)+10;
+      ({ error } = await sb.from('stages').insert(row));
+      if(!error) logAudit('stage_add','stage',k,name);
+    }
+    if(error){ console.error('stage save',error); if(window.showToast) showToast('Save failed: '+error.message,'error'); return; }
+    document.getElementById('cnt-stage-modal').classList.add('hidden');
+    await loadStages(); renderStagesSettings(); renderAll();
+    if(window.showToast) showToast('Stage saved','success');
+  };
+
+  window.cntStageDelete=async function(key){
+    const s=PIPELINE_STAGES.find(x=>x.key===key); if(!s) return;
+    const n=getAllApplicants().filter(a=>a.stage===key).length;
+    if(n){ alert('“'+s.label+'” still has '+n+' applicant'+(n!==1?'s':'')+'.\n\nMove or refuse them first — deleting the stage would strand their records.'); return; }
+    if(PIPELINE_STAGES.length<=1){ alert('You need at least one stage.'); return; }
+    if(!confirm('Delete the “'+s.label+'” stage?')) return;
+    if(!sb) return;
+    const { error }=await sb.from('stages').delete().eq('key',key);
+    if(error){ console.error('stage delete',error); if(window.showToast) showToast('Delete failed: '+error.message,'error'); return; }
+    logAudit('stage_delete','stage',key,s.label);
+    await loadStages(); renderStagesSettings(); renderAll();
+    if(window.showToast) showToast('Stage deleted','info');
+  };
+
+  window.cntStageMove=async function(i,dir){
+    const j=i+dir;
+    if(j<0 || j>=PIPELINE_STAGES.length) return;
+    const a=PIPELINE_STAGES[i], b=PIPELINE_STAGES[j];
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const sa=a.sequence||0, sb2=b.sequence||0;
+    const r1=await sb.from('stages').update({sequence:sb2}).eq('key',a.key);
+    const r2=await sb.from('stages').update({sequence:sa}).eq('key',b.key);
+    if(r1.error||r2.error){ console.error('stage move',r1.error||r2.error); if(window.showToast) showToast('Reorder failed','error'); return; }
+    await loadStages(); renderStagesSettings(); renderAll();
+  };
+
   // Bootstrap — called by the app's DOMContentLoaded handler
   window.cntBoot = function(){
+    applyStageStyles();   // stage badge colours must exist even before/without a backend
     if(!sb){ buildClientDropdown(); renderAll(); showDemoBanner(); return; }
     sb.auth.getSession().then(({data})=>{
       if(data && data.session){ startApp(); } else { showLogin(); }
