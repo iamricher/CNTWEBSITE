@@ -195,72 +195,6 @@
 
   <aside id="sidebar" class="sidebar bg-white border-r border-slate-200 flex flex-col overflow-hidden no-print" style="height:calc(100vh - 52px);position:sticky;top:52px;">
 
-    <div class="p-3 border-b border-slate-100" id="sidebar-filters">
-      <p class="nav-label">Quick Filters</p>
-      <div class="mt-1 space-y-2">
-
-        <div>
-          <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5 block">Client Account</label>
-          <div class="client-dropdown-wrap" id="client-dropdown-wrap">
-            <button type="button" class="client-trigger" onclick="toggleClientDropdown(event)" id="client-trigger">
-              <span class="material-icons-outlined text-red-800" style="font-size:14px;">business</span>
-              <span class="client-trigger-label" id="client-trigger-label">All Clients</span>
-              <span class="material-icons-outlined client-trigger-icon">expand_more</span>
-            </button>
-            <div class="client-dropdown-panel" id="client-dropdown-panel">
-              <input type="text" class="client-dropdown-search" placeholder="Search client…" oninput="filterClientOptions(this.value)" id="client-search-input">
-              <div class="client-dropdown-list" id="client-option-list"></div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5 block">Location</label>
-          <select id="filter-location" onchange="renderAll()" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer">
-            <option value="all">All Locations</option>
-            <option value="Manila">Manila (NCR)</option>
-            <option value="Tarlac">Tarlac</option>
-            <option value="Bulacan">Bulacan</option>
-            <option value="Pampanga">Pampanga</option>
-            <option value="Cavite">Cavite</option>
-            <option value="Pangasinan">Pangasinan</option>
-            <option value="Batangas">Batangas</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5 block">Position</label>
-          <select id="filter-role" onchange="renderAll()" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer">
-            <option value="all">All Positions</option>
-            <option value="Sales Promoter">Sales Promoter</option>
-            <option value="Merchandiser">Merchandiser</option>
-            <option value="Area Supervisor">Area Supervisor</option>
-            <option value="Brand Ambassador">Brand Ambassador</option>
-            <option value="Trade Marketing Specialist">Trade Marketing Specialist</option>
-            <option value="Field Sales Representative">Field Sales Representative</option>
-            <option value="Product Demonstrator">Product Demonstrator</option>
-            <option value="Store Supervisor">Store Supervisor</option>
-            <option value="In-Store Activator">In-Store Activator</option>
-            <option value="Content Marketer">Content Marketer</option>
-            <option value="Logistics Coordinator">Logistics Coordinator</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5 block">Stage</label>
-          <select id="filter-stage" onchange="renderAll()" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer">
-            <option value="all">All Stages</option>
-            <option value="new">Initial Screening</option>
-            <option value="interview">Interview</option>
-            <option value="exam">Pre-Employment Exam</option>
-            <option value="bgcheck">Background Check</option>
-            <option value="hired">Job Offer / Proposal</option>
-            <option value="onboarding">Onboarding</option>
-            <option value="pool">Talent Pool</option>
-            <option value="rejected">Not Qualified</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
     <nav class="flex-1 p-3 overflow-y-auto custom-scroll">
       <p class="nav-label">Navigation</p>
       <div class="mt-1 space-y-0.5">
@@ -433,7 +367,54 @@
       </div>
       <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center gap-2 flex-wrap" id="pipeline-filter-bar">
         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-0.5"><span class="material-icons-outlined" style="font-size:13px;">filter_list</span>Filter</span>
-        <div class="flex items-center gap-2 flex-wrap" id="pipeline-filters"></div>
+        <div class="flex items-center gap-2 flex-wrap" id="pipeline-filters">
+          <div class="client-dropdown-wrap" id="client-dropdown-wrap" style="width:150px;">
+            <button type="button" class="client-trigger" onclick="toggleClientDropdown(event)" id="client-trigger">
+              <span class="material-icons-outlined text-red-800" style="font-size:14px;">business</span>
+              <span class="client-trigger-label" id="client-trigger-label">All Clients</span>
+              <span class="material-icons-outlined client-trigger-icon">expand_more</span>
+            </button>
+            <div class="client-dropdown-panel" id="client-dropdown-panel">
+              <input type="text" class="client-dropdown-search" placeholder="Search client…" oninput="filterClientOptions(this.value)" id="client-search-input">
+              <div class="client-dropdown-list" id="client-option-list"></div>
+            </div>
+          </div>
+          <select id="filter-role" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
+            <option value="all">All Positions</option>
+            <option value="Sales Promoter">Sales Promoter</option>
+            <option value="Merchandiser">Merchandiser</option>
+            <option value="Area Supervisor">Area Supervisor</option>
+            <option value="Brand Ambassador">Brand Ambassador</option>
+            <option value="Trade Marketing Specialist">Trade Marketing Specialist</option>
+            <option value="Field Sales Representative">Field Sales Representative</option>
+            <option value="Product Demonstrator">Product Demonstrator</option>
+            <option value="Store Supervisor">Store Supervisor</option>
+            <option value="In-Store Activator">In-Store Activator</option>
+            <option value="Content Marketer">Content Marketer</option>
+            <option value="Logistics Coordinator">Logistics Coordinator</option>
+          </select>
+          <select id="filter-location" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
+            <option value="all">All Locations</option>
+            <option value="Manila">Manila (NCR)</option>
+            <option value="Tarlac">Tarlac</option>
+            <option value="Bulacan">Bulacan</option>
+            <option value="Pampanga">Pampanga</option>
+            <option value="Cavite">Cavite</option>
+            <option value="Pangasinan">Pangasinan</option>
+            <option value="Batangas">Batangas</option>
+          </select>
+          <select id="filter-stage" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
+            <option value="all">All Stages</option>
+            <option value="new">Initial Screening</option>
+            <option value="interview">Interview</option>
+            <option value="exam">Pre-Employment Exam</option>
+            <option value="bgcheck">Background Check</option>
+            <option value="hired">Job Offer / Proposal</option>
+            <option value="onboarding">Onboarding</option>
+            <option value="pool">Talent Pool</option>
+            <option value="rejected">Not Qualified</option>
+          </select>
+        </div>
         <select id="filter-source" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
           <option value="all">All Sources</option>
           <option value="Website">Website</option>
@@ -3222,18 +3203,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     host.appendChild(b);
   }
 
-  // Filters live INSIDE the pipeline view (not the header, not the sidebar)
+  // Filters now live directly inside the pipeline view (see #pipeline-filters in
+  // the markup). Nothing to move — just make sure the old header slot stays empty.
   function relocateFilters(){
-    const host=document.getElementById('pipeline-filters'); if(!host || host.dataset.done) return;
-    ['client-dropdown-wrap','filter-location','filter-role','filter-stage'].forEach(id=>{
-      const el=document.getElementById(id); if(!el) return;
-      if(id==='client-dropdown-wrap'){ el.style.width='150px'; }
-      else { el.classList.remove('w-full'); el.style.maxWidth='150px'; }
-      host.appendChild(el);
-    });
-    const sf=document.getElementById('sidebar-filters'); if(sf) sf.style.display='none';
     const hf=document.getElementById('hdr-filters'); if(hf) hf.style.display='none';
-    host.dataset.done='1';
   }
   // Reset every pipeline filter
   window.cntClearFilters=function(){
