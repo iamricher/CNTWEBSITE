@@ -149,6 +149,13 @@
   .btn-submit:disabled{opacity:.6;cursor:not-allowed}
   .form-msg{font-size:.8rem;margin-top:11px;padding:10px 13px;border-radius:var(--radius-sm);display:none}
   .form-msg.err{display:block;background:#FEE2E2;color:#B91C1C}
+  /* Honeypot — off-screen, not display:none (some bots skip hidden inputs) */
+  .hp-field{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .consent{margin-top:14px;padding:13px 14px;background:var(--gray-50,#F9FAFB);border:1px solid var(--gray-200,#E5E7EB);border-radius:var(--radius-sm)}
+  .consent-row{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:.78rem;line-height:1.5;color:var(--gray-700,#374151)}
+  .consent-row input{margin-top:2px;width:15px;height:15px;accent-color:var(--red);flex:none;cursor:pointer}
+  .consent-note{font-size:.7rem;line-height:1.55;color:var(--gray-400,#9CA3AF);margin-top:9px;padding-top:9px;border-top:1px solid var(--gray-200,#E5E7EB)}
+  .consent-note a{color:var(--red);text-decoration:underline}
   .success{text-align:center;padding:24px 6px}
   .success .check{width:58px;height:58px;border-radius:50%;background:#DCFCE7;color:#16A34A;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
   .success .check svg{width:30px;height:30px}
@@ -286,6 +293,21 @@
                   </label>
                 </div>
                 <div class="field"><label>Cover note <span style="color:var(--gray-400);font-weight:400">(optional)</span></label><textarea name="cover_note" placeholder="Why are you a great fit?"></textarea></div>
+
+                <!-- Honeypot: hidden from people, tempting to bots. Never filled by a real applicant. -->
+                <div class="hp-field" aria-hidden="true"><label>Company website</label><input name="company_website" type="text" tabindex="-1" autocomplete="off" /></div>
+
+                <div class="consent">
+                  <label class="consent-row">
+                    <input type="checkbox" name="consent" id="consent" required />
+                    <span>I consent to CNT Promo &amp; Ads Specialists, Inc. collecting and processing my personal data and CV for recruitment purposes, in accordance with the <b>Data Privacy Act of 2012 (RA 10173)</b>.</span>
+                  </label>
+                  <p class="consent-note">
+                    Your data is used only to assess your application and to endorse you to the client for this role. It is stored securely, accessible only to authorised CNT recruitment staff, and kept for up to <b>12 months</b> unless you ask us to remove it sooner. You may request access to, correction of, or deletion of your data any time by emailing
+                    <a href="mailto:privacy@cntpromoads.com">privacy@cntpromoads.com</a>.
+                  </p>
+                </div>
+
                 <button type="submit" class="btn-submit" id="submit-btn">Submit application</button>
                 <div class="form-msg" id="form-msg"></div>
               </form>
@@ -530,10 +552,22 @@
     e.preventDefault();
     const f=e.target, ri=$('#resume');
     const name=f.name.value.trim(), email=f.email.value.trim(), phone=f.phone.value.trim(), file=ri.files[0];
+
+    // Bot trap: a real person never sees (let alone fills) this field.
+    // Fail silently with a fake success so bots don't learn they were caught.
+    if(f.company_website && f.company_website.value.trim()!==''){ showSuccess(name); return; }
+
     if(!name||!email||!phone){ showMsg('Please fill in your name, email and mobile number.'); return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showMsg('Please enter a valid email address.'); return; }
     if(!file){ showMsg('Please attach your resume / CV.'); return; }
     if(file.size>5*1048576){ showMsg('Your file is larger than 5 MB.'); return; }
+    if(!f.consent.checked){ showMsg('Please tick the data privacy consent so we may process your application.'); return; }
     if(!sb){ showMsg('Applications are not live yet — Supabase must be configured first.'); return; }
+
+    // Throttle: one submission per 30s per browser, regardless of job
+    const last=+(localStorage.getItem('cnt_last_apply')||0);
+    if(Date.now()-last < 30000){ showMsg('Please wait a moment before submitting again.'); return; }
+
     const btn=$('#submit-btn'); btn.disabled=true; btn.textContent='Submitting…';
     try{
       const safe=file.name.replace(/[^\w.\-]/g,'_');
@@ -544,17 +578,33 @@
         job_id:activeJob.id??null, name, email, phone,
         role:activeJob.role, client:activeJob.client, location:activeJob.location,
         experience:f.experience.value||null, source:f.source.value||'Website',
-        cover_note:f.cover_note.value.trim()||null, resume_url:path, stage:'new'
+        cover_note:f.cover_note.value.trim()||null, resume_url:path, stage:'new',
+        consent_at:new Date().toISOString()
       });
       if(ins.error) throw ins.error;
-      f.style.display='none';
-      const d=document.createElement('div'); d.className='success';
-      d.innerHTML=`<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
-        <h4>Application received!</h4>
-        <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b> (${esc(activeJob.client)}) has been submitted. Our team will review it and reach out if you’re a match.</p>`;
-      $('#apply-inner').appendChild(d);
-    }catch(err){ console.error(err); btn.disabled=false; btn.textContent='Submit application'; showMsg('Something went wrong: '+(err.message||'please try again.')); }
+      localStorage.setItem('cnt_last_apply', String(Date.now()));
+      showSuccess(name);
+    }catch(err){
+      console.error(err);
+      btn.disabled=false; btn.textContent='Submit application';
+      // 23505 = unique violation → they already applied for this exact posting
+      if(err && (err.code==='23505' || /duplicate key|unique constraint/i.test(err.message||''))){
+        showMsg('You have already applied for this position — our team already has your application.');
+      } else {
+        showMsg('Something went wrong: '+(err.message||'please try again.'));
+      }
+    }
   });
+
+  function showSuccess(name){
+    const f=$('#apply-form'); if(f) f.style.display='none';
+    document.querySelector('#apply-inner .success')?.remove();
+    const d=document.createElement('div'); d.className='success';
+    d.innerHTML=`<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h4>Application received!</h4>
+      <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b> (${esc(activeJob.client)}) has been submitted. Our team will review it and reach out if you’re a match.</p>`;
+    $('#apply-inner').appendChild(d);
+  }
 
   loadJobs();
   </script>

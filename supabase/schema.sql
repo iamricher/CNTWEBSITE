@@ -114,6 +114,24 @@ alter table public.jobs
   add column if not exists employment_type text default 'Full-Time',
   add column if not exists recruiter        text;
 
+-- Data Privacy Act of 2012 (RA 10173)
+--   consent_at : when the applicant ticked the consent box on the careers form
+--   purged_at  : when the record was anonymised (retention purge / erasure request)
+alter table public.applications
+  add column if not exists consent_at timestamptz,
+  add column if not exists purged_at  timestamptz;
+
+-- One application per person per job posting (duplicate / spam guard).
+-- Enforced in the DB because anon cannot read the table to check for itself.
+create unique index if not exists applications_one_per_job
+  on public.applications (lower(email), job_id) where job_id is not null;
+
+-- Indexes for scale
+create index if not exists applications_stage_idx  on public.applications (stage);
+create index if not exists applications_client_idx on public.applications (client);
+create index if not exists applications_email_idx  on public.applications (lower(email));
+create index if not exists jobs_status_idx         on public.jobs (status);
+
 -- Fold any legacy interview stages into the consolidated 'interview' stage
 update public.applications set stage='interview',
   interview_round=coalesce(interview_round,'1st Interview'),
@@ -212,10 +230,14 @@ on conflict (id) do nothing;
 drop policy if exists "resumes upload public" on storage.objects;
 drop policy if exists "resumes read authed"   on storage.objects;
 drop policy if exists "resumes read staff"    on storage.objects;
+drop policy if exists "resumes delete mgr"    on storage.objects;
 create policy "resumes upload public" on storage.objects
   for insert to anon, authenticated with check (bucket_id='resumes');
 create policy "resumes read staff" on storage.objects
   for select to authenticated using (bucket_id='resumes' and public.cnt_is_staff());
+-- managers may delete CVs — required for the RA 10173 retention purge / erasure
+create policy "resumes delete mgr" on storage.objects
+  for delete to authenticated using (bucket_id='resumes' and public.cnt_is_manager());
 
 -- ────────────────────────────────────────────────────────────
 -- 6. SEED MASTER DATA + OPEN POSITIONS  (only when empty — never wipes live data)

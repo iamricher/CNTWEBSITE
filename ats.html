@@ -769,6 +769,39 @@
           <div class="p-2 max-h-80 overflow-y-auto custom-scroll" id="set-list-location"></div>
         </div>
       </div>
+
+      <!-- Data privacy (RA 10173) -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+          <span class="material-icons-outlined text-red-800" style="font-size:17px;">privacy_tip</span>
+          <div><h4 class="font-bold text-slate-800 text-sm">Data Privacy &amp; Retention</h4><p class="text-[11px] text-slate-400 mt-0.5">Data Privacy Act of 2012 (RA 10173) — retention limits and right to erasure</p></div>
+        </div>
+        <div class="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div>
+            <p class="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">Retention purge</p>
+            <p class="text-[11px] text-slate-500 leading-relaxed mb-3">Anonymises candidates who applied more than the retention window ago and were not hired. Name, email, phone, cover note and CV are removed; the record is kept (anonymous) so your reports and history stay accurate.</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <select id="retain-months" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white">
+                <option value="6">Older than 6 months</option>
+                <option value="12" selected>Older than 12 months</option>
+                <option value="24">Older than 24 months</option>
+              </select>
+              <button onclick="cntPreviewPurge()" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-slate-50">Preview</button>
+              <button onclick="cntRunPurge()" class="text-xs font-semibold text-white bg-red-800 hover:bg-red-900 rounded-lg px-3 py-1.5 cursor-pointer">Purge now</button>
+            </div>
+            <p class="text-[11px] mt-2.5" id="retain-preview"></p>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2">Right to erasure</p>
+            <p class="text-[11px] text-slate-500 leading-relaxed mb-3">A candidate may ask you to delete their data at any time. Enter their email to anonymise every application they submitted.</p>
+            <div class="flex items-center gap-2">
+              <input id="erase-email" type="email" placeholder="candidate@email.com" class="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5">
+              <button onclick="cntEraseCandidate()" class="text-xs font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg px-3 py-1.5 cursor-pointer whitespace-nowrap">Erase data</button>
+            </div>
+            <p class="text-[11px] mt-2.5" id="erase-result"></p>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -2530,10 +2563,20 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
   }
 
+  // Newest-first, capped. The ATS is a working pipeline, not an archive — pulling
+  // every row ever would eventually stall the browser. Older records stay in the
+  // database and remain reachable via Reports/CSV export.
+  const APPLICATIONS_PAGE_LIMIT = 1000;
   async function loadApplications(){
     if(!sb) return;
-    const { data, error } = await sb.from('applications').select('*').order('created_at',{ascending:false});
+    const { data, error, count } = await sb.from('applications')
+      .select('*',{count:'exact'})
+      .order('created_at',{ascending:false})
+      .limit(APPLICATIONS_PAGE_LIMIT);
     if(error){ console.error('load applications', error); if(window.showToast) showToast('Could not load website applications','error'); return; }
+    if(typeof count==='number' && count>APPLICATIONS_PAGE_LIMIT && window.showToast){
+      showToast('Showing the newest '+APPLICATIONS_PAGE_LIMIT+' of '+count+' applications','info');
+    }
     let added=0; const seen=_lastSeen();
     (data||[]).forEach(r=>{
       if(!findApplicant('web-'+r.id)){ addApplicant(mapRow(r)); added++; }
@@ -4218,6 +4261,85 @@ document.addEventListener('DOMContentLoaded',()=>{
     const _origRA_dash = renderAll;
     renderAll = function(){ _origRA_dash(); try{ cntRenderDashboard(); }catch(e){ console.warn('dashboard',e); } };
   }
+
+  // ══════════════════════════════════════════════════════════════
+  //  DATA PRIVACY — RA 10173 retention purge + right to erasure
+  //  Records are anonymised, never deleted: reporting history stays
+  //  intact while the personal data is genuinely gone.
+  // ══════════════════════════════════════════════════════════════
+  function _cutoffISO(months){ const d=new Date(); d.setMonth(d.getMonth()-parseInt(months,10)); return d.toISOString().slice(0,10); }
+  const _PURGE_PATCH=(id)=>({
+    name:'[Redacted]', email:'redacted+'+id+'@removed.invalid', phone:null,
+    cover_note:null, resume_url:null, linkedin:null, referred_by:null,
+    tags:null, degree:null, purged_at:new Date().toISOString()
+  });
+
+  async function _purgeRows(rows){
+    let ok=0;
+    for(const r of rows){
+      if(r.resume_url){ try{ await sb.storage.from('resumes').remove([r.resume_url]); }catch(e){ console.warn('cv remove',e); } }
+      const { error }=await sb.from('applications').update(_PURGE_PATCH(r.id)).eq('id',r.id);
+      if(error){ console.error('purge',error); } else ok++;
+    }
+    return ok;
+  }
+
+  window.cntPreviewPurge=async function(){
+    const el=document.getElementById('retain-preview'); if(!el) return;
+    if(!sb){ el.textContent='Backend unavailable.'; return; }
+    const months=(document.getElementById('retain-months')||{}).value||'12';
+    const { data, error }=await sb.from('applications').select('id')
+      .lt('applied_date',_cutoffISO(months)).is('purged_at',null).not('stage','in','("hired","onboarding")');
+    if(error){ el.className='text-[11px] mt-2.5 text-red-600'; el.textContent='Preview failed: '+error.message; return; }
+    const n=(data||[]).length;
+    el.className='text-[11px] mt-2.5 '+(n?'text-slate-600':'text-slate-400');
+    el.textContent=n?(n+' candidate record'+(n!==1?'s':'')+' would be anonymised (hired candidates are never purged).'):'Nothing to purge — no records older than that window.';
+  };
+
+  window.cntRunPurge=async function(){
+    const el=document.getElementById('retain-preview');
+    if(!sb) return;
+    const months=(document.getElementById('retain-months')||{}).value||'12';
+    const { data, error }=await sb.from('applications').select('id,resume_url')
+      .lt('applied_date',_cutoffISO(months)).is('purged_at',null).not('stage','in','("hired","onboarding")');
+    if(error){ if(window.showToast) showToast('Purge failed: '+error.message,'error'); return; }
+    const rows=data||[];
+    if(!rows.length){ if(window.showToast) showToast('Nothing to purge','info'); return; }
+    if(!confirm('Permanently anonymise '+rows.length+' candidate record'+(rows.length!==1?'s':'')+' older than '+months+' months?\n\nNames, emails, phone numbers and CVs will be removed. This cannot be undone.')) return;
+    const ok=await _purgeRows(rows);
+    logAudit('privacy_purge','applications',String(ok), ok+' records anonymised (>'+months+'mo)');
+    if(el){ el.className='text-[11px] mt-2.5 text-emerald-700'; el.textContent=ok+' record'+(ok!==1?'s':'')+' anonymised.'; }
+    if(window.showToast) showToast(ok+' record'+(ok!==1?'s':'')+' anonymised','success');
+    await loadApplications(); renderAll();
+  };
+
+  window.cntEraseCandidate=async function(){
+    const el=document.getElementById('erase-result');
+    const input=document.getElementById('erase-email');
+    const email=((input||{}).value||'').trim();
+    if(!email){ if(el){ el.className='text-[11px] mt-2.5 text-slate-400'; el.textContent='Enter an email address first.'; } return; }
+    if(!sb) return;
+    const { data, error }=await sb.from('applications').select('id,resume_url').ilike('email',email);
+    if(error){ if(el){ el.className='text-[11px] mt-2.5 text-red-600'; el.textContent='Lookup failed: '+error.message; } return; }
+    const rows=data||[];
+    if(!rows.length){ if(el){ el.className='text-[11px] mt-2.5 text-slate-400'; el.textContent='No applications found for that email.'; } return; }
+    if(!confirm('Erase all personal data for '+email+'?\n\n'+rows.length+' application'+(rows.length!==1?'s':'')+' will be anonymised and their CV deleted. This cannot be undone.')) return;
+    const ok=await _purgeRows(rows);
+    logAudit('privacy_erasure','applicant',email, ok+' records anonymised on request');
+    if(el){ el.className='text-[11px] mt-2.5 text-emerald-700'; el.textContent=ok+' application'+(ok!==1?'s':'')+' erased for '+email+'.'; }
+    if(input) input.value='';
+    if(window.showToast) showToast('Candidate data erased','success');
+    await loadApplications(); renderAll();
+  };
+
+  // ── Resilience: surface failures instead of dying silently ──
+  window.addEventListener('error', e=>{
+    console.error('[cnt] uncaught', e.error||e.message);
+    if(window.showToast) showToast('Something went wrong — the team has been notified.','error');
+  });
+  window.addEventListener('unhandledrejection', e=>{
+    console.error('[cnt] unhandled promise rejection', e.reason);
+  });
 
   // Bootstrap — called by the app's DOMContentLoaded handler
   window.cntBoot = function(){
