@@ -351,7 +351,7 @@
     <div id="view-applications" class="hidden space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 gap-4">
         <div class="flex items-center gap-3">
-          <button onclick="switchView('job')" title="Back to Job Positions" class="flex-shrink-0 w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-red-800 hover:border-red-200 flex items-center justify-center cursor-pointer transition"><span class="material-icons-outlined" style="font-size:18px;">arrow_back</span></button>
+          <button onclick="cntBackToJobs()" title="Back to Job Positions" class="flex-shrink-0 w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-red-800 hover:border-red-200 flex items-center justify-center cursor-pointer transition"><span class="material-icons-outlined" style="font-size:18px;">arrow_back</span></button>
           <div><h2 class="text-lg font-bold text-slate-900">Applications Pipeline</h2><p class="text-xs text-slate-500" id="pipeline-context">Full-cycle PH recruitment workflow</p></div>
         </div>
         <div class="flex items-center gap-2">
@@ -2027,14 +2027,25 @@ function fmtTime(t){if(!t)return'TBD';const[h,m]=t.split(':');const hr=parseInt(
 
 function quickJump(role,location,account,stage){
   selectClient(account);
-  document.getElementById('filter-location').value=location;
-  document.getElementById('filter-role').value=role;
+  _setSelect('filter-location',location);
+  _setSelect('filter-role',role);
   document.getElementById('filter-stage').value=stage||'all';
   window.cntPipelineJob={role,location,account};
   const ctx=document.getElementById('pipeline-context');
   if(ctx) ctx.textContent=role+' · '+account+' · '+location;
+  cntShowPipelineFilters(false);   // already scoped to one job — filters would only confuse
   switchView('applications');
   toggleApplicationView('kanban');
+}
+// The filter bar only makes sense when browsing the whole pipeline
+function cntShowPipelineFilters(show){
+  const bar=document.getElementById('pipeline-filter-bar');
+  if(bar) bar.style.display = show ? '' : 'none';
+}
+// Back from a job's pipeline → Job Positions, with every filter reset to All
+function cntBackToJobs(){
+  if(window.cntClearFilters) cntClearFilters();
+  switchView('job');
 }
 // Favorite (star) toggle on a job card — client-side highlight
 function cntToggleFav(accId,role,location){
@@ -2051,6 +2062,7 @@ function cntOpenPipelineList(stage){
   window.cntPipelineJob=null;
   const ctx=document.getElementById('pipeline-context');
   if(ctx) ctx.textContent=(stage&&stage!=='all')?('All clients · '+getStageName(stage)):'All applicants · all clients';
+  cntShowPipelineFilters(true);   // browsing everything — filters are useful here
   switchView('applications');
   toggleApplicationView('list');
 }
@@ -3212,9 +3224,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.cntClearFilters=function(){
     ['filter-location','filter-role','filter-stage','filter-source'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
     if(typeof selectClient==='function') selectClient('all'); else if(typeof currentAccount!=='undefined') currentAccount='all';
+    if(typeof activeJobClientTab!=='undefined') activeJobClientTab='all';   // reset the Job Positions client facet too
     if(typeof searchQuery!=='undefined') searchQuery='';
     window.cntPipelineJob=null;
     const ctx=document.getElementById('pipeline-context'); if(ctx) ctx.textContent='Full-cycle PH recruitment workflow';
+    if(window.cntShowPipelineFilters) cntShowPipelineFilters(true);
     renderAll();
   };
 
