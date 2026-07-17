@@ -59,6 +59,8 @@ const REQUIRED_IDS = [
   'applications-list-container', 'applications-kanban-container',
   'set-list-client', 'set-list-position', 'set-list-location',
   'resume-modal', 'crud-modal', 'job-modal', 'interview-modal',
+  // applicant form left / résumé right (Odoo Résumé Display)
+  'profile-split', 'profile-left', 'profile-right', 'printable-resume',
 ];
 const missing = REQUIRED_IDS.filter(id => !ats.includes('id="' + id + '"'));
 missing.length ? fail('all required ids present', 'missing: ' + missing.join(', '))

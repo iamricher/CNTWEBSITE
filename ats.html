@@ -1004,10 +1004,13 @@
          while the parent's fixed height keeps the modal from resizing -->
     <div class="flex-1 overflow-y-auto custom-scroll bg-slate-100 print-area" style="min-height:0;">
 
-      <!-- PROFILE TAB -->
+      <!-- PROFILE TAB — applicant form left, résumé right (Odoo Résumé Display).
+           Collapses to a single column on narrow screens, as Odoo notes. -->
       <div id="tab-profile" class="p-5">
+      <div id="profile-split" class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+        <div id="profile-left" class="space-y-4 min-w-0">
 
-        <div class="bg-white border border-slate-200 rounded-xl p-5 mb-4 shadow-sm">
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-4">
               <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-red-800 font-bold text-lg ring-2 ring-red-50" id="resume-avatar"></div>
@@ -1045,13 +1048,18 @@
           </div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden" id="printable-resume">
-          <div class="px-5 py-3 bg-red-800 flex items-center gap-2">
-            <span class="material-icons-outlined text-white" style="font-size:16px;">description</span>
-            <h4 class="font-bold text-white text-sm tracking-wide">Resume</h4>
+        </div><!-- /profile-left -->
+
+        <div id="profile-right" class="space-y-4 min-w-0">
+          <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden" id="printable-resume">
+            <div class="px-5 py-3 bg-red-800 flex items-center gap-2">
+              <span class="material-icons-outlined text-white" style="font-size:16px;">description</span>
+              <h4 class="font-bold text-white text-sm tracking-wide">Resume</h4>
+            </div>
+            <div class="p-7 resume-strict" id="profile-resume-content"></div>
           </div>
-          <div class="p-7 resume-strict" id="profile-resume-content"></div>
-        </div>
+        </div><!-- /profile-right -->
+      </div><!-- /profile-split -->
       </div>
 
       <!-- PRE-EMPLOYMENT TAB -->
