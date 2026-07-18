@@ -1427,6 +1427,13 @@ function normStage(s){
   if(STAGE_LEGACY[s]) return 'interview';
   return s;
 }
+// A stage counts as "hired" if flagged is_hired in Settings — works for renamed
+// or custom offer stages. Falls back to the built-in keys before stages load.
+function stageIsHired(key){
+  const s=PIPELINE_STAGES.find(x=>x.key===key);
+  if(s) return !!s.is_hired;
+  return key==='hired'||key==='onboarding';
+}
 
 // ── Odoo-style applicant form: fill the label/value fields + stage stepper ──
 function _escForm(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1662,7 +1669,7 @@ function renderAccountHealthGrid(){
   ahg.innerHTML=ACCOUNTS.map(acc=>{
     const all=accountData[acc.id]||[];
     const act=all.filter(a=>a.stage!=='pool'&&a.stage!=='rejected');
-    const hired=all.filter(a=>a.stage==='hired'||a.stage==='onboarding').length;
+    const hired=all.filter(a=>stageIsHired(a.stage)).length;
     const total=act.length;
     const pct=total?Math.round((hired/total)*100):0;
     const totalJobs=(jobDatabase[acc.id]||[]).reduce((s,j)=>s+j.needed,0);
@@ -1971,7 +1978,7 @@ function renderJobPositions(){
       const appsForJob=(accountData[accId]||[]).filter(a=>a.role===job.role&&a.location===job.location);
       const newCount=appsForJob.filter(a=>a.stage==='new').length;
       const totalApps=appsForJob.filter(a=>a.stage!=='pool').length;
-      const hiredCount=appsForJob.filter(a=>a.stage==='hired'||a.stage==='onboarding'||a.deployed_at).length;
+      const hiredCount=appsForJob.filter(a=>stageIsHired(a.stage)||a.deployed_at).length;
       const interviewCount=appsForJob.filter(a=>a.stage==='interview').length;
       const toRecruit=Math.max(0,(job.needed||1)-hiredCount);
       const published=job.status!=='closed';
@@ -2463,7 +2470,7 @@ function triggerResumeModal(id){
   sb.className='badge border '+getStageBadge(app.stage);
   const offerBtn=document.getElementById('offer-letter-btn');
   const offerBox=document.getElementById('offer-summary-box');
-  if(app.stage==='hired'){
+  if(stageIsHired(app.stage)){
     offerBtn.classList.remove('hidden');offerBox.classList.remove('hidden');
     if(window.cntRenderOfferBox) cntRenderOfferBox(app);
   }else{offerBtn.classList.add('hidden');offerBox.classList.add('hidden');}
@@ -2608,7 +2615,7 @@ function openRequirementsModal(id){triggerResumeModal(id);}
 
 function generateOfferLetter(){
   const app=findApplicant(currentViewedApplicantId);if(!app)return;
-  if(app.stage!=='hired'){showToast('Offer letter is only available for candidates in the Job Offer stage.','info');return;}
+  if(!stageIsHired(app.stage)){showToast('Offer letter is only available once the candidate reaches a Job Offer stage.','info');return;}
   const today=new Date().toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'});
   const offerAmt=app.proposed_salary||app.salary||'As discussed';
   let validUntil='';
@@ -4007,7 +4014,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   let _reportTab='applicants';
   function _outcome(a){
     if(a.stage==='rejected') return 'refused';
-    if(a.stage==='hired'||a.stage==='onboarding'||a.deployed_at) return 'hired';
+    if(stageIsHired(a.stage)||a.deployed_at) return 'hired';
     return 'in_progress';
   }
   function _reportData(){ return getAllApplicants().filter(a=>a.stage!=='pool'); }
