@@ -962,7 +962,7 @@
 <div id="resume-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-slate-900/50 modal-overlay no-print" onclick="closeResumeModal()"></div>
   <!-- FIX: height:92vh locks the modal size so tab switching never resizes it -->
-  <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10 modal-box border border-slate-200 no-print" style="height:92vh;">
+  <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10 modal-box border border-slate-200 no-print" style="height:94vh;">
 
     <!-- Modal Header -->
     <div class="px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50 no-print flex-shrink-0">
@@ -1000,7 +1000,7 @@
       <!-- PROFILE TAB — applicant form left, résumé right (Odoo Résumé Display).
            Collapses to a single column on narrow screens, as Odoo notes. -->
       <div id="tab-profile" class="p-5">
-      <div id="profile-split" class="grid grid-cols-1 xl:grid-cols-[3fr_2fr] gap-4 items-start">
+      <div id="profile-split" class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <div id="profile-left" class="space-y-4 min-w-0">
 
         <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
@@ -1086,7 +1086,7 @@
 
         </div><!-- /profile-left -->
 
-        <div id="profile-right" class="space-y-4 min-w-0">
+        <div id="profile-right" class="space-y-4 min-w-0 xl:sticky xl:top-0 self-start">
           <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden" id="printable-resume">
             <div class="px-5 py-3 bg-red-800 flex items-center gap-2">
               <span class="material-icons-outlined text-white" style="font-size:16px;">description</span>
@@ -2799,7 +2799,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'<a href="'+url+'" download style="font-size:12px;font-weight:600;color:#7f1d1d;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">download</span>Download</a>'
       +'</span></div>';
     if(isPdf){
-      box.innerHTML=actions+'<iframe src="'+url+'#toolbar=1" style="width:100%;height:540px;border:0;display:block;background:#f8fafc;" title="Uploaded resume"></iframe>';
+      box.innerHTML=actions+'<iframe src="'+url+'#toolbar=1&view=FitH" style="width:100%;height:78vh;min-height:560px;border:0;display:block;background:#f8fafc;" title="Uploaded resume"></iframe>';
     } else {
       box.innerHTML=actions+'<div style="padding:30px 16px;text-align:center;color:#64748b;font-size:13px;"><span class="material-icons-outlined" style="font-size:42px;color:#cbd5e1;">description</span><p style="margin-top:8px;">This is a document file and can’t preview inline.</p><a href="'+url+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;background:#7f1d1d;color:#fff;padding:9px 18px;border-radius:8px;font-weight:600;">Open / Download resume</a></div>';
     }
