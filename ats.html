@@ -40,6 +40,7 @@
   .cnt-step .s.active { background:#eef2ff; color:#4338ca; }
   .cnt-step .s.done { color:#16a34a; }
   .cnt-step .sep { color:#cbd5e1; margin:0 1px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
   .badge { display:inline-flex; align-items:center; padding:3px 8px; border-radius:99px; font-size:10px; font-weight:700; border:1px solid transparent; }
   .modal-overlay { animation: fadeIn .18s ease-out; }
   .modal-box { animation: slideUp .22s ease-out; }
@@ -1000,6 +1001,7 @@
       <!-- PROFILE TAB — applicant form left, résumé right (Odoo Résumé Display).
            Collapses to a single column on narrow screens, as Odoo notes. -->
       <div id="tab-profile" class="p-5">
+      <div id="cnt-digitize-banner" class="hidden"></div>
       <div id="profile-split" class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <div id="profile-left" class="space-y-4 min-w-0">
 
@@ -1018,6 +1020,9 @@
               </button>
               <button id="resume-refuse-btn" onclick="cntOpenRefuse(currentViewedApplicantId)" class="text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-red-200 cursor-pointer">
                 <span class="material-icons-outlined" style="font-size:13px;">block</span> Refuse
+              </button>
+              <button onclick="cntAddToPool(currentViewedApplicantId)" class="text-amber-700 hover:bg-amber-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-amber-200 cursor-pointer">
+                <span class="material-icons-outlined" style="font-size:13px;">auto_awesome</span> Add to Pool
               </button>
               <button id="resume-reopen-btn" onclick="cntReopen(currentViewedApplicantId)" class="hidden text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-emerald-300 cursor-pointer">
                 <span class="material-icons-outlined" style="font-size:13px;">restart_alt</span> Reopen
@@ -2792,9 +2797,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     const url=data.signedUrl;
     const isPdf=/\.pdf(\?|$)/i.test(app.resumePath);
     if(chip) chip.innerHTML='<a href="'+url+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#7f1d1d;"><span class="material-icons-outlined" style="font-size:16px;">description</span>View uploaded CV</a>';
-    const actions='<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #e2e8f0;background:#fff;">'
+    const actions='<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #e2e8f0;background:#fff;flex-wrap:wrap;">'
       +'<span style="font-size:12px;color:#334155;font-weight:600;display:inline-flex;align-items:center;gap:6px;"><span class="material-icons-outlined" style="font-size:16px;color:#7f1d1d;">upload_file</span>Uploaded by applicant</span>'
-      +'<span style="display:flex;gap:12px;">'
+      +'<span style="display:flex;gap:12px;align-items:center;">'
+      +'<button onclick="cntDigitizeResume(\''+app.id+'\')" style="font-size:12px;font-weight:700;color:#fff;background:#7f1d1d;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">auto_fix_high</span>Digitize</button>'
       +'<a href="'+url+'" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#7f1d1d;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">open_in_new</span>Open</a>'
       +'<a href="'+url+'" download style="font-size:12px;font-weight:600;color:#7f1d1d;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">download</span>Download</a>'
       +'</span></div>';
@@ -4753,6 +4759,109 @@ document.addEventListener('DOMContentLoaded',()=>{
     const r2=await sb.from('stages').update({sequence:sa}).eq('key',b.key);
     if(r1.error||r2.error){ console.error('stage move',r1.error||r2.error); if(window.showToast) showToast('Reorder failed','error'); return; }
     await loadStages(); renderStagesSettings(); renderAll();
+  };
+
+  // ── Add to Talent Pool ──
+  window.cntAddToPool=function(id){
+    const app=findApplicant(id); if(!app) return;
+    if(app.stage==='pool'){ if(window.showToast) showToast('Already in the Talent Pool','info'); return; }
+    updateApplicant(id,{stage:'pool'}); app.stage='pool';
+    _persistApp(app,{stage:'pool'});
+    logAudit('add_to_pool','applicant',app._sid||id, app.name);
+    cntLogActivity(app,'stage','Added to Talent Pool');
+    if(window.showToast) showToast(app.name+' added to Talent Pool','success');
+    const m=document.getElementById('resume-modal'); if(m) m.classList.add('hidden');
+    renderAll();
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  //  DIGITIZE RÉSUMÉ — extract candidate info from the uploaded CV
+  //  (PDF text layer via pdf.js, DOCX via mammoth) and fill EMPTY
+  //  applicant fields. Never overwrites what a recruiter typed.
+  // ══════════════════════════════════════════════════════════════
+  function _loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('Could not load '+src)); document.head.appendChild(s); }); }
+  async function _pdfText(url){
+    if(!window.pdfjsLib){
+      await _loadScript('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    }
+    const pdf=await window.pdfjsLib.getDocument(url).promise;
+    let text='', big={h:0,s:''};
+    const pages=Math.min(pdf.numPages,6);
+    for(let p=1;p<=pages;p++){
+      const page=await pdf.getPage(p);
+      const c=await page.getTextContent();
+      c.items.forEach(it=>{ const str=it.str||''; text+=str+' ';
+        if(p===1){ const h=Math.abs((it.transform&&it.transform[3])||it.height||0); const clean=str.trim();
+          if(clean.length>2 && /[A-Za-z]/.test(clean) && h>big.h) big={h,s:clean}; } });
+      text+='\n';
+    }
+    return { text, name:big.s };
+  }
+  async function _docxText(url){
+    if(!window.mammoth){ await _loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js'); }
+    const buf=await (await fetch(url)).arrayBuffer();
+    const r=await window.mammoth.extractRawText({ arrayBuffer:buf });
+    return { text:r.value||'', name:'' };
+  }
+  function _parseResume(t, guessName){
+    const email=(t.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)||[])[0]||'';
+    let linkedin=(t.match(/(?:https?:\/\/)?(?:[a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9_%-]+/i)||[])[0]||'';
+    if(linkedin && !/^https?:/i.test(linkedin)) linkedin='https://'+linkedin;
+    const phoneRaw=(t.match(/(?:\+?63|0)\s?9\d{2}[\s.\-]?\d{3}[\s.\-]?\d{4}|\+?\d[\d\s().\-]{9,}\d/)||[])[0]||'';
+    const phone=phoneRaw?phoneRaw.replace(/\s+/g,' ').trim():'';
+    let degree='';
+    if(/\b(ph\.?\s?d|doctorate|doctoral)\b/i.test(t)) degree='Doctoral';
+    else if(/\bmaster'?s?\b|\bm\.?\s?s\.?\b|\bm\.?\s?a\.?\b|\bmba\b/i.test(t)) degree='Master';
+    else if(/\bbachelor'?s?\b|\bb\.?\s?s\.?\b|\bb\.?\s?a\.?\b/i.test(t)) degree='Bachelor';
+    else if(/\bvocational\b|\btesda\b/i.test(t)) degree='Vocational';
+    else if(/\bhigh school\b|\bsenior high\b/i.test(t)) degree='High School';
+    let summary=''; const sm=t.match(/(?:professional\s+summary|career\s+summary|summary|profile|objective)\s*[:\-–]?\s*([\s\S]{40,700}?)(?:technical\s+skills|\bskills\b|experience|education|work\s+history|employment)/i); if(sm) summary=sm[1].replace(/\s+/g,' ').trim().slice(0,500);
+    let skills=''; const sk=t.match(/(?:technical\s+skills|core\s+competencies|\bskills\b)\s*[:\-–]?\s*([\s\S]{10,400}?)(?:professional\s+experience|experience|education|work\s+history|employment|certifi)/i); if(sk) skills=sk[1].replace(/\s+/g,' ').trim();
+    let name=guessName||'';
+    if(!name){ const lines=t.split(/\n/).map(l=>l.trim()).filter(Boolean); for(const l of lines.slice(0,5)){ if(/^[A-Z][A-Za-z.'-]+(\s+[A-Z][A-Za-z.'-]+){1,3}$/.test(l)){ name=l; break; } } }
+    return { name, email, phone, linkedin, degree, summary, skills };
+  }
+  window.cntDigitizeResume=async function(id){
+    const app=findApplicant(id); if(!app) return;
+    const banner=document.getElementById('cnt-digitize-banner');
+    const show=(html,cls)=>{ if(!banner) return; banner.className='mb-3';
+      banner.innerHTML='<div class="'+cls+'" style="border-radius:10px;padding:10px 14px;font-size:12.5px;display:flex;align-items:center;gap:8px;">'+html+'</div>'; };
+    if(!app._web || !app.resumePath || !sb){ show('<span class="material-icons-outlined" style="font-size:16px;">info</span>No uploaded résumé to digitize for this applicant.','bg-slate-100 text-slate-600 border border-slate-200'); return; }
+    show('<span class="material-icons-outlined" style="font-size:16px;animation:spin 1s linear infinite;">progress_activity</span>Reading the résumé…','bg-slate-100 text-slate-600 border border-slate-200');
+    try{
+      const { data, error }=await sb.storage.from('resumes').createSignedUrl(app.resumePath,300);
+      if(error||!data) throw new Error('Could not open the résumé file');
+      const url=data.signedUrl;
+      let res;
+      if(/\.pdf(\?|$)/i.test(app.resumePath)) res=await _pdfText(url);
+      else if(/\.docx?(\?|$)/i.test(app.resumePath)) res=await _docxText(url);
+      else throw new Error('Only PDF or DOCX résumés can be digitized');
+      const text=(res.text||'');
+      if(text.replace(/\s/g,'').length<40) throw new Error('scanned');
+      const f=_parseResume(text, res.name);
+      const patch={}, db={}, filled=[];
+      const put=(field,dbcol,val)=>{ if(val && !(''+(app[field]||'')).trim()){ patch[field]=val; db[dbcol]=val; filled.push(field==='notes'?'summary':field); } };
+      put('email','email',f.email);
+      put('phone','phone',f.phone);
+      put('linkedin','linkedin',f.linkedin);
+      put('degree','degree',f.degree);
+      put('notes','cover_note',f.summary);
+      if(f.skills && !(app.tags||'').trim()){ const tg=f.skills.split(/[,;•|/]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<24).slice(0,6).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
+      Object.assign(app,patch);
+      if(Object.keys(db).length){ updateApplicant(app.id,patch); _persistApp(app,db); }
+      logAudit('digitize','applicant',app._sid||id, filled.join(', ')||'no new fields');
+      cntLogActivity(app,'note','Résumé digitized'+(filled.length?(' — filled '+filled.join(', ')):' — nothing new to fill'));
+      if(window.cntRenderApplicantForm) cntRenderApplicantForm(app);
+      const found=[];
+      if(f.name) found.push('Name'); if(f.email) found.push('Email'); if(f.phone) found.push('Phone');
+      if(f.linkedin) found.push('LinkedIn'); if(f.degree) found.push('Degree'); if(f.skills) found.push('Skills'); if(f.summary) found.push('Summary');
+      const msg = filled.length ? ('Filled: <b>'+filled.join(', ')+'</b>.') : ('No empty fields to fill. Detected: '+(found.join(' · ')||'nothing readable')+'.');
+      show('<span class="material-icons-outlined" style="font-size:16px;color:#166534;">task_alt</span><div><b>Document successfully parsed.</b> '+msg+'</div>','bg-emerald-50 text-emerald-800 border border-emerald-200');
+    }catch(e){
+      if(e.message==='scanned'){ show('<span class="material-icons-outlined" style="font-size:16px;">image</span>This résumé looks like a scanned image — there is no text layer to read. Please enter the details manually.','bg-amber-50 text-amber-800 border border-amber-200'); }
+      else { console.error('digitize',e); show('<span class="material-icons-outlined" style="font-size:16px;">error_outline</span>Could not digitize: '+_e(e.message||'unknown error'),'bg-red-50 text-red-700 border border-red-200'); }
+    }
   };
 
   // Bootstrap — called by the app's DOMContentLoaded handler
