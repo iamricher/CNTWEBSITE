@@ -132,6 +132,12 @@ alter table public.jobs
   add column if not exists employment_type text default 'Full-Time',
   add column if not exists recruiter        text;
 
+-- Résumé detail fields (populated by Digitize Résumé, editable by recruiters)
+alter table public.applications
+  add column if not exists work_experience text,
+  add column if not exists education       text,
+  add column if not exists languages       text;
+
 -- Data Privacy Act of 2012 (RA 10173)
 --   consent_at : when the applicant ticked the consent box on the careers form
 --   purged_at  : when the record was anonymised (retention purge / erasure request)

@@ -857,6 +857,9 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">LinkedIn</label><input type="text" id="app-linkedin" placeholder="profile URL" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Availability</label><input type="date" id="app-availability" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Tags <span class="text-slate-400 font-normal normal-case">— comma-separated</span></label><input type="text" id="app-tags" placeholder="e.g. bilingual, driver's license, night shift" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Work Experience <span class="text-slate-400 font-normal normal-case">— auto-filled by Digitize</span></label><textarea id="app-experience" rows="3" placeholder="Roles, companies and dates…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Education</label><textarea id="app-education" rows="2" placeholder="Degree, school, year…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Languages</label><textarea id="app-languages" rows="2" placeholder="e.g. Filipino, English" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Notes / Remarks</label><textarea id="app-notes" rows="2" placeholder="Add recruiter notes here…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
       </div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -1069,6 +1072,22 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0.5">
               <div class="cnt-frow"><span class="cnt-frow-l">Expected Salary</span><span class="cnt-frow-v" id="resume-expected-val">—</span></div>
               <div class="cnt-frow"><span class="cnt-frow-l">Proposed Salary</span><span class="cnt-frow-v" id="resume-proposed-val">—</span></div>
+            </div>
+          </div>
+
+          <div id="cnt-resume-details" class="hidden mt-4 pt-3 border-t border-slate-100">
+            <p class="cnt-sec-title">Résumé Details</p>
+            <div id="cnt-rd-experience" class="hidden mb-3">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">work_history</span>Work Experience</p>
+              <div class="text-[12px] text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-line max-h-44 overflow-y-auto custom-scroll" id="cnt-rd-experience-val"></div>
+            </div>
+            <div id="cnt-rd-education" class="hidden mb-3">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">school</span>Education</p>
+              <div class="text-[12px] text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-line max-h-36 overflow-y-auto custom-scroll" id="cnt-rd-education-val"></div>
+            </div>
+            <div id="cnt-rd-languages" class="hidden">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">translate</span>Languages</p>
+              <div class="text-[12px] text-slate-700 leading-relaxed" id="cnt-rd-languages-val"></div>
             </div>
           </div>
 
@@ -1463,6 +1482,21 @@ function cntRenderApplicantForm(app){
   const tg=document.getElementById('resume-tags-val');
   if(tg){ const t=(app.tags||'').split(',').map(x=>x.trim()).filter(Boolean);
     tg.innerHTML = t.length ? t.map(x=>'<span class="badge" style="background:#fce7f3;color:#9d174d;margin-right:3px;">'+_escForm(x)+'</span>').join('') : '—'; }
+  // Résumé detail blocks — only shown when there's something to show
+  const block=(wrapId,valId,val)=>{
+    const w=document.getElementById(wrapId), v=document.getElementById(valId);
+    if(!w||!v) return false;
+    const has=!!(val&&String(val).trim());
+    if(has){ v.textContent=val; w.classList.remove('hidden'); } else { v.textContent=''; w.classList.add('hidden'); }
+    return has;
+  };
+  const anyDetail=[
+    block('cnt-rd-experience','cnt-rd-experience-val',app.work_experience),
+    block('cnt-rd-education','cnt-rd-education-val',app.education),
+    block('cnt-rd-languages','cnt-rd-languages-val',app.languages)
+  ].some(Boolean);
+  const rd=document.getElementById('cnt-resume-details');
+  if(rd) rd.classList.toggle('hidden', !anyDetail);
   cntRenderStageStepper(app);
 }
 function cntRenderStageStepper(app){
@@ -2306,6 +2340,7 @@ function openEditModal(id){
   if(typeof populateRecruiterSelect==='function') populateRecruiterSelect(app.recruiter);
   _s('app-proposed-salary',app.proposed_salary); _s('app-degree',app.degree); _s('app-medium',app.medium);
   _s('app-referred',app.referred_by); _s('app-linkedin',app.linkedin); _s('app-availability',app.availability); _s('app-tags',app.tags);
+  _s('app-experience',app.work_experience); _s('app-education',app.education); _s('app-languages',app.languages);
   document.getElementById('modal-title').textContent='Edit Applicant — '+app.name;
   document.getElementById('crud-modal').classList.remove('hidden');
 }
@@ -2315,7 +2350,8 @@ function handleFormSubmit(e){
   const id=document.getElementById('applicant-id').value;
   const _v=id=>{const el=document.getElementById(id);return el?el.value:'';};
   const obj={name:document.getElementById('app-name').value,account:document.getElementById('app-account').value,location:document.getElementById('app-location').value,role:document.getElementById('app-role').value,phone:document.getElementById('app-phone').value,email:document.getElementById('app-email').value,source:document.getElementById('app-source').value,salary:document.getElementById('app-salary').value,notes:document.getElementById('app-notes').value,stage:document.getElementById('app-stage').value,
-    recruiter:_v('app-recruiter'),proposed_salary:_v('app-proposed-salary'),degree:_v('app-degree'),medium:_v('app-medium'),referred_by:_v('app-referred'),linkedin:_v('app-linkedin'),availability:_v('app-availability'),tags:_v('app-tags')};
+    recruiter:_v('app-recruiter'),proposed_salary:_v('app-proposed-salary'),degree:_v('app-degree'),medium:_v('app-medium'),referred_by:_v('app-referred'),linkedin:_v('app-linkedin'),availability:_v('app-availability'),tags:_v('app-tags'),
+    work_experience:_v('app-experience'),education:_v('app-education'),languages:_v('app-languages')};
   if(!id) obj.appliedDate=new Date().toISOString().split('T')[0];
   if(id){updateApplicant(id,obj);showToast(`Updated ${obj.name}`,'success');}
   else{const newId='app_'+Date.now();addApplicant({id:newId,...obj});showToast(`Added ${obj.name} to pipeline`,'success');}
@@ -2725,7 +2761,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null,
       contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
       priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[],
-      recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||''
+      recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||'',
+      work_experience:r.work_experience||'', education:r.education||'', languages:r.languages||''
     };
   }
 
@@ -2935,7 +2972,10 @@ document.addEventListener('DOMContentLoaded',()=>{
         referred_by:(document.getElementById('app-referred')||{}).value||'',
         linkedin:(document.getElementById('app-linkedin')||{}).value||'',
         proposed_salary:(document.getElementById('app-proposed-salary')||{}).value||'',
-        availability:(document.getElementById('app-availability')||{}).value||''
+        availability:(document.getElementById('app-availability')||{}).value||'',
+        work_experience:(document.getElementById('app-experience')||{}).value||'',
+        education:(document.getElementById('app-education')||{}).value||'',
+        languages:(document.getElementById('app-languages')||{}).value||''
       };
       _origFormSubmit(e);   // existing in-memory add/update + renderAll
       if (sb && !isEdit && snap.name){
@@ -2946,7 +2986,8 @@ document.addEventListener('DOMContentLoaded',()=>{
               role:snap.role, client:snap.account, location:snap.location,
               source:snap.source||'ATS', cover_note:snap.notes||null, stage:snap.stage||'new',
               recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
-              referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null
+              referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null,
+              work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null
             }).select('id').single();
             if(error) throw error;
             // reconcile: drop the temporary in-memory record, re-add as web-<id> so refetch won't duplicate it
@@ -2971,7 +3012,8 @@ document.addEventListener('DOMContentLoaded',()=>{
             role:snap.role, client:snap.account, location:snap.location,
             cover_note:snap.notes||null, stage:snap.stage||app.stage,
             recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
-            referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null
+            referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null,
+            work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null
           }).eq('id', app._sid).then(({error})=>{ if(error) console.error('applicant edit sync',error); else if(window.showToast) showToast('Changes saved to backend','success'); });
         }
       }
@@ -4818,9 +4860,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     else if(/\bhigh school\b|\bsenior high\b/i.test(t)) degree='High School';
     let summary=''; const sm=t.match(/(?:professional\s+summary|career\s+summary|summary|profile|objective)\s*[:\-–]?\s*([\s\S]{40,700}?)(?:technical\s+skills|\bskills\b|experience|education|work\s+history|employment)/i); if(sm) summary=sm[1].replace(/\s+/g,' ').trim().slice(0,500);
     let skills=''; const sk=t.match(/(?:technical\s+skills|core\s+competencies|\bskills\b)\s*[:\-–]?\s*([\s\S]{10,400}?)(?:professional\s+experience|experience|education|work\s+history|employment|certifi)/i); if(sk) skills=sk[1].replace(/\s+/g,' ').trim();
+    let experience=''; const ex=t.match(/(?:professional\s+experience|work\s+experience|employment\s+history|work\s+history|\bexperience\b)\s*[:\-–]?\s*([\s\S]{20,1500}?)(?:\beducation\b|certificat|\breferences\b|\blanguages\b|\bawards\b|\bseminars\b|$)/i); if(ex) experience=ex[1].replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim().slice(0,1500);
+    let education=''; const ed=t.match(/\beducation\b\s*[:\-–]?\s*([\s\S]{15,900}?)(?:certificat|\breferences\b|\blanguages\b|\bawards\b|\bseminars\b|\bskills\b|professional\s+experience|$)/i); if(ed) education=ed[1].replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim().slice(0,900);
+    let languages=''; const lg=t.match(/\blanguages?\b\s*[:\-–]?\s*([\s\S]{3,200}?)(?:\n\s*\n|certificat|\breferences\b|\bawards\b|\beducation\b|\bskills\b|$)/i); if(lg) languages=lg[1].replace(/\s+/g,' ').trim().slice(0,200);
     let name=guessName||'';
     if(!name){ const lines=t.split(/\n/).map(l=>l.trim()).filter(Boolean); for(const l of lines.slice(0,5)){ if(/^[A-Z][A-Za-z.'-]+(\s+[A-Z][A-Za-z.'-]+){1,3}$/.test(l)){ name=l; break; } } }
-    return { name, email, phone, linkedin, degree, summary, skills };
+    return { name, email, phone, linkedin, degree, summary, skills, experience, education, languages };
   }
   window.cntDigitizeResume=async function(id){
     const app=findApplicant(id); if(!app) return;
@@ -4847,6 +4892,9 @@ document.addEventListener('DOMContentLoaded',()=>{
       put('linkedin','linkedin',f.linkedin);
       put('degree','degree',f.degree);
       put('notes','cover_note',f.summary);
+      put('work_experience','work_experience',f.experience);
+      put('education','education',f.education);
+      put('languages','languages',f.languages);
       if(f.skills && !(app.tags||'').trim()){ const tg=f.skills.split(/[,;•|/]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<24).slice(0,6).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
       Object.assign(app,patch);
       if(Object.keys(db).length){ updateApplicant(app.id,patch); _persistApp(app,db); }
@@ -4856,6 +4904,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       const found=[];
       if(f.name) found.push('Name'); if(f.email) found.push('Email'); if(f.phone) found.push('Phone');
       if(f.linkedin) found.push('LinkedIn'); if(f.degree) found.push('Degree'); if(f.skills) found.push('Skills'); if(f.summary) found.push('Summary');
+      if(f.experience) found.push('Experience'); if(f.education) found.push('Education'); if(f.languages) found.push('Languages');
       const msg = filled.length ? ('Filled: <b>'+filled.join(', ')+'</b>.') : ('No empty fields to fill. Detected: '+(found.join(' · ')||'nothing readable')+'.');
       show('<span class="material-icons-outlined" style="font-size:16px;color:#166534;">task_alt</span><div><b>Document successfully parsed.</b> '+msg+'</div>','bg-emerald-50 text-emerald-800 border border-emerald-200');
     }catch(e){
