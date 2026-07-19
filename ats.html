@@ -611,10 +611,20 @@
           <span class="material-icons-outlined" style="font-size:15px;">add_box</span> Post Position
         </button>
       </div>
-      <div class="flex gap-4 items-start">
-        <aside class="w-52 flex-shrink-0 bg-white border border-slate-200 rounded-xl p-3 space-y-4 hidden md:block" id="job-facets"></aside>
-        <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-0" id="job-cards-container"></div>
+      <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center gap-2 flex-wrap" id="job-filter-bar">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-0.5"><span class="material-icons-outlined" style="font-size:13px;">filter_list</span>Filter</span>
+        <select id="job-f-client" onchange="renderJobPositions()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:170px;"><option value="all">All Clients</option></select>
+        <select id="job-f-position" onchange="renderJobPositions()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:190px;"><option value="all">All Positions</option></select>
+        <select id="job-f-location" onchange="renderJobPositions()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:170px;"><option value="all">All Locations</option></select>
+        <select id="job-f-status" onchange="renderJobPositions()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:160px;">
+          <option value="all">All Postings</option>
+          <option value="open">Published</option>
+          <option value="closed">Not Published</option>
+        </select>
+        <span class="text-[11px] text-slate-400 ml-1" id="job-filter-count"></span>
+        <button onclick="cntClearJobFilters()" class="ml-auto text-[11px] font-semibold text-slate-500 hover:text-red-700 border border-slate-200 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center gap-1 whitespace-nowrap"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Clear</button>
       </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4" id="job-cards-container"></div>
     </div>
 
     <!-- TALENT POOL -->
@@ -1999,17 +2009,19 @@ function renderAnalyticsDashboard(pipeline, filtered) {
 function renderJobPositions(){
   const jc=document.getElementById('job-cards-container');
   if(!jc)return;
-  renderJobFacets();
-  const locF=document.getElementById('filter-location').value;
-  const roleF=document.getElementById('filter-role').value;
+  if(typeof fillJobFilters==='function') fillJobFilters();
+  const gv=id=>{ const el=document.getElementById(id); return el?el.value:'all'; };
+  const cliF=gv('job-f-client'), roleF=gv('job-f-position'), locF=gv('job-f-location'), stF=gv('job-f-status');
   const allClientIds=[...new Set([...ACCOUNTS.map(a=>a.id), ...Object.keys(jobDatabase)])];
-  const accs=(activeJobClientTab==='all'&&currentAccount==='all')?allClientIds:activeJobClientTab!=='all'?[activeJobClientTab]:currentAccount!=='all'?[currentAccount]:allClientIds;
+  const accs = cliF!=='all' ? [cliF] : allClientIds;
   let rendered=0;
   jc.innerHTML='';
   accs.forEach(accId=>{
     const jobs=(jobDatabase[accId]||[]).filter(j=>{
       if(locF!=='all'&&j.location!==locF)return false;
       if(roleF!=='all'&&j.role!==roleF)return false;
+      if(stF==='open'   && j.status==='closed') return false;
+      if(stF==='closed' && j.status!=='closed') return false;
       return true;
     });
     const accInfo=ACCOUNTS.find(a=>a.id===accId);
@@ -2061,60 +2073,37 @@ function renderJobPositions(){
       rendered++;
     });
   });
-  if(!rendered)jc.innerHTML=`<div class="col-span-full bg-white rounded-xl border p-10 text-center text-slate-400 text-sm">No positions found. <button onclick="openCreateJobModal()" class="text-red-700 font-semibold hover:underline cursor-pointer">Post one now.</button></div>`;
+  if(!rendered)jc.innerHTML=`<div class="col-span-full bg-white rounded-xl border p-10 text-center text-slate-400 text-sm">No positions match these filters. <button onclick="cntClearJobFilters()" class="text-red-700 font-semibold hover:underline cursor-pointer">Clear filters</button> or <button onclick="openCreateJobModal()" class="text-red-700 font-semibold hover:underline cursor-pointer">post one now.</button></div>`;
+  const cnt=document.getElementById('job-filter-count');
+  if(cnt) cnt.textContent = rendered ? (rendered+' position'+(rendered!==1?'s':'')) : '';
 }
-function setJobTab(t){ activeJobClientTab=t; renderJobPositions(); }
+function cntClearJobFilters(){
+  ['job-f-client','job-f-position','job-f-location','job-f-status'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
+  renderJobPositions();
+}
 
-// Odoo-style faceted filter panel for Job Positions:
-//   Client (Odoo "Company") · Position (Odoo "Department") · Location
-function renderJobFacets(){
-  const el=document.getElementById('job-facets'); if(!el) return;
+// Job Positions filter bar — options come from the jobs actually posted, with
+// a count so you can see how many postings sit behind each value.
+function fillJobFilters(){
+  const bar=document.getElementById('job-f-client'); if(!bar) return;
   const all=[];
   Object.keys(jobDatabase).forEach(k=>(jobDatabase[k]||[]).forEach(j=>all.push({account:j.account||k, role:j.role, location:j.location})));
-  const curClient=activeJobClientTab;
-  const curPos=(document.getElementById('filter-role')||{}).value||'all';
-  const curLoc=(document.getElementById('filter-location')||{}).value||'all';
-  // True faceted search: each facet's counts reflect the OTHER active filters,
-  // so the numbers refresh the moment you click anything.
-  const matches=(j,ignore)=>{
-    if(ignore!=='client'   && curClient!=='all' && j.account !==curClient) return false;
-    if(ignore!=='position' && curPos!=='all'    && j.role    !==curPos)    return false;
-    if(ignore!=='location' && curLoc!=='all'    && j.location!==curLoc)    return false;
-    return true;
+  const tally=fn=>{ const m={}; all.forEach(j=>{ const v=fn(j); if(v==null||v==='') return; m[v]=(m[v]||0)+1; }); return m; };
+  const fill=(id,counts,allLabel)=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="all">'+allLabel+' ('+all.length+')</option>'
+      +Object.keys(counts).sort().map(k=>'<option value="'+_escForm(k)+'">'+_escForm(k)+' ('+counts[k]+')</option>').join('');
+    sel.value=[...sel.options].some(o=>o.value===cur)?cur:'all';
   };
-  const countBy=(rows,fn)=>{ const m={}; rows.forEach(j=>{ const v=fn(j); if(v==null||v==='') return; m[v]=(m[v]||0)+1; }); return m; };
-  const clients  =countBy(all.filter(j=>matches(j,'client')),  j=>j.account);
-  const positions=countBy(all.filter(j=>matches(j,'position')),j=>j.role);
-  const locations=countBy(all.filter(j=>matches(j,'location')),j=>j.location);
-  // "All" reflects what's left once the other facets are applied
-  const allCount={ client:all.filter(j=>matches(j,'client')).length,
-                   position:all.filter(j=>matches(j,'position')).length,
-                   location:all.filter(j=>matches(j,'location')).length };
-  const esc=s=>String(s==null?'':s).replace(/'/g,"\\'");
-  const section=(icon,title,items,cur,type)=>{
-    const rows=[['all','All',allCount[type]]].concat(Object.keys(items).sort().map(k=>[k,k,items[k]]))
-      .map(([val,label,cnt])=>{
-        const active=(cur===val)||((cur==null||cur==='all')&&val==='all');
-        const dim=(cnt===0&&!active);   // nothing left under the current filters
-        return `<button onclick="cntJobFacet('${type}','${esc(val)}')" class="w-full flex items-center justify-between text-left px-2.5 py-1.5 rounded-lg text-[12px] transition ${active?'bg-red-50 text-red-800 font-bold':dim?'text-slate-300 hover:bg-slate-50':'text-slate-600 hover:bg-slate-50'}">`
-          +`<span class="truncate">${label}</span><span class="ml-2 text-[10px] ${active?'text-red-700':dim?'text-slate-300':'text-slate-400'} font-semibold flex-shrink-0">${cnt}</span></button>`;
-      }).join('');
-    return `<div><div class="flex items-center gap-1.5 px-1 mb-1.5"><span class="material-icons-outlined text-slate-400" style="font-size:14px;">${icon}</span><span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">${title}</span></div><div class="space-y-0.5">${rows}</div></div>`;
-  };
-  el.innerHTML=section('business','Client',clients,curClient,'client')
-    +section('badge','Position',positions,curPos,'position')
-    +section('location_on','Location',locations,curLoc,'location');
+  fill('job-f-client',   tally(j=>j.account),  'All Clients');
+  fill('job-f-position', tally(j=>j.role),     'All Positions');
+  fill('job-f-location', tally(j=>j.location), 'All Locations');
 }
 function _setSelect(id,value){
   const sel=document.getElementById(id); if(!sel) return;
   if(![...sel.options].some(o=>o.value===value)){ const o=document.createElement('option'); o.value=value; o.textContent=value; sel.appendChild(o); }
   sel.value=value;
-}
-window.cntJobFacet=function(type,value){
-  if(type==='client'){ activeJobClientTab=value; }
-  else if(type==='position'){ _setSelect('filter-role',value); }
-  else if(type==='location'){ _setSelect('filter-location',value); }
-  renderJobPositions();
 };
 
 function renderTalentPool(pool){
@@ -3495,7 +3484,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.cntClearFilters=function(){
     ['filter-location','filter-role','filter-stage','filter-source'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
     if(typeof selectClient==='function') selectClient('all'); else if(typeof currentAccount!=='undefined') currentAccount='all';
-    if(typeof activeJobClientTab!=='undefined') activeJobClientTab='all';   // reset the Job Positions client facet too
+    if(window.cntClearJobFilters) cntClearJobFilters();   // reset the Job Positions bar too
     if(typeof searchQuery!=='undefined') searchQuery='';
     window.cntPipelineJob=null;
     const ctx=document.getElementById('pipeline-context'); if(ctx) ctx.textContent='Full-cycle PH recruitment workflow';

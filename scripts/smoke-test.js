@@ -55,7 +55,7 @@ const REQUIRED_IDS = [
   'chart-by-type', 'dash-candidate-list',
   'pipeline-filter-bar', 'pipeline-filters', 'filter-source',
   'filter-role', 'filter-location', 'filter-stage', 'client-dropdown-wrap',
-  'job-facets', 'job-cards-container',
+  'job-filter-bar', 'job-f-client', 'job-f-position', 'job-f-location', 'job-cards-container',
   'applications-list-container', 'applications-kanban-container',
   'set-list-client', 'set-list-position', 'set-list-location', 'set-list-stages',
   'resume-modal', 'crud-modal', 'job-modal', 'interview-modal',
