@@ -625,6 +625,13 @@
           <option value="open">Published</option>
           <option value="closed">Not Published</option>
         </select>
+        <select id="job-f-sort" onchange="renderJobPositions()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:170px" title="Sort positions">
+          <option value="deadline">Sort: Deadline first</option>
+          <option value="newest">Sort: Newest posted</option>
+          <option value="oldest">Sort: Longest open</option>
+          <option value="applicants">Sort: Most applicants</option>
+          <option value="gap">Sort: Largest gap</option>
+        </select>
         <span class="text-[11px] text-slate-400 ml-1" id="job-filter-count"></span>
         <button onclick="cntClearJobFilters()" class="ml-auto text-[11px] font-semibold text-slate-500 hover:text-red-700 border border-slate-200 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center gap-1 whitespace-nowrap"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Clear</button>
       </div>
@@ -934,6 +941,7 @@
       <div class="grid grid-cols-2 gap-4">
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Priority</label><select id="job-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Employment Type</label><select id="job-employment" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Full-Time">Full-Time</option><option value="Project-based">Project-based</option><option value="Seasonal">Seasonal</option><option value="Part-Time">Part-Time</option><option value="Contract">Contract</option><option value="Internship">Internship</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Deadline to Fill <span class="text-slate-400 font-normal normal-case">— optional</span></label><input type="date" id="job-deadline" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       </div>
       <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Recruiter <span class="text-slate-400 font-normal normal-case">— person accountable for this role</span></label><select id="job-recruiter" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Unassigned</option></select></div>
 
@@ -2052,6 +2060,53 @@ function renderAnalyticsDashboard(pipeline, filtered) {
   }
 }
 
+// ── Job ageing / deadline ───────────────────────────────────────
+// A staffing agency is judged on how fast a seat gets filled, so the card
+// leads with how long the role has been open and how close the client's
+// deadline is. Both are derived — nothing extra to maintain by hand.
+function jobDaysOpen(job){
+  if(!job||!job.created_at) return null;
+  const t=new Date(job.created_at).getTime();
+  if(isNaN(t)) return null;
+  return Math.max(0,Math.floor((Date.now()-t)/86400000));
+}
+function jobDaysLeft(job){
+  if(!job||!job.deadline) return null;
+  const d=new Date(String(job.deadline).slice(0,10)+'T00:00:00');
+  if(isNaN(d.getTime())) return null;
+  // Calendar days apart, not elapsed hours: a deadline of today must read 0
+  // ("due today"), not 1 because there are still a few hours left in it.
+  const n=new Date();
+  const today=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  return Math.round((d.getTime()-today.getTime())/86400000);
+}
+// Colour follows urgency, not decoration: overdue red, closing amber, calm grey.
+function jobDeadlineChip(job){
+  const left=jobDaysLeft(job);
+  if(left===null) return '';
+  let bg,fg,txt;
+  if(left<0){        bg='#fee2e2'; fg='#b91c1c'; txt=Math.abs(left)+'d overdue'; }
+  else if(left<=7){  bg='#fef3c7'; fg='#b45309'; txt=left===0?'due today':left+'d left'; }
+  else {             bg='#f1f5f9'; fg='#64748b'; txt=left+'d left'; }
+  return '<span style="font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:99px;color:'+fg+';background:'+bg+';white-space:nowrap;">'+txt+'</span>';
+}
+function jobAgeChip(job){
+  const d=jobDaysOpen(job);
+  if(d===null) return '';
+  const stale=d>=45;
+  return '<span title="Days since this position was posted" style="font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:99px;color:'
+    +(stale?'#b45309':'#94a3b8')+';background:'+(stale?'#fffbeb':'#f8fafc')+';white-space:nowrap;">'+(d===0?'new today':d+'d open')+'</span>';
+}
+// Copy the public posting URL for pasting into a Facebook or JobStreet post.
+// Derived from where the ATS itself is served, so it works on localhost and on
+// the deployed site without a hard-coded domain.
+function cntCopyJobLink(sid){
+  const url=new URL('careers.html?job='+encodeURIComponent(sid), location.href).href;
+  const done=()=>showToast('Public link copied','success');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done).catch(()=>prompt('Copy this link:',url));
+  } else prompt('Copy this link:',url);
+}
 function renderJobPositions(){
   const jc=document.getElementById('job-cards-container');
   if(!jc)return;
@@ -2062,16 +2117,38 @@ function renderJobPositions(){
   const accs = cliF!=='all' ? [cliF] : allClientIds;
   let rendered=0;
   jc.innerHTML='';
+  // Gather every matching job first so sorting can order across clients —
+  // rendering client-by-client would only ever sort within each group.
+  const matches=[];
   accs.forEach(accId=>{
-    const jobs=(jobDatabase[accId]||[]).filter(j=>{
-      if(locF!=='all'&&j.location!==locF)return false;
-      if(roleF!=='all'&&j.role!==roleF)return false;
-      if(stF==='open'   && j.status==='closed') return false;
-      if(stF==='closed' && j.status!=='closed') return false;
-      return true;
+    (jobDatabase[accId]||[]).forEach(j=>{
+      if(locF!=='all'&&j.location!==locF)return;
+      if(roleF!=='all'&&j.role!==roleF)return;
+      if(stF==='open'   && j.status==='closed') return;
+      if(stF==='closed' && j.status!=='closed') return;
+      matches.push({accId,job:j});
     });
+  });
+  const apps=m=>(accountData[m.accId]||[]).filter(a=>a.role===m.job.role&&a.location===m.job.location);
+  const sortBy=gv('job-f-sort');
+  const BIG=1e9;   // no deadline sorts last rather than first
+  matches.sort((a,b)=>{
+    if(sortBy==='newest'||sortBy==='oldest'){
+      const ta=a.job.created_at?new Date(a.job.created_at).getTime():0;
+      const tb=b.job.created_at?new Date(b.job.created_at).getTime():0;
+      return sortBy==='newest' ? tb-ta : ta-tb;
+    }
+    if(sortBy==='applicants') return apps(b).filter(x=>x.stage!=='pool').length - apps(a).filter(x=>x.stage!=='pool').length;
+    if(sortBy==='gap'){
+      const gap=m=>Math.max(0,(m.job.needed||1)-apps(m).filter(x=>stageIsHired(x.stage)||x.deployed_at).length);
+      return gap(b)-gap(a);
+    }
+    const la=jobDaysLeft(a.job), lb=jobDaysLeft(b.job);   // deadline: soonest first
+    return (la===null?BIG:la)-(lb===null?BIG:lb);
+  });
+  matches.forEach(({accId,job})=>{
     const accInfo=ACCOUNTS.find(a=>a.id===accId);
-    jobs.forEach(job=>{
+    {
       const appsForJob=(accountData[accId]||[]).filter(a=>a.role===job.role&&a.location===job.location);
       const newCount=appsForJob.filter(a=>a.stage==='new').length;
       const totalApps=appsForJob.filter(a=>a.stage!=='pool').length;
@@ -2090,6 +2167,7 @@ function renderJobPositions(){
               <h3 class="font-bold text-slate-900 text-[13px] leading-tight group-hover:text-red-800 transition">${job.role}</h3>
               <p class="text-[11px] text-slate-500 mt-0.5">${job.recruiter?job.recruiter:'<span class="text-slate-300">Unassigned recruiter</span>'}</p>
               <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">business</span>${job.account} <span class="text-slate-300">(${job.location})</span></p>
+              <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">${jobAgeChip(job)}${jobDeadlineChip(job)}</div>
             </div>
             ${job._sid?`<div style="position:relative;" class="flex-shrink-0 mr-6">
               <button onclick="event.stopPropagation();var m=this.nextElementSibling;m.style.display=m.style.display==='block'?'none':'block';" class="text-slate-300 hover:text-slate-600 cursor-pointer p-0.5 leading-none"><span class="material-icons-outlined" style="font-size:17px;">more_vert</span></button>
@@ -2113,11 +2191,14 @@ function renderJobPositions(){
             <span style="width:30px;height:16px;border-radius:99px;background:${published?'#16a34a':'#cbd5e1'};position:relative;display:inline-block;transition:.15s;"><span style="position:absolute;top:2px;left:${published?'16px':'2px'};width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s;"></span></span>
             <span class="text-[11px] font-semibold ${published?'text-emerald-700':'text-slate-400'}">${published?'Published':'Not Published'}</span>
           </button>
-          ${job._sid?`<a href="careers.html?job=${job._sid}" target="_blank" rel="noopener" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1" title="Open public job page"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Job Page</a>`:'<span></span>'}
+          ${job._sid?`<span class="flex items-center gap-3">
+            <button onclick="cntCopyJobLink('${job._sid}')" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1 cursor-pointer" title="Copy the public link to share on Facebook or JobStreet"><span class="material-icons-outlined" style="font-size:13px;">link</span>Copy link</button>
+            <a href="careers.html?job=${job._sid}" target="_blank" rel="noopener" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1" title="Open public job page"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Job Page</a>
+          </span>`:'<span></span>'}
         </div>
       </div>`;
       rendered++;
-    });
+    }
   });
   if(!rendered)jc.innerHTML=`<div class="col-span-full bg-white rounded-xl border p-10 text-center text-slate-400 text-sm">No positions match these filters. <button onclick="cntClearJobFilters()" class="text-red-700 font-semibold hover:underline cursor-pointer">Clear filters</button> or <button onclick="openCreateJobModal()" class="text-red-700 font-semibold hover:underline cursor-pointer">post one now.</button></div>`;
   const cnt=document.getElementById('job-filter-count');
@@ -2465,10 +2546,11 @@ function handleJobSubmit(e){
   const priority=document.getElementById('job-priority').value;
   const employment=(document.getElementById('job-employment')||{}).value||'Full-Time';
   const recruiter=(document.getElementById('job-recruiter')||{}).value||'';
+  const deadline=(document.getElementById('job-deadline')||{}).value||'';
   if(!jobDatabase[account])jobDatabase[account]=[];
   const existing=jobDatabase[account].find(j=>j.role===role&&j.location===location);
-  if(existing){existing.needed=needed;existing.salary=salary;existing.priority=priority;existing.employment_type=employment;existing.recruiter=recruiter;showToast(`Updated ${role} for ${account}`,'success');}
-  else{jobDatabase[account].push({role,account,location,needed,salary,priority,employment_type:employment,recruiter,status:'open'});showToast(`Posted: ${role} · ${account} · ${location}`,'success');}
+  if(existing){existing.needed=needed;existing.salary=salary;existing.priority=priority;existing.employment_type=employment;existing.recruiter=recruiter;existing.deadline=deadline;showToast(`Updated ${role} for ${account}`,'success');}
+  else{jobDatabase[account].push({role,account,location,needed,salary,priority,employment_type:employment,recruiter,deadline,status:'open',created_at:new Date().toISOString()});showToast(`Posted: ${role} · ${account} · ${location}`,'success');}
   closeJobModal();renderAll();
 }
 
@@ -2963,7 +3045,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       jobDatabase[j.client].push({ _sid:j.id, role:j.role, account:j.client, location:j.location,
         needed:j.openings||1, salary:j.salary_range||'', priority:(j.priority||'normal').toLowerCase(),
         about:j.about||'', responsibilities:j.responsibilities||'', must_have:j.must_have||'', nice_to_have:j.nice_to_have||'', we_offer:j.we_offer||'',
-        employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open' });
+        employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open',
+        deadline:j.deadline||'', created_at:j.created_at||null });
     });
     return true;
   }
@@ -2996,7 +3079,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('job-needed').value=job.needed;
     document.getElementById('job-salary').value=job.salary||'';
     document.getElementById('job-priority').value=(job.priority||'normal').toLowerCase();
-    { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time'; }
+    { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time';
+      const dl=document.getElementById('job-deadline'); if(dl) dl.value=(job.deadline||'').slice(0,10); }
     document.getElementById('job-about').value=job.about||'';
     document.getElementById('job-responsibilities').value=job.responsibilities||'';
     document.getElementById('job-must').value=job.must_have||'';
@@ -3038,15 +3122,22 @@ document.addEventListener('DOMContentLoaded',()=>{
         we_offer: document.getElementById('job-offer').value || null,
         employment_type: (document.getElementById('job-employment')||{}).value || 'Full-Time',
         recruiter: (document.getElementById('job-recruiter')||{}).value || null,
-        status: 'open'
+        deadline: (document.getElementById('job-deadline')||{}).value || null
       };
+      // Editing must not republish a position someone deliberately took down,
+      // so only a brand new posting defaults to 'open'.
+      if(editingSid){
+        let cur=null;
+        for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ cur=j; break; } }
+        job.status = (cur && cur.status) ? cur.status : 'open';
+      } else job.status='open';
       _origJobSubmit(e);   // in-memory update + closeJobModal + renderAll
       if (sb && job.role && job.client){
         (async ()=>{
           try{
             if(editingSid){
               const {error}=await sb.from('jobs').update(job).eq('id',editingSid); if(error) throw error;
-              for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ Object.assign(j,{role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||''}); break; } }
+              for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ Object.assign(j,{role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status}); break; } }
               logAudit('job_edit','job', editingSid, job.role+' · '+job.client); if(window.showToast) showToast('Updated on website careers page','success');
             } else {
               const { data } = await sb.from('jobs').select('id').eq('role',job.role).eq('client',job.client).eq('location',job.location).limit(1);
@@ -3231,13 +3322,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
     const needed=r.count||1, prio=(r.priority||'normal').toLowerCase();
     const entry={ role, account:client, location, needed, salary:'', priority:prio,
-      employment_type:'Full-Time', recruiter:r.assigned_name||'', status:'open', about:r.notes||'' };
+      employment_type:'Full-Time', recruiter:r.assigned_name||'', status:'open', about:r.notes||'',
+      deadline:r.deadline||'', created_at:new Date().toISOString() };
     jobDatabase[client].push(entry);
     if(sb){
       try{
         const { data, error } = await sb.from('jobs').insert({
           role, client, location, openings:needed, priority:prio, salary_range:null,
-          about:r.notes||null, employment_type:'Full-Time', recruiter:r.assigned_name||null, status:'open'
+          about:r.notes||null, employment_type:'Full-Time', recruiter:r.assigned_name||null, status:'open',
+          deadline:r.deadline||null            // client's expected fill date, carried from the MRF
         }).select('id').single();
         if(error) throw error;
         entry._sid=data.id;

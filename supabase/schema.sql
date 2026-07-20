@@ -130,7 +130,10 @@ alter table public.applications
 -- Odoo job-position fields
 alter table public.jobs
   add column if not exists employment_type text default 'Full-Time',
-  add column if not exists recruiter        text;
+  add column if not exists recruiter        text,
+  -- Date the client expects the role filled. Carried over from the approved
+  -- hiring request; drives the ageing / overdue flags on the Job Positions tab.
+  add column if not exists deadline         date;
 
 -- Résumé detail fields (populated by Digitize Résumé, editable by recruiters)
 alter table public.applications
