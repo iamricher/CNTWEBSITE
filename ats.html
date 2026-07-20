@@ -973,10 +973,10 @@
 </div>
 
 <!-- ── Candidate Profile Modal ── -->
-<div id="resume-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+<div id="resume-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-0">
   <div class="absolute inset-0 bg-slate-900/50 modal-overlay no-print" onclick="closeResumeModal()"></div>
-  <!-- FIX: height:92vh locks the modal size so tab switching never resizes it -->
-  <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10 modal-box border border-slate-200 no-print" style="height:94vh;">
+  <!-- Candidate profile runs full-screen: fixed height so tab switching never resizes it -->
+  <div class="bg-white w-full max-w-none rounded-none shadow-2xl overflow-hidden flex flex-col z-10 modal-box border-0 no-print" style="height:100vh;width:100vw;">
 
     <!-- Modal Header -->
     <div class="px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50 no-print flex-shrink-0">
@@ -1039,6 +1039,12 @@
               </button>
               <button id="resume-reopen-btn" onclick="cntReopen(currentViewedApplicantId)" class="hidden text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-emerald-300 cursor-pointer">
                 <span class="material-icons-outlined" style="font-size:13px;">restart_alt</span> Reopen
+              </button>
+              <button id="endorse-btn" onclick="cntOpenEndorsement()" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
+                <span class="material-icons-outlined" style="font-size:13px;">verified_user</span> Endorsement<span id="endorse-btn-chip"></span>
+              </button>
+              <button id="deploy-btn" onclick="cntOpenDeployment()" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
+                <span class="material-icons-outlined" style="font-size:13px;">timeline</span> Deployment<span id="deploy-btn-chip"></span>
               </button>
             </div>
             <div class="cnt-step" id="resume-stage-stepper"></div>
@@ -3207,9 +3213,12 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'Unlocks once the candidate reaches the <b style="color:#64748b;font-weight:700;">Job Offer</b> stage.</div>';
   }
   function renderEndorsement(app){
-    const tab=document.getElementById('tab-profile'); if(!tab) return;
-    let panel=document.getElementById('cnt-endorse-panel');
-    if(!panel){ panel=document.createElement('div'); panel.id='cnt-endorse-panel'; panel.style.cssText='margin-bottom:14px;'; tab.insertBefore(panel, tab.firstChild); }
+    // Lives in the Endorsement dialog now, not inline on the profile. When the
+    // dialog is closed there is nothing to draw — the action-row chip carries
+    // the status instead (see cntSyncPanelChips).
+    cntSyncPanelChips(app);
+    const panel=document.getElementById('cnt-endorse-panel');
+    if(!panel) return;
     if(!app){ panel.innerHTML=''; return; }
     const st=app.client_status||'none';
     const atOffer=_atOfferStage(app);
@@ -3220,9 +3229,9 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(st==='none'||st==='rejected') actions+=btn('#7f1d1d','Endorse to client','endorse');
       if(st==='endorsed'||st==='approved'||st==='rejected') actions+=btn('#16a34a','Client approved','approve')+btn('#dc2626','Client rejected','reject');
     }
-    panel.innerHTML='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">'
+    panel.innerHTML='<div>'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">'
-      +'<div style="display:flex;align-items:center;gap:8px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">verified_user</span><span style="font-weight:700;font-size:12.5px;color:#0f172a;">Client Endorsement</span></div>'
+      +'<span style="font-size:12px;color:#64748b;font-weight:600;">Current status</span>'
       +_endorseBadge(st)+'</div>'
       +((app.client_reason&&st==='rejected')?'<div style="font-size:12px;color:#b91c1c;margin-top:9px;background:#fef2f2;padding:8px 10px;border-radius:8px;">Reason: '+_escN(app.client_reason)+'</div>':'')
       +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!atOffer?_offerLockNote():'<div style="font-size:11.5px;color:#94a3b8;margin-top:8px;">View only for your role.</div>'))
@@ -3259,10 +3268,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   ];
   function _fmtDate(iso){ if(!iso) return ''; try{ return new Date(iso).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return String(iso).slice(0,10); } }
   function renderWorkflow(app){
-    const tab=document.getElementById('tab-profile'); if(!tab) return;
-    let panel=document.getElementById('cnt-workflow-panel');
-    if(!panel){ panel=document.createElement('div'); panel.id='cnt-workflow-panel'; panel.style.cssText='margin-bottom:14px;';
-      const endo=document.getElementById('cnt-endorse-panel'); if(endo && endo.parentNode===tab) tab.insertBefore(panel, endo.nextSibling); else tab.insertBefore(panel, tab.firstChild); }
+    cntSyncPanelChips(app);
+    const panel=document.getElementById('cnt-workflow-panel');
+    if(!panel) return;
     if(!app){ panel.innerHTML=''; return; }
     const atOffer=_atOfferStage(app);
     const canDo=atOffer && ['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
@@ -3274,8 +3282,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         +(canDo?'<button class="cnt-ms-btn" data-f="'+m.f+'" style="font-size:11px;font-weight:600;padding:4px 11px;border-radius:7px;cursor:pointer;color:'+(done?'#64748b':'#fff')+';background:'+(done?'#f1f5f9':'#7f1d1d')+';border:none;">'+(done?'Undo':'Mark done')+'</button>':'')
         +'</div></div>';
     }).join('');
-    panel.innerHTML='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;">'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">timeline</span><span style="font-weight:700;font-size:12.5px;color:#0f172a;">Contract → Deployment → New Hire</span></div>'
+    panel.innerHTML='<div>'
       +rows
       +(!atOffer?_offerLockNote():'')
       +(canDo?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;"><button class="cnt-print-dep" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>Deployment Notice</button><button class="cnt-print-nh" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>New Hire Report</button></div>':'')
@@ -3292,6 +3299,52 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(window.showToast) showToast(app.name+' — '+field.replace(/_at$/,'').replace(/_/g,' ')+(val?' recorded':' cleared'),'success');
     renderWorkflow(app);
   }
+
+  // ── Endorsement / Deployment as action-row buttons ──────────────
+  // Both used to sit as large panels at the top of the profile. They now open
+  // on demand so the profile stays a profile; the buttons carry a compact
+  // status chip so nothing is hidden from a glance.
+  function cntSyncPanelChips(app){
+    const ec=document.getElementById('endorse-btn-chip');
+    const dc=document.getElementById('deploy-btn-chip');
+    if(ec){
+      const st=app&&app.client_status||'none';
+      const dot={none:'#cbd5e1',endorsed:'#d97706',approved:'#16a34a',rejected:'#dc2626'}[st]||'#cbd5e1';
+      ec.innerHTML='<span style="display:inline-block;width:7px;height:7px;border-radius:99px;background:'+dot+';margin-left:4px;"></span>';
+    }
+    if(dc){
+      const done=app?_MILESTONES.filter(m=>app[m.f]).length:0;
+      dc.innerHTML=done?'<span style="font-size:10px;font-weight:700;color:#16a34a;margin-left:4px;">'+done+'/'+_MILESTONES.length+'</span>':'';
+    }
+  }
+  function _cntPanelDialog(title, icon, bodyId){
+    document.getElementById('cnt-panel-dialog')?.remove();
+    const wrap=document.createElement('div');
+    wrap.id='cnt-panel-dialog';
+    wrap.className='fixed inset-0 z-[300] flex items-center justify-center p-4 no-print';
+    wrap.innerHTML='<div class="absolute inset-0 bg-slate-900/50"></div>'
+      +'<div class="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">'
+      +'<div class="flex items-center justify-between px-5 py-3 border-b border-slate-100">'
+      +'<div class="flex items-center gap-2"><span class="material-icons-outlined" style="font-size:18px;color:#7f1d1d;">'+icon+'</span>'
+      +'<span class="text-sm font-bold text-slate-900">'+title+'</span></div>'
+      +'<button class="cnt-panel-x text-slate-400 hover:text-slate-700 cursor-pointer"><span class="material-icons-outlined" style="font-size:20px;">close</span></button></div>'
+      +'<div class="p-5 max-h-[70vh] overflow-y-auto"><div id="'+bodyId+'"></div></div></div>';
+    const close=()=>wrap.remove();
+    wrap.querySelector('.cnt-panel-x').addEventListener('click',close);
+    wrap.firstElementChild.addEventListener('click',close);
+    document.addEventListener('keydown',function esc(e){ if(e.key==='Escape'){ close(); document.removeEventListener('keydown',esc); } });
+    document.body.appendChild(wrap);
+  }
+  window.cntOpenEndorsement=function(){
+    const app=findApplicant(currentViewedApplicantId); if(!app) return;
+    _cntPanelDialog('Client Endorsement','verified_user','cnt-endorse-panel');
+    renderEndorsement(app);
+  };
+  window.cntOpenDeployment=function(){
+    const app=findApplicant(currentViewedApplicantId); if(!app) return;
+    _cntPanelDialog('Contract → Deployment → New Hire','timeline','cnt-workflow-panel');
+    renderWorkflow(app);
+  };
 
   // ── Phase 4: KPI dashboard · SLA/aging · recruiter scorecard ──
   function _kpiCard(label, value, sub, color){
