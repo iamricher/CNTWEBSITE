@@ -961,15 +961,18 @@
     </div>
     <form id="hiring-request-form" onsubmit="handleHiringRequestSubmit(event)" class="space-y-4">
       <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client</label><select id="req-account" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>SONY</option><option>HAIER</option><option>HISENSE</option><option>URC</option><option>SKYWORTH</option><option>UNCLE JOHNS</option><option>Cinderella</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client</label><select id="req-account" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a client…</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Request Type</label><select id="req-type" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="New Headcount">New Headcount</option><option value="Replacement">Replacement</option><option value="Seasonal">Seasonal / Project-based</option><option value="Augmentation">Staff Augmentation</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position</label><select id="req-role" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Sales Promoter</option><option>Merchandiser</option><option>Area Supervisor</option><option>Brand Ambassador</option><option>Trade Marketing Specialist</option><option>Field Sales Representative</option><option>Product Demonstrator</option><option>Store Supervisor</option><option>In-Store Activator</option><option>Content Marketer</option><option>Logistics Coordinator</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location</label><select id="req-location" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Manila">Manila (NCR)</option><option value="Tarlac">Tarlac</option><option value="Bulacan">Bulacan</option><option value="Pampanga">Pampanga</option><option value="Cavite">Cavite</option><option value="Pangasinan">Pangasinan</option><option value="Batangas">Batangas</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position</label><select id="req-role" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a position…</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location</label><select id="req-location" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a location…</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Headcount Needed</label><input type="number" id="req-count" min="1" value="1" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Priority</label><select id="req-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Target Start Date</label><input type="date" id="req-date" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Deadline to Fill</label><input type="date" id="req-deadline" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Requested By</label><input type="text" id="req-requestor" placeholder="Client rep name" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <!-- Assigning is a supervisor action, so this is hidden for roles that
+             cannot already assign from the requests list. -->
+        <div id="req-recruiter-wrap" class="hidden"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Assign Recruiter <span class="text-slate-400 font-normal normal-case">— optional</span></label><select id="req-recruiter" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Unassigned</option></select></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Justification / Notes</label><textarea id="req-notes" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none" placeholder="Reason for request, special requirements…"></textarea></div>
       </div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -2454,11 +2457,27 @@ function handleJobSubmit(e){
   closeJobModal();renderAll();
 }
 
-function openHiringRequestModal(){document.getElementById('hiring-request-modal').classList.remove('hidden');}
+function openHiringRequestModal(){
+  // Rebuild the pickers from the current taxonomy each time, so a client added
+  // in Settings is selectable without a reload.
+  if(window.cntRepopulateTaxonomyUI) cntRepopulateTaxonomyUI();
+  // Same gate as the Assign control on the requests list — opening this form
+  // must not become a way around it.
+  const wrap=document.getElementById('req-recruiter-wrap');
+  if(wrap) wrap.classList.toggle('hidden', !(window.cntRole==='super_admin'||window.cntRole==='recruitment_supervisor'));
+  document.getElementById('hiring-request-modal').classList.remove('hidden');
+}
 function closeHiringRequestModal(){document.getElementById('hiring-request-modal').classList.add('hidden');}
 function handleHiringRequestSubmit(e){
   e.preventDefault();
   const req={id:'REQ-'+String(hiringRequests.length+1).padStart(3,'0'),account:document.getElementById('req-account').value,role:document.getElementById('req-role').value,location:document.getElementById('req-location').value,type:document.getElementById('req-type').value,count:parseInt(document.getElementById('req-count').value)||1,priority:document.getElementById('req-priority').value,status:'Pending',date:new Date().toISOString().split('T')[0],deadline:document.getElementById('req-deadline').value||'',requestor:document.getElementById('req-requestor').value,notes:document.getElementById('req-notes').value};
+  // Only honour an assignment the role is actually allowed to make.
+  const canAssign=(window.cntRole==='super_admin'||window.cntRole==='recruitment_supervisor');
+  const rec=canAssign ? ((document.getElementById('req-recruiter')||{}).value||'') : '';
+  if(rec){
+    const u=(window.cntRecruiters||[]).find(x=>(x.full_name||x.email)===rec);
+    req.assigned_to=u?u.id:null; req.assigned_name=rec; req.status='Open';
+  }
   hiringRequests.unshift(req);
   showToast(`Request ${req.id} submitted`,'success');
   closeHiringRequestModal();renderAll();
@@ -3167,7 +3186,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         sb.from('hiring_requests').insert({
           req_id:req.id, account:req.account, role:req.role, location:req.location, type:req.type,
           count:req.count, priority:req.priority, status:req.status, date:req.date,
-          deadline:req.deadline||null, requestor:req.requestor||null, notes:req.notes||null
+          deadline:req.deadline||null, requestor:req.requestor||null, notes:req.notes||null,
+          assigned_to:req.assigned_to||null, assigned_name:req.assigned_name||null
         }).select('id').single().then(({data,error})=>{
           if(error){ console.error('hiring request persist',error); if(window.showToast) showToast('Saved locally, backend sync failed','error'); return; }
           req._sid = data.id; if(window.showToast) showToast('Hiring request saved to backend','success');
@@ -4235,17 +4255,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     sel.innerHTML='<option value="">Unassigned</option>'+names.map(n=>'<option value="'+_e(n)+'"'+(selected===n?' selected':'')+'>'+_e(n)+'</option>').join('');
     sel.value=selected||'';
   };
-  window.cntFillJobRecruiters=function(keep){
-    const sel=document.getElementById('job-recruiter'); if(!sel) return;
+  // Fill any recruiter picker from the assignable staff list.
+  window.cntFillRecruiterSelect=function(id,keep){
+    const sel=document.getElementById(id); if(!sel) return;
     const names=[]; (window.cntRecruiters||[]).forEach(u=>{ const n=u.full_name||u.email; if(n && names.indexOf(n)<0) names.push(n); });
     const cur=keep!==undefined ? keep : sel.value;
-    // A recruiter who has since left (or been promoted to admin) is no longer
-    // in the list; keep the name so opening the job doesn't unassign it.
+    // Someone who has since left (or been promoted to admin) is no longer in
+    // the list; keep the name so reopening the record doesn't unassign them.
     let html='<option value="">Unassigned</option>'+names.map(n=>'<option value="'+_e(n)+'">'+_e(n)+'</option>').join('');
     if(cur && names.indexOf(cur)<0) html+='<option value="'+_e(cur)+'">'+_e(cur)+' (no longer listed)</option>';
     sel.innerHTML=html;
     sel.value=cur||'';
   };
+  window.cntFillJobRecruiters=function(keep){ cntFillRecruiterSelect('job-recruiter',keep); };
 
   // ── Offer box: proposed salary + validity date (Odoo Generate Offer) ──
   function _defaultValidity(app){
@@ -4512,7 +4534,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     _fillPicker('job-role',positions,'Select a position…');
     _fillPicker('job-location',locations,'Select a location…');
     if(typeof cntFillJobRecruiters==='function') cntFillJobRecruiters();
-    _fillPlain('req-account',clients); _fillPlain('req-role',positions); _fillPlain('req-location',locations);
+    _fillPicker('req-account',clients,'Select a client…');
+    _fillPicker('req-role',positions,'Select a position…');
+    _fillPicker('req-location',locations,'Select a location…');
+    if(window.cntFillRecruiterSelect) cntFillRecruiterSelect('req-recruiter');
     if(typeof buildClientDropdown==='function') buildClientDropdown();
   }
   // openCreateJobModal lives outside this IIFE and needs to rebuild the job
