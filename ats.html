@@ -2808,6 +2808,11 @@ document.addEventListener('DOMContentLoaded',()=>{
       showUploadedResume(a);
       renderEndorsement(a);
       renderWorkflow(a);
+      // Clear any banner left over from the previously viewed applicant
+      const dg=document.getElementById('cnt-digitize-banner');
+      if(dg){ dg.className='hidden'; dg.innerHTML=''; }
+      // Read the CV automatically — fills only blank fields, never overwrites
+      if(window.cntDigitizeResume) cntDigitizeResume(id,{auto:true});
     };
   }
 
@@ -2832,7 +2837,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     const actions='<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #e2e8f0;background:#fff;flex-wrap:wrap;">'
       +'<span style="font-size:12px;color:#334155;font-weight:600;display:inline-flex;align-items:center;gap:6px;"><span class="material-icons-outlined" style="font-size:16px;color:#7f1d1d;">upload_file</span>Uploaded by applicant</span>'
       +'<span style="display:flex;gap:12px;align-items:center;">'
-      +'<button onclick="cntDigitizeResume(\''+app.id+'\')" style="font-size:12px;font-weight:700;color:#fff;background:#7f1d1d;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">auto_fix_high</span>Digitize</button>'
       +'<a href="'+url+'" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#7f1d1d;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">open_in_new</span>Open</a>'
       +'<a href="'+url+'" download style="font-size:12px;font-weight:600;color:#7f1d1d;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">download</span>Download</a>'
       +'</span></div>';
@@ -5007,11 +5011,25 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!name){ const lines=t.split(/\n/).map(l=>l.trim()).filter(Boolean); for(const l of lines.slice(0,5)){ if(/^[A-Z][A-Za-z.'-]+(\s+[A-Z][A-Za-z.'-]+){1,3}$/.test(l)){ name=l; break; } } }
     return { name, email, phone, linkedin, degree, summary, skills, experience, education, languages };
   }
-  window.cntDigitizeResume=async function(id){
+  // Fields Digitize can fill. Doubles as the "is anything still empty?" check
+  // that stops the automatic run from re-downloading a CV we already read.
+  const _DIGI_FIELDS=['email','phone','linkedin','degree','notes','work_experience','education','languages','tags'];
+  const _digiAutoDone=new Set();
+  function _digiHasGaps(app){ return _DIGI_FIELDS.some(f=>!(''+(app[f]||'')).trim()); }
+  window.cntDigitizeResume=async function(id, opts){
+    const auto=!!(opts&&opts.auto);
     const app=findApplicant(id); if(!app) return;
     const banner=document.getElementById('cnt-digitize-banner');
     const show=(html,cls)=>{ if(!banner) return; banner.className='mb-3';
       banner.innerHTML='<div class="'+cls+'" style="border-radius:10px;padding:10px 14px;font-size:12.5px;display:flex;align-items:center;gap:8px;">'+html+'</div>'; };
+    if(auto){
+      // Opening a profile must stay cheap and silent: read the CV only when
+      // there is a real gap to fill, and only once per applicant per session.
+      if(_digiAutoDone.has(id)) return;
+      if(!app._web || !app.resumePath || !sb) return;
+      if(!_digiHasGaps(app)) return;
+      _digiAutoDone.add(id);
+    }
     if(!app._web || !app.resumePath || !sb){ show('<span class="material-icons-outlined" style="font-size:16px;">info</span>No uploaded résumé to digitize for this applicant.','bg-slate-100 text-slate-600 border border-slate-200'); return; }
     show('<span class="material-icons-outlined" style="font-size:16px;animation:spin 1s linear infinite;">progress_activity</span>Reading the résumé…','bg-slate-100 text-slate-600 border border-slate-200');
     try{
@@ -5038,15 +5056,20 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(f.skills && !(app.tags||'').trim()){ const tg=f.skills.split(/[,;•|/]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<24).slice(0,6).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
       Object.assign(app,patch);
       if(Object.keys(db).length){ updateApplicant(app.id,patch); _persistApp(app,db); }
-      logAudit('digitize','applicant',app._sid||id, filled.join(', ')||'no new fields');
-      cntLogActivity(app,'note','Résumé digitized'+(filled.length?(' — filled '+filled.join(', ')):' — nothing new to fill'));
+      // An automatic pass that found nothing is not worth a log entry — it would
+      // put a meaningless note on every profile that has a hard-to-read CV.
+      if(filled.length || !auto){
+        logAudit('digitize','applicant',app._sid||id, filled.join(', ')||'no new fields');
+        cntLogActivity(app,'note','Résumé digitized'+(filled.length?(' — filled '+filled.join(', ')):' — nothing new to fill'));
+      }
       if(window.cntRenderApplicantForm) cntRenderApplicantForm(app);
       const found=[];
       if(f.name) found.push('Name'); if(f.email) found.push('Email'); if(f.phone) found.push('Phone');
       if(f.linkedin) found.push('LinkedIn'); if(f.degree) found.push('Degree'); if(f.skills) found.push('Skills'); if(f.summary) found.push('Summary');
       if(f.experience) found.push('Experience'); if(f.education) found.push('Education'); if(f.languages) found.push('Languages');
+      if(auto && !filled.length){ if(banner){ banner.className='hidden'; banner.innerHTML=''; } return; }
       const msg = filled.length ? ('Filled: <b>'+filled.join(', ')+'</b>.') : ('No empty fields to fill. Detected: '+(found.join(' · ')||'nothing readable')+'.');
-      show('<span class="material-icons-outlined" style="font-size:16px;color:#166534;">task_alt</span><div><b>Document successfully parsed.</b> '+msg+'</div>','bg-emerald-50 text-emerald-800 border border-emerald-200');
+      show('<span class="material-icons-outlined" style="font-size:16px;color:#166534;">task_alt</span><div><b>Résumé read automatically.</b> '+msg+'</div>','bg-emerald-50 text-emerald-800 border border-emerald-200');
     }catch(e){
       if(e.message==='scanned'){ show('<span class="material-icons-outlined" style="font-size:16px;">image</span>This résumé looks like a scanned image — there is no text layer to read. Please enter the details manually.','bg-amber-50 text-amber-800 border border-amber-200'); }
       else { console.error('digitize',e); show('<span class="material-icons-outlined" style="font-size:16px;">error_outline</span>Could not digitize: '+_e(e.message||'unknown error'),'bg-red-50 text-red-700 border border-red-200'); }
