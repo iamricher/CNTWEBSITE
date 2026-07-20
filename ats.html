@@ -2840,18 +2840,26 @@ document.addEventListener('DOMContentLoaded',()=>{
   // ── Job Positions: full backend management (post / edit / remove → website) ──
   let _editingJobSid = null;
 
-  async function loadJobsFromBackend(){
-    if(!sb || typeof jobDatabase==='undefined') return;
-    const { data, error } = await sb.from('jobs').select('*');   // all statuses — ATS shows published + unpublished
-    if(error){ console.error('load jobs',error); return; }
+  function _applyJobs(rows){
+    if(!rows || typeof jobDatabase==='undefined') return false;
     Object.keys(jobDatabase).forEach(k=>delete jobDatabase[k]);
-    (data||[]).forEach(j=>{
+    rows.forEach(j=>{
       if(!jobDatabase[j.client]) jobDatabase[j.client]=[];
       jobDatabase[j.client].push({ _sid:j.id, role:j.role, account:j.client, location:j.location,
         needed:j.openings||1, salary:j.salary_range||'', priority:(j.priority||'normal').toLowerCase(),
         about:j.about||'', responsibilities:j.responsibilities||'', must_have:j.must_have||'', nice_to_have:j.nice_to_have||'', we_offer:j.we_offer||'',
         employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open' });
     });
+    return true;
+  }
+  async function loadJobsFromBackend(){
+    if(typeof jobDatabase==='undefined') return;
+    _applyJobs(cacheGet('jobs'));                                // instant from cache
+    if(!sb) return;
+    const { data, error } = await sb.from('jobs').select('*');   // all statuses — ATS shows published + unpublished
+    if(error){ console.error('load jobs',error); return; }
+    cacheSet('jobs',data||[]);
+    _applyJobs(data||[]);                                        // then the live copy
   }
 
   if (typeof openCreateJobModal === 'function'){
@@ -3653,7 +3661,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     await loadHiringRequests();
     await loadRecruiters();
     await loadJobsFromBackend();
+    watchFilters();      // persist filter changes for this session
+    restoreFilters();    // put back what was selected before the reload
     renderAll();
+    restoreView();       // and the view + board/list mode from last time
     injectBell();
     injectRoleBadge();
     injectLogout();
@@ -3698,7 +3709,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     btn.id='cnt-logout';
     btn.className='text-slate-400 hover:text-red-800 transition cursor-pointer p-1 rounded-lg hover:bg-slate-100';
     btn.title='Sign out'; btn.innerHTML='<span class="material-icons-outlined">logout</span>';
-    btn.onclick=async()=>{ if(sb) await sb.auth.signOut(); location.reload(); };
+    // Wipe every cached/remembered value on sign-out — nothing of this session
+    // should survive for whoever uses the machine next.
+    btn.onclick=async()=>{ cacheClearAll(); if(sb) await sb.auth.signOut(); location.reload(); };
     (document.getElementById('hdr-actions')||header).appendChild(btn);
   }
 
@@ -4286,12 +4299,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     return n;
   }
 
-  async function loadTaxonomy(){
-    if(!sb) return;
-    const { data, error } = await sb.from('taxonomy').select('*').order('name');
-    if(error){ console.warn('taxonomy load',error); return; }
+  function _applyTaxonomy(rows){
+    if(!rows) return false;
     const t={client:[],position:[],location:[]};
-    (data||[]).forEach(r=>{ if(t[r.kind]) t[r.kind].push({id:r.id,name:r.name,color:r.color}); });
+    rows.forEach(r=>{ if(t[r.kind]) t[r.kind].push({id:r.id,name:r.name,color:r.color}); });
     window.cntTax=t;
     if(t.client.length){   // taxonomy is the source of truth for client accounts
       const rebuilt=t.client.map((c,i)=>{
@@ -4301,6 +4312,15 @@ document.addEventListener('DOMContentLoaded',()=>{
       ACCOUNTS.length=0; rebuilt.forEach(x=>ACCOUNTS.push(x));
     }
     repopulateTaxonomyUI();
+    return true;
+  }
+  async function loadTaxonomy(){
+    _applyTaxonomy(cacheGet('taxonomy'));             // instant from cache
+    if(!sb) return;
+    const { data, error } = await sb.from('taxonomy').select('*').order('name');
+    if(error){ console.warn('taxonomy load',error); return; }
+    cacheSet('taxonomy',data||[]);
+    _applyTaxonomy(data||[]);                         // then the live copy
   }
 
   function _fillSelect(id,values,allLabel){
@@ -4644,20 +4664,98 @@ document.addEventListener('DOMContentLoaded',()=>{
   const STAGE_COLORS=['#ef4444','#f97316','#f59e0b','#8b5cf6','#3b82f6','#06b6d4','#6366f1','#10b981','#059669','#be185d'];
   function _slug(s){ return String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40); }
 
-  async function loadStages(){
-    applyStageStyles();
-    if(!sb) return;
-    const { data, error } = await sb.from('stages').select('*').order('sequence');
-    if(error){ console.warn('stages load — using built-in pipeline',error); return; }
-    if(!data || !data.length) return;
+  // ══════════════════════════════════════════════════════════════
+  //  CACHE  —  instant first paint, then always refresh from the server.
+  //  ONLY reference data is cached (stages, clients/positions/locations,
+  //  job postings). Applicant records are NEVER cached: that is personal
+  //  data and localStorage would outlive the session on a shared machine.
+  //  Everything here is wiped on sign-out.
+  // ══════════════════════════════════════════════════════════════
+  const CACHE_PREFIX='cnt_cache_', PREF_PREFIX='cnt_pref_', SESS_PREFIX='cnt_sess_';
+  const CACHE_VERSION='v1';          // bump to invalidate every cached entry
+  const CACHE_TTL_MIN=720;           // 12h — the network copy always wins anyway
+  function cacheSet(key,val){
+    try{ localStorage.setItem(CACHE_PREFIX+key, JSON.stringify({v:CACHE_VERSION,t:Date.now(),d:val})); }
+    catch(e){ /* quota/private mode — caching is optional, never fatal */ }
+  }
+  function cacheGet(key){
+    try{
+      const r=JSON.parse(localStorage.getItem(CACHE_PREFIX+key)||'null');
+      if(!r || r.v!==CACHE_VERSION) return null;
+      if(Date.now()-r.t > CACHE_TTL_MIN*60000) return null;
+      return r.d;
+    }catch(e){ return null; }
+  }
+  function prefSet(k,v){ try{ localStorage.setItem(PREF_PREFIX+k, JSON.stringify(v)); }catch(e){} }
+  function prefGet(k,d){ try{ const s=localStorage.getItem(PREF_PREFIX+k); return s==null?d:JSON.parse(s); }catch(e){ return d; } }
+  function sessSet(k,v){ try{ sessionStorage.setItem(SESS_PREFIX+k, JSON.stringify(v)); }catch(e){} }
+  function sessGet(k,d){ try{ const s=sessionStorage.getItem(SESS_PREFIX+k); return s==null?d:JSON.parse(s); }catch(e){ return d; } }
+  function cacheClearAll(){
+    try{
+      Object.keys(localStorage).forEach(k=>{ if(k.indexOf(CACHE_PREFIX)===0||k.indexOf(PREF_PREFIX)===0) localStorage.removeItem(k); });
+      Object.keys(sessionStorage).forEach(k=>{ if(k.indexOf(SESS_PREFIX)===0) sessionStorage.removeItem(k); });
+    }catch(e){}
+  }
+  window.cntClearCache=function(){ cacheClearAll(); if(window.showToast) showToast('Cached data cleared','info'); };
+
+  // Remember where you were. View + board/list mode persist across sessions;
+  // data filters only for the current session — a filter you set yesterday
+  // silently hiding records this morning would be worse than useless.
+  const FILTER_IDS=['filter-role','filter-location','filter-stage','filter-source',
+                    'job-f-client','job-f-position','job-f-location','job-f-status'];
+  function saveFilters(){
+    const o={}; FILTER_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) o[id]=el.value; });
+    if(typeof currentAccount!=='undefined') o._client=currentAccount;
+    sessSet('filters',o);
+  }
+  function restoreFilters(){
+    const o=sessGet('filters',null); if(!o) return;
+    FILTER_IDS.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && o[id]!=null && [...el.options].some(x=>x.value===o[id])) el.value=o[id];
+    });
+    if(o._client && o._client!=='all' && typeof selectClient==='function') selectClient(o._client);
+  }
+  function watchFilters(){
+    FILTER_IDS.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && !el.dataset.cntWatch){ el.dataset.cntWatch='1'; el.addEventListener('change',saveFilters); }
+    });
+  }
+  function restoreView(){
+    const allowed=ROLE_MODULES[currentRole]||ROLE_MODULES['recruiter'];
+    const m=prefGet('pipemode',null);
+    if(m && typeof toggleApplicationView==='function') toggleApplicationView(m);
+    const v=prefGet('view',null);
+    if(v && allowed.indexOf(v)>=0 && typeof switchView==='function'){
+      switchView(v);
+      if(v==='applications' && window.cntShowPipelineFilters) cntShowPipelineFilters(true);
+    }
+  }
+  if(typeof switchView==='function'){ const _sv=switchView; switchView=function(v){ _sv(v); prefSet('view',v); }; }
+  if(typeof toggleApplicationView==='function'){ const _tv=toggleApplicationView; toggleApplicationView=function(m){ _tv(m); prefSet('pipemode',m); }; }
+
+  function _applyStages(rows){
+    if(!rows || !rows.length) return false;
     PIPELINE_STAGES.length=0;
-    data.forEach(r=>PIPELINE_STAGES.push({
+    rows.forEach(r=>PIPELINE_STAGES.push({
       _id:r.id, key:r.key, label:r.name, short:r.short||r.name, color:r.color||'#64748b',
       sequence:r.sequence||0, folded:!!r.folded, is_hired:!!r.is_hired,
       email_subject:r.email_subject||'', email_body:r.email_body||'', requirements:r.requirements||''
     }));
     applyStageStyles();
     fillStageSelects();
+    return true;
+  }
+  async function loadStages(){
+    applyStageStyles();
+    _applyStages(cacheGet('stages'));                 // paint immediately from cache
+    if(!sb) return;
+    const { data, error } = await sb.from('stages').select('*').order('sequence');
+    if(error){ console.warn('stages load — using built-in pipeline',error); return; }
+    if(!data || !data.length) return;
+    cacheSet('stages',data);
+    _applyStages(data);                               // server copy always wins
   }
 
   function fillStageSelects(){
