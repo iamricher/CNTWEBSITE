@@ -1443,7 +1443,16 @@ function getFilteredDataset(){
   const role = document.getElementById('filter-role').value;
   const stg  = document.getElementById('filter-stage').value;
   const src  = (document.getElementById('filter-source')||{}).value||'all';
+  // When we drilled in from a job card, scope to that exact posting so the
+  // pipeline shows the same candidates the card counted. Without this the card
+  // would say "12 Applications" and open a list holding a different number.
+  const pj = window.cntPipelineJob;
   return base.filter(a=>{
+    if(pj && pj.sid!=null){
+      const belongs = a.job_id!=null ? String(a.job_id)===String(pj.sid)
+                                     : (a.role===pj.role && a.location===pj.location);
+      if(!belongs) return false;
+    }
     const ml = loc==='all'||a.location===loc;
     const mr = role==='all'||a.role===role;
     const ms = stg==='all'||a.stage===stg;
@@ -2107,6 +2116,23 @@ function cntCopyJobLink(sid){
     navigator.clipboard.writeText(url).then(done).catch(()=>prompt('Copy this link:',url));
   } else prompt('Copy this link:',url);
 }
+// Applications belonging to one posting.
+//
+// Matching on role+location alone made two similar postings for the same
+// client cross-count each other's applicants. Applications carry job_id, so
+// prefer that. Applications with no job_id — added by hand in the ATS, or
+// created before the link existed — still fall back to role+location, which
+// keeps their counts working; that fallback is the one case where two
+// identical sibling postings can still share a candidate.
+function appsForJob(accId, job){
+  const list=(typeof accountData!=='undefined' && accountData[accId])||[];
+  if(job && job._sid!=null){
+    return list.filter(a=> a.job_id!=null
+      ? String(a.job_id)===String(job._sid)
+      : (a.role===job.role && a.location===job.location));
+  }
+  return list.filter(a=>a.role===job.role && a.location===job.location);
+}
 function renderJobPositions(){
   const jc=document.getElementById('job-cards-container');
   if(!jc)return;
@@ -2129,7 +2155,7 @@ function renderJobPositions(){
       matches.push({accId,job:j});
     });
   });
-  const apps=m=>(accountData[m.accId]||[]).filter(a=>a.role===m.job.role&&a.location===m.job.location);
+  const apps=m=>appsForJob(m.accId,m.job);
   const sortBy=gv('job-f-sort');
   const BIG=1e9;   // no deadline sorts last rather than first
   matches.sort((a,b)=>{
@@ -2149,16 +2175,16 @@ function renderJobPositions(){
   matches.forEach(({accId,job})=>{
     const accInfo=ACCOUNTS.find(a=>a.id===accId);
     {
-      const appsForJob=(accountData[accId]||[]).filter(a=>a.role===job.role&&a.location===job.location);
-      const newCount=appsForJob.filter(a=>a.stage==='new').length;
-      const totalApps=appsForJob.filter(a=>a.stage!=='pool').length;
-      const hiredCount=appsForJob.filter(a=>stageIsHired(a.stage)||a.deployed_at).length;
-      const interviewCount=appsForJob.filter(a=>a.stage==='interview').length;
+      const appsForThisJob=appsForJob(accId,job);
+      const newCount=appsForThisJob.filter(a=>a.stage==='new').length;
+      const totalApps=appsForThisJob.filter(a=>a.stage!=='pool').length;
+      const hiredCount=appsForThisJob.filter(a=>stageIsHired(a.stage)||a.deployed_at).length;
+      const interviewCount=appsForThisJob.filter(a=>a.stage==='interview').length;
       const toRecruit=Math.max(0,(job.needed||1)-hiredCount);
       const published=job.status!=='closed';
       const isFav=job.favorite||job.priority==='urgent';
       const rc=s=>String(s==null?'':s).replace(/'/g,"\\'");
-      jc.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl hover:shadow-md transition cursor-pointer hover:border-slate-300 group" style="position:relative;" onclick="quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}')">
+      jc.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl hover:shadow-md transition cursor-pointer hover:border-slate-300 group" style="position:relative;" onclick="quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}',null,'${job._sid||''}')">
         ${published?`<div style="position:absolute;top:0;right:0;width:104px;height:104px;overflow:hidden;pointer-events:none;border-top-right-radius:12px;"><div style="position:absolute;transform:rotate(45deg);background:#16a34a;color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;text-align:center;width:150px;top:20px;right:-42px;padding:3px 0;box-shadow:0 1px 3px rgba(0,0,0,.25);">PUBLISHED</div></div>`:''}
         <div class="p-4">
           <div class="flex items-start gap-2 mb-1">
@@ -2178,7 +2204,7 @@ function renderJobPositions(){
             </div>`:''}
           </div>
           <div class="flex items-end justify-between gap-3 mt-3">
-            <button onclick="event.stopPropagation();quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}',${newCount>0?"'new'":'null'})" class="bg-red-800 hover:bg-red-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition cursor-pointer whitespace-nowrap shadow-sm">${totalApps} Application${totalApps===1?'':'s'}${newCount>0?` · ${newCount} new`:''}</button>
+            <button onclick="event.stopPropagation();quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}',${newCount>0?"'new'":'null'},'${job._sid||''}')" class="bg-red-800 hover:bg-red-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition cursor-pointer whitespace-nowrap shadow-sm">${totalApps} Application${totalApps===1?'':'s'}${newCount>0?` · ${newCount} new`:''}</button>
             <div class="text-right leading-tight">
               <div class="text-[12px] font-bold text-slate-700">${toRecruit} To Recruit</div>
               <div class="text-[11px] mt-0.5 ${interviewCount>0?'text-amber-600 font-semibold':'text-slate-400'}">${interviewCount} In Interview</div>
@@ -2382,12 +2408,13 @@ function fmtMonth(d){if(!d)return 'TBD';return new Date(d+'T00:00').toLocaleStri
 function fmtDay(d){if(!d)return '--';return new Date(d+'T00:00').getDate().toString().padStart(2,'0');}
 function fmtTime(t){if(!t)return'TBD';const[h,m]=t.split(':');const hr=parseInt(h);const ap=hr>=12?'PM':'AM';return`${hr%12||12}:${m} ${ap}`;}
 
-function quickJump(role,location,account,stage){
+function quickJump(role,location,account,stage,jobSid){
   selectClient(account);
   _setSelect('filter-location',location);
   _setSelect('filter-role',role);
   document.getElementById('filter-stage').value=stage||'all';
-  window.cntPipelineJob={role,location,account};
+  // sid scopes the pipeline to this exact posting (see getFilteredDataset).
+  window.cntPipelineJob={role,location,account,sid:(jobSid===''||jobSid===undefined)?null:jobSid};
   const ctx=document.getElementById('pipeline-context');
   if(ctx) ctx.textContent=role+' · '+account+' · '+location;
   cntShowPipelineFilters(false);   // already scoped to one job — filters would only confuse
@@ -2906,6 +2933,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       interviewDate:r.interview_date||'', interviewTime:r.interview_time||'', interviewType:r.interview_type||'', interviewRound:r.interview_round||'',
       source:r.source||'Website', salary:'', notes:r.cover_note||'',
       appliedDate:r.applied_date||(r.created_at?String(r.created_at).slice(0,10):''),
+      job_id:r.job_id||null,          // the posting this application belongs to
       experience:r.experience||'', resumePath:r.resume_url||null,
       client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null,
       contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
