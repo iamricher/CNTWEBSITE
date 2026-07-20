@@ -283,7 +283,18 @@
                   <select name="experience"><option value="">Select…</option><option>No experience</option><option>Less than 1 year</option><option>1–2 years</option><option>3–5 years</option><option>5+ years</option></select>
                 </div>
                 <div class="field"><label>How did you hear about us?</label>
-                  <select name="source"><option value="Website">Company Website</option><option>JobStreet</option><option>Indeed</option><option>Facebook</option><option>LinkedIn</option><option>Kalibrr</option><option>Referral</option><option>Walk-in</option><option>Other</option></select>
+                  <select name="source" id="source-select"><option value="Website">Company Website</option><option>JobStreet</option><option>Indeed</option><option>Facebook</option><option>LinkedIn</option><option>Kalibrr</option><option>Referral</option><option>Walk-in</option><option>Other</option></select>
+                </div>
+                <!-- Shown only for Referral. Hidden fields stay out of the way
+                     and are not required, so the form still submits normally
+                     for every other source. -->
+                <div class="field" id="referral-name-field" hidden>
+                  <label for="referred_by">Who referred you? <span class="req">*</span></label>
+                  <input id="referred_by" name="referred_by" type="text" placeholder="Full name of the person who referred you" autocomplete="off" />
+                </div>
+                <div class="field" id="referral-relation-field" hidden>
+                  <label for="referral_relation">How are you related to that person? <span class="req">*</span></label>
+                  <input id="referral_relation" name="referral_relation" type="text" placeholder="e.g. former colleague, friend, relative" autocomplete="off" />
                 </div>
                 <div class="field"><label>Resume / CV <span class="req">*</span></label>
                   <label class="filebox" id="filebox">
@@ -541,12 +552,27 @@
     $('#filebox').classList.remove('has'); $('#filebox-text').textContent='Upload PDF or DOC (max 5 MB)';
     const m=$('#form-msg'); m.className='form-msg'; m.textContent='';
     $('#submit-btn').disabled=false; $('#submit-btn').textContent='Submit application';
+    syncReferralFields();          // reset() restores Website, so re-hide these
   }
   document.getElementById('resume').addEventListener('change',function(){
     const file=this.files[0];
     if(file){ $('#filebox').classList.add('has'); $('#filebox-text').textContent=file.name+' ('+(file.size/1048576).toFixed(1)+' MB)'; }
   });
   function showMsg(t){ const m=$('#form-msg'); m.textContent=t; m.className='form-msg err'; }
+
+  /* Referral follow-ups: who referred you, and how you know them. Only shown
+     when Referral is chosen — and cleared when it isn't, so switching away
+     can't leave a stale name attached to a different source. */
+  function syncReferralFields(){
+    const sel=$('#source-select'); if(!sel) return;
+    const on=sel.value==='Referral';
+    const nameF=$('#referral-name-field'), relF=$('#referral-relation-field');
+    if(nameF) nameF.hidden=!on;
+    if(relF)  relF.hidden=!on;
+    if(!on){ const n=$('#referred_by'), r=$('#referral_relation'); if(n) n.value=''; if(r) r.value=''; }
+  }
+  document.getElementById('source-select').addEventListener('change',syncReferralFields);
+  syncReferralFields();
 
   document.getElementById('apply-form').addEventListener('submit',async(e)=>{
     e.preventDefault();
@@ -562,6 +588,13 @@
     if(!file){ showMsg('Please attach your resume / CV.'); return; }
     if(file.size>5*1048576){ showMsg('Your file is larger than 5 MB.'); return; }
     if(!f.consent.checked){ showMsg('Please tick the data privacy consent so we may process your application.'); return; }
+
+    const isReferral=f.source.value==='Referral';
+    const referredBy=isReferral ? (f.referred_by.value||'').trim() : '';
+    const referralRelation=isReferral ? (f.referral_relation.value||'').trim() : '';
+    if(isReferral && !referredBy){ showMsg('Please tell us who referred you.'); f.referred_by.focus(); return; }
+    if(isReferral && !referralRelation){ showMsg('Please tell us how you know the person who referred you.'); f.referral_relation.focus(); return; }
+
     if(!sb){ showMsg('Applications are not live yet — Supabase must be configured first.'); return; }
 
     // Throttle: one submission per 30s per browser, regardless of job
@@ -579,6 +612,7 @@
         role:activeJob.role, client:activeJob.client, location:activeJob.location,
         experience:f.experience.value||null, source:f.source.value||'Website',
         cover_note:f.cover_note.value.trim()||null, resume_url:path, stage:'new',
+        referred_by:referredBy||null, referral_relation:referralRelation||null,
         consent_at:new Date().toISOString()
       });
       if(ins.error) throw ins.error;

@@ -854,9 +854,9 @@
       <input type="hidden" id="applicant-id">
       <div class="grid grid-cols-2 gap-4">
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Full Name <span class="text-red-500">*</span></label><input type="text" id="app-name" required placeholder="e.g. Juan Dela Cruz" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client Account <span class="text-red-500">*</span></label><select id="app-account" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm" onchange="updateJobOptions()"><option value="SONY">SONY</option><option value="HAIER">HAIER</option><option value="HISENSE">HISENSE</option><option value="URC">URC</option><option value="SKYWORTH">SKYWORTH</option><option value="UNCLE JOHNS">UNCLE JOHNS</option><option value="Cinderella">Cinderella</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location <span class="text-red-500">*</span></label><select id="app-location" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Manila">Manila (NCR)</option><option value="Tarlac">Tarlac</option><option value="Bulacan">Bulacan</option><option value="Pampanga">Pampanga</option><option value="Cavite">Cavite</option><option value="Pangasinan">Pangasinan</option><option value="Batangas">Batangas</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position Applied <span class="text-red-500">*</span></label><select id="app-role" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Sales Promoter</option><option>Merchandiser</option><option>Area Supervisor</option><option>Brand Ambassador</option><option>Trade Marketing Specialist</option><option>Field Sales Representative</option><option>Product Demonstrator</option><option>Store Supervisor</option><option>In-Store Activator</option><option>Content Marketer</option><option>Logistics Coordinator</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client Account <span class="text-red-500">*</span></label><select id="app-account" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white" onchange="updateJobOptions()"><option value="">Select a client…</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location <span class="text-red-500">*</span></label><select id="app-location" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a location…</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position Applied <span class="text-red-500">*</span></label><select id="app-role" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a position…</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Stage</label><select id="app-stage" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="new">Initial Screening</option><option value="interview">Interview</option><option value="exam">Pre-Employment Exam</option><option value="bgcheck">Background Check</option><option value="hired">Job Offer / Proposal</option><option value="onboarding">Onboarding</option><option value="pool">Talent Pool</option><option value="rejected">Not Qualified</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Mobile <span class="text-red-500">*</span></label><input type="text" id="app-phone" required placeholder="+63 9XX XXX XXXX" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Email</label><input type="email" id="app-email" placeholder="juan@email.com" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
@@ -1079,6 +1079,7 @@
             <div class="cnt-frow"><span class="cnt-frow-l">Evaluation</span><span class="cnt-frow-v flex items-center gap-1"><span id="resume-stars"></span><span class="text-[10px] font-bold text-amber-600" id="resume-priority-label"></span></span></div>
             <div class="cnt-frow"><span class="cnt-frow-l">Degree</span><span class="cnt-frow-v" id="resume-degree-val">—</span></div>
             <div class="cnt-frow"><span class="cnt-frow-l">Source</span><span class="cnt-frow-v" id="resume-source-val">—</span></div>
+            <div class="cnt-frow" id="resume-referral-row" style="display:none;"><span class="cnt-frow-l">Referred by</span><span class="cnt-frow-v" id="resume-referral-val">—</span></div>
             <div class="cnt-frow"><span class="cnt-frow-l">Location</span><span class="cnt-frow-v" id="resume-location-display"></span></div>
             <div class="cnt-frow"><span class="cnt-frow-l">Medium</span><span class="cnt-frow-v" id="resume-medium-val">—</span></div>
             <div class="cnt-frow"><span class="cnt-frow-l">Availability</span><span class="cnt-frow-v" id="resume-availability-val">—</span></div>
@@ -1513,6 +1514,14 @@ function cntRenderApplicantForm(app){
   set('resume-recruiter-val',   app.recruiter);
   set('resume-degree-val',      app.degree);
   set('resume-source-val',      app.source);
+  // Referral details only mean something when there is a referrer; the row
+  // stays out of the way otherwise.
+  { const row=document.getElementById('resume-referral-row'), val=document.getElementById('resume-referral-val');
+    if(row&&val){
+      const who=(app.referred_by||'').trim(), rel=(app.referral_relation||'').trim();
+      row.style.display=who?'':'none';
+      val.textContent=who?(who+(rel?' · '+rel:'')):'—';
+    } }
   set('resume-medium-val',      app.medium);
   set('resume-availability-val',app.availability);
   set('resume-referred-val',    app.referred_by);
@@ -2345,7 +2354,9 @@ function openCreateApplicationModal(){
   document.getElementById('crud-form').reset();
   document.getElementById('applicant-id').value='';
   document.getElementById('modal-title').textContent='Add Applicant';
-  if(currentAccount!=='all')document.getElementById('app-account').value=currentAccount;
+  // reset() only restores the markup defaults; rebuild from the live taxonomy.
+  if(window.cntRepopulateTaxonomyUI) cntRepopulateTaxonomyUI();
+  if(currentAccount!=='all'){ const a=document.getElementById('app-account'); if(a && [...a.options].some(o=>o.value===currentAccount)) a.value=currentAccount; }
   if(typeof populateRecruiterSelect==='function') populateRecruiterSelect('');
   document.getElementById('crud-modal').classList.remove('hidden');
 }
@@ -2353,9 +2364,13 @@ function openEditModal(id){
   const app=findApplicant(id);if(!app)return;
   document.getElementById('applicant-id').value=app.id;
   document.getElementById('app-name').value=app.name;
-  document.getElementById('app-account').value=app.account;
-  document.getElementById('app-location').value=app.location;
-  document.getElementById('app-role').value=app.role;
+  // Build the options around this applicant's own values first — a <select>
+  // discards any value it has no option for, so assigning .value directly
+  // would blank the field whenever the taxonomy has moved on since.
+  if(window.cntFillApplicantPickers) cntFillApplicantPickers(app);
+  else { document.getElementById('app-account').value=app.account;
+         document.getElementById('app-location').value=app.location;
+         document.getElementById('app-role').value=app.role; }
   document.getElementById('app-phone').value=app.phone;
   document.getElementById('app-email').value=app.email||'';
   document.getElementById('app-source').value=app.source||'JobStreet';
@@ -2813,7 +2828,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null,
       contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
       priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[],
-      recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||'',
+      recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', referral_relation:r.referral_relation||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||'',
       work_experience:r.work_experience||'', education:r.education||'', languages:r.languages||'',
       certifications:r.certifications||'', seminars:r.seminars||'', awards:r.awards||'', char_references:r.char_references||''
     };
@@ -4245,15 +4260,12 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   window.cntReportTab=function(t){ _reportTab=t; renderOdooReports(); };
 
-  // Fill the applicant form's Recruiter dropdown from the loaded recruiters + current user
+  // Applicant form's Recruiter dropdown. Uses the shared filler so all three
+  // forms offer the same people: every staff account except super_admin and
+  // pending. It no longer prepends the signed-in user — a working recruiter is
+  // already in that list, and the only account this used to add was an admin's.
   window.populateRecruiterSelect=function(selected){
-    const sel=document.getElementById('app-recruiter'); if(!sel) return;
-    const names=[];
-    (window.cntRecruiters||[]).forEach(u=>{ const n=u.full_name||u.email; if(n && names.indexOf(n)<0) names.push(n); });
-    if(window.cntUserName && names.indexOf(window.cntUserName)<0) names.unshift(window.cntUserName);
-    if(selected && names.indexOf(selected)<0) names.push(selected);
-    sel.innerHTML='<option value="">Unassigned</option>'+names.map(n=>'<option value="'+_e(n)+'"'+(selected===n?' selected':'')+'>'+_e(n)+'</option>').join('');
-    sel.value=selected||'';
+    cntFillRecruiterSelect('app-recruiter', selected||'');
   };
   // Fill any recruiter picker from the assignable staff list.
   window.cntFillRecruiterSelect=function(id,keep){
@@ -4529,7 +4541,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     const clients=_taxNames('client'), positions=_taxNames('position'), locations=_taxNames('location');
     _fillSelect('filter-location',locations,'All Locations');
     _fillSelect('filter-role',positions,'All Positions');
-    _fillPlain('app-account',clients); _fillPlain('app-location',locations); _fillPlain('app-role',positions);
+    _fillPicker('app-account',clients,'Select a client…');
+    _fillPicker('app-location',locations,'Select a location…');
+    _fillPicker('app-role',positions,'Select a position…');
     _fillPicker('job-account',clients,'Select a client…');
     _fillPicker('job-role',positions,'Select a position…');
     _fillPicker('job-location',locations,'Select a location…');
@@ -4540,9 +4554,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(window.cntFillRecruiterSelect) cntFillRecruiterSelect('req-recruiter');
     if(typeof buildClientDropdown==='function') buildClientDropdown();
   }
-  // openCreateJobModal lives outside this IIFE and needs to rebuild the job
-  // pickers after form.reset(), so hand it an explicit handle.
+  // openCreateJobModal / openEditModal live outside this IIFE and need to
+  // rebuild the pickers, so hand them explicit handles.
   window.cntRepopulateTaxonomyUI=repopulateTaxonomyUI;
+  window.cntFillApplicantPickers=function(app){
+    _fillPicker('app-account',_taxNames('client'),'Select a client…',(app&&app.account)||'');
+    _fillPicker('app-location',_taxNames('location'),'Select a location…',(app&&app.location)||'');
+    _fillPicker('app-role',_taxNames('position'),'Select a position…',(app&&app.role)||'');
+  };
 
   function renderSettings(){
     TAX_KINDS.forEach(kind=>{

@@ -142,7 +142,10 @@ alter table public.applications
   add column if not exists certifications  text,
   add column if not exists seminars        text,
   add column if not exists awards          text,
-  add column if not exists char_references text;
+  add column if not exists char_references text,
+  -- How the applicant knows the person who referred them (careers form asks
+  -- for this only when the source is Referral).
+  add column if not exists referral_relation text;
 
 -- Data Privacy Act of 2012 (RA 10173)
 --   consent_at : when the applicant ticked the consent box on the careers form
