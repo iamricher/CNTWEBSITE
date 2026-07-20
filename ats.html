@@ -924,9 +924,9 @@
       <button onclick="closeJobModal()" class="text-slate-400 hover:text-red-700 cursor-pointer p-1 rounded-lg hover:bg-slate-100 transition"><span class="material-icons-outlined">close</span></button>
     </div>
     <form id="job-form" onsubmit="handleJobSubmit(event)" class="space-y-4">
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client Account</label><input id="job-account" list="job-account-list" autocomplete="off" required placeholder="Type or pick a client" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><datalist id="job-account-list"><option>SONY</option><option>HAIER</option><option>HISENSE</option><option>URC</option><option>SKYWORTH</option><option>UNCLE JOHNS</option><option>Cinderella</option></datalist></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position Title</label><input id="job-role" list="job-role-list" autocomplete="off" required placeholder="Type or pick a position" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><datalist id="job-role-list"><option>Sales Promoter</option><option>Merchandiser</option><option>Area Supervisor</option><option>Brand Ambassador</option><option>Trade Marketing Specialist</option><option>Field Sales Representative</option><option>Product Demonstrator</option><option>Store Supervisor</option><option>In-Store Activator</option><option>Content Marketer</option><option>Logistics Coordinator</option></datalist></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location</label><input id="job-location" list="job-location-list" autocomplete="off" required placeholder="Type or pick a location" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><datalist id="job-location-list"><option>Manila</option><option>Tarlac</option><option>Bulacan</option><option>Pampanga</option><option>Cavite</option><option>Pangasinan</option><option>Batangas</option></datalist></div>
+      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client Account</label><select id="job-account" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a client…</option></select></div>
+      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position Title</label><select id="job-role" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a position…</option></select></div>
+      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location</label><select id="job-location" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a location…</option></select></div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Target Headcount</label><input type="number" id="job-needed" required min="1" value="5" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Salary Range</label><input type="text" id="job-salary" placeholder="₱15,000 – ₱20,000" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
@@ -935,7 +935,7 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Priority</label><select id="job-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Employment Type</label><select id="job-employment" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Full-Time">Full-Time</option><option value="Project-based">Project-based</option><option value="Seasonal">Seasonal</option><option value="Part-Time">Part-Time</option><option value="Contract">Contract</option><option value="Internship">Internship</option></select></div>
       </div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Recruiter <span class="text-slate-400 font-normal normal-case">— person accountable for this role</span></label><input id="job-recruiter" list="job-recruiter-list" autocomplete="off" placeholder="Assign a recruiter" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><datalist id="job-recruiter-list"></datalist></div>
+      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Recruiter <span class="text-slate-400 font-normal normal-case">— person accountable for this role</span></label><select id="job-recruiter" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Unassigned</option></select></div>
 
       <div class="pt-3 mt-1 border-t border-slate-100"><p class="text-[11px] font-bold text-red-800 uppercase tracking-wide">Job Description <span class="text-slate-400 font-normal normal-case">— shown on the website (optional; leave blank to auto-generate)</span></p></div>
       <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">About the role</label><textarea id="job-about" rows="2" placeholder="Short overview of what this role is about…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
@@ -2428,7 +2428,14 @@ function handleInterviewSubmit(e){
   }
 }
 
-function openCreateJobModal(){document.getElementById('job-form').reset();if(currentAccount!=='all')document.getElementById('job-account').value=currentAccount;document.getElementById('job-modal').classList.remove('hidden');}
+function openCreateJobModal(){
+  document.getElementById('job-form').reset();
+  // reset() only restores the markup defaults, so rebuild the pickers from the
+  // current taxonomy before preselecting the account being viewed.
+  if(window.cntRepopulateTaxonomyUI) cntRepopulateTaxonomyUI();
+  if(currentAccount!=='all'){ const a=document.getElementById('job-account'); if(a && [...a.options].some(o=>o.value===currentAccount)) a.value=currentAccount; }
+  document.getElementById('job-modal').classList.remove('hidden');
+}
 function closeJobModal(){document.getElementById('job-modal').classList.add('hidden');}
 function handleJobSubmit(e){
   e.preventDefault();
@@ -2945,13 +2952,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     let job=null;
     for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===sid); if(j){job=j;break;} }
     if(!job) return;
-    document.getElementById('job-account').value=job.account;
-    document.getElementById('job-role').value=job.role;
-    document.getElementById('job-location').value=job.location;
+    // Build the options around this job's own values first — a <select> drops
+    // any value it has no option for, so setting .value directly would blank
+    // the field whenever a client/position/location has changed in Settings.
+    _fillPicker('job-account',_taxNames('client'),'Select a client…',job.account||'');
+    _fillPicker('job-role',_taxNames('position'),'Select a position…',job.role||'');
+    _fillPicker('job-location',_taxNames('location'),'Select a location…',job.location||'');
+    cntFillJobRecruiters(job.recruiter||'');
     document.getElementById('job-needed').value=job.needed;
     document.getElementById('job-salary').value=job.salary||'';
     document.getElementById('job-priority').value=(job.priority||'normal').toLowerCase();
-    { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time'; const jr=document.getElementById('job-recruiter'); if(jr) jr.value=job.recruiter||''; }
+    { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time'; }
     document.getElementById('job-about').value=job.about||'';
     document.getElementById('job-responsibilities').value=job.responsibilities||'';
     document.getElementById('job-must').value=job.must_have||'';
@@ -3113,10 +3124,17 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // Hiring Requests → Supabase backend (load on start; persist submit + approve/fill)
   let recruitersList=[];
+  // Anyone who can be held accountable for a role: every staff account except
+  // the super admin (an owner account, not a working recruiter) and 'pending'
+  // sign-ups, who have no role assigned yet and cannot act on anything.
+  const NON_ASSIGNABLE_ROLES=['super_admin','pending'];
   async function loadRecruiters(){
     if(!sb) return;
-    const { data } = await sb.from('profiles').select('id,full_name,email,role').in('role',['recruiter','recruitment_supervisor']);
+    const { data } = await sb.from('profiles').select('id,full_name,email,role')
+      .not('role','in','('+NON_ASSIGNABLE_ROLES.join(',')+')')
+      .order('full_name');
     recruitersList = data||[]; window.cntRecruiters = recruitersList;
+    if(typeof cntFillJobRecruiters==='function') cntFillJobRecruiters();
   }
   async function assignRequest(reqId, uid, name){
     const r=(typeof hiringRequests!=='undefined')?hiringRequests.find(x=>x.id===reqId):null; if(!r) return;
@@ -4217,11 +4235,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     sel.innerHTML='<option value="">Unassigned</option>'+names.map(n=>'<option value="'+_e(n)+'"'+(selected===n?' selected':'')+'>'+_e(n)+'</option>').join('');
     sel.value=selected||'';
   };
-  window.cntFillJobRecruiters=function(){
-    const dl=document.getElementById('job-recruiter-list'); if(!dl) return;
+  window.cntFillJobRecruiters=function(keep){
+    const sel=document.getElementById('job-recruiter'); if(!sel) return;
     const names=[]; (window.cntRecruiters||[]).forEach(u=>{ const n=u.full_name||u.email; if(n && names.indexOf(n)<0) names.push(n); });
-    if(window.cntUserName && names.indexOf(window.cntUserName)<0) names.unshift(window.cntUserName);
-    dl.innerHTML=names.map(n=>'<option>'+_e(n)+'</option>').join('');
+    const cur=keep!==undefined ? keep : sel.value;
+    // A recruiter who has since left (or been promoted to admin) is no longer
+    // in the list; keep the name so opening the job doesn't unassign it.
+    let html='<option value="">Unassigned</option>'+names.map(n=>'<option value="'+_e(n)+'">'+_e(n)+'</option>').join('');
+    if(cur && names.indexOf(cur)<0) html+='<option value="'+_e(cur)+'">'+_e(cur)+' (no longer listed)</option>';
+    sel.innerHTML=html;
+    sel.value=cur||'';
   };
 
   // ── Offer box: proposed salary + validity date (Odoo Generate Offer) ──
@@ -4466,15 +4489,35 @@ document.addEventListener('DOMContentLoaded',()=>{
     const dl=document.getElementById(id); if(!dl) return;
     dl.innerHTML=values.map(v=>'<option>'+_escN(v)+'</option>').join('');
   }
+  // Fill a required picker on the Job form. `keep` is the value already saved
+  // on the job being edited: a select silently drops any value it has no
+  // option for, so a job whose client was later renamed or removed in Settings
+  // would blank that field the moment someone opened it. Keep it as an option,
+  // flagged, rather than losing the record's own data.
+  function _fillPicker(id,values,placeholder,keep){
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=keep!==undefined ? keep : sel.value;
+    let html='<option value="">'+_escN(placeholder)+'</option>'
+      +values.map(v=>'<option value="'+_escN(v)+'">'+_escN(v)+'</option>').join('');
+    if(cur && !values.some(v=>v===cur)) html+='<option value="'+_escN(cur)+'">'+_escN(cur)+' (not in Settings)</option>';
+    sel.innerHTML=html;
+    sel.value=cur||'';
+  }
   function repopulateTaxonomyUI(){
     const clients=_taxNames('client'), positions=_taxNames('position'), locations=_taxNames('location');
     _fillSelect('filter-location',locations,'All Locations');
     _fillSelect('filter-role',positions,'All Positions');
     _fillPlain('app-account',clients); _fillPlain('app-location',locations); _fillPlain('app-role',positions);
-    _fillList('job-account-list',clients); _fillList('job-role-list',positions); _fillList('job-location-list',locations);
+    _fillPicker('job-account',clients,'Select a client…');
+    _fillPicker('job-role',positions,'Select a position…');
+    _fillPicker('job-location',locations,'Select a location…');
+    if(typeof cntFillJobRecruiters==='function') cntFillJobRecruiters();
     _fillPlain('req-account',clients); _fillPlain('req-role',positions); _fillPlain('req-location',locations);
     if(typeof buildClientDropdown==='function') buildClientDropdown();
   }
+  // openCreateJobModal lives outside this IIFE and needs to rebuild the job
+  // pickers after form.reset(), so hand it an explicit handle.
+  window.cntRepopulateTaxonomyUI=repopulateTaxonomyUI;
 
   function renderSettings(){
     TAX_KINDS.forEach(kind=>{
