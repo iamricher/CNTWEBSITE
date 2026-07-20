@@ -21,6 +21,9 @@ jobs:
       - name: Run smoke tests
         run: node scripts/smoke-test.js
 
+      - name: Run résumé parser tests
+        run: node scripts/test-resume-parser.js
+
   secrets-guard:
     name: No secrets committed
     runs-on: ubuntu-latest

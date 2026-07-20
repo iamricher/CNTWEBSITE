@@ -873,6 +873,10 @@
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Tags <span class="text-slate-400 font-normal normal-case">— comma-separated</span></label><input type="text" id="app-tags" placeholder="e.g. bilingual, driver's license, night shift" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Work Experience <span class="text-slate-400 font-normal normal-case">— auto-filled by Digitize</span></label><textarea id="app-experience" rows="3" placeholder="Roles, companies and dates…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Education</label><textarea id="app-education" rows="2" placeholder="Degree, school, year…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Certifications &amp; Licenses</label><textarea id="app-certifications" rows="2" placeholder="TESDA, PRC, eligibility…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Seminars &amp; Trainings</label><textarea id="app-seminars" rows="2" placeholder="Trainings attended…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Awards &amp; Achievements</label><textarea id="app-awards" rows="2" placeholder="Recognition, honours…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+        <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Character References</label><textarea id="app-char-references" rows="2" placeholder="Name, position, contact number…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Languages</label><textarea id="app-languages" rows="2" placeholder="e.g. Filipino, English" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Notes / Remarks</label><textarea id="app-notes" rows="2" placeholder="Add recruiter notes here…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
       </div>
@@ -1105,9 +1109,25 @@
               <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">school</span>Education</p>
               <div class="text-[12px] text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-line max-h-36 overflow-y-auto custom-scroll" id="cnt-rd-education-val"></div>
             </div>
-            <div id="cnt-rd-languages" class="hidden">
+            <div id="cnt-rd-certifications" class="hidden mb-3">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">workspace_premium</span>Certifications &amp; Licenses</p>
+              <div class="text-[12px] text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-line max-h-36 overflow-y-auto custom-scroll" id="cnt-rd-certifications-val"></div>
+            </div>
+            <div id="cnt-rd-seminars" class="hidden mb-3">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">cast_for_education</span>Seminars &amp; Trainings</p>
+              <div class="text-[12px] text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-line max-h-36 overflow-y-auto custom-scroll" id="cnt-rd-seminars-val"></div>
+            </div>
+            <div id="cnt-rd-awards" class="hidden mb-3">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">emoji_events</span>Awards &amp; Achievements</p>
+              <div class="text-[12px] text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-line max-h-36 overflow-y-auto custom-scroll" id="cnt-rd-awards-val"></div>
+            </div>
+            <div id="cnt-rd-languages" class="hidden mb-3">
               <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">translate</span>Languages</p>
               <div class="text-[12px] text-slate-700 leading-relaxed" id="cnt-rd-languages-val"></div>
+            </div>
+            <div id="cnt-rd-char-references" class="hidden">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">contact_phone</span>Character References</p>
+              <div class="text-[12px] text-slate-700 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 whitespace-pre-line max-h-36 overflow-y-auto custom-scroll" id="cnt-rd-char-references-val"></div>
             </div>
           </div>
 
@@ -1513,7 +1533,11 @@ function cntRenderApplicantForm(app){
   const anyDetail=[
     block('cnt-rd-experience','cnt-rd-experience-val',app.work_experience),
     block('cnt-rd-education','cnt-rd-education-val',app.education),
-    block('cnt-rd-languages','cnt-rd-languages-val',app.languages)
+    block('cnt-rd-certifications','cnt-rd-certifications-val',app.certifications),
+    block('cnt-rd-seminars','cnt-rd-seminars-val',app.seminars),
+    block('cnt-rd-awards','cnt-rd-awards-val',app.awards),
+    block('cnt-rd-languages','cnt-rd-languages-val',app.languages),
+    block('cnt-rd-char-references','cnt-rd-char-references-val',app.char_references)
   ].some(Boolean);
   const rd=document.getElementById('cnt-resume-details');
   if(rd) rd.classList.toggle('hidden', !anyDetail);
@@ -2340,6 +2364,8 @@ function openEditModal(id){
   _s('app-proposed-salary',app.proposed_salary); _s('app-degree',app.degree); _s('app-medium',app.medium);
   _s('app-referred',app.referred_by); _s('app-linkedin',app.linkedin); _s('app-availability',app.availability); _s('app-tags',app.tags);
   _s('app-experience',app.work_experience); _s('app-education',app.education); _s('app-languages',app.languages);
+  _s('app-certifications',app.certifications); _s('app-seminars',app.seminars);
+  _s('app-awards',app.awards); _s('app-char-references',app.char_references);
   document.getElementById('modal-title').textContent='Edit Applicant — '+app.name;
   document.getElementById('crud-modal').classList.remove('hidden');
 }
@@ -2350,7 +2376,8 @@ function handleFormSubmit(e){
   const _v=id=>{const el=document.getElementById(id);return el?el.value:'';};
   const obj={name:document.getElementById('app-name').value,account:document.getElementById('app-account').value,location:document.getElementById('app-location').value,role:document.getElementById('app-role').value,phone:document.getElementById('app-phone').value,email:document.getElementById('app-email').value,source:document.getElementById('app-source').value,salary:document.getElementById('app-salary').value,notes:document.getElementById('app-notes').value,stage:document.getElementById('app-stage').value,
     recruiter:_v('app-recruiter'),proposed_salary:_v('app-proposed-salary'),degree:_v('app-degree'),medium:_v('app-medium'),referred_by:_v('app-referred'),linkedin:_v('app-linkedin'),availability:_v('app-availability'),tags:_v('app-tags'),
-    work_experience:_v('app-experience'),education:_v('app-education'),languages:_v('app-languages')};
+    work_experience:_v('app-experience'),education:_v('app-education'),languages:_v('app-languages'),
+    certifications:_v('app-certifications'),seminars:_v('app-seminars'),awards:_v('app-awards'),char_references:_v('app-char-references')};
   if(!id) obj.appliedDate=new Date().toISOString().split('T')[0];
   if(id){updateApplicant(id,obj);showToast(`Updated ${obj.name}`,'success');}
   else{const newId='app_'+Date.now();addApplicant({id:newId,...obj});showToast(`Added ${obj.name} to pipeline`,'success');}
@@ -2761,7 +2788,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
       priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[],
       recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||'',
-      work_experience:r.work_experience||'', education:r.education||'', languages:r.languages||''
+      work_experience:r.work_experience||'', education:r.education||'', languages:r.languages||'',
+      certifications:r.certifications||'', seminars:r.seminars||'', awards:r.awards||'', char_references:r.char_references||''
     };
   }
 
@@ -3018,7 +3046,11 @@ document.addEventListener('DOMContentLoaded',()=>{
         availability:(document.getElementById('app-availability')||{}).value||'',
         work_experience:(document.getElementById('app-experience')||{}).value||'',
         education:(document.getElementById('app-education')||{}).value||'',
-        languages:(document.getElementById('app-languages')||{}).value||''
+        languages:(document.getElementById('app-languages')||{}).value||'',
+        certifications:(document.getElementById('app-certifications')||{}).value||'',
+        seminars:(document.getElementById('app-seminars')||{}).value||'',
+        awards:(document.getElementById('app-awards')||{}).value||'',
+        char_references:(document.getElementById('app-char-references')||{}).value||''
       };
       _origFormSubmit(e);   // existing in-memory add/update + renderAll
       if (sb && !isEdit && snap.name){
@@ -3030,7 +3062,8 @@ document.addEventListener('DOMContentLoaded',()=>{
               source:snap.source||'ATS', cover_note:snap.notes||null, stage:snap.stage||'new',
               recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
               referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null,
-              work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null
+              work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null,
+              certifications:snap.certifications||null, seminars:snap.seminars||null, awards:snap.awards||null, char_references:snap.char_references||null
             }).select('id').single();
             if(error) throw error;
             // reconcile: drop the temporary in-memory record, re-add as web-<id> so refetch won't duplicate it
@@ -3056,7 +3089,8 @@ document.addEventListener('DOMContentLoaded',()=>{
             cover_note:snap.notes||null, stage:snap.stage||app.stage,
             recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
             referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null,
-            work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null
+            work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null,
+              certifications:snap.certifications||null, seminars:snap.seminars||null, awards:snap.awards||null, char_references:snap.char_references||null
           }).eq('id', app._sid).then(({error})=>{ if(error) console.error('applicant edit sync',error); else if(window.showToast) showToast('Changes saved to backend','success'); });
         }
       }
@@ -5049,30 +5083,97 @@ document.addEventListener('DOMContentLoaded',()=>{
     mount.appendChild(ifr);
     return ifr;
   };
+  // ── Résumé section splitter ──────────────────────────────────────
+  // Each section used to have its own regex that had to list every heading
+  // which might follow it. A résumé using an unlisted heading ("EMPLOYMENT
+  // RECORD", "SEMINARS ATTENDED") silently produced an empty field — that is
+  // why Work Experience kept coming back blank. Instead find the heading lines
+  // once; a section is then simply the text running up to the next heading.
+  const _SEC_PATTERNS=[
+    ['summary',        /^(career\s+|professional\s+)?(objective|summary|profile|about\s+me)\b/i],
+    ['experience',     /^(work|professional|employment|job|career)?\s*[-–—]?\s*(experience|experiences|history|record|records|background)\b/i],
+    ['education',      /^(educational\s+|academic\s+)?(education|background|attainment|qualifications?|studies)\b/i],
+    ['skills',         /^(technical\s+|core\s+|key\s+|special\s+|other\s+|computer\s+)?(skills?|competenc(?:y|ies)|strengths?|proficienc(?:y|ies)|expertise)\b/i],
+    ['certifications', /^(certificat\w*|licen[sc]\w*|eligibilit\w*|credential\w*)\b/i],
+    ['seminars',       /^(seminars?|trainings?|workshops?|continuing\s+education)\b/i],
+    ['awards',         /^(awards?|achievements?|hono(?:u)?rs?|recognitions?|accomplishments?)\b/i],
+    ['char_references',/^(character\s+|personal\s+)?(references?|referees?)\b/i],
+    ['languages',      /^(languages?|dialects?)\b/i],
+  ];
+  function _secKey(line){
+    const s=String(line).trim().replace(/^[•\-*•\s]+/,'').replace(/[:\-–—\s]+$/,'');
+    if(!s || s.length>60) return null;
+    for(const [key,re] of _SEC_PATTERNS) if(re.test(s)) return key;
+    return null;
+  }
+  function _isCapsLine(line){
+    const s=String(line).trim();
+    if(!s || s.length>60 || /[.,;]$/.test(s)) return false;
+    const letters=s.replace(/[^A-Za-z]/g,'');
+    return letters.length>=3 && letters===letters.toUpperCase() && s.split(/\s+/).length<=6;
+  }
+  function _splitSections(text){
+    const lines=String(text||'').split(/\r?\n/);
+    const nonEmpty=lines.filter(l=>l.trim());
+    // Some résumés are typed entirely in capitals. Treating every line as a
+    // heading there would empty every section, so fall back to named headings.
+    const capsRatio=nonEmpty.length ? nonEmpty.filter(_isCapsLine).length/nonEmpty.length : 0;
+    const useCaps=capsRatio<0.5;
+    const out={}; let cur=null, buf=[];
+    const flush=()=>{
+      if(cur && buf.length){
+        const v=buf.join('\n').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+        if(v) out[cur]=out[cur] ? out[cur]+'\n'+v : v;   // a section may repeat
+      }
+      buf=[];
+    };
+    for(const line of lines){
+      const key=_secKey(line);
+      if(key || (useCaps && _isCapsLine(line))){ flush(); cur=key; continue; }
+      if(cur) buf.push(line);
+    }
+    flush();
+    return out;
+  }
   function _parseResume(t, guessName){
     const email=(t.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/)||[])[0]||'';
     let linkedin=(t.match(/(?:https?:\/\/)?(?:[a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9_%-]+/i)||[])[0]||'';
     if(linkedin && !/^https?:/i.test(linkedin)) linkedin='https://'+linkedin;
     const phoneRaw=(t.match(/(?:\+?63|0)\s?9\d{2}[\s.\-]?\d{3}[\s.\-]?\d{4}|\+?\d[\d\s().\-]{9,}\d/)||[])[0]||'';
     const phone=phoneRaw?phoneRaw.replace(/\s+/g,' ').trim():'';
+    const sec=_splitSections(t);
+    // Read the degree out of the education section when there is one. Scanning
+    // the whole document matched "MS Office" in a skills list and promoted the
+    // candidate to a master's degree — and MS Office is on most PH BPO CVs.
+    // The bare "MS"/"MA" abbreviations are gone for the same reason: they now
+    // need either periods ("M.S.") or a following "in" ("MS in Psychology").
+    const degText=sec.education||t;
     let degree='';
-    if(/\b(ph\.?\s?d|doctorate|doctoral)\b/i.test(t)) degree='Doctoral';
-    else if(/\bmaster'?s?\b|\bm\.?\s?s\.?\b|\bm\.?\s?a\.?\b|\bmba\b/i.test(t)) degree='Master';
-    else if(/\bbachelor'?s?\b|\bb\.?\s?s\.?\b|\bb\.?\s?a\.?\b/i.test(t)) degree='Bachelor';
-    else if(/\bvocational\b|\btesda\b/i.test(t)) degree='Vocational';
-    else if(/\bhigh school\b|\bsenior high\b/i.test(t)) degree='High School';
-    let summary=''; const sm=t.match(/(?:professional\s+summary|career\s+summary|summary|profile|objective)\s*[:\-–]?\s*([\s\S]{40,700}?)(?:technical\s+skills|\bskills\b|experience|education|work\s+history|employment)/i); if(sm) summary=sm[1].replace(/\s+/g,' ').trim().slice(0,500);
-    let skills=''; const sk=t.match(/(?:technical\s+skills|core\s+competencies|\bskills\b)\s*[:\-–]?\s*([\s\S]{10,400}?)(?:professional\s+experience|experience|education|work\s+history|employment|certifi)/i); if(sk) skills=sk[1].replace(/\s+/g,' ').trim();
-    let experience=''; const ex=t.match(/(?:professional\s+experience|work\s+experience|employment\s+history|work\s+history|\bexperience\b)\s*[:\-–]?\s*([\s\S]{20,1500}?)(?:\beducation\b|certificat|\breferences\b|\blanguages\b|\bawards\b|\bseminars\b|$)/i); if(ex) experience=ex[1].replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim().slice(0,1500);
-    let education=''; const ed=t.match(/\beducation\b\s*[:\-–]?\s*([\s\S]{15,900}?)(?:certificat|\breferences\b|\blanguages\b|\bawards\b|\bseminars\b|\bskills\b|professional\s+experience|$)/i); if(ed) education=ed[1].replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim().slice(0,900);
-    let languages=''; const lg=t.match(/\blanguages?\b\s*[:\-–]?\s*([\s\S]{3,200}?)(?:\n\s*\n|certificat|\breferences\b|\bawards\b|\beducation\b|\bskills\b|$)/i); if(lg) languages=lg[1].replace(/\s+/g,' ').trim().slice(0,200);
+    if(/\b(ph\.?\s?d|doctorate|doctoral)\b/i.test(degText)) degree='Doctoral';
+    else if(/\bmaster'?s?\b|\bmba\b|\bm\.\s?[sa]\.|\bm\.?[sa]\.?\s+in\b/i.test(degText)) degree='Master';
+    else if(/\bbachelor'?s?\b|\bb\.?\s?s\.?\b|\bb\.?\s?a\.?\b/i.test(degText)) degree='Bachelor';
+    else if(/\bvocational\b|\btesda\b/i.test(degText)) degree='Vocational';
+    else if(/\bhigh school\b|\bsenior high\b/i.test(degText)) degree='High School';
+    const cap=(v,n)=>v?String(v).trim().slice(0,n):'';
+    const oneLine=(v,n)=>v?String(v).replace(/\s+/g,' ').trim().slice(0,n):'';
+    const summary        = oneLine(sec.summary,500);
+    const skills         = oneLine(sec.skills,400);
+    const languages      = oneLine(sec.languages,200);
+    const experience     = cap(sec.experience,2000);
+    const education      = cap(sec.education,900);
+    const certifications = cap(sec.certifications,900);
+    const seminars       = cap(sec.seminars,900);
+    const awards         = cap(sec.awards,600);
+    const char_references= cap(sec.char_references,600);
     let name=guessName||'';
     if(!name){ const lines=t.split(/\n/).map(l=>l.trim()).filter(Boolean); for(const l of lines.slice(0,5)){ if(/^[A-Z][A-Za-z.'-]+(\s+[A-Z][A-Za-z.'-]+){1,3}$/.test(l)){ name=l; break; } } }
-    return { name, email, phone, linkedin, degree, summary, skills, experience, education, languages };
+    return { name, email, phone, linkedin, degree, summary, skills, experience, education, languages,
+             certifications, seminars, awards, char_references };
   }
   // Fields Digitize can fill. Doubles as the "is anything still empty?" check
   // that stops the automatic run from re-downloading a CV we already read.
-  const _DIGI_FIELDS=['email','phone','linkedin','degree','notes','work_experience','education','languages','tags'];
+  const _DIGI_FIELDS=['email','phone','linkedin','degree','notes','work_experience','education','languages','tags',
+                      'certifications','seminars','awards','char_references'];
   const _digiAutoDone=new Set();
   function _digiHasGaps(app){ return _DIGI_FIELDS.some(f=>!(''+(app[f]||'')).trim()); }
   window.cntDigitizeResume=async function(id, opts){
@@ -5112,6 +5213,10 @@ document.addEventListener('DOMContentLoaded',()=>{
       put('work_experience','work_experience',f.experience);
       put('education','education',f.education);
       put('languages','languages',f.languages);
+      put('certifications','certifications',f.certifications);
+      put('seminars','seminars',f.seminars);
+      put('awards','awards',f.awards);
+      put('char_references','char_references',f.char_references);
       if(f.skills && !(app.tags||'').trim()){ const tg=f.skills.split(/[,;•|/]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<24).slice(0,6).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
       Object.assign(app,patch);
       if(Object.keys(db).length){ updateApplicant(app.id,patch); _persistApp(app,db); }

@@ -136,7 +136,13 @@ alter table public.jobs
 alter table public.applications
   add column if not exists work_experience text,
   add column if not exists education       text,
-  add column if not exists languages       text;
+  add column if not exists languages       text,
+  -- Résumé sections captured by Digitize. "references" is a reserved word in
+  -- Postgres, hence char_references.
+  add column if not exists certifications  text,
+  add column if not exists seminars        text,
+  add column if not exists awards          text,
+  add column if not exists char_references text;
 
 -- Data Privacy Act of 2012 (RA 10173)
 --   consent_at : when the applicant ticked the consent box on the careers form
