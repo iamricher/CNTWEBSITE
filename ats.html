@@ -5042,6 +5042,86 @@ document.addEventListener('DOMContentLoaded',()=>{
   // fine — mammoth keeps the newlines). Rebuild lines from the runs' baseline
   // y, and insert a space only where there is a real horizontal gap, because
   // runs frequently split mid-word.
+  const _LINE_TOL=2.5;                 // baseline wobble within one line
+  const _MIN_GUTTER=18;                // narrower than this is word spacing
+
+  // Turn runs sharing a baseline into one line. A space goes in only where
+  // there is a real horizontal gap — runs frequently split mid-word, and
+  // "Cus"+"tomer" must not come back as "Cus tomer".
+  function _buildLines(runs){
+    const rs=runs.slice().sort((a,b)=> (b.y-a.y) || (a.x-b.x));
+    const groups=[]; let cur=[], curY=rs[0].y;
+    for(const r of rs){
+      if(Math.abs(r.y-curY)>_LINE_TOL){ groups.push(cur); cur=[]; curY=r.y; }
+      cur.push(r);
+    }
+    groups.push(cur);
+    return groups.map(g=>{
+      g.sort((a,b)=>a.x-b.x);
+      let s='', end=null;
+      for(const r of g){
+        if(end!==null && (r.x-end)>1) s+=' ';
+        s+=r.str; end=r.x+r.w;
+      }
+      return s.replace(/[ \t]+/g,' ').trim();
+    }).filter(Boolean);
+  }
+
+  // Find the widest vertical band that no run crosses. In a two-column résumé
+  // that band is the gutter between the columns.
+  function _findGutter(runs){
+    let minX=Infinity, maxX=-Infinity;
+    for(const r of runs){ if(r.x<minX) minX=r.x; if(r.x+r.w>maxX) maxX=r.x+r.w; }
+    const width=maxX-minX;
+    if(!(width>0)) return null;
+    const B=2, n=Math.ceil(width/B)+1, covered=new Uint8Array(n);
+    for(const r of runs){
+      const a=Math.max(0,Math.floor((r.x-minX)/B));
+      const b=Math.min(n-1,Math.ceil((r.x+r.w-minX)/B));
+      for(let i=a;i<=b;i++) covered[i]=1;
+    }
+    let best=null,i=0;
+    while(i<n){
+      if(covered[i]){ i++; continue; }
+      let j=i; while(j<n && !covered[j]) j++;
+      if(i>0 && j<n){                                  // interior bands only
+        const w=(j-i)*B;
+        if(!best || w>best.w) best={ w, mid:minX+((i+j)/2)*B };
+      }
+      i=j;
+    }
+    return (best && best.w>=_MIN_GUTTER) ? best : null;
+  }
+
+  // A real column carries its own headings; a strip of right-aligned dates
+  // does not. That is the signal used below to tell them apart.
+  function _hasHeading(runs){
+    return _buildLines(runs).some(l => _secKey(l) || _isCapsLine(l));
+  }
+
+  // Split runs at a gutter, but only when both sides really look like columns.
+  // The false positive to avoid is a single-column résumé with right-aligned
+  // dates ("Acme BPO . . . 2020-2024"), which also leaves an uncovered band.
+  // Baseline sharing cannot separate the two cases — sidebar columns usually
+  // do align their baselines — but headings can: a date strip has none.
+  function _splitColumns(runs, depth){
+    if(depth<=0 || runs.length<8) return [runs];
+    const g=_findGutter(runs);
+    if(!g) return [runs];
+    const left=runs.filter(r=>(r.x+r.w/2)<g.mid);
+    const right=runs.filter(r=>(r.x+r.w/2)>=g.mid);
+    const min=Math.max(3, runs.length*0.15);
+    if(left.length<min || right.length<min) return [runs];
+    if(!_hasHeading(left) || !_hasHeading(right)) return [runs];
+    return [].concat(_splitColumns(left,depth-1), _splitColumns(right,depth-1));
+  }
+
+  // pdf.js hands back positioned text runs, not lines. Joining them with
+  // spaces produced one enormous line per page, so the section splitter found
+  // no headings and every section came back empty for PDF résumés (DOCX was
+  // fine — mammoth keeps the newlines). Rebuild lines from the runs' baseline
+  // y; where the page is laid out in columns, read each column top to bottom
+  // in turn rather than interleaving them across shared baselines.
   function _linesFromItems(items){
     const runs=[];
     for(const it of items||[]){
@@ -5051,23 +5131,11 @@ document.addEventListener('DOMContentLoaded',()=>{
       runs.push({ y:+tr[5]||0, x:+tr[4]||0, w:+it.width||0, str });
     }
     if(!runs.length) return [];
-    runs.sort((a,b)=> (b.y-a.y) || (a.x-b.x));
-    const TOL=2.5;                     // baseline wobble within one line
-    const lines=[]; let cur=[], curY=runs[0].y;
-    for(const r of runs){
-      if(Math.abs(r.y-curY)>TOL){ lines.push(cur); cur=[]; curY=r.y; }
-      cur.push(r);
-    }
-    lines.push(cur);
-    return lines.map(rs=>{
-      rs.sort((a,b)=>a.x-b.x);
-      let s='', end=null;
-      for(const r of rs){
-        if(end!==null && (r.x-end)>1) s+=' ';
-        s+=r.str; end=r.x+r.w;
-      }
-      return s.replace(/[ \t]+/g,' ').trim();
-    }).filter(Boolean);
+    const cols=_splitColumns(runs,2);                  // up to ~4 columns
+    if(cols.length<2) return _buildLines(runs);
+    // Left to right, each column read in full — the order a person reads them.
+    cols.sort((a,b)=>Math.min(...a.map(r=>r.x))-Math.min(...b.map(r=>r.x)));
+    return [].concat(...cols.map(_buildLines));
   }
   async function _pdfText(url){
     if(!window.pdfjsLib){

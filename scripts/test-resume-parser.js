@@ -33,7 +33,7 @@ if (from < 0 || to < 0) {
 const src = html.slice(from, to);
 
 // The PDF line reconstruction sits with the extractors, further up the file.
-const L_START = '  function _linesFromItems(items){';
+const L_START = '  const _LINE_TOL=2.5;';
 const L_END   = '  async function _pdfText(url){';
 const lFrom = html.indexOf(L_START);
 const lTo   = html.indexOf(L_END, lFrom);
@@ -322,7 +322,96 @@ const oldParsed = _parseResume(oldStyleText);
   : fail('old space-joined text really did yield no sections',
          'expected empty, got ' + JSON.stringify(oldParsed.experience));
 
-// ── 9. Junk input must not throw ───────────────────────────────
+// ── 9. Two-column layouts ──────────────────────────────────────
+// A sidebar résumé puts unrelated text on the same baseline. Read naively the
+// columns interleave — "SKILLS WORK EXPERIENCE" — and sections come out
+// scrambled. Each column must be read top to bottom in turn.
+console.log('\nTwo-column layout');
+const twoCol = _linesFromItems([
+  // left sidebar (x ≈ 40, width ≈ 100) | right main column (x ≈ 300)
+  ['SKILLS',            45,  40, 700], ['WORK EXPERIENCE',                 120, 300, 700],
+  ['Zendesk',           50,  40, 680], ['Team Leader, Acme BPO (2020-2024)',180, 300, 680],
+  ['Salesforce',        55,  40, 660], ['Handled 15 agents.',              110, 300, 660],
+  ['LANGUAGES',         70,  40, 620], ['EDUCATION',                        75, 300, 620],
+  ['English, Filipino', 90,  40, 600], ['BS Info Tech, PSU, 2020',         140, 300, 600],
+].map(([str, width, x, y]) => ({ str, width, transform: [0, 0, 0, 12, x, y] })));
+
+// no line may contain text from both columns
+const bled = twoCol.find(l => /SKILLS|Zendesk|LANGUAGES/.test(l) && /EXPERIENCE|Acme|EDUCATION/.test(l));
+!bled ? ok('columns are not interleaved on shared baselines')
+      : fail('columns are not interleaved on shared baselines', JSON.stringify(bled));
+
+r = _parseResume(twoCol.join('\n'));
+has('two-column → skills',     r.skills,     'Zendesk');
+has('two-column → languages',  r.languages,  'Filipino');
+has('two-column → experience', r.experience, 'Acme BPO');
+has('two-column → education',  r.education,  'Info Tech');
+!/Zendesk|English/.test(r.experience) ? ok('sidebar text stays out of experience')
+                                      : fail('sidebar text stays out of experience', r.experience);
+
+// Single column with right-aligned dates must NOT be treated as two columns:
+// the gap is real, but each date shares a baseline with the entry beside it.
+console.log('\nRight-aligned dates are not a column');
+const dated = _linesFromItems([
+  ['WORK EXPERIENCE',          120, 50, 700],
+  ['Team Leader, Acme BPO',    130, 50, 680], ['2020 - 2024', 60, 460, 680],
+  ['Agent, Beta Solutions',    125, 50, 660], ['2018 - 2020', 60, 460, 660],
+  ['EDUCATION',                 75, 50, 620],
+  ['BS Info Tech, PSU',        105, 50, 600], ['2016 - 2020', 60, 460, 600],
+].map(([str, width, x, y]) => ({ str, width, transform: [0, 0, 0, 12, x, y] })));
+const joined = dated.find(l => /Acme BPO/.test(l) && /2020 - 2024/.test(l));
+joined ? ok('entry and its right-aligned date stay on one line')
+       : fail('entry and its right-aligned date stay on one line', JSON.stringify(dated));
+
+r = _parseResume(dated.join('\n'));
+has('dates: experience intact', r.experience, 'Acme BPO');
+has('dates: education intact',  r.education,  'Info Tech');
+
+// Single-column pages must be untouched by the column logic.
+console.log('\nSingle column unaffected');
+const single = _linesFromItems(realItems);
+single.length === 10 ? ok('single column still yields one line per row')
+                     : fail('single column still yields one line per row', 'got ' + single.length);
+
+// ── 10. Real two-column geometry from pdf.js ───────────────────
+// Dumped from pdfjs-dist 3.11.174 reading an actual sidebar résumé. Note the
+// whitespace-only runs (" ") that pdf.js emits spanning the gutter: they would
+// bridge the two columns and defeat detection if they were not discarded
+// before the gutter is measured.
+console.log('\nReal two-column PDF geometry');
+const twoColItems = [
+  ['CONTACT',53.2,40,730],[' ',156.8,93.2,730],['MARIA C. SANTOS',97.2,250,730],
+  ['maria@example.com',104.1,40,712],['WORK EXPERIENCE',108.2,250,700],
+  ['0917 555 1234',73.4,40,694],['Team Leader, Acme BPO Inc. (2020 - 2024)',215.8,250,682],
+  ['SKILLS',37.3,40,660],[' ',172.7,77.3,660],['Handled a team of 15 agents daily.',170,250,664],
+  ['Zendesk',42.2,40,642],[' ',167.8,82.2,642],['Agent, Beta Solutions (2018 - 2020)',174.9,250,646],
+  ['Salesforce',52,40,624],['EDUCATION',64.8,250,610],
+  ['MS Office',48.3,40,606],['BS Information Technology, PSU, 2020',192,250,592],
+  ['LANGUAGES',68.5,40,570],['CERTIFICATIONS',91.7,250,556],
+  ['English',36.1,40,552],['TESDA NC II Contact Center Services',187.1,250,538],
+  ['Filipino',34.8,40,534],['Civil Service Professional Eligibility',169.9,250,520],
+].map(([str, width, x, y]) => ({ str, width, transform: [0, 0, 0, 11, x, y] }));
+
+const twoColLines = _linesFromItems(twoColItems);
+const realBled = twoColLines.find(l =>
+  /CONTACT|Zendesk|Filipino|SKILLS/.test(l) && /MARIA|EXPERIENCE|Acme|EDUCATION/.test(l));
+!realBled ? ok('real gutter detected despite spacer runs')
+          : fail('real gutter detected despite spacer runs', JSON.stringify(realBled));
+
+r = _parseResume(twoColLines.join('\n'));
+has('real 2-col → experience',     r.experience,     'Acme BPO');
+has('real 2-col → second job',     r.experience,     'Beta Solutions');
+has('real 2-col → education',      r.education,      'Information Technology');
+has('real 2-col → certifications', r.certifications, 'TESDA');
+has('real 2-col → skills sidebar', r.skills,         'Zendesk');
+has('real 2-col → languages',      r.languages,      'Filipino');
+!/Zendesk|Filipino|CONTACT/.test(r.experience)
+  ? ok('real 2-col: sidebar text stays out of experience')
+  : fail('real 2-col: sidebar text stays out of experience', r.experience);
+r.degree === 'Bachelor' ? ok('real 2-col: sidebar "MS Office" does not inflate degree')
+                        : fail('real 2-col: sidebar "MS Office" does not inflate degree', 'got ' + r.degree);
+
+// ── 11. Junk input must not throw ──────────────────────────────
 console.log('\nDefensive');
 for (const junk of ['', '   ', 'no headings here at all, just prose about nothing']) {
   try { _parseResume(junk); ok('survives ' + JSON.stringify(junk.slice(0, 24))); }
