@@ -2820,6 +2820,24 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
   }
 
+  // Size the CV frame to the room actually left in the scroll area rather than
+  // to a slice of the viewport. The résumé column is sticky, so anything taller
+  // than its own scroll viewport can never be scrolled into view — the bottom
+  // of the CV would simply be unreachable.
+  function _fitResumeFrame(){
+    const ifr=document.querySelector('#cnt-uploaded-resume iframe');
+    const sc=document.querySelector('#resume-modal .print-area');
+    if(!ifr||!sc||!sc.clientHeight) return;
+    const offset=ifr.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+    const avail=sc.clientHeight - offset - 12;
+    ifr.style.height=Math.max(280, avail)+'px';
+    // On a screen too short to fit even the minimum, sticky would pin the pane
+    // and strand the overflow. Release it so the column can scroll normally.
+    const right=document.getElementById('profile-right');
+    if(right) right.classList.toggle('xl:sticky', avail>=280);
+  }
+  window.addEventListener('resize', _fitResumeFrame);
+
   // Show the applicant's actually-uploaded resume inside the profile "Resume" card
   async function showUploadedResume(app){
     document.getElementById('cnt-uploaded-resume')?.remove();
@@ -2845,7 +2863,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'<a href="'+url+'" download style="font-size:12px;font-weight:600;color:#7f1d1d;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">download</span>Download</a>'
       +'</span></div>';
     if(isPdf){
-      box.innerHTML=actions+'<iframe src="'+url+'#toolbar=1&view=FitH" style="width:100%;height:78vh;min-height:560px;border:0;display:block;background:#f8fafc;" title="Uploaded resume"></iframe>';
+      box.innerHTML=actions+'<iframe src="'+url+'#toolbar=1&view=FitH" style="width:100%;height:400px;border:0;display:block;background:#f8fafc;" title="Uploaded resume"></iframe>';
+      _fitResumeFrame();
     } else {
       box.innerHTML=actions+'<div style="padding:30px 16px;text-align:center;color:#64748b;font-size:13px;"><span class="material-icons-outlined" style="font-size:42px;color:#cbd5e1;">description</span><p style="margin-top:8px;">This is a document file and can’t preview inline.</p><a href="'+url+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;background:#7f1d1d;color:#fff;padding:9px 18px;border-radius:8px;font-weight:600;">Open / Download resume</a></div>';
     }
