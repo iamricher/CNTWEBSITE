@@ -5036,6 +5036,39 @@ document.addEventListener('DOMContentLoaded',()=>{
   //  applicant fields. Never overwrites what a recruiter typed.
   // ══════════════════════════════════════════════════════════════
   function _loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('Could not load '+src)); document.head.appendChild(s); }); }
+  // pdf.js hands back positioned text runs, not lines. Joining them with
+  // spaces produced one enormous line per page, so the section splitter found
+  // no headings and every section came back empty for PDF résumés (DOCX was
+  // fine — mammoth keeps the newlines). Rebuild lines from the runs' baseline
+  // y, and insert a space only where there is a real horizontal gap, because
+  // runs frequently split mid-word.
+  function _linesFromItems(items){
+    const runs=[];
+    for(const it of items||[]){
+      const str=(it&&it.str)||'';
+      if(!str.trim()) continue;
+      const tr=it.transform||[];
+      runs.push({ y:+tr[5]||0, x:+tr[4]||0, w:+it.width||0, str });
+    }
+    if(!runs.length) return [];
+    runs.sort((a,b)=> (b.y-a.y) || (a.x-b.x));
+    const TOL=2.5;                     // baseline wobble within one line
+    const lines=[]; let cur=[], curY=runs[0].y;
+    for(const r of runs){
+      if(Math.abs(r.y-curY)>TOL){ lines.push(cur); cur=[]; curY=r.y; }
+      cur.push(r);
+    }
+    lines.push(cur);
+    return lines.map(rs=>{
+      rs.sort((a,b)=>a.x-b.x);
+      let s='', end=null;
+      for(const r of rs){
+        if(end!==null && (r.x-end)>1) s+=' ';
+        s+=r.str; end=r.x+r.w;
+      }
+      return s.replace(/[ \t]+/g,' ').trim();
+    }).filter(Boolean);
+  }
   async function _pdfText(url){
     if(!window.pdfjsLib){
       await _loadScript('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
@@ -5047,10 +5080,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(let p=1;p<=pages;p++){
       const page=await pdf.getPage(p);
       const c=await page.getTextContent();
-      c.items.forEach(it=>{ const str=it.str||''; text+=str+' ';
-        if(p===1){ const h=Math.abs((it.transform&&it.transform[3])||it.height||0); const clean=str.trim();
-          if(clean.length>2 && /[A-Za-z]/.test(clean) && h>big.h) big={h,s:clean}; } });
-      text+='\n';
+      // Largest text on page 1 is a decent guess at the candidate's name
+      if(p===1) c.items.forEach(it=>{
+        const clean=(it.str||'').trim();
+        const h=Math.abs((it.transform&&it.transform[3])||it.height||0);
+        if(clean.length>2 && /[A-Za-z]/.test(clean) && h>big.h) big={h,s:clean};
+      });
+      text+=_linesFromItems(c.items).join('\n')+'\n';
     }
     return { text, name:big.s };
   }

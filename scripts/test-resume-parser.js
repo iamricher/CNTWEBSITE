@@ -32,10 +32,27 @@ if (from < 0 || to < 0) {
 }
 const src = html.slice(from, to);
 
+// The PDF line reconstruction sits with the extractors, further up the file.
+const L_START = '  function _linesFromItems(items){';
+const L_END   = '  async function _pdfText(url){';
+const lFrom = html.indexOf(L_START);
+const lTo   = html.indexOf(L_END, lFrom);
+if (lFrom < 0 || lTo < 0) {
+  console.error('Could not locate _linesFromItems in ats.html — did the markers move?');
+  process.exit(1);
+}
+
 const sandbox = {};
 vm.createContext(sandbox);
-vm.runInContext(src + '\n;this._parseResume=_parseResume;this._splitSections=_splitSections;', sandbox);
-const { _parseResume, _splitSections } = sandbox;
+vm.runInContext(
+  html.slice(lFrom, lTo) + '\n' + src +
+  '\n;this._parseResume=_parseResume;this._splitSections=_splitSections;this._linesFromItems=_linesFromItems;',
+  sandbox
+);
+const { _parseResume, _splitSections, _linesFromItems } = sandbox;
+
+// Build pdf.js-shaped text runs: [text, x, y] per run.
+const runs = rows => rows.map(([str, x, y]) => ({ str, width: str.length * 5, transform: [0, 0, 0, 10, x, y] }));
 
 let failures = 0, checks = 0;
 const ok   = n      => { checks++; console.log('  \x1b[32m✓\x1b[0m ' + n); };
@@ -199,7 +216,113 @@ r = _parseResume('EDUCATION\nSenior High School, Palaris Colleges, 2022\n\nSKILL
 r.degree === 'High School' ? ok('high school not inflated by skills list')
                            : fail('high school not inflated by skills list', 'got ' + r.degree);
 
-// ── 7. Junk input must not throw ───────────────────────────────
+// ── 7. PDF line reconstruction ─────────────────────────────────
+// pdf.js returns positioned runs, not lines. These used to be joined with
+// spaces into one giant line, which left the splitter no headings to find —
+// so every section came back empty for PDFs while DOCX worked fine.
+console.log('\nPDF line reconstruction');
+
+let lines = _linesFromItems(runs([
+  ['WORK EXPERIENCE', 50, 700],
+  ['Team Leader, Acme BPO', 50, 680],
+  ['EDUCATION', 50, 650],
+  ['BSIT, PSU, 2020', 50, 630],
+]));
+lines.length === 4 ? ok('one line per baseline')
+                   : fail('one line per baseline', 'got ' + lines.length + ': ' + JSON.stringify(lines));
+lines[0] === 'WORK EXPERIENCE' ? ok('heading kept on its own line')
+                               : fail('heading kept on its own line', JSON.stringify(lines[0]));
+
+// Runs on the same baseline merge left-to-right even when delivered jumbled.
+// Coordinates leave a real gap between words, as a PDF does for a space.
+lines = _linesFromItems([
+  { str: 'BPO',          width: 20, transform: [0,0,0,10, 125, 700] },
+  { str: 'Acme',         width: 25, transform: [0,0,0,10,  95, 700] },
+  { str: 'Team Leader,', width: 65, transform: [0,0,0,10,  20, 700] },
+]);
+lines[0] === 'Team Leader, Acme BPO' ? ok('same-line runs merge in x order')
+                                     : fail('same-line runs merge in x order', JSON.stringify(lines[0]));
+
+// a run split mid-word must not gain a space, adjacent words must
+lines = _linesFromItems([
+  { str: 'Cus',    width: 15, transform: [0,0,0,10, 20, 700] },
+  { str: 'tomer',  width: 25, transform: [0,0,0,10, 35, 700] },
+  { str: 'Service',width: 35, transform: [0,0,0,10, 75, 700] },
+]);
+lines[0] === 'Customer Service' ? ok('mid-word split rejoins, real gap keeps space')
+                                : fail('mid-word split rejoins, real gap keeps space', JSON.stringify(lines[0]));
+
+// slight baseline wobble is still one line
+lines = _linesFromItems(runs([['Bachelor of', 20, 700], ['Science', 90, 701.5]]));
+lines.length === 1 ? ok('baseline wobble stays one line')
+                   : fail('baseline wobble stays one line', JSON.stringify(lines));
+
+// empty / junk input
+[[], null, undefined].forEach(v => {
+  try { _linesFromItems(v); ok('survives ' + JSON.stringify(v) + ' items'); }
+  catch (e) { fail('survives ' + JSON.stringify(v) + ' items', e.message); }
+});
+
+// End-to-end: reconstructed PDF text must parse into sections. This is the
+// exact path that was returning nothing.
+console.log('\nPDF → sections end to end');
+const pdfText = _linesFromItems(runs([
+  ['MARIA C. SANTOS',   50, 760],
+  ['WORK EXPERIENCE',   50, 700],
+  ['Team Leader, Acme BPO Inc. (2020 - 2024)', 50, 680],
+  ['EDUCATION',         50, 640],
+  ['BS Information Technology, PSU, 2020',     50, 620],
+  ['CERTIFICATIONS',    50, 580],
+  ['TESDA NC II Contact Center Services',      50, 560],
+  ['SEMINARS',          50, 520],
+  ['Leadership Bootcamp 2021',                 50, 500],
+])).join('\n');
+r = _parseResume(pdfText);
+has('PDF → experience',     r.experience,     'Acme BPO');
+has('PDF → education',      r.education,      'Information Technology');
+has('PDF → certifications', r.certifications, 'TESDA');
+has('PDF → seminars',       r.seminars,       'Leadership Bootcamp');
+
+// ── 8. Geometry captured from a real pdf.js run ────────────────
+// Coordinates and widths below were dumped from pdfjs-dist 3.11.174 reading an
+// actual PDF, so this pins the reconstruction against the real library rather
+// than against assumptions about it.
+console.log('\nReal pdf.js geometry');
+const realItems = [
+  ['MARIA C. SANTOS',                          106,   50, 760],
+  ['WORK EXPERIENCE',                          118,   50, 700],
+  ['Team Leader, Acme BPO Inc. (2020 - 2024)',  235.4, 50, 680],
+  ['Handled a team of 15 agents.',              157.4, 50, 660],
+  ['EDUCATION',                                  70.7, 50, 620],
+  ['BS Information Technology, PSU, 2020',      209.4, 50, 600],
+  ['CERTIFICATIONS',                            100,   50, 560],
+  ['TESDA NC II Contact Center Services',       204.1, 50, 540],
+  ['SEMINARS',                                   62.7, 50, 500],
+  ['Leadership Bootcamp 2021',                  146.7, 50, 480],
+].map(([str, width, x, y]) => ({ str, width, transform: [0, 0, 0, 12, x, y] }));
+
+const realLines = _linesFromItems(realItems);
+realLines.length === 10 ? ok('real geometry → one line per row')
+                        : fail('real geometry → one line per row', 'got ' + realLines.length);
+
+r = _parseResume(realLines.join('\n'));
+has('real PDF → experience',       r.experience,     'Acme BPO');
+has('real PDF → experience line 2', r.experience,    'Handled a team');
+has('real PDF → education',        r.education,      'Information Technology');
+has('real PDF → certifications',   r.certifications, 'TESDA');
+has('real PDF → seminars',         r.seminars,       'Leadership Bootcamp');
+
+// The old code joined every run with a space and emitted one newline per page.
+// Reproduced here to prove the regression this guards against was real: with
+// no line breaks the splitter has no headings to find and returns nothing.
+const oldStyleText = realItems.map(i => i.str).join(' ') + '\n';
+const oldParsed = _parseResume(oldStyleText);
+!String(oldParsed.experience || '').trim()
+  ? ok('old space-joined text really did yield no sections (regression is real)')
+  : fail('old space-joined text really did yield no sections',
+         'expected empty, got ' + JSON.stringify(oldParsed.experience));
+
+// ── 9. Junk input must not throw ───────────────────────────────
 console.log('\nDefensive');
 for (const junk of ['', '   ', 'no headings here at all, just prose about nothing']) {
   try { _parseResume(junk); ok('survives ' + JSON.stringify(junk.slice(0, 24))); }
