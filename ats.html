@@ -62,7 +62,11 @@
     body * { visibility:hidden; }
     #resume-modal, #resume-modal * { visibility:visible; }
     #resume-modal { position:absolute; left:0; top:0; width:100%; background:white; z-index:9999; }
-    .modal-box { box-shadow:none !important; max-height:none !important; }
+    /* The profile runs full-screen on-screen via an inline height; on paper it
+       must grow to fit the content instead of being cut at one viewport. */
+    .modal-box { box-shadow:none !important; max-height:none !important; height:auto !important; overflow:visible !important; }
+    #resume-modal .overflow-y-auto, #resume-modal .custom-scroll {
+      max-height:none !important; overflow:visible !important; }
     .no-print { display:none !important; }
   }
   .tab-btn { padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; color:#64748b; }
