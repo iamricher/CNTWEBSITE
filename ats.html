@@ -156,8 +156,7 @@
   }
   /* Each tab panel takes at least the full scroll area height */
   #tab-profile,
-  #tab-checklist,
-  #tab-recruiter {
+  #tab-checklist {
     min-height: 100%;
   }
 </style>
@@ -1020,10 +1019,6 @@
       <button class="tab-btn" id="tab-btn-checklist" onclick="switchProfileTab('checklist')">
         <span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">checklist</span>Pre-Employment
       </button>
-      <button class="tab-btn" id="tab-btn-recruiter" onclick="switchProfileTab('recruiter')">
-        <span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">rate_review</span>Recruiter Notes
-        <span id="recruiter-note-badge" class="ml-1.5 bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-      </button>
     </div>
 
     <!-- FIX: min-height:0 on a flex child allows it to shrink/scroll properly
@@ -1170,6 +1165,44 @@
             </div>
             <div class="p-7 resume-strict" id="profile-resume-content"></div>
           </div>
+
+          <!-- Recruiter notes sit under the résumé instead of behind a tab, so
+               the CV and the conversation about it are on screen together. The
+               list scrolls inside the panel rather than growing the column. -->
+          <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden no-print" id="recruiter-notes-panel">
+            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+              <span class="material-icons-outlined text-red-700" style="font-size:15px;">chat_bubble_outline</span>
+              <h4 class="font-bold text-slate-800 text-[13px]">Recruiter Notes</h4>
+              <span id="recruiter-note-badge" class="bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+              <span class="ml-auto text-[10px] text-slate-400">Internal only — never shown to the candidate</span>
+            </div>
+            <div class="p-3 border-b border-slate-100">
+              <div class="flex gap-2.5">
+                <div class="recruiter-note-avatar flex-shrink-0">HR</div>
+                <div class="flex-1 min-w-0">
+                  <textarea id="new-recruiter-comment" rows="2" placeholder="Add an internal recruiter note, flag, or update…"
+                    class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs resize-none text-slate-700 bg-slate-50 focus:bg-white transition"></textarea>
+                  <div class="flex justify-between items-center mt-2 gap-2 flex-wrap">
+                    <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
+                      <input type="checkbox" id="comment-flag" class="accent-red-800"> Flag as important
+                    </label>
+                    <button onclick="addRecruiterComment()" class="bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1">
+                      <span class="material-icons-outlined" style="font-size:13px;">send</span> Add Note
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="recruiter-notes-scroll" class="overflow-y-auto custom-scroll p-3 space-y-4" style="max-height:300px;">
+              <div id="recruiter-comments-list" class="space-y-3"></div>
+              <div class="pt-3 border-t border-slate-100">
+                <h4 class="font-bold text-slate-700 text-[11px] uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                  <span class="material-icons-outlined text-slate-400" style="font-size:13px;">history</span>Activity Timeline
+                </h4>
+                <div id="resume-activity-list" class="space-y-2.5"></div>
+              </div>
+            </div>
+          </div>
         </div><!-- /profile-right -->
       </div><!-- /profile-split -->
       </div>
@@ -1200,39 +1233,6 @@
       </div>
 
       <!-- RECRUITER NOTES TAB -->
-      <div id="tab-recruiter" class="hidden p-5">
-        <div class="bg-white mx-auto shadow-sm border border-slate-200 p-6 rounded-xl max-w-2xl space-y-5">
-          <div>
-            <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2">
-              <span class="material-icons-outlined text-red-700" style="font-size:16px;">chat_bubble_outline</span>
-              Recruiter Comments
-            </h4>
-            <div class="flex gap-3 mb-4">
-              <div class="recruiter-note-avatar flex-shrink-0">HR</div>
-              <div class="flex-1">
-                <textarea id="new-recruiter-comment" rows="3" placeholder="Add an internal recruiter note, flag, or update…"
-                  class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs resize-none text-slate-700 bg-slate-50 focus:bg-white transition"></textarea>
-                <div class="flex justify-between items-center mt-2">
-                  <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
-                    <input type="checkbox" id="comment-flag" class="accent-red-800"> Flag as important
-                  </label>
-                  <button onclick="addRecruiterComment()" class="bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1">
-                    <span class="material-icons-outlined" style="font-size:13px;">send</span> Add Note
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div id="recruiter-comments-list" class="space-y-3"></div>
-          </div>
-          <div class="pt-4 border-t border-slate-100">
-            <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2">
-              <span class="material-icons-outlined text-slate-500" style="font-size:16px;">history</span>
-              Activity Timeline
-            </h4>
-            <div id="resume-activity-list" class="space-y-2.5"></div>
-          </div>
-        </div>
-      </div>
 
     </div><!-- end print-area -->
   </div><!-- end modal-box -->
@@ -2611,12 +2611,14 @@ function fillRequest(id){const r=hiringRequests.find(x=>x.id===id);if(r){r.statu
 
 function switchProfileTab(tab){
   activeProfileTab = tab;
-  ['profile','checklist','recruiter'].forEach(t=>{
-    document.getElementById('tab-'+t).classList.add('hidden');
-    document.getElementById('tab-btn-'+t).classList.remove('active');
+  // Recruiter notes used to be a third tab; it now lives inside the profile
+  // under the résumé, so only these two remain.
+  ['profile','checklist'].forEach(t=>{
+    document.getElementById('tab-'+t)?.classList.add('hidden');
+    document.getElementById('tab-btn-'+t)?.classList.remove('active');
   });
-  document.getElementById('tab-'+tab).classList.remove('hidden');
-  document.getElementById('tab-btn-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab)?.classList.remove('hidden');
+  document.getElementById('tab-btn-'+tab)?.classList.add('active');
 }
 
 function renderStrictResume(app){
@@ -3003,17 +3005,27 @@ document.addEventListener('DOMContentLoaded',()=>{
   // to a slice of the viewport. The résumé column is sticky, so anything taller
   // than its own scroll viewport can never be scrolled into view — the bottom
   // of the CV would simply be unreachable.
+  // The CV keeps the full height of the scroll viewport — squeezing it to make
+  // room for the notes made it too small to actually read. The notes panel sits
+  // below it and you scroll down to reach it, the way Odoo places its chatter,
+  // with the note list scrolling inside its own box.
+  //
+  // That means the column is deliberately taller than the viewport, so it must
+  // NOT be sticky while the notes are there: sticky would pin the column and
+  // the notes could never be scrolled into view.
+  const CV_MIN=280;
   function _fitResumeFrame(){
-    const ifr=document.querySelector('#cnt-uploaded-resume iframe');
     const sc=document.querySelector('#resume-modal .print-area');
-    if(!ifr||!sc||!sc.clientHeight) return;
+    if(!sc||!sc.clientHeight) return;
+    const ifr=document.querySelector('#cnt-uploaded-resume iframe');
+    const panel=document.getElementById('recruiter-notes-panel');
+    const right=document.getElementById('profile-right');
+    const showNotes=!!(panel && panel.offsetParent!==null);
+    if(!ifr){ if(right) right.classList.toggle('xl:sticky', !showNotes); return; }
     const offset=ifr.getBoundingClientRect().top - sc.getBoundingClientRect().top;
     const avail=sc.clientHeight - offset - 12;
-    ifr.style.height=Math.max(280, avail)+'px';
-    // On a screen too short to fit even the minimum, sticky would pin the pane
-    // and strand the overflow. Release it so the column can scroll normally.
-    const right=document.getElementById('profile-right');
-    if(right) right.classList.toggle('xl:sticky', avail>=280);
+    ifr.style.height=Math.max(CV_MIN, avail)+'px';
+    if(right) right.classList.toggle('xl:sticky', !showNotes && avail>=CV_MIN);
   }
   window.addEventListener('resize', _fitResumeFrame);
 
