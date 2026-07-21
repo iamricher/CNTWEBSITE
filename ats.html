@@ -3849,7 +3849,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   let currentUserEmail = '';
   let currentUserName = '';
   let currentUserId = '';
-  const ROLE_LABELS = { super_admin:'Super Admin', account_officer:'Account Officer', recruitment_manager:'Recruitment Manager', recruitment_supervisor:'Recruitment Supervisor', recruiter:'Recruiter' };
+  const ROLE_LABELS = { super_admin:'Super Admin', account_officer:'Account Officer', recruitment_manager:'Recruitment Manager', recruitment_supervisor:'Recruitment Supervisor', recruiter:'Recruiter', client:'Client (portal)' };
   const ROLE_MODULES = {
     super_admin:            ['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports','settings'],
     account_officer:        ['dashboard','request','applications','reports'],
@@ -3965,9 +3965,15 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'<div><label style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;">Email</label><input id="cnt-nu-email" type="email" autocomplete="off" placeholder="name@cntpromoads.com" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:13px;margin-top:3px;"></div>'
       +'<div><label style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;">Temporary password</label><input id="cnt-nu-pass" type="text" autocomplete="off" placeholder="min 6 characters" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:13px;margin-top:3px;"></div>'
       +'<div><label style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;">Role</label><select id="cnt-nu-role" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:13px;margin-top:3px;background:#fff;">'+roles.map(r=>'<option value="'+r+'">'+ROLE_LABELS[r]+'</option>').join('')+'</select></div>'
+      +'<div id="cnt-nu-acct-wrap" style="display:none;"><label style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;">Client account</label><select id="cnt-nu-client-account" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 11px;font-size:13px;margin-top:3px;background:#fff;"><option value="">Select a client…</option>'+_taxNames('client').map(c=>'<option value="'+_escN(c)+'">'+_escN(c)+'</option>').join('')+'</select></div>'
       +'<div style="display:flex;align-items:flex-end;"><button id="cnt-nu-create" style="width:100%;background:#7f1d1d;color:#fff;font-size:13px;font-weight:600;padding:9px;border-radius:8px;cursor:pointer;">Create login</button></div>'
       +'</div><div id="cnt-nu-msg" style="font-size:12px;margin-top:8px;"></div>';
     f.style.display='block';
+    // Client accounts get a portal login tied to one client; the account
+    // selector only applies to that role.
+    const roleSel=document.getElementById('cnt-nu-role');
+    const toggleAcct=()=>{ document.getElementById('cnt-nu-acct-wrap').style.display = roleSel.value==='client' ? '' : 'none'; };
+    roleSel.addEventListener('change', toggleAcct); toggleAcct();
     document.getElementById('cnt-nu-create').onclick=submitNewUser;
   }
 
@@ -3975,16 +3981,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     const email=(document.getElementById('cnt-nu-email').value||'').trim();
     const pass=(document.getElementById('cnt-nu-pass').value||'');
     const role=document.getElementById('cnt-nu-role').value;
+    const clientAccount = role==='client' ? ((document.getElementById('cnt-nu-client-account')||{}).value||'') : '';
     const msg=document.getElementById('cnt-nu-msg'); const btn=document.getElementById('cnt-nu-create');
     if(!email||!pass){ msg.style.color='#dc2626'; msg.textContent='Email and password are required.'; return; }
     if(pass.length<6){ msg.style.color='#dc2626'; msg.textContent='Password must be at least 6 characters.'; return; }
+    if(role==='client' && !clientAccount){ msg.style.color='#dc2626'; msg.textContent='Choose which client this portal login is for.'; return; }
     btn.disabled=true; btn.textContent='Creating…'; msg.style.color='#64748b'; msg.textContent='';
     try{
       const tmp=window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, { auth:{ persistSession:false, autoRefreshToken:false, storageKey:'cnt-signup-tmp' } });
       const { data, error }=await tmp.auth.signUp({ email, password:pass });
       if(error) throw error;
       const uid=data && data.user && data.user.id;
-      if(uid){ const { error:pe }=await sb.from('profiles').update({ role }).eq('id', uid); if(pe) console.warn('role set',pe); }
+      if(uid){ const patch={ role }; if(role==='client') patch.client_account=clientAccount; else patch.client_account=null;
+        const { error:pe }=await sb.from('profiles').update(patch).eq('id', uid); if(pe) console.warn('role set',pe); }
       logAudit('user_create','user', uid||email, email+' · '+role);
       msg.style.color='#16a34a'; msg.textContent='Created '+email+' as '+ROLE_LABELS[role]+'. They can sign in with the password you set.';
       document.getElementById('cnt-nu-email').value=''; document.getElementById('cnt-nu-pass').value='';
@@ -3994,7 +4003,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   // Role → [text colour, chip background] for the badge + avatar tint
-  const ROLE_BADGE={ super_admin:['#991b1b','#fde8e8'], account_officer:['#b45309','#fef3c7'], recruitment_manager:['#6d28d9','#f3e8ff'], recruitment_supervisor:['#0f766e','#ccfbf1'], recruiter:['#1d4ed8','#dbeafe'] };
+  const ROLE_BADGE={ super_admin:['#991b1b','#fde8e8'], account_officer:['#b45309','#fef3c7'], recruitment_manager:['#6d28d9','#f3e8ff'], recruitment_supervisor:['#0f766e','#ccfbf1'], recruiter:['#1d4ed8','#dbeafe'], client:['#0e7490','#cffafe'] };
   function _roleBadge(r){ const c=ROLE_BADGE[r]||['#475569','#f1f5f9']; return '<span style="display:inline-block;font-size:11px;font-weight:700;padding:3px 11px;border-radius:99px;color:'+c[0]+';background:'+c[1]+';white-space:nowrap;">'+_escN(ROLE_LABELS[r]||r)+'</span>'; }
   function _avatarChip(name,email,r){ const t=(name||email||'?').trim(); const init=(t.split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase())||'?'; const c=(ROLE_BADGE[r]||['#7f1d1d'])[0]; return '<div style="width:34px;height:34px;border-radius:50%;background:'+c+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none;">'+_escN(init)+'</div>'; }
   function _fmtD(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString('en-CA'); }catch(e){ return String(iso).slice(0,10); } }
