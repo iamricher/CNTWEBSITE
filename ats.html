@@ -159,6 +159,15 @@
   #tab-checklist {
     min-height: 100%;
   }
+  /* Recruiter notes: soft fade at the bottom hints there is more below.
+     Smooth scrolling so jumps to the newest note glide instead of snapping. */
+  #recruiter-notes-scroll { scroll-behavior: smooth; }
+  #recruiter-notes-fade {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 40px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), #fff);
+    pointer-events: none; opacity: 0; transition: opacity .2s ease;
+  }
+  #recruiter-notes-fade.show { opacity: 1; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen" style="display:flex;flex-direction:column;">
@@ -1183,14 +1192,17 @@
               </div>
             </div>
           </div>
-          <div id="recruiter-notes-scroll" class="overflow-y-auto custom-scroll p-3 space-y-4" style="max-height:340px;">
-            <div id="recruiter-comments-list" class="space-y-3"></div>
-            <div class="pt-3 border-t border-slate-100">
-              <h4 class="font-bold text-slate-700 text-[11px] uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                <span class="material-icons-outlined text-slate-400" style="font-size:13px;">history</span>Activity Timeline
-              </h4>
-              <div id="resume-activity-list" class="space-y-2.5"></div>
+          <div style="position:relative;">
+            <div id="recruiter-notes-scroll" class="overflow-y-auto custom-scroll p-3 space-y-4" style="max-height:340px;">
+              <div id="recruiter-comments-list" class="space-y-3"></div>
+              <div class="pt-3 border-t border-slate-100">
+                <h4 class="font-bold text-slate-700 text-[11px] uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                  <span class="material-icons-outlined text-slate-400" style="font-size:13px;">history</span>Activity Timeline
+                </h4>
+                <div id="resume-activity-list" class="space-y-2.5"></div>
+              </div>
             </div>
+            <div id="recruiter-notes-fade"></div>
           </div>
         </div>
 
@@ -2777,6 +2789,35 @@ function renderRecruiterComments(app){
       </div>
     </div>`).join('');
 }
+
+// Bottom fade on the notes list: shown while there is more to scroll to,
+// hidden once you reach the end. Wired once to the scroll event, and to any
+// content change (new/deleted note, activity refresh) via a MutationObserver
+// so it re-evaluates without every render call having to know about it.
+function cntSyncNotesFade(){
+  const sc=document.getElementById('recruiter-notes-scroll');
+  const fade=document.getElementById('recruiter-notes-fade');
+  if(!sc||!fade) return;
+  const more = sc.scrollTop + sc.clientHeight < sc.scrollHeight - 4;
+  fade.classList.toggle('show', more);
+}
+(function _initNotesFade(){
+  const start=()=>{
+    const sc=document.getElementById('recruiter-notes-scroll');
+    if(!sc){ setTimeout(start,300); return; }          // modal markup may load after this
+    if(sc.dataset.fadeWired) return;
+    sc.dataset.fadeWired='1';
+    sc.addEventListener('scroll', cntSyncNotesFade, {passive:true});
+    const list=document.getElementById('recruiter-comments-list');
+    if(window.MutationObserver && list){
+      new MutationObserver(()=>cntSyncNotesFade()).observe(sc, {childList:true, subtree:true});
+    }
+    window.addEventListener('resize', cntSyncNotesFade);
+    cntSyncNotesFade();
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start);
+  else start();
+})();
 
 function deleteRecruiterComment(id,idx){
   const app=findApplicant(id);if(!app||!app.recruiterComments)return;
