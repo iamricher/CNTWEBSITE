@@ -2,12 +2,13 @@
 /**
  * CNT ATS — client portal guardrails.
  *
- * The one invariant the whole portal rests on: a client must never be able to
- * read applicant PII. RLS is row-level and cannot hide columns, so clients read
- * endorsed candidates ONLY through the cnt_client_candidates() function. The
- * fixed column list in that function body is the security boundary — this test
- * fails if a PII column ever appears in it, or if the function loses its
- * SECURITY DEFINER / status filter / account scoping.
+ * By product decision, a client sees the full profile + CV of candidates
+ * endorsed to THEM. So the invariant is no longer "no PII" — it is isolation:
+ * a client must only ever reach candidates (and CVs) for their own account, in
+ * the endorsed/decided states. The security boundary is the gating on the two
+ * RPCs and the storage policy — this test fails if any of that gating is lost
+ * (SECURITY DEFINER, account scoping, endorsed-only), if a client gets a direct
+ * applications policy, or if the CV storage policy stops being scoped.
  *
  * Usage: node scripts/test-client-portal.js
  */
@@ -20,7 +21,7 @@ const fail = (n, w) => { checks++; failures++; console.log('  \x1b[31m✗\x1b[0m
 
 const sql = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
 
-// ── 1. The anonymised read path must expose no PII ─────────────
+// ── 1. The read path must be gated to the caller's own account ─
 console.log('\nClient read path (cnt_client_candidates)');
 const m = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_client_candidates[\s\S]*?\$\$;/i);
 if (!m) {
@@ -28,14 +29,10 @@ if (!m) {
 } else {
   ok('cnt_client_candidates present');
   const body = m[0];
-  const FORBIDDEN = ['name', 'email', 'phone', 'resume_url', 'linkedin', 'referred_by', 'referral_relation'];
-  const leaked = FORBIDDEN.filter(c => new RegExp('\\b' + c + '\\b').test(body));
-  leaked.length
-    ? fail('no PII columns in client read path', 'found forbidden column(s): ' + leaked.join(', '))
-    : ok('no PII columns (name/email/phone/resume_url/linkedin/referred_by) exposed');
   /security\s+definer/i.test(body)     ? ok('runs SECURITY DEFINER')                 : fail('SECURITY DEFINER', 'missing');
   /client_status\s+in\s*\(\s*'endorsed'/i.test(body) ? ok('filters to endorsed/approved/rejected') : fail('status filter', 'missing');
   /a\.client\s*=\s*public\.cnt_client_account\(\)/i.test(body) ? ok('scoped to the caller\'s client account') : fail('account scoping', 'missing');
+  /public\.cnt_client_account\(\)\s+is\s+not\s+null/i.test(body) ? ok('returns nothing when caller is not a client') : fail('null-account guard', 'missing');
 }
 
 // ── 2. The decision RPC must be gated ──────────────────────────
@@ -68,6 +65,18 @@ const hrInsert = (sql.match(/create policy[^;]*hr client insert[^;]*;/i) || [])[
 /client_submitted\s*=\s*true/i.test(hrInsert) && /status\s*=\s*'Pending'/i.test(hrInsert) && /account\s*=\s*public\.cnt_client_account\(\)/i.test(hrInsert)
   ? ok('client insert forced to own account, Pending, client_submitted')
   : fail('constrained client insert', 'policy: ' + (hrInsert || 'not found'));
+
+// ── 5. CV storage access is scoped to endorsed + own account ───
+console.log('\nClient CV access is scoped');
+const cvPolicy = (sql.match(/create policy\s+"resumes read client"[\s\S]*?;/i) || [])[0] || '';
+if (!cvPolicy) {
+  fail('resumes read client policy present', 'not found');
+} else {
+  ok('resumes read client policy present');
+  /a\.client\s*=\s*public\.cnt_client_account\(\)/i.test(cvPolicy) ? ok('CV read scoped to the caller\'s account') : fail('CV account scoping', 'missing');
+  /client_status\s+in\s*\(\s*'endorsed'/i.test(cvPolicy)          ? ok('CV read limited to endorsed/decided')     : fail('CV status scoping', 'missing');
+  /a\.resume_url\s*=\s*storage\.objects\.name/i.test(cvPolicy)     ? ok('CV read matched by exact object path')     : fail('CV path match', 'missing');
+}
 
 console.log('\n' + '─'.repeat(52));
 if (failures) {

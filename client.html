@@ -87,6 +87,22 @@
   .empty{text-align:center;color:#94A3B8;font-size:13px;padding:26px}
   .toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shadow);z-index:50;opacity:0;transform:translateY(8px);transition:.25s}
   .toast.show{opacity:1;transform:none}
+
+  /* Candidate profile modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+  .modal-box{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);width:100%;max-width:1040px;height:92vh;display:flex;flex-direction:column;overflow:hidden}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .modal-body{flex:1;overflow:hidden;min-height:0}
+  .modal-foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+  .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);height:100%}
+  .pane-left{overflow-y:auto;padding:18px 20px;border-right:1px solid var(--line)}
+  .pane-right{display:flex;flex-direction:column;min-height:0;padding:14px 16px;background:#f8fafc}
+  @media(max-width:760px){.split{grid-template-columns:1fr;overflow-y:auto}.pane-left{border-right:none;border-bottom:1px solid var(--line)}.pane-right{height:70vh}}
+  .prow{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12.5px}
+  .prow .pk{color:#94A3B8;font-weight:600;min-width:110px;flex:none}
+  .prow .pv{color:#111}
+  .cv-bar{display:flex;gap:8px;margin-bottom:8px}
+  .cv-frame{flex:1;width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;min-height:0}
   </style>
 </head>
 <body>
@@ -160,6 +176,21 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- Candidate profile modal -->
+  <div id="cand-modal" class="hidden modal-overlay">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div style="min-width:0">
+          <h2 id="cand-modal-title" style="font-family:var(--font-display);font-size:16px;font-weight:800">Candidate</h2>
+          <div id="cand-modal-sub" class="kv" style="margin-top:2px"></div>
+        </div>
+        <button class="btn btn-ghost" onclick="closeCandModal()"><span class="mi" style="font-size:18px">close</span></button>
+      </div>
+      <div id="cand-modal-body" class="modal-body"></div>
+      <div class="modal-foot"><div id="cand-modal-actions" class="actions" style="margin:0"></div></div>
+    </div>
   </div>
 
   <div id="toast" class="toast"></div>
@@ -257,41 +288,99 @@
     toast('Vacancy submitted to CNT'); loadClientVacancies();
   }
 
-  // ── Endorsed Candidates ─────────────────────────────────
-  function candidateCard(c){
-    const detail=(t,v)=> v && String(v).trim() ? '<p class="sec-t">'+t+'</p><div class="prose">'+esc(v)+'</div>' : '';
-    return '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'
-      +'<div><h3>'+esc(c.role||'Candidate')+'</h3><div class="kv">Endorsed candidate · evaluation '+stars(c.priority)+'</div></div></div>'
-      +(c.tags?('<p class="sec-t">Expected skills</p><div>'+skillChips(c.tags)+'</div>'):'')
-      +detail('Work experience',c.work_experience)+detail('Education',c.education)
-      +detail('Certifications & licenses',c.certifications)+detail('Seminars & trainings',c.seminars)
-      +detail('Awards',c.awards)+(c.languages?('<p class="sec-t">Languages</p><div class="prose">'+esc(c.languages)+'</div>'):'')
-      +'<div class="actions"><button class="btn btn-primary" onclick="clientDecide('+c.id+',\'approved\')"><span class="mi" style="font-size:15px">check</span> Approve</button>'
-      +'<button class="btn btn-ghost" onclick="clientDecide('+c.id+',\'rejected\')"><span class="mi" style="font-size:15px">close</span> Decline</button></div></div>';
-  }
-  function decidedRow(c){
-    const s=c.client_status, badge=s==='approved'?'<span class="badge b-open">Approved</span>':'<span class="badge b-filled">Declined</span>';
-    return '<div class="row"><div><div style="font-weight:600;font-size:13px">'+esc(c.role||'Candidate')+'</div>'
-      +(s==='rejected'&&c.client_reason?('<div class="kv">Reason: '+esc(c.client_reason)+'</div>'):'')+'</div>'+badge+'</div>';
+  // ── Endorsed Candidates: list + full candidate profile ──────
+  let _cands = [];   // last-loaded candidates, so the detail view can look one up
+  function candStatusBadge(s){ return s==='approved'?'<span class="badge b-open">Approved</span>':s==='rejected'?'<span class="badge b-filled">Declined</span>':'<span class="badge b-pending">Awaiting you</span>'; }
+  function candRow(c){
+    return '<div class="row" style="cursor:pointer" onclick="openCandidate('+c.id+')">'
+      +'<div><div style="font-weight:600;font-size:13.5px">'+esc(c.name||'Candidate')+'</div>'
+      +'<div class="kv">'+esc(c.role||'—')+' · '+esc(c.location||'—')+' · evaluation '+stars(c.priority)+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:10px">'+candStatusBadge(c.client_status)
+      +'<span class="mi" style="font-size:18px;color:#94A3B8">chevron_right</span></div></div>';
   }
   async function loadClientCandidates(){
     const el=$('#client-candidate-list'); el.innerHTML='<div class="empty">Loading…</div>';
     const { data, error } = await sb.rpc('cnt_client_candidates');
     if(error){ el.innerHTML='<div class="empty">Could not load candidates.</div>'; return; }
-    const all=data||[], pending=all.filter(c=>c.client_status==='endorsed'), decided=all.filter(c=>c.client_status!=='endorsed');
+    _cands = data||[];
+    const pending=_cands.filter(c=>c.client_status==='endorsed'), decided=_cands.filter(c=>c.client_status!=='endorsed');
     const badge=$('#cand-count'); badge.textContent=pending.length; badge.classList.toggle('hidden',!pending.length);
-    let html = pending.length ? pending.map(candidateCard).join('') : '<div class="empty">No candidates awaiting your decision right now.</div>';
-    if(decided.length) html += '<p class="sec-t" style="margin-top:18px">Already decided</p>'+decided.map(decidedRow).join('');
+    let html = pending.length ? pending.map(candRow).join('') : '<div class="empty">No candidates awaiting your decision right now.</div>';
+    if(decided.length) html += '<p class="sec-t" style="margin-top:18px">Already decided</p>'+decided.map(candRow).join('');
     el.innerHTML = html;
   }
+
+  // Full candidate profile + the actual CV, shown in a modal.
+  function _kvRow(label,val){ return val && String(val).trim() ? '<div class="prow"><span class="pk">'+label+'</span><span class="pv">'+esc(val)+'</span></div>' : ''; }
+  function _section(t,v){ return v && String(v).trim() ? '<p class="sec-t">'+t+'</p><div class="prose">'+esc(v)+'</div>' : ''; }
+  async function openCandidate(id){
+    const c=_cands.find(x=>String(x.id)===String(id)); if(!c) return;
+    const decided = c.client_status!=='endorsed';
+    const body=$('#cand-modal-body');
+    $('#cand-modal-title').textContent=c.name||'Candidate';
+    $('#cand-modal-sub').innerHTML=esc(c.role||'—')+' · '+esc(c.location||'—')+' · evaluation '+stars(c.priority)+' '+candStatusBadge(c.client_status);
+    const contact=[c.email,c.phone,c.linkedin].filter(Boolean).map(esc).join(' · ');
+    body.innerHTML =
+      '<div class="split">'
+      +'<div class="pane-left">'
+        +(contact?('<div class="prow"><span class="pk">Contact</span><span class="pv">'+contact+'</span></div>'):'')
+        +_kvRow('Applied for', c.role)+_kvRow('Location', c.location)
+        +_kvRow('Highest degree', c.degree)+_kvRow('Source', c.source)
+        +_kvRow('Referred by', c.referred_by)+_kvRow('Proposed salary', c.proposed_salary)
+        +(c.tags?('<p class="sec-t">Expected skills</p><div>'+skillChips(c.tags)+'</div>'):'')
+        +_section('Work experience', c.work_experience)+_section('Education', c.education)
+        +_section('Certifications & licenses', c.certifications)+_section('Seminars & trainings', c.seminars)
+        +_section('Awards', c.awards)+_section('Languages', c.languages)
+        +_section('Cover note', c.cover_note)
+        +(decided && c.client_status==='rejected' && c.client_reason ? ('<p class="sec-t">Your reason for declining</p><div class="prose">'+esc(c.client_reason)+'</div>') : '')
+      +'</div>'
+      +'<div class="pane-right"><p class="sec-t">Résumé / CV</p><div id="cand-cv"><div class="empty">Loading CV…</div></div></div>'
+      +'</div>';
+    // actions
+    $('#cand-modal-actions').innerHTML = decided
+      ? '<span class="muted">You '+(c.client_status==='approved'?'approved':'declined')+' this candidate.</span>'
+      : '<button class="btn btn-ghost" onclick="clientDecide('+c.id+',\'rejected\')"><span class="mi" style="font-size:15px">close</span> Decline</button>'
+        +'<button class="btn btn-primary" onclick="clientDecide('+c.id+',\'approved\')"><span class="mi" style="font-size:15px">check</span> Approve</button>';
+    $('#cand-modal').classList.remove('hidden');
+    renderCV(c.resume_url);
+  }
+  function closeCandModal(){ $('#cand-modal').classList.add('hidden'); const cv=$('#cand-cv'); if(cv) cv.innerHTML=''; }
+
+  async function renderCV(path){
+    const mount=$('#cand-cv'); if(!mount) return;
+    if(!path){ mount.innerHTML='<div class="empty">No résumé on file for this candidate.</div>'; return; }
+    const { data, error } = await sb.storage.from('resumes').createSignedUrl(path, 3600);
+    if(error || !data){ mount.innerHTML='<div class="empty">Résumé is unavailable.</div>'; return; }
+    const url=data.signedUrl;
+    const bar='<div class="cv-bar"><a href="'+url+'" target="_blank" rel="noopener" class="btn btn-ghost"><span class="mi" style="font-size:15px">open_in_new</span> Open</a>'
+      +'<a href="'+url+'" download class="btn btn-ghost"><span class="mi" style="font-size:15px">download</span> Download</a></div>';
+    if(/\.pdf(\?|$)/i.test(path)){
+      mount.innerHTML=bar+'<iframe src="'+url+'#toolbar=1&view=FitH" class="cv-frame" title="Résumé"></iframe>';
+    } else if(/\.docx(\?|$)/i.test(path)){
+      mount.innerHTML=bar+'<div id="cv-docx" class="empty">Converting document…</div>';
+      try{
+        if(!window.mammoth){ await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);}); }
+        const buf=await (await fetch(url)).arrayBuffer();
+        const html=((await window.mammoth.convertToHtml({arrayBuffer:buf})).value||'').trim();
+        if(!html) throw new Error('empty');
+        // Untrusted applicant HTML → sandboxed iframe (no scripts, no same-origin)
+        const ifr=document.createElement('iframe'); ifr.setAttribute('sandbox',''); ifr.className='cv-frame'; ifr.title='Résumé';
+        ifr.srcdoc='<!doctype html><meta charset="utf-8"><style>body{font-family:system-ui,Segoe UI,Roboto,sans-serif;font-size:13px;line-height:1.6;color:#111;padding:22px 26px;margin:0}h1,h2,h3{margin:12px 0 6px}table{border-collapse:collapse}td,th{border:1px solid #e2e8f0;padding:4px 8px}img{max-width:100%}</style>'+html;
+        const box=$('#cv-docx'); box.replaceWith(ifr);
+      }catch(e){ const box=$('#cv-docx'); if(box) box.innerHTML='<div class="empty">This document can’t preview inline — use Open / Download above.</div>'; }
+    } else {
+      mount.innerHTML=bar+'<div class="empty">This file can’t preview inline — use Open / Download above.</div>';
+    }
+  }
+
   async function clientDecide(id, decision){
     let reason=null;
     if(decision==='rejected'){ reason=prompt('Reason for declining (optional):'); if(reason===null) return; }
-    else if(!confirm('Approve this candidate? CNT will then share their contact details with you and proceed.')) return;
+    else if(!confirm('Approve this candidate and proceed with CNT?')) return;
     const { error } = await sb.rpc('cnt_client_decide', { app_id:id, decision, reason });
-    if(error){ toast('This candidate is no longer awaiting your decision.'); loadClientCandidates(); return; }
+    if(error){ toast('This candidate is no longer awaiting your decision.'); closeCandModal(); loadClientCandidates(); return; }
     toast(decision==='approved'?'Candidate approved':'Candidate declined');
-    loadClientCandidates();
+    closeCandModal(); loadClientCandidates();
   }
 
   _restore();

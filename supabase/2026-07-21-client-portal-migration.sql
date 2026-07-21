@@ -19,18 +19,26 @@ returns text language sql stable security definer set search_path=public as $$
   select client_account from public.profiles where id=auth.uid()
 $$;
 
--- Anonymised read of a client's endorsed candidates — the ONLY read path a
--- client has into applications. Returns NO PII (no name/email/phone/CV/etc.).
+-- The ONLY read path a client has into applications. Its WHERE clause is the
+-- security boundary (own account only, endorsed/decided only). Returns the full
+-- candidate profile + CV path so the client can review the actual applicant
+-- before approving; excludes internal recruiter notes.
 create or replace function public.cnt_client_candidates()
 returns table (
-  id bigint, role text, tags text, work_experience text, education text,
-  languages text, certifications text, seminars text, awards text,
+  id bigint, name text, email text, phone text, linkedin text, referred_by text,
+  role text, location text, source text, applied_date date,
+  tags text, degree text, medium text, work_experience text, education text,
+  languages text, certifications text, seminars text, awards text, char_references text,
+  cover_note text, proposed_salary text, availability date, resume_url text,
   priority int, client_status text, endorsed_at timestamptz,
   decided_at timestamptz, client_reason text
 ) language sql stable security definer set search_path=public as $$
-  select a.id, a.role, a.tags, a.work_experience, a.education, a.languages,
-         a.certifications, a.seminars, a.awards, a.priority, a.client_status,
-         a.endorsed_at, a.decided_at, a.client_reason
+  select a.id, a.name, a.email, a.phone, a.linkedin, a.referred_by,
+         a.role, a.location, a.source, a.applied_date,
+         a.tags, a.degree, a.medium, a.work_experience, a.education,
+         a.languages, a.certifications, a.seminars, a.awards, a.char_references,
+         a.cover_note, a.proposed_salary, a.availability, a.resume_url,
+         a.priority, a.client_status, a.endorsed_at, a.decided_at, a.client_reason
   from public.applications a
   where public.cnt_client_account() is not null
     and a.client = public.cnt_client_account()
@@ -76,6 +84,19 @@ create policy "hr client read"   on public.hiring_requests for select to authent
 drop policy if exists "hr client insert" on public.hiring_requests;
 create policy "hr client insert" on public.hiring_requests for insert to authenticated
   with check (account = public.cnt_client_account() and status = 'Pending' and client_submitted = true);
+
+-- Client may fetch a signed URL for exactly the CVs endorsed to their account.
+drop policy if exists "resumes read client" on storage.objects;
+create policy "resumes read client" on storage.objects for select to authenticated
+  using (
+    bucket_id='resumes'
+    and exists (
+      select 1 from public.applications a
+      where a.resume_url = storage.objects.name
+        and a.client = public.cnt_client_account()
+        and a.client_status in ('endorsed','approved','rejected')
+    )
+  );
 
 -- 4. Verify ----------------------------------------------------
 --  Expect: both columns present, both functions present.
