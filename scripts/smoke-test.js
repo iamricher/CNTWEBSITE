@@ -33,7 +33,7 @@ function inlineScripts(html) {
 
 // ── 1. inline scripts parse ────────────────────────────────────
 console.log('\nParsing inline scripts');
-for (const file of ['ats.html', 'careers.html', 'index.html']) {
+for (const file of ['ats.html', 'careers.html', 'client.html', 'index.html']) {
   let html;
   try { html = read(file); } catch { continue; }          // index.html is optional
   const scripts = inlineScripts(html);
@@ -66,9 +66,22 @@ const missing = REQUIRED_IDS.filter(id => !ats.includes('id="' + id + '"'));
 missing.length ? fail('all required ids present', 'missing: ' + missing.join(', '))
                : ok('all ' + REQUIRED_IDS.length + ' required ids present');
 
+// Client portal required elements
+let clientHtml; try { clientHtml = read('client.html'); } catch { clientHtml = null; }
+if (clientHtml) {
+  const CLIENT_IDS = [
+    'client-login', 'client-app', 'client-email', 'client-password', 'client-login-btn',
+    'client-msg', 'client-account-name', 'tab-candidates', 'tab-vacancies',
+    'client-candidate-list', 'client-vacancy-list', 'cv-position', 'cv-location', 'cv-submit',
+  ];
+  const cm = CLIENT_IDS.filter(id => !clientHtml.includes('id="' + id + '"'));
+  cm.length ? fail('client.html required ids present', 'missing: ' + cm.join(', '))
+            : ok('all ' + CLIENT_IDS.length + ' client.html required ids present');
+}
+
 // ── 3. inline handlers resolve to real functions ───────────────
 console.log('\nInline handlers resolve');
-for (const file of ['ats.html', 'careers.html']) {
+for (const file of ['ats.html', 'careers.html', 'client.html']) {
   let html; try { html = read(file); } catch { continue; }
   const called = new Set();
   const re = /\bon(?:click|change|submit|input)\s*=\s*"([^"]*)"/g;
@@ -106,7 +119,7 @@ const SECRET_PATTERNS = [
   [/(?:SERVICE_ROLE|SECRET_KEY)\s*=\s*['"][^'"]+['"]/,   'secret assigned to a global'],
 ];
 let leaked = [];
-for (const file of ['ats.html', 'careers.html', 'assets/supabase-config.js']) {
+for (const file of ['ats.html', 'careers.html', 'client.html', 'assets/supabase-config.js']) {
   let src; try { src = stripComments(read(file)); } catch { continue; }
   for (const [re, label] of SECRET_PATTERNS) if (re.test(src)) leaked.push(file + ': ' + label);
 }

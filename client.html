@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Portal — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="CNT client portal — file vacancies and review endorsed candidates." />
+  <meta name="robots" content="noindex" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+
+  <style>
+  :root{
+    --red:#C8102E; --red-deep:#A50D24; --red-pale:#FFF0F2;
+    --ink:#111; --sub:#555; --line:#E5E7EB; --bg:#F6F7F9;
+    --amber:#B45309; --amber-bg:#FEF3C7; --green:#15803D; --green-bg:#DCFCE7;
+    --slate:#475569; --slate-bg:#F1F5F9;
+    --radius:14px; --shadow:0 8px 32px rgba(0,0,0,.08);
+    --font-display:'Plus Jakarta Sans',sans-serif; --font-body:'Inter',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-body);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  button{cursor:pointer;border:none;background:none;font-family:inherit}
+  input,select,textarea{font-family:var(--font-body);font-size:14px}
+  .muted{color:var(--sub);font-size:13px}
+  .mi{font-family:'Material Icons Outlined';font-style:normal;line-height:1;vertical-align:middle}
+
+  /* Login */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);width:100%;max-width:400px;padding:32px 28px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .brand-dot{width:34px;height:34px;border-radius:9px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--font-display)}
+  .login-card h1{font-family:var(--font-display);font-size:19px;font-weight:800;margin-top:14px}
+  .login-card p.lead{color:var(--sub);font-size:13px;margin:4px 0 20px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-pale)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:13px;padding:10px 16px;border-radius:9px}
+  .btn-primary{background:var(--red);color:#fff}
+  .btn-primary:hover{background:var(--red-deep)}
+  .btn-primary:disabled{opacity:.6;cursor:default}
+  .btn-ghost{border:1px solid var(--line);color:var(--sub);background:#fff}
+  .btn-ghost:hover{background:var(--bg)}
+  .btn-block{width:100%}
+  .msg{font-size:12.5px;margin-top:10px;min-height:16px}
+  .msg.err{color:var(--red)}
+  .msg.ok{color:var(--green)}
+
+  /* App shell */
+  .hidden{display:none!important}
+  header.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+  header.top .who{margin-left:auto;display:flex;align-items:center;gap:12px}
+  header.top .acct{font-weight:700;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px}
+  .tabs{display:flex;gap:6px;padding:14px 20px 0;max-width:1080px;margin:0 auto;width:100%}
+  .tab-btn{padding:8px 16px;border-radius:9px 9px 0 0;font-weight:600;font-size:13px;color:var(--sub);border:1px solid transparent;border-bottom:none}
+  .tab-btn.active{color:var(--red);background:#fff;border-color:var(--line)}
+  main{max-width:1080px;margin:0 auto;padding:18px 20px 60px;width:100%}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+  .panel-h{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .panel-h h2{font-family:var(--font-display);font-size:15px;font-weight:700}
+  .panel-b{padding:16px 18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px}
+  .b-pending{color:var(--amber);background:var(--amber-bg)}
+  .b-open{color:var(--green);background:var(--green-bg)}
+  .b-filled{color:var(--slate);background:var(--slate-bg)}
+  .skill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#FCE7F3;color:#9D174D;margin:0 3px 3px 0}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .row:last-child{border-bottom:none}
+  .card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .card h3{font-family:var(--font-display);font-size:14px;font-weight:700}
+  .kv{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .sec-t{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94A3B8;margin:10px 0 4px}
+  .prose{font-size:12.5px;color:#334155;line-height:1.55;white-space:pre-line}
+  .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .stars{color:#F59E0B;font-size:13px}
+  .stars .off{color:#E2E8F0}
+  .empty{text-align:center;color:#94A3B8;font-size:13px;padding:26px}
+  .toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shadow);z-index:50;opacity:0;transform:translateY(8px);transition:.25s}
+  .toast.show{opacity:1;transform:none}
+  </style>
+</head>
+<body>
+
+  <!-- ── Login ─────────────────────────────────────────────── -->
+  <div id="client-login" class="login-wrap">
+    <form class="login-card" onsubmit="clientLogin(event)">
+      <div class="brand"><div class="brand-dot">C</div><span style="font-weight:700;font-family:var(--font-display)">CNT Client Portal</span></div>
+      <h1>Sign in</h1>
+      <p class="lead">File vacancies and review candidates endorsed to your company.</p>
+      <div class="field"><label for="client-email">Email</label><input id="client-email" type="email" autocomplete="username" required placeholder="you@company.com" /></div>
+      <div class="field"><label for="client-password">Password</label><input id="client-password" type="password" autocomplete="current-password" required placeholder="••••••••" /></div>
+      <button id="client-login-btn" type="submit" class="btn btn-primary btn-block">Sign in</button>
+      <p id="client-msg" class="msg"></p>
+      <p class="muted" style="margin-top:14px;font-size:11.5px">Access is set up by CNT. If you can't sign in, contact your CNT account officer.</p>
+    </form>
+  </div>
+
+  <!-- ── App ───────────────────────────────────────────────── -->
+  <div id="client-app" class="hidden">
+    <header class="top">
+      <div class="brand"><div class="brand-dot">C</div><span style="font-weight:700;font-family:var(--font-display)">CNT Client Portal</span></div>
+      <div class="who">
+        <span class="acct"><span class="mi" style="font-size:16px;color:var(--red)">business</span><span id="client-account-name">—</span></span>
+        <button id="client-logout" class="btn btn-ghost" onclick="clientLogout()"><span class="mi" style="font-size:15px">logout</span> Sign out</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button id="tab-btn-candidates" class="tab-btn active" onclick="showClientTab('candidates')">Endorsed Candidates <span id="cand-count" class="badge b-pending hidden">0</span></button>
+      <button id="tab-btn-vacancies" class="tab-btn" onclick="showClientTab('vacancies')">My Vacancies</button>
+    </div>
+
+    <main>
+      <!-- Endorsed Candidates -->
+      <section id="tab-candidates">
+        <div class="panel">
+          <div class="panel-h">
+            <span class="mi" style="font-size:17px;color:var(--red)">how_to_reg</span>
+            <h2>Candidates endorsed to you</h2>
+            <span class="muted" style="margin-left:auto">Approve or decline the people CNT has put forward. Contact details follow once you approve.</span>
+          </div>
+          <div class="panel-b"><div id="client-candidate-list"><div class="empty">Loading…</div></div></div>
+        </div>
+      </section>
+
+      <!-- My Vacancies -->
+      <section id="tab-vacancies" class="hidden">
+        <div class="panel">
+          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">post_add</span><h2>File a new vacancy</h2></div>
+          <div class="panel-b">
+            <form onsubmit="fileClientVacancy(event)">
+              <div class="grid2">
+                <div class="field"><label for="cv-position">Position</label><input id="cv-position" list="cv-position-list" required placeholder="e.g. Sales Promoter" /><datalist id="cv-position-list"></datalist></div>
+                <div class="field"><label for="cv-location">Location</label><input id="cv-location" list="cv-location-list" required placeholder="e.g. Manila" /><datalist id="cv-location-list"></datalist></div>
+                <div class="field"><label for="cv-count">Headcount needed</label><input id="cv-count" type="number" min="1" value="1" /></div>
+                <div class="field"><label for="cv-type">Request type</label><select id="cv-type"><option>New Headcount</option><option>Replacement</option><option>Seasonal / Project-based</option><option>Staff Augmentation</option></select></div>
+                <div class="field"><label for="cv-priority">Priority</label><select id="cv-priority"><option>Normal</option><option>High</option><option>Urgent</option></select></div>
+                <div class="field"><label for="cv-date">Target start date</label><input id="cv-date" type="date" /></div>
+                <div class="field" style="grid-column:1/-1"><label for="cv-notes">Notes / requirements</label><textarea id="cv-notes" rows="2" placeholder="Shift, special requirements, headcount context…"></textarea></div>
+              </div>
+              <button id="cv-submit" type="submit" class="btn btn-primary"><span class="mi" style="font-size:15px">send</span> Submit vacancy</button>
+              <p id="cv-msg" class="msg"></p>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">work_outline</span><h2>Your vacancies</h2></div>
+          <div class="panel-b"><div id="client-vacancy-list"><div class="empty">Loading…</div></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+  const $ = s => document.querySelector(s);
+  const sb = window.getSupabase ? window.getSupabase() : null;
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2600); }
+
+  // Title-case skills for display, keeping known acronyms uppercase. Kept local
+  // to the portal — must not depend on the staff app.
+  const ACR = {tesda:'TESDA',prc:'PRC',csr:'CSR',bpo:'BPO',fmcg:'FMCG',pos:'POS',sku:'SKU',kpi:'KPI',ojt:'OJT',hr:'HR',it:'IT',ms:'MS',nbi:'NBI',sss:'SSS',tin:'TIN',dti:'DTI',lto:'LTO',pwd:'PWD',nc:'NC',id:'ID',cv:'CV',osha:'OSHA',qa:'QA',mc:'MC',ii:'II',iii:'III',iv:'IV'};
+  function uniformSkill(s){ return String(s||'').trim().split(/\s+/).map(w=>w.split(/([\-\/])/).map(p=>(!p||p==='-'||p==='/')?p:(ACR[p.toLowerCase()]||p.charAt(0).toUpperCase()+p.slice(1).toLowerCase())).join('')).join(' '); }
+  function skillChips(tags){ const seen=new Set(),out=[]; String(tags||'').split(',').map(uniformSkill).forEach(v=>{if(!v)return;const k=v.toLowerCase();if(!seen.has(k)){seen.add(k);out.push(v);}}); return out.map(s=>'<span class="skill">'+esc(s)+'</span>').join(''); }
+  function stars(n){ n=Math.max(0,Math.min(3,parseInt(n,10)||0)); let h=''; for(let i=1;i<=3;i++) h+='<span class="'+(i<=n?'':'off')+'">★</span>'; return '<span class="stars">'+h+'</span>'; }
+
+  // ── Auth ────────────────────────────────────────────────
+  async function _gateProfile(user){
+    const { data: prof } = await sb.from('profiles').select('role,client_account,full_name').eq('id',user.id).maybeSingle();
+    if(!prof || prof.role!=='client' || !prof.client_account) return null;
+    return prof;
+  }
+  function _enterApp(prof){
+    window.cntClientAccount = prof.client_account;
+    $('#client-account-name').textContent = prof.client_account;
+    $('#client-login').classList.add('hidden');
+    $('#client-app').classList.remove('hidden');
+    showClientTab('candidates');
+    loadClientCandidates();
+    loadClientVacancies();
+  }
+  async function clientLogin(e){
+    e.preventDefault();
+    const btn=$('#client-login-btn'), msg=$('#client-msg');
+    msg.className='msg'; msg.textContent='';
+    if(!sb){ msg.className='msg err'; msg.textContent='Portal is not configured yet.'; return; }
+    btn.disabled=true; btn.textContent='Signing in…';
+    const { data, error } = await sb.auth.signInWithPassword({ email:$('#client-email').value.trim(), password:$('#client-password').value });
+    btn.disabled=false; btn.textContent='Sign in';
+    if(error){ msg.className='msg err'; msg.textContent='Sign-in failed. Check your email and password.'; return; }
+    const prof = await _gateProfile(data.user);
+    if(!prof){ await sb.auth.signOut(); msg.className='msg err'; msg.textContent='This login is not set up for the client portal. Contact CNT.'; return; }
+    _enterApp(prof);
+  }
+  async function clientLogout(){ if(sb) await sb.auth.signOut(); location.reload(); }
+  async function _restore(){
+    if(!sb) return;
+    const { data } = await sb.auth.getSession();
+    if(data && data.session){ const prof=await _gateProfile(data.session.user); if(prof){ _enterApp(prof); return; } await sb.auth.signOut(); }
+  }
+
+  function showClientTab(tab){
+    ['candidates','vacancies'].forEach(t=>{
+      $('#tab-'+t).classList.toggle('hidden', t!==tab);
+      $('#tab-btn-'+t).classList.toggle('active', t===tab);
+    });
+  }
+
+  // ── My Vacancies ────────────────────────────────────────
+  function statusBadge(s){ const c=s==='Open'?'b-open':s==='Filled'?'b-filled':'b-pending'; return '<span class="badge '+c+'">'+esc(s||'Pending')+'</span>'; }
+  function vacancyRow(v){
+    const when = v.created_at ? new Date(v.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : '';
+    return '<div class="row"><div><div style="font-weight:600;font-size:13.5px">'+esc(v.role||'—')+' · '+esc(v.location||'—')+'</div>'
+      +'<div class="kv">'+esc(v.count||1)+' needed · '+esc(v.type||'—')+' · '+esc(v.priority||'Normal')+(when?(' · filed '+when):'')+'</div></div>'
+      +'<div>'+statusBadge(v.status)+'</div></div>';
+  }
+  async function loadClientVacancies(){
+    const el=$('#client-vacancy-list'); el.innerHTML='<div class="empty">Loading…</div>';
+    const { data, error } = await sb.from('hiring_requests')
+      .select('req_id,role,location,count,type,priority,status,created_at').order('created_at',{ascending:false});
+    if(error){ el.innerHTML='<div class="empty">Could not load your vacancies.</div>'; return; }
+    const rows=data||[];
+    // Seed the position/location datalists from what they've filed before
+    const pos=[...new Set(rows.map(r=>r.role).filter(Boolean))], loc=[...new Set(rows.map(r=>r.location).filter(Boolean))];
+    $('#cv-position-list').innerHTML=pos.map(p=>'<option>'+esc(p)+'</option>').join('');
+    $('#cv-location-list').innerHTML=loc.map(l=>'<option>'+esc(l)+'</option>').join('');
+    el.innerHTML = rows.length ? rows.map(vacancyRow).join('') : '<div class="empty">No vacancies yet — file your first above.</div>';
+  }
+  async function fileClientVacancy(e){
+    e.preventDefault();
+    const msg=$('#cv-msg'); msg.className='msg'; msg.textContent='';
+    const role=$('#cv-position').value.trim(), location=$('#cv-location').value.trim();
+    if(!role || !location){ msg.className='msg err'; msg.textContent='Please enter a position and location.'; return; }
+    const btn=$('#cv-submit'); btn.disabled=true;
+    const rec={ req_id:'CLT-'+Date.now(), account:window.cntClientAccount, role, location,
+      count:parseInt($('#cv-count').value)||1, type:$('#cv-type').value, priority:$('#cv-priority').value,
+      status:'Pending', date:new Date().toISOString().slice(0,10), deadline:$('#cv-date').value||null,
+      requestor:window.cntClientAccount, notes:$('#cv-notes').value.trim()||null, client_submitted:true };
+    const { error } = await sb.from('hiring_requests').insert(rec);
+    btn.disabled=false;
+    if(error){ msg.className='msg err'; msg.textContent='Could not submit — please try again.'; return; }
+    e.target.reset(); $('#cv-count').value='1';
+    toast('Vacancy submitted to CNT'); loadClientVacancies();
+  }
+
+  // ── Endorsed Candidates ─────────────────────────────────
+  function candidateCard(c){
+    const detail=(t,v)=> v && String(v).trim() ? '<p class="sec-t">'+t+'</p><div class="prose">'+esc(v)+'</div>' : '';
+    return '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+      +'<div><h3>'+esc(c.role||'Candidate')+'</h3><div class="kv">Endorsed candidate · evaluation '+stars(c.priority)+'</div></div></div>'
+      +(c.tags?('<p class="sec-t">Expected skills</p><div>'+skillChips(c.tags)+'</div>'):'')
+      +detail('Work experience',c.work_experience)+detail('Education',c.education)
+      +detail('Certifications & licenses',c.certifications)+detail('Seminars & trainings',c.seminars)
+      +detail('Awards',c.awards)+(c.languages?('<p class="sec-t">Languages</p><div class="prose">'+esc(c.languages)+'</div>'):'')
+      +'<div class="actions"><button class="btn btn-primary" onclick="clientDecide('+c.id+',\'approved\')"><span class="mi" style="font-size:15px">check</span> Approve</button>'
+      +'<button class="btn btn-ghost" onclick="clientDecide('+c.id+',\'rejected\')"><span class="mi" style="font-size:15px">close</span> Decline</button></div></div>';
+  }
+  function decidedRow(c){
+    const s=c.client_status, badge=s==='approved'?'<span class="badge b-open">Approved</span>':'<span class="badge b-filled">Declined</span>';
+    return '<div class="row"><div><div style="font-weight:600;font-size:13px">'+esc(c.role||'Candidate')+'</div>'
+      +(s==='rejected'&&c.client_reason?('<div class="kv">Reason: '+esc(c.client_reason)+'</div>'):'')+'</div>'+badge+'</div>';
+  }
+  async function loadClientCandidates(){
+    const el=$('#client-candidate-list'); el.innerHTML='<div class="empty">Loading…</div>';
+    const { data, error } = await sb.rpc('cnt_client_candidates');
+    if(error){ el.innerHTML='<div class="empty">Could not load candidates.</div>'; return; }
+    const all=data||[], pending=all.filter(c=>c.client_status==='endorsed'), decided=all.filter(c=>c.client_status!=='endorsed');
+    const badge=$('#cand-count'); badge.textContent=pending.length; badge.classList.toggle('hidden',!pending.length);
+    let html = pending.length ? pending.map(candidateCard).join('') : '<div class="empty">No candidates awaiting your decision right now.</div>';
+    if(decided.length) html += '<p class="sec-t" style="margin-top:18px">Already decided</p>'+decided.map(decidedRow).join('');
+    el.innerHTML = html;
+  }
+  async function clientDecide(id, decision){
+    let reason=null;
+    if(decision==='rejected'){ reason=prompt('Reason for declining (optional):'); if(reason===null) return; }
+    else if(!confirm('Approve this candidate? CNT will then share their contact details with you and proceed.')) return;
+    const { error } = await sb.rpc('cnt_client_decide', { app_id:id, decision, reason });
+    if(error){ toast('This candidate is no longer awaiting your decision.'); loadClientCandidates(); return; }
+    toast(decision==='approved'?'Candidate approved':'Candidate declined');
+    loadClientCandidates();
+  }
+
+  _restore();
+  </script>
+</body>
+</html>
