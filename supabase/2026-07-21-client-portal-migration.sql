@@ -23,6 +23,10 @@ $$;
 -- security boundary (own account only, endorsed/decided only). Returns the full
 -- candidate profile + CV path so the client can review the actual applicant
 -- before approving; excludes internal recruiter notes.
+-- drop first: the return signature evolved, and CREATE OR REPLACE cannot
+-- change a function's return type. Note the SQL editor shows a "destructive
+-- operations" confirmation because of the drop/revoke — that is expected; confirm it.
+drop function if exists public.cnt_client_candidates();
 create or replace function public.cnt_client_candidates()
 returns table (
   id bigint, name text, email text, phone text, linkedin text, referred_by text,

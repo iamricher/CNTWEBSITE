@@ -250,6 +250,9 @@ $$;
 -- internal recruiter notes (activity/recruiterComments live only in the ATS).
 -- resume_url is the storage path; the "resumes client read" storage policy
 -- lets the client fetch a signed URL for exactly the CVs endorsed to them.
+-- drop first: the return signature evolved (anonymised → full profile), and
+-- Postgres won't let CREATE OR REPLACE change a function's return type.
+drop function if exists public.cnt_client_candidates();
 create or replace function public.cnt_client_candidates()
 returns table (
   id bigint, name text, email text, phone text, linkedin text, referred_by text,
