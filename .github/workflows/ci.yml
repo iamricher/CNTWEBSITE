@@ -24,6 +24,9 @@ jobs:
       - name: Run résumé parser tests
         run: node scripts/test-resume-parser.js
 
+      - name: Run client portal guardrail tests
+        run: node scripts/test-client-portal.js
+
   secrets-guard:
     name: No secrets committed
     runs-on: ubuntu-latest

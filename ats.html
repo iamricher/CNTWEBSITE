@@ -2452,7 +2452,7 @@ function renderHiringRequests(){
     return `<tr>
       <td class="px-4 py-2.5 font-bold text-slate-700 text-xs">${r.id}</td>
       <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${r.account}</span></td>
-      <td class="px-4 py-2.5 text-xs font-semibold text-slate-800">${r.role}${r.assigned_name?`<div class="text-[10px] text-slate-400 font-normal mt-0.5">→ ${r.assigned_name}</div>`:''}</td>
+      <td class="px-4 py-2.5 text-xs font-semibold text-slate-800">${r.role}${r.client_submitted?` <span class="badge" style="background:#cffafe;color:#0e7490;font-size:9px;vertical-align:middle;">Client-submitted</span>`:''}${r.assigned_name?`<div class="text-[10px] text-slate-400 font-normal mt-0.5">→ ${r.assigned_name}</div>`:''}</td>
       <td class="px-4 py-2.5 text-xs text-slate-500">${r.location}</td>
       <td class="px-4 py-2.5 text-xs text-slate-500">${r.type}</td>
       <td class="px-4 py-2.5 text-center font-bold text-slate-700">${r.count}</td>
@@ -3410,7 +3410,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(hiringRequests.some(x=>x.id===r.req_id)) return;
       hiringRequests.unshift({ id:r.req_id, _sid:r.id, account:r.account, role:r.role, location:r.location,
         type:r.type, count:r.count, priority:r.priority, status:r.status, date:r.date,
-        deadline:r.deadline||'', requestor:r.requestor||'', notes:r.notes||'', assigned_to:r.assigned_to||null, assigned_name:r.assigned_name||'' });
+        deadline:r.deadline||'', requestor:r.requestor||'', notes:r.notes||'', assigned_to:r.assigned_to||null, assigned_name:r.assigned_name||'',
+        client_submitted:!!r.client_submitted });
     });
   }
   if (typeof handleHiringRequestSubmit === 'function'){
