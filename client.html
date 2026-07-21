@@ -134,6 +134,7 @@
     <div class="tabs">
       <button id="tab-btn-candidates" class="tab-btn active" onclick="showClientTab('candidates')">Endorsed Candidates <span id="cand-count" class="badge b-pending hidden">0</span></button>
       <button id="tab-btn-vacancies" class="tab-btn" onclick="showClientTab('vacancies')">My Vacancies</button>
+      <button id="tab-btn-history" class="tab-btn" onclick="showClientTab('history')">History</button>
     </div>
 
     <main>
@@ -171,8 +172,20 @@
         </div>
 
         <div class="panel">
-          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">work_outline</span><h2>Your vacancies</h2></div>
+          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">work_outline</span><h2>Your vacancies</h2><span class="muted" style="margin-left:auto">Open &amp; pending requests · filled ones move to History</span></div>
           <div class="panel-b"><div id="client-vacancy-list"><div class="empty">Loading…</div></div></div>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section id="tab-history" class="hidden">
+        <div class="panel">
+          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">how_to_reg</span><h2>Decided candidates</h2><span class="muted" style="margin-left:auto">Candidates you have approved or declined</span></div>
+          <div class="panel-b"><div id="history-candidate-list"><div class="empty">Loading…</div></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">history</span><h2>Completed vacancies</h2><span class="muted" style="margin-left:auto">Vacancies CNT has filled</span></div>
+          <div class="panel-b"><div id="history-vacancy-list"><div class="empty">Loading…</div></div></div>
         </div>
       </section>
     </main>
@@ -253,7 +266,7 @@
   }
 
   function showClientTab(tab){
-    ['candidates','vacancies'].forEach(t=>{
+    ['candidates','vacancies','history'].forEach(t=>{
       $('#tab-'+t).classList.toggle('hidden', t!==tab);
       $('#tab-btn-'+t).classList.toggle('active', t===tab);
     });
@@ -277,7 +290,11 @@
     const pos=[...new Set(rows.map(r=>r.role).filter(Boolean))], loc=[...new Set(rows.map(r=>r.location).filter(Boolean))];
     $('#cv-position-list').innerHTML=pos.map(p=>'<option>'+esc(p)+'</option>').join('');
     $('#cv-location-list').innerHTML=loc.map(l=>'<option>'+esc(l)+'</option>').join('');
-    el.innerHTML = rows.length ? rows.map(vacancyRow).join('') : '<div class="empty">No vacancies yet — file your first above.</div>';
+    // Active (Pending/Open) stay here; Filled ones move to History.
+    const active=rows.filter(r=>r.status!=='Filled'), filled=rows.filter(r=>r.status==='Filled');
+    el.innerHTML = active.length ? active.map(vacancyRow).join('') : '<div class="empty">No open vacancies — file your first above.</div>';
+    const hist=$('#history-vacancy-list');
+    if(hist) hist.innerHTML = filled.length ? filled.map(vacancyRow).join('') : '<div class="empty">No filled vacancies yet.</div>';
   }
   async function fileClientVacancy(e){
     e.preventDefault();
@@ -313,9 +330,10 @@
     _cands = data||[];
     const pending=_cands.filter(c=>c.client_status==='endorsed'), decided=_cands.filter(c=>c.client_status!=='endorsed');
     const badge=$('#cand-count'); badge.textContent=pending.length; badge.classList.toggle('hidden',!pending.length);
-    let html = pending.length ? pending.map(candRow).join('') : '<div class="empty">No candidates awaiting your decision right now.</div>';
-    if(decided.length) html += '<p class="sec-t" style="margin-top:18px">Already decided</p>'+decided.map(candRow).join('');
-    el.innerHTML = html;
+    el.innerHTML = pending.length ? pending.map(candRow).join('') : '<div class="empty">No candidates awaiting your decision right now.</div>';
+    // Decided candidates live in the History tab.
+    const hist=$('#history-candidate-list');
+    if(hist) hist.innerHTML = decided.length ? decided.map(candRow).join('') : '<div class="empty">No decided candidates yet.</div>';
   }
 
   // Full candidate profile + the actual CV, shown in a modal.
