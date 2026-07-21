@@ -885,7 +885,7 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Referred By</label><input type="text" id="app-referred" placeholder="employee name" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">LinkedIn</label><input type="text" id="app-linkedin" placeholder="profile URL" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Availability</label><input type="date" id="app-availability" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
-        <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Tags <span class="text-slate-400 font-normal normal-case">— comma-separated</span></label><input type="text" id="app-tags" placeholder="e.g. bilingual, driver's license, night shift" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Expected Skills <span class="text-slate-400 font-normal normal-case">— comma-separated</span></label><input type="text" id="app-tags" placeholder="e.g. bilingual, driver's license, night shift" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Work Experience <span class="text-slate-400 font-normal normal-case">— auto-filled by Digitize</span></label><textarea id="app-experience" rows="3" placeholder="Roles, companies and dates…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Education</label><textarea id="app-education" rows="2" placeholder="Degree, school, year…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Certifications &amp; Licenses</label><textarea id="app-certifications" rows="2" placeholder="TESDA, PRC, eligibility…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
@@ -1096,7 +1096,7 @@
             <div class="cnt-frow"><span class="cnt-frow-l">Medium</span><span class="cnt-frow-v" id="resume-medium-val">—</span></div>
             <div class="cnt-frow"><span class="cnt-frow-l">Availability</span><span class="cnt-frow-v" id="resume-availability-val">—</span></div>
             <div class="cnt-frow"><span class="cnt-frow-l">Referred By</span><span class="cnt-frow-v" id="resume-referred-val">—</span></div>
-            <div class="cnt-frow"><span class="cnt-frow-l">Tags</span><span class="cnt-frow-v" id="resume-tags-val">—</span></div>
+            <div class="cnt-frow"><span class="cnt-frow-l">Expected Skills</span><span class="cnt-frow-v" id="resume-tags-val">—</span></div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-100">
@@ -1535,6 +1535,28 @@ function stageIsHired(key){
 
 // ── Odoo-style applicant form: fill the label/value fields + stage stepper ──
 function _escForm(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// Present expected skills uniformly so "bilingual", "BILINGUAL" and "Bilingual"
+// all read the same. Everything is Title Cased — caps-lock input is normalised,
+// not preserved, since a word typed in caps ("SHIFT") can't be told apart from
+// an acronym by shape. Hyphen/slash parts are cased too ("on-site" → "On-Site").
+function _uniformSkill(s){
+  return String(s||'').trim().split(/\s+/).map(word=>
+    word.split(/([\-\/])/).map(part=>
+      (!part || part==='-' || part==='/') ? part
+        : part.charAt(0).toUpperCase()+part.slice(1).toLowerCase()
+    ).join('')
+  ).join(' ');
+}
+// Normalise a comma-separated skills string: trim, uniform-case, drop blanks,
+// and collapse case-insensitive duplicates ("Driver" + "driver" → one).
+function _uniformSkills(str){
+  const seen=new Set(), out=[];
+  String(str||'').split(',').map(x=>_uniformSkill(x)).forEach(v=>{
+    if(!v) return; const k=v.toLowerCase();
+    if(!seen.has(k)){ seen.add(k); out.push(v); }
+  });
+  return out;
+}
 function cntRenderApplicantForm(app){
   if(!app) return;
   const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=(v==null||v==='')?'—':v; };
@@ -1562,7 +1584,7 @@ function cntRenderApplicantForm(app){
   const li=document.getElementById('resume-linkedin-val');
   if(li) li.innerHTML = app.linkedin ? '<a href="'+_escForm(app.linkedin)+'" target="_blank" rel="noopener" class="text-sky-700 hover:underline">'+_escForm(app.linkedin)+'</a>' : '—';
   const tg=document.getElementById('resume-tags-val');
-  if(tg){ const t=(app.tags||'').split(',').map(x=>x.trim()).filter(Boolean);
+  if(tg){ const t=_uniformSkills(app.tags);
     tg.innerHTML = t.length ? t.map(x=>'<span class="badge" style="background:#fce7f3;color:#9d174d;margin-right:3px;">'+_escForm(x)+'</span>').join('') : '—'; }
   // Résumé detail blocks — only shown when there's something to show
   const block=(wrapId,valId,val)=>{
@@ -2514,7 +2536,7 @@ function handleFormSubmit(e){
   const id=document.getElementById('applicant-id').value;
   const _v=id=>{const el=document.getElementById(id);return el?el.value:'';};
   const obj={name:document.getElementById('app-name').value,account:document.getElementById('app-account').value,location:document.getElementById('app-location').value,role:document.getElementById('app-role').value,phone:document.getElementById('app-phone').value,email:document.getElementById('app-email').value,source:document.getElementById('app-source').value,salary:document.getElementById('app-salary').value,notes:document.getElementById('app-notes').value,stage:document.getElementById('app-stage').value,
-    recruiter:_v('app-recruiter'),proposed_salary:_v('app-proposed-salary'),degree:_v('app-degree'),medium:_v('app-medium'),referred_by:_v('app-referred'),linkedin:_v('app-linkedin'),availability:_v('app-availability'),tags:_v('app-tags'),
+    recruiter:_v('app-recruiter'),proposed_salary:_v('app-proposed-salary'),degree:_v('app-degree'),medium:_v('app-medium'),referred_by:_v('app-referred'),linkedin:_v('app-linkedin'),availability:_v('app-availability'),tags:_uniformSkills(_v('app-tags')).join(', '),
     work_experience:_v('app-experience'),education:_v('app-education'),languages:_v('app-languages'),
     certifications:_v('app-certifications'),seminars:_v('app-seminars'),awards:_v('app-awards'),char_references:_v('app-char-references')};
   if(!id) obj.appliedDate=new Date().toISOString().split('T')[0];
@@ -3251,7 +3273,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         notes: document.getElementById('app-notes').value,
         stage: document.getElementById('app-stage').value,
         recruiter:(document.getElementById('app-recruiter')||{}).value||'',
-        tags:(document.getElementById('app-tags')||{}).value||'',
+        tags:_uniformSkills((document.getElementById('app-tags')||{}).value||'').join(', '),
         degree:(document.getElementById('app-degree')||{}).value||'',
         medium:(document.getElementById('app-medium')||{}).value||'',
         referred_by:(document.getElementById('app-referred')||{}).value||'',
@@ -5579,7 +5601,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       put('seminars','seminars',f.seminars);
       put('awards','awards',f.awards);
       put('char_references','char_references',f.char_references);
-      if(f.skills && !(app.tags||'').trim()){ const tg=f.skills.split(/[,;•|/]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<24).slice(0,6).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
+      if(f.skills && !(app.tags||'').trim()){ const tg=_uniformSkills(f.skills.split(/[;•|/]/).join(',')).filter(s=>s.length>1&&s.length<24).slice(0,6).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
       Object.assign(app,patch);
       if(Object.keys(db).length){ updateApplicant(app.id,patch); _persistApp(app,db); }
       // An automatic pass that found nothing is not worth a log entry — it would
