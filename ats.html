@@ -3870,6 +3870,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(!data){ currentRole='no_access'; currentUserName=currentUserEmail; return; }   // profile removed / not staff → access revoked
       currentRole = data.role || 'recruiter'; currentUserName = data.full_name || data.email || currentUserEmail;
       if(currentRole==='pending'){ currentRole='no_access'; }   // new sign-up not yet granted a staff role
+      // A client account belongs in the client portal, never the staff ATS.
+      if(currentRole==='client'){ currentRole='no_access'; window.cntWrongPortal='client'; }
     }catch(e){ console.error('loadCurrentUser',e); currentRole='super_admin'; }
   }
 
@@ -3915,7 +3917,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!o){
       o=document.createElement('div'); o.id='cnt-revoked'; o.className='no-print';
       o.style.cssText='position:fixed;inset:0;z-index:600;background:#0f172a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;';
-      o.innerHTML='<span class="material-icons-outlined" style="font-size:54px;color:#f87171;">lock</span><h2 style="font-size:20px;font-weight:800;margin-top:14px;">Access removed</h2><p style="color:#94a3b8;font-size:14px;margin-top:8px;max-width:340px;line-height:1.6;">Your access to the CNT ATS has been revoked. Please contact your administrator.</p><button id="cnt-revoked-out" style="margin-top:22px;background:#7f1d1d;color:#fff;padding:10px 22px;border-radius:8px;font-weight:600;cursor:pointer;">Sign out</button>';
+      const isClient = window.cntWrongPortal==='client';
+      o.innerHTML = isClient
+        ? '<span class="material-icons-outlined" style="font-size:54px;color:#38bdf8;">business</span><h2 style="font-size:20px;font-weight:800;margin-top:14px;">This is a client account</h2><p style="color:#94a3b8;font-size:14px;margin-top:8px;max-width:360px;line-height:1.6;">Client logins use the CNT Client Portal, not the staff system. Head there to file vacancies and review the candidates endorsed to you.</p><a href="client.html" style="margin-top:22px;background:#0e7490;color:#fff;padding:10px 22px;border-radius:8px;font-weight:600;text-decoration:none;">Go to Client Portal</a><button id="cnt-revoked-out" style="margin-top:12px;background:transparent;color:#94a3b8;padding:6px 14px;border-radius:8px;font-weight:600;cursor:pointer;">Sign out</button>'
+        : '<span class="material-icons-outlined" style="font-size:54px;color:#f87171;">lock</span><h2 style="font-size:20px;font-weight:800;margin-top:14px;">Access removed</h2><p style="color:#94a3b8;font-size:14px;margin-top:8px;max-width:340px;line-height:1.6;">Your access to the CNT ATS has been revoked. Please contact your administrator.</p><button id="cnt-revoked-out" style="margin-top:22px;background:#7f1d1d;color:#fff;padding:10px 22px;border-radius:8px;font-weight:600;cursor:pointer;">Sign out</button>';
       document.body.appendChild(o);
       o.querySelector('#cnt-revoked-out').onclick=async()=>{ try{ if(sb) await sb.auth.signOut(); }catch(e){} location.reload(); };
     }

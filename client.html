@@ -212,9 +212,9 @@
   // ── Auth ────────────────────────────────────────────────
   async function _gateProfile(user){
     const { data: prof } = await sb.from('profiles').select('role,client_account,full_name').eq('id',user.id).maybeSingle();
-    if(!prof || prof.role!=='client' || !prof.client_account) return null;
-    return prof;
+    return prof || null;
   }
+  function _isClient(prof){ return !!(prof && prof.role==='client' && prof.client_account); }
   function _enterApp(prof){
     window.cntClientAccount = prof.client_account;
     $('#client-account-name').textContent = prof.client_account;
@@ -234,14 +234,22 @@
     btn.disabled=false; btn.textContent='Sign in';
     if(error){ msg.className='msg err'; msg.textContent='Sign-in failed. Check your email and password.'; return; }
     const prof = await _gateProfile(data.user);
-    if(!prof){ await sb.auth.signOut(); msg.className='msg err'; msg.textContent='This login is not set up for the client portal. Contact CNT.'; return; }
+    if(!_isClient(prof)){
+      await sb.auth.signOut();
+      msg.className='msg err';
+      const staff = prof && prof.role && prof.role!=='client' && prof.role!=='pending';
+      // A staff login belongs in the ATS, never the client portal.
+      if(staff) msg.innerHTML='This is a staff account — please use the CNT ATS. <a href="ats.html" style="color:var(--red);text-decoration:underline">Open the staff system</a>.';
+      else msg.textContent='This login is not set up for the client portal. Contact CNT.';
+      return;
+    }
     _enterApp(prof);
   }
   async function clientLogout(){ if(sb) await sb.auth.signOut(); location.reload(); }
   async function _restore(){
     if(!sb) return;
     const { data } = await sb.auth.getSession();
-    if(data && data.session){ const prof=await _gateProfile(data.session.user); if(prof){ _enterApp(prof); return; } await sb.auth.signOut(); }
+    if(data && data.session){ const prof=await _gateProfile(data.session.user); if(_isClient(prof)){ _enterApp(prof); return; } await sb.auth.signOut(); }
   }
 
   function showClientTab(tab){
