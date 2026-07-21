@@ -157,6 +157,43 @@ alter table public.applications
   add column if not exists consent_at timestamptz,
   add column if not exists purged_at  timestamptz;
 
+-- Client endorsement (recruiter endorses → client approves/rejects in the portal)
+--   client_status : none | endorsed | approved | rejected
+--   client_reason : reason the client gave when rejecting
+alter table public.applications
+  add column if not exists client_status text default 'none',
+  add column if not exists client_reason text,
+  add column if not exists endorsed_at   timestamptz,
+  add column if not exists decided_at    timestamptz;
+
+-- Which client a portal user represents (null for staff). Matches a taxonomy
+-- client name and applications.client / hiring_requests.account.
+alter table public.profiles
+  add column if not exists client_account text;
+
+-- Hiring requests (MRF). Staff-created, or client-submitted via the portal.
+create table if not exists public.hiring_requests (
+  id               bigint generated always as identity primary key,
+  req_id           text,
+  account          text,                          -- client this vacancy is for
+  role             text,
+  location         text,
+  type             text,
+  count            int  default 1,
+  priority         text default 'Normal',
+  status           text default 'Pending',        -- Pending | Open | Filled
+  date             date default current_date,
+  deadline         date,
+  requestor        text,
+  notes            text,
+  assigned_to      uuid,
+  assigned_name    text,
+  client_submitted boolean default false,         -- filed by a client in the portal
+  created_at       timestamptz default now()
+);
+alter table public.hiring_requests
+  add column if not exists client_submitted boolean default false;
+
 -- One application per person per job posting (duplicate / spam guard).
 -- Enforced in the DB because anon cannot read the table to check for itself.
 create unique index if not exists applications_one_per_job
@@ -195,6 +232,62 @@ returns boolean language sql stable security definer set search_path=public as $
     and role in ('super_admin','recruitment_manager','recruitment_supervisor'))
 $$;
 
+-- The client account of the caller (null for staff / anon). One place for the
+-- scoping rule used by every client-facing policy and RPC. Note 'client' is
+-- deliberately absent from cnt_is_staff()/cnt_is_manager(), so a client never
+-- gains staff access through those.
+create or replace function public.cnt_client_account()
+returns text language sql stable security definer set search_path=public as $$
+  select client_account from public.profiles where id=auth.uid()
+$$;
+
+-- Anonymised read of a client's endorsed candidates. RLS is row-level and
+-- cannot hide columns, so clients never SELECT applications directly — this
+-- function is the ONLY read path and it returns no PII (no name/email/phone/
+-- resume_url/linkedin/referred_by). The fixed column list here is the security
+-- boundary; scripts/test-client-portal.js fails if PII ever creeps in.
+create or replace function public.cnt_client_candidates()
+returns table (
+  id bigint, role text, tags text, work_experience text, education text,
+  languages text, certifications text, seminars text, awards text,
+  priority int, client_status text, endorsed_at timestamptz,
+  decided_at timestamptz, client_reason text
+) language sql stable security definer set search_path=public as $$
+  select a.id, a.role, a.tags, a.work_experience, a.education, a.languages,
+         a.certifications, a.seminars, a.awards, a.priority, a.client_status,
+         a.endorsed_at, a.decided_at, a.client_reason
+  from public.applications a
+  where public.cnt_client_account() is not null
+    and a.client = public.cnt_client_account()
+    and a.client_status in ('endorsed','approved','rejected')
+$$;
+revoke all on function public.cnt_client_candidates() from public, anon;
+grant execute on function public.cnt_client_candidates() to authenticated;
+
+-- A client records their decision on an endorsed candidate. The only write a
+-- client can make to applications. Gated: must be the caller's own account,
+-- and only from 'endorsed' → 'approved'/'rejected'.
+create or replace function public.cnt_client_decide(app_id bigint, decision text, reason text default null)
+returns text language plpgsql security definer set search_path=public as $$
+declare acct text; cur text;
+begin
+  acct := public.cnt_client_account();
+  if acct is null then raise exception 'Not a client account'; end if;
+  if decision not in ('approved','rejected') then raise exception 'Invalid decision'; end if;
+  select client_status into cur from public.applications
+    where id=app_id and client=acct for update;
+  if cur is null then raise exception 'Candidate not found for your account'; end if;
+  if cur <> 'endorsed' then raise exception 'Candidate is not awaiting your decision'; end if;
+  update public.applications
+    set client_status=decision, decided_at=now(),
+        client_reason=case when decision='rejected' then reason else null end
+    where id=app_id and client=acct;
+  return decision;
+end;
+$$;
+revoke all on function public.cnt_client_decide(bigint, text, text) from public, anon;
+grant execute on function public.cnt_client_decide(bigint, text, text) to authenticated;
+
 -- New sign-ups are inert ('pending') until an admin assigns a real role
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path=public as $$
@@ -217,16 +310,17 @@ create trigger on_auth_user_created
 --    append-only. Wiped-then-recreated so re-runs never leave a stale
 --    permissive policy behind.
 -- ────────────────────────────────────────────────────────────
-alter table public.applications enable row level security;
-alter table public.jobs         enable row level security;
-alter table public.profiles     enable row level security;
-alter table public.audit_log    enable row level security;
-alter table public.taxonomy     enable row level security;
-alter table public.stages       enable row level security;
+alter table public.applications    enable row level security;
+alter table public.jobs            enable row level security;
+alter table public.profiles        enable row level security;
+alter table public.audit_log       enable row level security;
+alter table public.taxonomy        enable row level security;
+alter table public.stages          enable row level security;
+alter table public.hiring_requests enable row level security;
 
 do $wipe$ declare p record; begin
   for p in select policyname, tablename from pg_policies
-           where schemaname='public' and tablename in ('applications','jobs','profiles','audit_log','taxonomy','stages') loop
+           where schemaname='public' and tablename in ('applications','jobs','profiles','audit_log','taxonomy','stages','hiring_requests') loop
     execute format('drop policy if exists %I on public.%I', p.policyname, p.tablename);
   end loop;
 end $wipe$;
@@ -247,6 +341,18 @@ create policy "profiles read staff" on public.profiles for select to authenticat
 create policy "profiles insert mgr" on public.profiles for insert to authenticated with check (public.cnt_is_manager());
 create policy "profiles update mgr" on public.profiles for update to authenticated using (public.cnt_is_manager()) with check (public.cnt_is_manager());
 create policy "profiles delete mgr" on public.profiles for delete to authenticated using (public.cnt_is_manager());
+-- Every user may read their OWN profile row (portal clients need role + account)
+create policy "profiles read self" on public.profiles for select to authenticated using (id = auth.uid());
+
+-- Hiring requests: staff manage all; a client reads and files only their own.
+-- A client-filed request is forced to their account, Pending, client_submitted;
+-- they cannot update or delete — staff own the lifecycle.
+create policy "hr staff all"      on public.hiring_requests for all    to authenticated
+  using (public.cnt_is_staff()) with check (public.cnt_is_staff());
+create policy "hr client read"    on public.hiring_requests for select to authenticated
+  using (account is not null and account = public.cnt_client_account());
+create policy "hr client insert"  on public.hiring_requests for insert to authenticated
+  with check (account = public.cnt_client_account() and status = 'Pending' and client_submitted = true);
 
 -- Audit log: staff append + read; no update/delete policy ⇒ rows are immutable
 create policy "audit insert staff" on public.audit_log for insert to authenticated with check (public.cnt_is_staff());
