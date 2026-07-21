@@ -54,15 +54,32 @@
   .msg.err{color:var(--red)}
   .msg.ok{color:var(--green)}
 
-  /* App shell */
+  /* App shell — left sidebar + main, like the staff ATS */
   .hidden{display:none!important}
-  header.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
-  header.top .who{margin-left:auto;display:flex;align-items:center;gap:12px}
-  header.top .acct{font-weight:700;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:6px}
-  .tabs{display:flex;gap:6px;padding:14px 20px 0;max-width:1080px;margin:0 auto;width:100%}
-  .tab-btn{padding:8px 16px;border-radius:9px 9px 0 0;font-weight:600;font-size:13px;color:var(--sub);border:1px solid transparent;border-bottom:none}
-  .tab-btn.active{color:var(--red);background:#fff;border-color:var(--line)}
-  main{max-width:1080px;margin:0 auto;padding:18px 20px 60px;width:100%}
+  .app-shell{display:flex;min-height:100vh;align-items:stretch}
+  .sidebar{width:238px;flex:none;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .sb-brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .nav-label{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94A3B8;padding:16px 20px 7px}
+  nav.sb-nav{display:flex;flex-direction:column;gap:1px;padding:0 8px}
+  .nav-item{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:9px;font-size:13.5px;font-weight:600;color:#334155;text-align:left;background:none}
+  .nav-item:hover{background:#f1f5f9}
+  .nav-item.active{background:var(--red);color:#fff}
+  .nav-item .mi{font-size:19px;flex:none}
+  .nav-item .count{margin-left:auto}
+  .sb-foot{margin-top:auto;padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+  .sb-acct{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--ink);min-width:0}
+  .sb-acct .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  main{flex:1;min-width:0;max-width:1120px;padding:22px 26px 60px}
+  @media(max-width:760px){
+    .app-shell{flex-direction:column}
+    .sidebar{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);gap:4px;padding:8px}
+    .sb-brand,.nav-label{display:none}
+    nav.sb-nav{flex-direction:row;padding:0}
+    .nav-item{white-space:nowrap;width:auto}
+    .sb-foot{margin:0 0 0 auto;flex-direction:row;border:none;padding:0}
+    .sb-acct .name{max-width:110px}
+    main{padding:16px}
+  }
   .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
   .panel-h{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .panel-h h2{font-family:var(--font-display);font-size:15px;font-weight:700}
@@ -122,20 +139,20 @@
   </div>
 
   <!-- ── App ───────────────────────────────────────────────── -->
-  <div id="client-app" class="hidden">
-    <header class="top">
-      <div class="brand"><div class="brand-dot">C</div><span style="font-weight:700;font-family:var(--font-display)">CNT Client Portal</span></div>
-      <div class="who">
-        <span class="acct"><span class="mi" style="font-size:16px;color:var(--red)">business</span><span id="client-account-name">—</span></span>
+  <div id="client-app" class="hidden app-shell">
+    <aside class="sidebar">
+      <div class="sb-brand"><div class="brand-dot">C</div><span style="font-weight:700;font-family:var(--font-display);font-size:14px">Client Portal</span></div>
+      <p class="nav-label">Navigation</p>
+      <nav class="sb-nav">
+        <button id="tab-btn-candidates" class="nav-item active" onclick="showClientTab('candidates')"><span class="mi">how_to_reg</span>Endorsed Candidates<span id="cand-count" class="badge b-pending count hidden">0</span></button>
+        <button id="tab-btn-vacancies" class="nav-item" onclick="showClientTab('vacancies')"><span class="mi">post_add</span>My Vacancies</button>
+        <button id="tab-btn-history" class="nav-item" onclick="showClientTab('history')"><span class="mi">history</span>History</button>
+      </nav>
+      <div class="sb-foot">
+        <span class="sb-acct"><span class="mi" style="font-size:16px;color:var(--red)">business</span><span class="name" id="client-account-name">—</span></span>
         <button id="client-logout" class="btn btn-ghost" onclick="clientLogout()"><span class="mi" style="font-size:15px">logout</span> Sign out</button>
       </div>
-    </header>
-
-    <div class="tabs">
-      <button id="tab-btn-candidates" class="tab-btn active" onclick="showClientTab('candidates')">Endorsed Candidates <span id="cand-count" class="badge b-pending hidden">0</span></button>
-      <button id="tab-btn-vacancies" class="tab-btn" onclick="showClientTab('vacancies')">My Vacancies</button>
-      <button id="tab-btn-history" class="tab-btn" onclick="showClientTab('history')">History</button>
-    </div>
+    </aside>
 
     <main>
       <!-- Endorsed Candidates -->
