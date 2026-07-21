@@ -1535,16 +1535,30 @@ function stageIsHired(key){
 
 // ── Odoo-style applicant form: fill the label/value fields + stage stepper ──
 function _escForm(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// Known acronyms that keep their exact casing instead of being Title Cased,
+// so "tesda"/"TESDA" → "TESDA" and "ms office" → "MS Office". Add to this list
+// as new ones come up. Matched case-insensitively; the value is the canonical
+// form that gets shown. (A shape rule can't do this safely — a word typed in
+// caps like "SHIFT" is indistinguishable from an acronym — so it's a list.)
+const _SKILL_ACRONYMS = (function(){
+  const list = ['TESDA','PRC','CSR','BPO','FMCG','POS','SKU','KPI','OJT','HR','IT',
+    'MS','NBI','SSS','TIN','DTI','LTO','PWD','NC','ID','CV','OSHA','QA','MC','II','III','IV'];
+  const m = {};
+  list.forEach(a => m[a.toLowerCase()] = a);
+  return m;
+})();
 // Present expected skills uniformly so "bilingual", "BILINGUAL" and "Bilingual"
-// all read the same. Everything is Title Cased — caps-lock input is normalised,
-// not preserved, since a word typed in caps ("SHIFT") can't be told apart from
-// an acronym by shape. Hyphen/slash parts are cased too ("on-site" → "On-Site").
+// all read the same. Everything is Title Cased except known acronyms (above);
+// caps-lock input is otherwise normalised, not preserved. Hyphen/slash parts
+// are cased too ("on-site" → "On-Site").
 function _uniformSkill(s){
   return String(s||'').trim().split(/\s+/).map(word=>
-    word.split(/([\-\/])/).map(part=>
-      (!part || part==='-' || part==='/') ? part
-        : part.charAt(0).toUpperCase()+part.slice(1).toLowerCase()
-    ).join('')
+    word.split(/([\-\/])/).map(part=>{
+      if(!part || part==='-' || part==='/') return part;
+      const ac=_SKILL_ACRONYMS[part.toLowerCase()];
+      if(ac) return ac;
+      return part.charAt(0).toUpperCase()+part.slice(1).toLowerCase();
+    }).join('')
   ).join(' ');
 }
 // Normalise a comma-separated skills string: trim, uniform-case, drop blanks,
