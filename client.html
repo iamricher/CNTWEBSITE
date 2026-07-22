@@ -69,7 +69,30 @@
   .sb-foot{margin-top:auto;padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
   .sb-acct{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--ink);min-width:0}
   .sb-acct .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  main{flex:1;min-width:0;max-width:1120px;padding:22px 26px 60px}
+  main{flex:1;min-width:0;max-width:1120px;padding:0 26px 60px}
+  .sb-brand img{height:30px;width:auto;max-width:150px;object-fit:contain}
+  .sb-client{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--bg);border-radius:10px;min-width:0}
+  .sb-client img{height:24px;max-width:74px;object-fit:contain}
+  .sb-client .sb-mono{width:28px;height:28px;border-radius:7px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex:none}
+  .sb-client .nm{font-size:12px;font-weight:700;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* topbar + notifications */
+  .topbar{display:flex;align-items:center;gap:12px;padding:16px 0 14px;position:sticky;top:0;background:var(--bg);z-index:15}
+  .topbar h1{font-family:var(--font-display);font-size:18px;font-weight:800}
+  .bell{position:relative;margin-left:auto}
+  .bell-btn{position:relative;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+  .bell-btn:hover{background:#fff;box-shadow:var(--shadow)}
+  .bell-dot{position:absolute;top:5px;right:6px;min-width:16px;height:16px;padding:0 3px;border-radius:99px;background:var(--red);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .bell-menu{position:absolute;right:0;top:46px;width:330px;max-height:64vh;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);z-index:40}
+  .bell-menu h4{font-size:12px;font-weight:800;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .notif{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid #f1f5f9;cursor:pointer;text-align:left;width:100%;background:none}
+  .notif:hover{background:var(--bg)}
+  .notif .mi{font-size:18px;flex:none;margin-top:1px}
+  .notif .nt{font-size:12.5px;color:#334155;line-height:1.4}
+  /* dashboard */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:18px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .n{font-size:26px;font-weight:800;line-height:1.1}
+  .stat .l{font-size:11px;font-weight:600;color:var(--sub);margin-top:3px}
   @media(max-width:760px){
     .app-shell{flex-direction:column}
     .sidebar{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);gap:4px;padding:8px}
@@ -127,7 +150,8 @@
   <!-- ── Login ─────────────────────────────────────────────── -->
   <div id="client-login" class="login-wrap">
     <form class="login-card" onsubmit="clientLogin(event)">
-      <div class="brand"><div class="brand-dot">C</div><span style="font-weight:700;font-family:var(--font-display)">CNT Client Portal</span></div>
+      <div class="brand"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." style="height:34px;width:auto;object-fit:contain" /></div>
+      <p style="font-weight:700;font-family:var(--font-display);font-size:13px;color:var(--sub);margin:10px 0 0">Client Portal</p>
       <h1>Sign in</h1>
       <p class="lead">File vacancies and review candidates endorsed to your company.</p>
       <div class="field"><label for="client-email">Email</label><input id="client-email" type="email" autocomplete="username" required placeholder="you@company.com" /></div>
@@ -141,22 +165,40 @@
   <!-- ── App ───────────────────────────────────────────────── -->
   <div id="client-app" class="hidden app-shell">
     <aside class="sidebar">
-      <div class="sb-brand"><div class="brand-dot">C</div><span style="font-weight:700;font-family:var(--font-display);font-size:14px">Client Portal</span></div>
+      <div class="sb-brand"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." /></div>
       <p class="nav-label">Navigation</p>
       <nav class="sb-nav">
-        <button id="tab-btn-candidates" class="nav-item active" onclick="showClientTab('candidates')"><span class="mi">how_to_reg</span>Endorsed Candidates<span id="cand-count" class="badge b-pending count hidden">0</span></button>
+        <button id="tab-btn-dashboard" class="nav-item active" onclick="showClientTab('dashboard')"><span class="mi">dashboard</span>Dashboard</button>
+        <button id="tab-btn-candidates" class="nav-item" onclick="showClientTab('candidates')"><span class="mi">how_to_reg</span>Endorsed Candidates<span id="cand-count" class="badge b-pending count hidden">0</span></button>
         <button id="tab-btn-vacancies" class="nav-item" onclick="showClientTab('vacancies')"><span class="mi">post_add</span>My Vacancies</button>
         <button id="tab-btn-history" class="nav-item" onclick="showClientTab('history')"><span class="mi">history</span>History</button>
       </nav>
       <div class="sb-foot">
-        <span class="sb-acct"><span class="mi" style="font-size:16px;color:var(--red)">business</span><span class="name" id="client-account-name">—</span></span>
+        <div class="sb-client" id="sb-client"><span class="nm" id="client-account-name">—</span></div>
         <button id="client-logout" class="btn btn-ghost" onclick="clientLogout()"><span class="mi" style="font-size:15px">logout</span> Sign out</button>
       </div>
     </aside>
 
     <main>
+      <div class="topbar">
+        <h1 id="page-title">Dashboard</h1>
+        <div class="bell">
+          <button class="bell-btn" onclick="toggleBell(event)" aria-label="Notifications"><span class="mi">notifications</span><span id="bell-dot" class="bell-dot hidden">0</span></button>
+          <div id="bell-menu" class="bell-menu hidden"><h4>Notifications</h4><div id="notif-list"></div></div>
+        </div>
+      </div>
+
+      <!-- Dashboard -->
+      <section id="tab-dashboard">
+        <div class="stat-grid" id="dash-stats"></div>
+        <div class="panel">
+          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">priority_high</span><h2>Needs your attention</h2><span class="muted" style="margin-left:auto">Candidates awaiting your decision</span></div>
+          <div class="panel-b"><div id="dash-attention"><div class="empty">Loading…</div></div></div>
+        </div>
+      </section>
+
       <!-- Endorsed Candidates -->
-      <section id="tab-candidates">
+      <section id="tab-candidates" class="hidden">
         <div class="panel">
           <div class="panel-h">
             <span class="mi" style="font-size:17px;color:var(--red)">how_to_reg</span>
@@ -245,12 +287,28 @@
     return prof || null;
   }
   function _isClient(prof){ return !!(prof && prof.role==='client' && prof.client_account); }
+  // Client logos for identification. Matched by account name (case-insensitive);
+  // anything unmapped falls back to a monogram of the name.
+  const CLIENT_LOGOS = {
+    'SONY':'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/SONY.png',
+    'URC':'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/Universal_Robina-Logo.wine.png',
+    'UNCLE JOHNS':'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/UJ.png',
+    'SKYWORTH':'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/Skyworth-Logo-Vector.svg-.png',
+    'HISENSE':'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/Hisense%20(1).png',
+  };
+  function renderClientBrand(account){
+    const el=$('#sb-client'); if(!el) return;
+    const logo=CLIENT_LOGOS[(account||'').toUpperCase()];
+    const mono='<div class="sb-mono">'+esc((account||'?').trim().slice(0,2).toUpperCase())+'</div>';
+    el.innerHTML = (logo?'<img src="'+esc(logo)+'" alt="'+esc(account)+'" onerror="this.outerHTML=\''+mono.replace(/'/g,"&#39;")+'\'">':mono)
+      +'<span class="nm">'+esc(account)+'</span>';
+  }
   function _enterApp(prof){
     window.cntClientAccount = prof.client_account;
-    $('#client-account-name').textContent = prof.client_account;
+    renderClientBrand(prof.client_account);
     $('#client-login').classList.add('hidden');
     $('#client-app').classList.remove('hidden');
-    showClientTab('candidates');
+    showClientTab('dashboard');
     loadClientCandidates();
     loadClientVacancies();
   }
@@ -282,12 +340,55 @@
     if(data && data.session){ const prof=await _gateProfile(data.session.user); if(_isClient(prof)){ _enterApp(prof); return; } await sb.auth.signOut(); }
   }
 
+  const TAB_TITLES = { dashboard:'Dashboard', candidates:'Endorsed Candidates', vacancies:'My Vacancies', history:'History' };
   function showClientTab(tab){
-    ['candidates','vacancies','history'].forEach(t=>{
+    ['dashboard','candidates','vacancies','history'].forEach(t=>{
       $('#tab-'+t).classList.toggle('hidden', t!==tab);
       $('#tab-btn-'+t).classList.toggle('active', t===tab);
     });
+    const pt=$('#page-title'); if(pt) pt.textContent = TAB_TITLES[tab]||'Client Portal';
   }
+
+  // ── Dashboard + notifications (derived from loaded data) ────
+  let _vacs = [];
+  function refreshDerived(){ renderDashboard(); renderNotifications(); }
+  function _statCard(n,l,color){ return '<div class="stat"><div class="n" style="color:'+(color||'#0f172a')+'">'+n+'</div><div class="l">'+l+'</div></div>'; }
+  function renderDashboard(){
+    const pending=_cands.filter(c=>c.client_status==='endorsed'),
+          approved=_cands.filter(c=>c.client_status==='approved'),
+          declined=_cands.filter(c=>c.client_status==='rejected'),
+          open=_vacs.filter(v=>v.status!=='Filled'),
+          filled=_vacs.filter(v=>v.status==='Filled');
+    const s=$('#dash-stats'); if(s) s.innerHTML=
+        _statCard(pending.length,'Awaiting your decision', pending.length?'#B45309':'#0f172a')
+      + _statCard(approved.length,'Approved','#15803D')
+      + _statCard(declined.length,'Declined','#475569')
+      + _statCard(open.length,'Open vacancies','#0e7490')
+      + _statCard(filled.length,'Filled vacancies','#15803D');
+    const a=$('#dash-attention'); if(a) a.innerHTML = pending.length
+      ? pending.map(candRow).join('')
+      : '<div class="empty">Nothing needs your decision right now. 🎉</div>';
+  }
+  function renderNotifications(){
+    const pending=_cands.filter(c=>c.client_status==='endorsed');
+    const filled=_vacs.filter(v=>v.status==='Filled');
+    const items=[];
+    pending.forEach(c=>items.push({icon:'how_to_reg',color:'#B45309',
+      html:'<b>'+esc(c.name||'A candidate')+'</b> ('+esc(c.role||'—')+') is awaiting your decision.',
+      go:()=>{ showClientTab('candidates'); openCandidate(c.id); }}));
+    filled.forEach(v=>items.push({icon:'work','color':'#15803D',
+      html:'Your <b>'+esc(v.role||'vacancy')+'</b> in '+esc(v.location||'—')+' has been filled.',
+      go:()=>showClientTab('history')}));
+    const dot=$('#bell-dot'); if(dot){ dot.textContent=pending.length; dot.classList.toggle('hidden', !pending.length); }
+    const list=$('#notif-list'); if(!list) return;
+    window._notifGo = items.map(i=>i.go);
+    list.innerHTML = items.length
+      ? items.map((i,idx)=>'<button class="notif" onclick="_notifClick('+idx+')"><span class="mi" style="color:'+i.color+'">'+i.icon+'</span><span class="nt">'+i.html+'</span></button>').join('')
+      : '<div class="empty">No notifications.</div>';
+  }
+  window._notifClick=function(i){ $('#bell-menu').classList.add('hidden'); const fns=window._notifGo||[]; if(fns[i]) fns[i](); };
+  window.toggleBell=function(e){ e.stopPropagation(); $('#bell-menu').classList.toggle('hidden'); };
+  document.addEventListener('click',e=>{ const b=$('#bell-menu'); if(b && !b.classList.contains('hidden') && !e.target.closest('.bell')) b.classList.add('hidden'); });
 
   // ── My Vacancies ────────────────────────────────────────
   function statusBadge(s){ const c=s==='Open'?'b-open':s==='Filled'?'b-filled':'b-pending'; return '<span class="badge '+c+'">'+esc(s||'Pending')+'</span>'; }
@@ -302,7 +403,7 @@
     const { data, error } = await sb.from('hiring_requests')
       .select('req_id,role,location,count,type,priority,status,created_at').order('created_at',{ascending:false});
     if(error){ el.innerHTML='<div class="empty">Could not load your vacancies.</div>'; return; }
-    const rows=data||[];
+    const rows=data||[]; _vacs=rows;
     // Seed the position/location datalists from what they've filed before
     const pos=[...new Set(rows.map(r=>r.role).filter(Boolean))], loc=[...new Set(rows.map(r=>r.location).filter(Boolean))];
     $('#cv-position-list').innerHTML=pos.map(p=>'<option>'+esc(p)+'</option>').join('');
@@ -312,6 +413,7 @@
     el.innerHTML = active.length ? active.map(vacancyRow).join('') : '<div class="empty">No open vacancies — file your first above.</div>';
     const hist=$('#history-vacancy-list');
     if(hist) hist.innerHTML = filled.length ? filled.map(vacancyRow).join('') : '<div class="empty">No filled vacancies yet.</div>';
+    refreshDerived();
   }
   async function fileClientVacancy(e){
     e.preventDefault();
@@ -351,6 +453,7 @@
     // Decided candidates live in the History tab.
     const hist=$('#history-candidate-list');
     if(hist) hist.innerHTML = decided.length ? decided.map(candRow).join('') : '<div class="empty">No decided candidates yet.</div>';
+    refreshDerived();
   }
 
   // Full candidate profile + the actual CV, shown in a modal.
