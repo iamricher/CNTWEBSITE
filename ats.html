@@ -696,7 +696,20 @@
         <div class="bg-white border border-slate-200 rounded-xl p-3 text-center"><div class="text-xl font-black text-emerald-700" id="int-passed">0</div><div class="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wide font-semibold">Passed (MTD)</div></div>
       </div>
       <div class="bg-white rounded-2xl border border-slate-200 p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="interviews-grid-container"></div>
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div class="flex items-center gap-1.5">
+            <button onclick="intvCalMove(-1)" class="w-7 h-7 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center justify-center cursor-pointer text-slate-600"><span class="material-icons-outlined" style="font-size:16px;">chevron_left</span></button>
+            <span id="intv-cal-title" class="text-sm font-bold text-slate-800 text-center" style="min-width:150px;"></span>
+            <button onclick="intvCalMove(1)" class="w-7 h-7 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center justify-center cursor-pointer text-slate-600"><span class="material-icons-outlined" style="font-size:16px;">chevron_right</span></button>
+            <button onclick="intvCalToday()" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1 hover:bg-slate-50 cursor-pointer">Today</button>
+          </div>
+          <div class="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
+            <button id="intv-view-calendar" onclick="setIntvView('calendar')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm">Calendar</button>
+            <button id="intv-view-list" onclick="setIntvView('list')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">List</button>
+          </div>
+        </div>
+        <div id="interviews-calendar-container"></div>
+        <div class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="interviews-grid-container"></div>
       </div>
     </div>
 
@@ -1762,6 +1775,8 @@ function renderAll(){
   renderJobPositions();
   renderTalentPool(pool);
   renderInterviewsGrid(filtered);
+  renderInterviewsCalendar(filtered);
+  window._intvFiltered=filtered;   // so month nav / view toggle can re-render
   renderOnboarding(onboarding);
   renderReports();
   renderHiringRequests();
@@ -1806,7 +1821,7 @@ function renderDashboardJobsTable(pipeline){
 }
 
 function renderDashboardInterviews(filtered){
-  const interviews=filtered.filter(a=>['phone','qualified','scheduled'].includes(a.stage)&&a.interviewDate).sort((a,b)=>(a.interviewDate+a.interviewTime)>(b.interviewDate+b.interviewTime)?1:-1);
+  const interviews=filtered.filter(a=>a.stage==='interview'&&a.interviewDate).sort((a,b)=>(a.interviewDate+a.interviewTime)>(b.interviewDate+b.interviewTime)?1:-1);
   const dic=document.getElementById('dashboard-interview-count');if(dic)dic.textContent=interviews.length;
   const dil=document.getElementById('dashboard-interview-list');
   if(!dil)return;
@@ -2082,7 +2097,7 @@ function renderAnalyticsDashboard(pipeline, filtered) {
     anlClientTable.innerHTML = clientsToShow.map(acc => {
       const all       = accountData[acc.id] || [];
       const act       = all.filter(a => a.stage !== 'pool' && a.stage !== 'rejected');
-      const intv      = act.filter(a => ['phone','qualified','scheduled'].includes(a.stage)).length;
+      const intv      = act.filter(a => a.stage==='interview').length;
       const offr      = act.filter(a => a.stage === 'hired').length;
       const pooled    = all.filter(a => a.stage === 'pool').length;
       const target    = (jobDatabase[acc.id] || []).reduce((s, j) => s + j.needed, 0);
@@ -2350,12 +2365,12 @@ function renderTalentPool(pool){
 function renderInterviewsGrid(filtered){
   const ig=document.getElementById('interviews-grid-container');
   if(!ig)return;
-  const interviews=filtered.filter(a=>['phone','qualified','scheduled'].includes(a.stage)&&a.interviewDate).sort((a,b)=>(a.interviewDate+a.interviewTime)>(b.interviewDate+b.interviewTime)?1:-1);
+  const interviews=filtered.filter(a=>a.stage==='interview'&&a.interviewDate).sort((a,b)=>(a.interviewDate+a.interviewTime)>(b.interviewDate+b.interviewTime)?1:-1);
   const today=new Date().toISOString().split('T')[0];
   const thisWeekEnd=new Date(Date.now()+7*24*3600*1000).toISOString().split('T')[0];
   const todayCount=interviews.filter(a=>a.interviewDate===today).length;
   const weekCount=interviews.filter(a=>a.interviewDate>=today&&a.interviewDate<=thisWeekEnd).length;
-  const pending=filtered.filter(a=>['phone','qualified','scheduled'].includes(a.stage)&&!a.interviewDate).length;
+  const pending=filtered.filter(a=>a.stage==='interview'&&!a.interviewDate).length;
   const passed=filtered.filter(a=>['exam','bgcheck','hired','onboarding'].includes(a.stage)).length;
   const itEl=document.getElementById('int-today');if(itEl)itEl.textContent=todayCount;
   const iwEl=document.getElementById('int-week');if(iwEl)iwEl.textContent=weekCount;
@@ -2389,6 +2404,50 @@ function renderInterviewsGrid(filtered){
       </div>
     </div>`;
   }).join('');
+}
+
+// ── Interviews calendar (monthly) ───────────────────────────────
+let _intvView = 'calendar';
+let _intvCalRef = new Date();   // any date within the shown month
+function setIntvView(v){
+  _intvView = v;
+  document.getElementById('interviews-calendar-container').classList.toggle('hidden', v!=='calendar');
+  document.getElementById('interviews-grid-container').classList.toggle('hidden', v!=='list');
+  const cal=document.getElementById('intv-view-calendar'), lst=document.getElementById('intv-view-list');
+  if(cal&&lst){
+    cal.className='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer '+(v==='calendar'?'bg-white text-red-800 shadow-sm':'text-slate-500');
+    lst.className='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer '+(v==='list'?'bg-white text-red-800 shadow-sm':'text-slate-500');
+  }
+}
+function intvCalMove(delta){ _intvCalRef=new Date(_intvCalRef.getFullYear(), _intvCalRef.getMonth()+delta, 1); renderInterviewsCalendar(window._intvFiltered||[]); }
+function intvCalToday(){ _intvCalRef=new Date(); renderInterviewsCalendar(window._intvFiltered||[]); }
+function renderInterviewsCalendar(filtered){
+  const host=document.getElementById('interviews-calendar-container'); if(!host) return;
+  const title=document.getElementById('intv-cal-title');
+  const ref=_intvCalRef, y=ref.getFullYear(), m=ref.getMonth();
+  if(title) title.textContent=new Date(y,m,1).toLocaleString('default',{month:'long',year:'numeric'});
+  // interviews indexed by date string
+  const byDate={};
+  (filtered||[]).filter(a=>a.stage==='interview'&&a.interviewDate).forEach(a=>{ (byDate[a.interviewDate]=byDate[a.interviewDate]||[]).push(a); });
+  const todayStr=new Date().toISOString().split('T')[0];
+  const first=new Date(y,m,1), startDow=first.getDay(), daysInMonth=new Date(y,m+1,0).getDate();
+  const dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let cells='';
+  dow.forEach(d=>cells+=`<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400 text-center py-1">${d}</div>`);
+  for(let i=0;i<startDow;i++) cells+=`<div class="min-h-[92px] rounded-lg bg-slate-50/50"></div>`;
+  for(let day=1;day<=daysInMonth;day++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const items=(byDate[ds]||[]).sort((a,b)=>(a.interviewTime||'')>(b.interviewTime||'')?1:-1);
+    const isToday=ds===todayStr;
+    const chips=items.slice(0,3).map(a=>{
+      const acc=ACCOUNTS.find(x=>x.id===a.account); const c=acc?.color||'#7f1d1d';
+      return `<button onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="${_escForm(a.name)} · ${_escForm(a.interviewType||'Interview')}" class="w-full text-left truncate text-[10px] font-semibold rounded px-1.5 py-0.5 cursor-pointer" style="background:${c}1a;color:${c};">${a.interviewTime?fmtTime(a.interviewTime).replace(' ',''):''} ${_escForm(a.name)}</button>`;
+    }).join('');
+    const more=items.length>3?`<div class="text-[9px] text-slate-400 font-semibold px-1">+${items.length-3} more</div>`:'';
+    cells+=`<div class="min-h-[92px] rounded-lg border ${isToday?'border-red-300 bg-red-50/40':'border-slate-100'} p-1 flex flex-col gap-0.5">
+      <div class="text-[11px] font-bold ${isToday?'text-red-700':'text-slate-500'} px-0.5">${day}</div>${chips}${more}</div>`;
+  }
+  host.innerHTML=`<div class="grid grid-cols-7 gap-1.5">${cells}</div>`;
 }
 
 function renderOnboarding(onboarding){
