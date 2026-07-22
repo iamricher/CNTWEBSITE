@@ -703,9 +703,16 @@
             <button onclick="intvCalMove(1)" class="w-7 h-7 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center justify-center cursor-pointer text-slate-600"><span class="material-icons-outlined" style="font-size:16px;">chevron_right</span></button>
             <button onclick="intvCalToday()" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1 hover:bg-slate-50 cursor-pointer">Today</button>
           </div>
-          <div class="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
-            <button id="intv-view-calendar" onclick="setIntvView('calendar')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm">Calendar</button>
-            <button id="intv-view-list" onclick="setIntvView('list')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">List</button>
+          <div class="flex items-center gap-2 flex-wrap">
+            <div id="intv-scope-toggle" class="hidden items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
+              <button id="intv-scope-mine" onclick="setIntvScope('mine')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm">Mine</button>
+              <button id="intv-scope-all" onclick="setIntvScope('all')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">All</button>
+            </div>
+            <span id="intv-scope-note" class="text-[11px] text-slate-400 font-medium"></span>
+            <div class="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
+              <button id="intv-view-calendar" onclick="setIntvView('calendar')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm">Calendar</button>
+              <button id="intv-view-list" onclick="setIntvView('list')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">List</button>
+            </div>
           </div>
         </div>
         <div id="interviews-calendar-container"></div>
@@ -2373,6 +2380,8 @@ function renderTalentPool(pool){
 function renderInterviewsGrid(filtered){
   const ig=document.getElementById('interviews-grid-container');
   if(!ig)return;
+  _intvSyncScopeUI();
+  filtered=_intvScopeApplied(filtered);
   const interviews=filtered.filter(a=>a.stage==='interview'&&a.interviewDate).sort((a,b)=>(a.interviewDate+a.interviewTime)>(b.interviewDate+b.interviewTime)?1:-1);
   const today=new Date().toISOString().split('T')[0];
   const thisWeekEnd=new Date(Date.now()+7*24*3600*1000).toISOString().split('T')[0];
@@ -2420,6 +2429,31 @@ function renderInterviewsGrid(filtered){
 // ── Interviews calendar (monthly) ───────────────────────────────
 let _intvView = 'calendar';
 let _intvCalRef = new Date();   // any date within the shown month
+
+// Each recruiter sees their own scheduled interviews; managers/admins can see
+// everyone's. "Their" = they are the assigned recruiter or the interviewer.
+let _intvScope = 'mine';
+function _intvSeesAll(){ return ['super_admin','recruitment_manager','recruitment_supervisor'].includes(window.cntRole); }
+function _intvScopeApplied(list){
+  const scope = _intvSeesAll() ? _intvScope : 'mine';   // non-managers always scoped to self
+  if(scope==='all') return list;
+  const me=(window.cntUserName||'').trim().toLowerCase();
+  if(!me) return list;   // no identity (e.g. offline/demo) → don't hide anything
+  return list.filter(a=>(a.recruiter||'').trim().toLowerCase()===me || (a.interviewInterviewer||'').trim().toLowerCase()===me);
+}
+function setIntvScope(s){ _intvScope=s;
+  const mi=document.getElementById('intv-scope-mine'), al=document.getElementById('intv-scope-all');
+  if(mi&&al){ const on='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm', off='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500';
+    mi.className=s==='mine'?on:off; al.className=s==='all'?on:off; }
+  const f=window._intvFiltered||[]; renderInterviewsGrid(f); renderInterviewsCalendar(f);
+}
+function _intvSyncScopeUI(){
+  const tog=document.getElementById('intv-scope-toggle'), note=document.getElementById('intv-scope-note');
+  const mgr=_intvSeesAll();
+  if(tog) tog.classList.toggle('hidden', !mgr);   // toggle only for managers
+  if(tog) tog.classList.toggle('flex', mgr);
+  if(note) note.textContent = mgr ? '' : 'Showing your interviews';
+}
 function setIntvView(v){
   _intvView = v;
   document.getElementById('interviews-calendar-container').classList.toggle('hidden', v!=='calendar');
@@ -2434,6 +2468,7 @@ function intvCalMove(delta){ _intvCalRef=new Date(_intvCalRef.getFullYear(), _in
 function intvCalToday(){ _intvCalRef=new Date(); renderInterviewsCalendar(window._intvFiltered||[]); }
 function renderInterviewsCalendar(filtered){
   const host=document.getElementById('interviews-calendar-container'); if(!host) return;
+  filtered=_intvScopeApplied(filtered);
   const title=document.getElementById('intv-cal-title');
   const ref=_intvCalRef, y=ref.getFullYear(), m=ref.getMonth();
   if(title) title.textContent=new Date(y,m,1).toLocaleString('default',{month:'long',year:'numeric'});
