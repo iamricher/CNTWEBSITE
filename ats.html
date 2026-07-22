@@ -952,7 +952,15 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Kind of Interview</label><select id="interview-type" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Phone Interview</option><option>Face-to-Face Interview</option><option>Video Interview</option><option>Panel Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
       </div>
       <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Interviewer</label><input type="text" id="interview-interviewer" placeholder="HR Manager / Account Manager" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Venue / Link</label><input type="text" id="interview-venue" placeholder="Office address or meeting link" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+      <div>
+        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Venue / Online meeting link</label>
+        <div class="flex gap-2">
+          <input type="text" id="interview-venue" placeholder="Office address, or paste/generate a video link" class="flex-1 min-w-0 px-3 py-2 border border-slate-200 rounded-lg text-sm">
+          <button type="button" onclick="cntGenMeetLink()" title="Create an instant online meeting room" class="flex-none px-2.5 py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">videocam</span>Generate</button>
+          <button type="button" onclick="cntJoinMeet()" title="Open the meeting" class="flex-none px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">login</span>Join</button>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">“Generate” creates a browser video room (no account needed) for conducting the interview online — or paste your Zoom / Google Meet / Teams link.</p>
+      </div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
         <button type="button" onclick="closeInterviewModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition cursor-pointer">Cancel</button>
         <button type="submit" class="px-4 py-2 bg-red-800 hover:bg-red-900 text-white rounded-lg text-sm font-semibold shadow transition flex items-center gap-1 cursor-pointer"><span class="material-icons-outlined" style="font-size:14px;">event_available</span> Confirm Slot</button>
@@ -2396,11 +2404,14 @@ function renderInterviewsGrid(filtered){
           <p class="text-[10px] text-slate-400">${item.account} · ${item.location}</p>
         </div>
       </div>
-      <div class="pt-2.5 border-t border-slate-200 flex justify-between items-center">
-        <span class="text-[10px] text-slate-400">${item.interviewVenue||item.interviewType||'—'}</span>
-        <button onclick="event.stopPropagation();openInterviewModal('${item.id}')" class="text-xs text-red-700 font-semibold hover:underline cursor-pointer flex items-center gap-1">
-          <span class="material-icons-outlined" style="font-size:12px;">edit_calendar</span>Reschedule
-        </button>
+      <div class="pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
+        <span class="text-[10px] text-slate-400 truncate min-w-0">${_isMeetUrl(item.interviewVenue)?'Online meeting':(item.interviewVenue||item.interviewType||'—')}</span>
+        <div class="flex items-center gap-2 flex-none">
+          ${_isMeetUrl(item.interviewVenue)?`<a href="${item.interviewVenue}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-xs text-white bg-emerald-600 hover:bg-emerald-700 font-semibold px-2 py-1 rounded-lg cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">videocam</span>Join</a>`:''}
+          <button onclick="event.stopPropagation();openInterviewModal('${item.id}')" class="text-xs text-red-700 font-semibold hover:underline cursor-pointer flex items-center gap-1">
+            <span class="material-icons-outlined" style="font-size:12px;">edit_calendar</span>Reschedule
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -2656,6 +2667,21 @@ function closeInterviewModal(){
   document.getElementById('interview-modal').classList.add('hidden');
   if(pendingStageChange){if(pendingStageChange.onCancel)pendingStageChange.onCancel();pendingStageChange=null;}
 }
+// Online interview: generate an instant, account-free video room (Jitsi Meet)
+// so recruiters can conduct the interview in the browser. Or paste any link.
+function cntGenMeetLink(){
+  const id=(document.getElementById('interview-applicant-id').value||'').replace(/[^\w]/g,'');
+  const rand=Math.random().toString(36).slice(2,8);
+  document.getElementById('interview-venue').value='https://meet.jit.si/CNT-Interview-'+(id||'x')+'-'+rand;
+  const t=document.getElementById('interview-type'); if(t && !/video/i.test(t.value)) t.value='Video Interview';
+  if(window.showToast) showToast('Online meeting link generated','success');
+}
+function cntJoinMeet(){
+  const v=(document.getElementById('interview-venue').value||'').trim();
+  if(/^https?:\/\//i.test(v)) window.open(v,'_blank','noopener');
+  else if(window.showToast) showToast('No online meeting link set — press Generate or paste one','info');
+}
+function _isMeetUrl(s){ return /^https?:\/\//i.test((s||'').trim()); }
 function handleInterviewSubmit(e){
   e.preventDefault();
   const id=document.getElementById('interview-applicant-id').value;
@@ -2668,7 +2694,7 @@ function handleInterviewSubmit(e){
   const app=findApplicant(id);
   if(app){
     updateApplicant(id,{interviewDate:date,interviewTime:time,interviewType:type,interviewRound:round,interviewInterviewer:interviewer,interviewVenue:venue});
-    if(window.cntPersistInterview) cntPersistInterview(app,{interview_date:date,interview_time:time,interview_type:type,interview_round:round});
+    if(window.cntPersistInterview) cntPersistInterview(app,{interview_date:date,interview_time:time,interview_type:type,interview_round:round,interview_link:venue||null});
     if(window.cntLogActivity) cntLogActivity(app,'stage',round+' scheduled — '+type+(date?(' on '+date):''));
     if(pendingStageChange&&pendingStageChange.id===id){
       executeStageChange(id,pendingStageChange.targetStage);
@@ -3086,7 +3112,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       name:r.name, role:r.role||'General Application',
       account:r.client||'Website', location:r.location||'—',
       stage:normStage(r.stage||'new'), phone:r.phone||'', email:r.email||'',
-      interviewDate:r.interview_date||'', interviewTime:r.interview_time||'', interviewType:r.interview_type||'', interviewRound:r.interview_round||'',
+      interviewDate:r.interview_date||'', interviewTime:r.interview_time||'', interviewType:r.interview_type||'', interviewRound:r.interview_round||'', interviewVenue:r.interview_link||'',
       source:r.source||'Website', salary:'', notes:r.cover_note||'',
       appliedDate:r.applied_date||(r.created_at?String(r.created_at).slice(0,10):''),
       job_id:r.job_id||null,          // the posting this application belongs to
@@ -4612,7 +4638,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   };
 
   // Persist interview scheduling fields to Supabase
-  window.cntPersistInterview=function(app,patch){ _persistApp(app,patch); };
+  // Persist an interview. If the interview_link column isn't in the DB yet, the
+  // whole update would fail — so on that specific error, retry without the link
+  // so date/time/type/round still save. The link persists once the column exists.
+  window.cntPersistInterview=function(app,patch){
+    if(!(sb && app && app._web && app._sid)) return;
+    sb.from('applications').update(patch).eq('id',app._sid).then(({error})=>{
+      if(error && /interview_link/i.test(error.message||'')){
+        const p=Object.assign({},patch); delete p.interview_link;
+        sb.from('applications').update(p).eq('id',app._sid).then(({error})=>{ if(error) console.error('persist interview',error); });
+      } else if(error) console.error('persist interview',error);
+    });
+  };
 
   // Publish / unpublish a job to the website (status open<->closed)
   window.cntTogglePublish=function(accId,sid,role,location){

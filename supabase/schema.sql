@@ -125,7 +125,8 @@ alter table public.applications
   add column if not exists interview_date  date,
   add column if not exists interview_time  text,
   add column if not exists interview_type  text,   -- Phone / Face-to-Face / Video / Panel / Client / Final
-  add column if not exists interview_round text;   -- 1st / 2nd / 3rd / Final
+  add column if not exists interview_round text,   -- 1st / 2nd / 3rd / Final
+  add column if not exists interview_link  text;   -- venue or online meeting URL
 
 -- Odoo job-position fields
 alter table public.jobs
