@@ -68,11 +68,30 @@ begin
     set client_status=decision, decided_at=now(),
         client_reason=case when decision='rejected' then reason else null end
     where id=app_id and client=acct;
+  insert into public.audit_log(actor_email, actor_role, action, entity, entity_ref, details)
+  values ((select email from public.profiles where id=auth.uid()), 'client',
+          'client_'||decision, 'applicant', app_id::text, acct||coalesce(' — '||reason,''));
   return decision;
 end;
 $$;
 revoke all on function public.cnt_client_decide(bigint, text, text) from public, anon;
 grant execute on function public.cnt_client_decide(bigint, text, text) to authenticated;
+
+-- RA 10173 accountability: clients log their own access events (privacy ack,
+-- viewing a candidate). Only clients log, and only as themselves.
+create or replace function public.cnt_client_log(p_action text, p_ref text default null)
+returns void language plpgsql security definer set search_path=public as $$
+declare acct text;
+begin
+  acct := public.cnt_client_account();
+  if acct is null then return; end if;
+  insert into public.audit_log(actor_email, actor_role, action, entity, entity_ref, details)
+  values ((select email from public.profiles where id=auth.uid()), 'client',
+          left(coalesce(p_action,'client_event'),40), 'client_portal', left(p_ref,120), acct);
+end;
+$$;
+revoke all on function public.cnt_client_log(text, text) from public, anon;
+grant execute on function public.cnt_client_log(text, text) to authenticated;
 
 -- 3. RLS -------------------------------------------------------
 drop policy if exists "profiles read self" on public.profiles;

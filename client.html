@@ -89,10 +89,19 @@
   .notif .mi{font-size:18px;flex:none;margin-top:1px}
   .notif .nt{font-size:12.5px;color:#334155;line-height:1.4}
   /* dashboard */
-  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:18px}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-  .stat .n{font-size:26px;font-weight:800;line-height:1.1}
-  .stat .l{font-size:11px;font-weight:600;color:var(--sub);margin-top:3px}
+  .dash-hero{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-bottom:16px}
+  .dash-hero .logo{height:40px;max-width:120px;object-fit:contain;flex:none}
+  .dash-hero .mono{width:44px;height:44px;border-radius:10px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex:none}
+  .dash-hero .hello{font-family:var(--font-display);font-size:19px;font-weight:800;line-height:1.2}
+  .dash-hero .sub{font-size:12.5px;color:var(--sub);margin-top:3px}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin-bottom:18px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;transition:box-shadow .15s}
+  .stat:hover{box-shadow:var(--shadow)}
+  .stat .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .stat .ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+  .stat .ic .mi{font-size:18px}
+  .stat .n{font-size:27px;font-weight:800;line-height:1}
+  .stat .l{font-size:11.5px;font-weight:600;color:var(--sub);margin-top:4px}
   @media(max-width:760px){
     .app-shell{flex-direction:column}
     .sidebar{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);gap:4px;padding:8px}
@@ -128,12 +137,15 @@
   .toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shadow);z-index:50;opacity:0;transform:translateY(8px);transition:.25s}
   .toast.show{opacity:1;transform:none}
 
-  /* Candidate profile modal */
-  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
-  .modal-box{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);width:100%;max-width:1040px;height:92vh;display:flex;flex-direction:column;overflow:hidden}
-  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+  /* Candidate profile modal — full-screen, like the staff ATS */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:0}
+  .modal-box{background:#fff;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:#fff}
   .modal-body{flex:1;overflow:hidden;min-height:0}
-  .modal-foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+  .modal-foot{padding:12px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;background:#fff}
+  /* Confidentiality banner (RA 10173) */
+  .confid{display:flex;align-items:center;gap:8px;background:#FEF3C7;border-bottom:1px solid #FDE68A;color:#92400E;font-size:11.5px;font-weight:600;padding:8px 22px}
+  .confid .mi{font-size:15px}
   .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);height:100%}
   .pane-left{overflow-y:auto;padding:18px 20px;border-right:1px solid var(--line)}
   .pane-right{display:flex;flex-direction:column;min-height:0;padding:14px 16px;background:#f8fafc}
@@ -159,6 +171,7 @@
       <button id="client-login-btn" type="submit" class="btn btn-primary btn-block">Sign in</button>
       <p id="client-msg" class="msg"></p>
       <p class="muted" style="margin-top:14px;font-size:11.5px">Access is set up by CNT. If you can't sign in, contact your CNT account officer.</p>
+      <p class="muted" style="margin-top:8px;font-size:10.5px;line-height:1.5">Candidate data in this portal is personal information processed under the <b>Data Privacy Act of 2012 (RA 10173)</b> and is confidential — for your recruitment evaluation only.</p>
     </form>
   </div>
 
@@ -190,6 +203,7 @@
 
       <!-- Dashboard -->
       <section id="tab-dashboard">
+        <div class="dash-hero" id="dash-hero"></div>
         <div class="stat-grid" id="dash-stats"></div>
         <div class="panel">
           <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">priority_high</span><h2>Needs your attention</h2><span class="muted" style="margin-left:auto">Candidates awaiting your decision</span></div>
@@ -260,8 +274,19 @@
         </div>
         <button class="btn btn-ghost" onclick="closeCandModal()"><span class="mi" style="font-size:18px">close</span></button>
       </div>
+      <div class="confid"><span class="mi">lock</span>Confidential — personal data shared by CNT under RA 10173 to evaluate this application only. Do not copy, retain, or share.</div>
       <div id="cand-modal-body" class="modal-body"></div>
       <div class="modal-foot"><div id="cand-modal-actions" class="actions" style="margin:0"></div></div>
+    </div>
+  </div>
+
+  <!-- Data privacy acknowledgment (RA 10173) — gates all candidate PII -->
+  <div id="confid-gate" class="hidden modal-overlay" style="z-index:70;padding:16px;background:rgba(15,23,42,.6)">
+    <div style="background:#fff;border-radius:14px;box-shadow:var(--shadow);max-width:460px;width:100%;padding:26px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="mi" style="font-size:24px;color:var(--red)">privacy_tip</span><h2 style="font-family:var(--font-display);font-size:17px;font-weight:800">Data privacy acknowledgment</h2></div>
+      <p style="font-size:13px;color:var(--sub);line-height:1.6">The candidate information in this portal is <b>personal data</b> shared with you by CNT Promo &amp; Ads Specialists, Inc. under the <b>Data Privacy Act of 2012 (RA 10173)</b>, solely so you can evaluate candidates for the roles you are hiring.</p>
+      <p style="font-size:13px;color:var(--sub);line-height:1.6;margin-top:10px">By continuing you agree to keep it confidential, use it only for this recruitment, not disclose or retain it beyond what is necessary, and delete it when your evaluation is complete. Your access is logged.</p>
+      <button class="btn btn-primary btn-block" style="margin-top:18px" onclick="acceptConfid()">I understand and agree</button>
     </div>
   </div>
 
@@ -309,9 +334,21 @@
     $('#client-login').classList.add('hidden');
     $('#client-app').classList.remove('hidden');
     showClientTab('dashboard');
-    loadClientCandidates();
-    loadClientVacancies();
+    // RA 10173: no candidate personal data loads until the client acknowledges
+    // the confidentiality terms (once per browser session).
+    if(sessionStorage.getItem('cnt_confid_ok')==='1') _loadClientData();
+    else $('#confid-gate').classList.remove('hidden');
   }
+  function _loadClientData(){ loadClientCandidates(); loadClientVacancies(); }
+  // Best-effort access logging for accountability (RA 10173). Never blocks the
+  // UI; ignores errors so a missing RPC or offline state can't break the portal.
+  function clientAudit(action, ref){ try{ if(sb) sb.rpc('cnt_client_log', { p_action:String(action), p_ref: ref==null?null:String(ref) }); }catch(e){} }
+  window.acceptConfid=function(){
+    sessionStorage.setItem('cnt_confid_ok','1');
+    $('#confid-gate').classList.add('hidden');
+    clientAudit('privacy_ack', window.cntClientAccount);
+    _loadClientData();
+  };
   async function clientLogin(e){
     e.preventDefault();
     const btn=$('#client-login-btn'), msg=$('#client-msg');
@@ -352,22 +389,31 @@
   // ── Dashboard + notifications (derived from loaded data) ────
   let _vacs = [];
   function refreshDerived(){ renderDashboard(); renderNotifications(); }
-  function _statCard(n,l,color){ return '<div class="stat"><div class="n" style="color:'+(color||'#0f172a')+'">'+n+'</div><div class="l">'+l+'</div></div>'; }
+  function _statCard(n,l,icon,color,bg){
+    return '<div class="stat"><div class="top"><div class="ic" style="background:'+bg+'"><span class="mi" style="color:'+color+'">'+icon+'</span></div></div>'
+      +'<div class="n" style="color:'+color+'">'+n+'</div><div class="l">'+l+'</div></div>';
+  }
   function renderDashboard(){
+    const acct=window.cntClientAccount||'';
+    const logo=CLIENT_LOGOS[(acct||'').toUpperCase()];
+    const hero=$('#dash-hero');
+    if(hero) hero.innerHTML =
+        (logo?'<img class="logo" src="'+esc(logo)+'" alt="'+esc(acct)+'" onerror="this.outerHTML=\'<div class=&quot;mono&quot;>'+esc((acct||'?').slice(0,2).toUpperCase())+'</div>\'">':'<div class="mono">'+esc((acct||'?').slice(0,2).toUpperCase())+'</div>')
+      + '<div><div class="hello">Welcome, '+esc(acct)+'</div><div class="sub">Your recruitment overview with CNT Promo &amp; Ads Specialists, Inc. · '+new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+'</div></div>';
     const pending=_cands.filter(c=>c.client_status==='endorsed'),
           approved=_cands.filter(c=>c.client_status==='approved'),
           declined=_cands.filter(c=>c.client_status==='rejected'),
           open=_vacs.filter(v=>v.status!=='Filled'),
           filled=_vacs.filter(v=>v.status==='Filled');
     const s=$('#dash-stats'); if(s) s.innerHTML=
-        _statCard(pending.length,'Awaiting your decision', pending.length?'#B45309':'#0f172a')
-      + _statCard(approved.length,'Approved','#15803D')
-      + _statCard(declined.length,'Declined','#475569')
-      + _statCard(open.length,'Open vacancies','#0e7490')
-      + _statCard(filled.length,'Filled vacancies','#15803D');
+        _statCard(pending.length,'Awaiting your decision','how_to_reg','#B45309','#FEF3C7')
+      + _statCard(approved.length,'Approved','task_alt','#15803D','#DCFCE7')
+      + _statCard(declined.length,'Declined','do_not_disturb_on','#475569','#F1F5F9')
+      + _statCard(open.length,'Open vacancies','work_outline','#0e7490','#CFFAFE')
+      + _statCard(filled.length,'Filled vacancies','verified','#7C3AED','#F3E8FF');
     const a=$('#dash-attention'); if(a) a.innerHTML = pending.length
       ? pending.map(candRow).join('')
-      : '<div class="empty">Nothing needs your decision right now. 🎉</div>';
+      : '<div class="empty">Nothing needs your decision right now.</div>';
   }
   function renderNotifications(){
     const pending=_cands.filter(c=>c.client_status==='endorsed');
@@ -461,6 +507,7 @@
   function _section(t,v){ return v && String(v).trim() ? '<p class="sec-t">'+t+'</p><div class="prose">'+esc(v)+'</div>' : ''; }
   async function openCandidate(id){
     const c=_cands.find(x=>String(x.id)===String(id)); if(!c) return;
+    clientAudit('view_candidate', id);   // RA 10173 accountability
     const decided = c.client_status!=='endorsed';
     const body=$('#cand-modal-body');
     $('#cand-modal-title').textContent=c.name||'Candidate';
