@@ -73,9 +73,22 @@ if (!cvPolicy) {
   fail('resumes read client policy present', 'not found');
 } else {
   ok('resumes read client policy present');
-  /a\.client\s*=\s*public\.cnt_client_account\(\)/i.test(cvPolicy) ? ok('CV read scoped to the caller\'s account') : fail('CV account scoping', 'missing');
-  /client_status\s+in\s*\(\s*'endorsed'/i.test(cvPolicy)          ? ok('CV read limited to endorsed/decided')     : fail('CV status scoping', 'missing');
-  /a\.resume_url\s*=\s*storage\.objects\.name/i.test(cvPolicy)     ? ok('CV read matched by exact object path')     : fail('CV path match', 'missing');
+  // The policy delegates the ownership check to a SECURITY DEFINER function
+  // (an inline subquery would be blocked by applications' own RLS).
+  /public\.cnt_client_can_read_cv\(\s*storage\.objects\.name\s*\)/i.test(cvPolicy)
+    ? ok('CV read delegated to cnt_client_can_read_cv on the object path')
+    : fail('CV read via definer function', 'policy: ' + cvPolicy);
+}
+const cvFn = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_client_can_read_cv[\s\S]*?\$\$;/i);
+if (!cvFn) {
+  fail('cnt_client_can_read_cv present', 'function not found');
+} else {
+  ok('cnt_client_can_read_cv present');
+  const b = cvFn[0];
+  /security\s+definer/i.test(b)                              ? ok('CV check runs SECURITY DEFINER (bypasses applications RLS)') : fail('SECURITY DEFINER', 'missing');
+  /a\.client\s*=\s*public\.cnt_client_account\(\)/i.test(b)  ? ok('CV check scoped to the caller\'s account')                  : fail('CV account scoping', 'missing');
+  /client_status\s+in\s*\(\s*'endorsed'/i.test(b)           ? ok('CV check limited to endorsed/decided')                      : fail('CV status scoping', 'missing');
+  /a\.resume_url\s*=\s*p_path/i.test(b)                      ? ok('CV check matched by exact object path')                     : fail('CV path match', 'missing');
 }
 
 console.log('\n' + '─'.repeat(52));

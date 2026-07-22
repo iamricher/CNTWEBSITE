@@ -322,6 +322,21 @@ $$;
 revoke all on function public.cnt_client_log(text, text) from public, anon;
 grant execute on function public.cnt_client_log(text, text) to authenticated;
 
+-- Does the caller (a client) own the candidate whose CV is at this path? Used by
+-- the "resumes read client" storage policy. SECURITY DEFINER so its read of
+-- applications bypasses that table's RLS (which otherwise blocks clients).
+create or replace function public.cnt_client_can_read_cv(p_path text)
+returns boolean language sql stable security definer set search_path=public as $$
+  select exists(
+    select 1 from public.applications a
+    where a.resume_url = p_path
+      and a.client = public.cnt_client_account()
+      and a.client_status in ('endorsed','approved','rejected')
+  );
+$$;
+revoke all on function public.cnt_client_can_read_cv(text) from public, anon;
+grant execute on function public.cnt_client_can_read_cv(text) to authenticated;
+
 -- New sign-ups are inert ('pending') until an admin assigns a real role
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path=public as $$
@@ -418,16 +433,13 @@ create policy "resumes upload public" on storage.objects
 create policy "resumes read staff" on storage.objects
   for select to authenticated using (bucket_id='resumes' and public.cnt_is_staff());
 -- A client may fetch a signed URL for exactly the CVs of candidates endorsed
--- to their account — matched by the object path stored in applications.resume_url.
+-- to their account. The ownership check MUST run in a SECURITY DEFINER function:
+-- an inline subquery on applications would itself be blocked by applications'
+-- RLS (clients have no direct read there), so the check would always be false
+-- and no CV would ever load. The definer function bypasses that.
 create policy "resumes read client" on storage.objects
   for select to authenticated using (
-    bucket_id='resumes'
-    and exists (
-      select 1 from public.applications a
-      where a.resume_url = storage.objects.name
-        and a.client = public.cnt_client_account()
-        and a.client_status in ('endorsed','approved','rejected')
-    )
+    bucket_id='resumes' and public.cnt_client_can_read_cv(storage.objects.name)
   );
 -- managers may delete CVs — required for the RA 10173 retention purge / erasure
 create policy "resumes delete mgr" on storage.objects

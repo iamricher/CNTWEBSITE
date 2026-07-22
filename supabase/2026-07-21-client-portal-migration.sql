@@ -93,6 +93,21 @@ $$;
 revoke all on function public.cnt_client_log(text, text) from public, anon;
 grant execute on function public.cnt_client_log(text, text) to authenticated;
 
+-- Ownership check for the client CV storage policy. SECURITY DEFINER so its
+-- read of applications bypasses that table's RLS (an inline subquery in the
+-- policy would be blocked, so no CV would ever load for a client).
+create or replace function public.cnt_client_can_read_cv(p_path text)
+returns boolean language sql stable security definer set search_path=public as $$
+  select exists(
+    select 1 from public.applications a
+    where a.resume_url = p_path
+      and a.client = public.cnt_client_account()
+      and a.client_status in ('endorsed','approved','rejected')
+  );
+$$;
+revoke all on function public.cnt_client_can_read_cv(text) from public, anon;
+grant execute on function public.cnt_client_can_read_cv(text) to authenticated;
+
 -- 3. RLS -------------------------------------------------------
 drop policy if exists "profiles read self" on public.profiles;
 create policy "profiles read self" on public.profiles for select to authenticated using (id = auth.uid());
@@ -111,15 +126,7 @@ create policy "hr client insert" on public.hiring_requests for insert to authent
 -- Client may fetch a signed URL for exactly the CVs endorsed to their account.
 drop policy if exists "resumes read client" on storage.objects;
 create policy "resumes read client" on storage.objects for select to authenticated
-  using (
-    bucket_id='resumes'
-    and exists (
-      select 1 from public.applications a
-      where a.resume_url = storage.objects.name
-        and a.client = public.cnt_client_account()
-        and a.client_status in ('endorsed','approved','rejected')
-    )
-  );
+  using (bucket_id='resumes' and public.cnt_client_can_read_cv(storage.objects.name));
 
 -- 4. Verify ----------------------------------------------------
 --  Expect: both columns present, both functions present.
