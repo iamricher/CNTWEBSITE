@@ -955,18 +955,20 @@
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Time</label><input type="time" id="interview-time" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       </div>
       <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Round</label><select id="interview-round" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>1st Interview</option><option>2nd Interview</option><option>3rd Interview</option><option>Final Interview</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Kind of Interview</label><select id="interview-type" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Phone Interview</option><option>Face-to-Face Interview</option><option>Video Interview</option><option>Panel Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Round</label><select id="interview-round" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Initial Interview</option><option>Second Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Kind of Interview</label><select id="interview-type" onchange="cntToggleOnline()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Phone Call</option><option>Video</option><option>Onsite / Face-to-Face Interview</option></select></div>
       </div>
       <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Interviewer</label><input type="text" id="interview-interviewer" placeholder="HR Manager / Account Manager" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       <div>
-        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Venue / Online meeting link</label>
+        <label id="interview-venue-label" class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Venue / Online meeting link</label>
         <div class="flex gap-2">
           <input type="text" id="interview-venue" placeholder="Office address, or paste/generate a video link" class="flex-1 min-w-0 px-3 py-2 border border-slate-200 rounded-lg text-sm">
-          <button type="button" onclick="cntGenMeetLink()" title="Create an instant online meeting room" class="flex-none px-2.5 py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">videocam</span>Generate</button>
-          <button type="button" onclick="cntJoinMeet()" title="Open the meeting" class="flex-none px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">login</span>Join</button>
+          <span id="interview-online" class="flex gap-2 flex-none">
+            <button type="button" onclick="cntGenMeetLink()" title="Create an instant online meeting room" class="px-2.5 py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">videocam</span>Generate</button>
+            <button type="button" onclick="cntJoinMeet()" title="Open the meeting" class="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">login</span>Join</button>
+          </span>
         </div>
-        <p class="text-[10px] text-slate-400 mt-1">“Generate” creates a browser video room (no account needed) for conducting the interview online — or paste your Zoom / Google Meet / Teams link.</p>
+        <p id="interview-online-help" class="text-[10px] text-slate-400 mt-1">“Generate” creates a browser video room (no account needed) for conducting the interview online — or paste your Zoom / Google Meet / Teams link.</p>
       </div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
         <button type="button" onclick="closeInterviewModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition cursor-pointer">Cancel</button>
@@ -1535,8 +1537,8 @@ const PIPELINE_STAGES = [
 ];
 
 // Kinds of interview captured inside the single Interview stage
-const INTERVIEW_TYPES  = ['Phone Interview','Face-to-Face Interview','Video Interview','Panel Interview','Client Interview','Final Interview'];
-const INTERVIEW_ROUNDS = ['1st Interview','2nd Interview','3rd Interview','Final Interview'];
+const INTERVIEW_TYPES  = ['Phone Call','Video','Onsite / Face-to-Face Interview'];   // medium
+const INTERVIEW_ROUNDS = ['Initial Interview','Second Interview','Client Interview','Final Interview'];   // stage
 
 // Stages are configurable data (public.stages). These derive from PIPELINE_STAGES,
 // which is rebuilt from the database at boot — so renaming/recolouring a stage in
@@ -2692,8 +2694,9 @@ function openInterviewModal(id,stageLabel){
   document.getElementById('interview-applicant-name').textContent=app.name+' · '+app.role+' ('+app.account+')';
   document.getElementById('interview-date').value=app.interviewDate||'';
   document.getElementById('interview-time').value=app.interviewTime||'';
-  document.getElementById('interview-type').value=app.interviewType||'Phone Interview';
-  { const rd=document.getElementById('interview-round'); if(rd) rd.value=app.interviewRound||'1st Interview'; }
+  document.getElementById('interview-type').value=app.interviewType||'Phone Call';
+  { const rd=document.getElementById('interview-round'); if(rd) rd.value=app.interviewRound||'Initial Interview'; }
+  cntToggleOnline();
   document.getElementById('interview-interviewer').value=app.interviewInterviewer||'';
   document.getElementById('interview-venue').value=app.interviewVenue||'';
   document.getElementById('interview-modal').classList.remove('hidden');
@@ -2708,7 +2711,7 @@ function cntGenMeetLink(){
   const id=(document.getElementById('interview-applicant-id').value||'').replace(/[^\w]/g,'');
   const rand=Math.random().toString(36).slice(2,8);
   document.getElementById('interview-venue').value='https://meet.jit.si/CNT-Interview-'+(id||'x')+'-'+rand;
-  const t=document.getElementById('interview-type'); if(t && !/video/i.test(t.value)) t.value='Video Interview';
+  const t=document.getElementById('interview-type'); if(t && t.value!=='Video'){ t.value='Video'; cntToggleOnline(); }
   if(window.showToast) showToast('Online meeting link generated','success');
 }
 function cntJoinMeet(){
@@ -2717,13 +2720,25 @@ function cntJoinMeet(){
   else if(window.showToast) showToast('No online meeting link set — press Generate or paste one','info');
 }
 function _isMeetUrl(s){ return /^https?:\/\//i.test((s||'').trim()); }
+// The online meeting tools (generate/join) only make sense for a Video interview.
+// For Phone/Onsite the field is just a venue/address (or left blank).
+function cntToggleOnline(){
+  const kind=(document.getElementById('interview-type')||{}).value||'';
+  const online=kind==='Video';
+  const box=document.getElementById('interview-online'); if(box) box.style.display=online?'':'none';
+  const help=document.getElementById('interview-online-help'); if(help) help.style.display=online?'':'none';
+  const label=document.getElementById('interview-venue-label');
+  const input=document.getElementById('interview-venue');
+  if(label) label.textContent = online?'Online meeting link' : (kind==='Phone Call'?'Contact number / notes':'Venue / office address');
+  if(input) input.placeholder = online?'Paste or generate a video link' : (kind==='Phone Call'?'Number to call (optional)':'Office address');
+}
 function handleInterviewSubmit(e){
   e.preventDefault();
   const id=document.getElementById('interview-applicant-id').value;
   const date=document.getElementById('interview-date').value;
   const time=document.getElementById('interview-time').value;
   const type=document.getElementById('interview-type').value;
-  const round=(document.getElementById('interview-round')||{}).value||'1st Interview';
+  const round=(document.getElementById('interview-round')||{}).value||'Initial Interview';
   const interviewer=document.getElementById('interview-interviewer').value;
   const venue=document.getElementById('interview-venue').value;
   const app=findApplicant(id);
