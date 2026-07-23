@@ -203,7 +203,14 @@
       <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Recruitment Logo" class="h-8 object-contain">
     </div>
     <div class="hidden md:block h-5 w-px bg-slate-200"></div>
-    <span class="hidden md:block text-[11px] font-semibold text-slate-400 tracking-wide">Applicant Tracking System · CNT</span>
+    <span class="hidden lg:block text-[11px] font-semibold text-slate-400 tracking-wide">Applicant Tracking System · CNT</span>
+    <div class="relative hidden md:block no-print" style="width:250px;">
+      <span class="material-icons-outlined absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" style="font-size:16px;pointer-events:none;">search</span>
+      <input id="global-search" type="text" autocomplete="off" placeholder="Search all candidates…  ( / )" aria-label="Search all candidates"
+        oninput="cntGlobalSearch(this.value)" onkeydown="cntGlobalSearchKey(event)" onblur="setTimeout(cntCloseSearch,160)"
+        class="w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-slate-50 focus:bg-white focus:border-red-300 focus:ring-2 focus:ring-red-100 outline-none transition">
+      <div id="global-search-results" class="hidden absolute left-0 top-full mt-1.5 w-80 max-h-96 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-50"></div>
+    </div>
   </div>
   <div class="flex items-center gap-2 flex-wrap justify-end">
     <div id="hdr-filters" class="flex items-center gap-1.5 flex-wrap justify-end"></div>
@@ -2580,6 +2587,54 @@ function renderHiringRequests(){
 function fmtMonth(d){if(!d)return 'TBD';return new Date(d+'T00:00').toLocaleString('default',{month:'short'});}
 function fmtDay(d){if(!d)return '--';return new Date(d+'T00:00').getDate().toString().padStart(2,'0');}
 function fmtTime(t){if(!t)return'TBD';const[h,m]=t.split(':');const hr=parseInt(h);const ap=hr>=12?'PM':'AM';return`${hr%12||12}:${m} ${ap}`;}
+
+// ── Global candidate search (header) ────────────────────────────
+// Searches every candidate across all client accounts, regardless of the
+// current view/filter, and jumps straight to their profile.
+function cntGlobalSearch(q){
+  q=(q||'').trim().toLowerCase();
+  const box=document.getElementById('global-search-results'); if(!box) return;
+  if(q.length<2){ box.classList.add('hidden'); box.innerHTML=''; return; }
+  const all=(typeof getAllApplicants==='function')?getAllApplicants():[];
+  const results=all.map(a=>{
+    const name=(a.name||'').toLowerCase();
+    const other=[a.role,a.account,a.location,a.email,a.tags,a.degree].map(x=>(x||'').toLowerCase());
+    let score=0;
+    if(name.startsWith(q)) score=100; else if(name.includes(q)) score=60;
+    else if(other.some(h=>h.includes(q))) score=30;
+    return {a,score};
+  }).filter(x=>x.score>0).sort((x,y)=>y.score-x.score).slice(0,12);
+  if(!results.length){
+    box.innerHTML='<div class="px-3 py-4 text-xs text-slate-400 text-center">No candidates match &ldquo;'+_escForm(q)+'&rdquo;</div>';
+    box.classList.remove('hidden'); return;
+  }
+  box.innerHTML=results.map(({a})=>{
+    const st=(typeof getStageName==='function')?getStageName(a.stage):a.stage;
+    const badge=(typeof getStageBadge==='function')?getStageBadge(a.stage):'bg-slate-100 text-slate-600';
+    return '<button type="button" class="w-full text-left px-3 py-2 hover:bg-slate-50 border-b border-slate-100 cursor-pointer flex items-center justify-between gap-2" onmousedown="cntOpenSearchResult(\''+a.id+'\')">'
+      +'<div class="min-w-0"><div class="text-xs font-semibold text-slate-800 truncate">'+_escForm(a.name)+'</div>'
+      +'<div class="text-[10px] text-slate-400 truncate">'+_escForm(a.role||'—')+' · '+_escForm(a.account||'—')+(a.location?(' · '+_escForm(a.location)):'')+'</div></div>'
+      +'<span class="badge border '+badge+' text-[9px] flex-none whitespace-nowrap">'+_escForm(st)+'</span></button>';
+  }).join('');
+  box.classList.remove('hidden');
+}
+function cntOpenSearchResult(id){
+  cntCloseSearch();
+  const inp=document.getElementById('global-search'); if(inp) inp.value='';
+  if(typeof triggerResumeModal==='function') triggerResumeModal(id);
+  else if(typeof openEditModal==='function') openEditModal(id);
+}
+function cntCloseSearch(){ const box=document.getElementById('global-search-results'); if(box) box.classList.add('hidden'); }
+function cntGlobalSearchKey(e){
+  if(e.key==='Escape'){ cntCloseSearch(); e.target.value=''; e.target.blur(); }
+  else if(e.key==='Enter'){ const first=document.querySelector('#global-search-results button'); if(first) first.dispatchEvent(new MouseEvent('mousedown')); }
+}
+// Press "/" anywhere (outside a field) to jump to search.
+document.addEventListener('keydown',function(e){
+  if(e.key==='/' && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||'')) && !e.target.isContentEditable){
+    const inp=document.getElementById('global-search'); if(inp){ e.preventDefault(); inp.focus(); }
+  }
+});
 
 function quickJump(role,location,account,stage,jobSid){
   selectClient(account);
