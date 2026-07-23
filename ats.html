@@ -4785,13 +4785,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     const inprog=total-hired-refused;
     const hireRate=(hired+refused)?Math.round(hired/(hired+refused)*100):0;
     const kpi=(label,val,sub,color)=>'<div class="bg-white border border-slate-200 rounded-xl p-4"><div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">'+label+'</div><div class="text-2xl font-extrabold" style="color:'+color+'">'+val+'</div><div class="text-[10px] text-slate-400 mt-0.5">'+sub+'</div></div>';
-    const tabs=[['applicants','Applicant Analysis','how_to_reg'],['sources','Source Analysis','share'],['velocity','Velocity','speed'],['team','Team Performance','groups']];
+    const tabs=[['applicants','Applicant Analysis','how_to_reg'],['sources','Source Analysis','share'],['velocity','Velocity','speed'],['team','Team Performance','groups'],['clients','Client Decisions','verified_user']];
     const tabBtn=(k,lbl,ic)=>'<button onclick="cntReportTab(\''+k+'\')" class="px-3 py-2 text-xs font-bold rounded-lg cursor-pointer flex items-center gap-1 transition '+(_reportTab===k?'bg-red-800 text-white shadow-sm':'text-slate-500 hover:bg-slate-100')+'"><span class="material-icons-outlined" style="font-size:14px;">'+ic+'</span>'+lbl+'</button>';
     let body='';
     if(_reportTab==='applicants') body=_reportApplicants(data);
     else if(_reportTab==='sources') body=_reportSources(data);
     else if(_reportTab==='velocity') body=_reportVelocity(data);
     else if(_reportTab==='team') body=_reportTeam(data);
+    else if(_reportTab==='clients') body=_reportClients(data);
     node.innerHTML=
       '<div class="grid grid-cols-2 md:grid-cols-5 gap-3">'
         +kpi('Total applicants',total,'excl. talent pool','#0f172a')
@@ -4842,6 +4843,46 @@ document.addEventListener('DOMContentLoaded',()=>{
       +'</div><div class="flex gap-4 mt-3 text-[10px] text-slate-500"><span class="flex items-center gap-1"><span style="width:9px;height:9px;border-radius:2px;background:'+_OUT_COLORS.in_progress[0]+';display:inline-block;"></span>In progress</span><span class="flex items-center gap-1"><span style="width:9px;height:9px;border-radius:2px;background:'+_OUT_COLORS.hired[0]+';display:inline-block;"></span>Hired</span><span class="flex items-center gap-1"><span style="width:9px;height:9px;border-radius:2px;background:'+_OUT_COLORS.refused[0]+';display:inline-block;"></span>Refused</span></div></div>'):'';
     return '<p class="text-[11px] text-slate-400 mb-3">Applicants by position, broken down by outcome. Hire rate = hired ÷ (hired + refused).</p>'
       +_reportTable(['Position','Applicants','In progress','Hired','Refused','Hire rate'],rows)+trend;
+  }
+
+  // ── Client Decisions: endorsement outcomes per client account ──
+  function _reportClients(data){
+    const by={};
+    data.forEach(a=>{
+      const c=a.account||'—'; if(c==='—') return;
+      const b=(by[c]=by[c]||{end:0,app:0,rej:0,ddays:0,dn:0});
+      const cs=a.client_status;
+      if(cs==='endorsed') b.end++;
+      else if(cs==='approved') b.app++;
+      else if(cs==='rejected') b.rej++;
+      if((cs==='approved'||cs==='rejected') && a.endorsed_at && a.decided_at){
+        const d=(new Date(a.decided_at)-new Date(a.endorsed_at))/86400000; if(d>=0){ b.ddays+=d; b.dn++; }
+      }
+    });
+    const entries=Object.entries(by).sort((x,y)=>(y[1].app+y[1].rej+y[1].end)-(x[1].app+x[1].rej+x[1].end));
+    let totEnd=0,totApp=0,totRej=0;
+    const rows=entries.map(([c,b])=>{
+      totEnd+=b.end; totApp+=b.app; totRej+=b.rej;
+      const decided=b.app+b.rej, rate=decided?Math.round(b.app/decided*100):0;
+      const avgd=b.dn?Math.round(b.ddays/b.dn):null;
+      const acc=ACCOUNTS.find(x=>x.id===c);
+      return '<tr style="border-bottom:1px solid #f1f5f9;">'
+        +'<td style="padding:9px 10px;font-size:12.5px;font-weight:600;color:#0f172a;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;background:'+((acc&&acc.color)||'#64748b')+';"></span>'+_e(c)+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(b.end,'#b45309','#fef3c7')+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(b.app,'#166534','#dcfce7')+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;">'+_pill(b.rej,'#b91c1c','#fee2e2')+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;font-size:12px;font-weight:700;color:'+(decided?(rate>=50?'#166534':'#b91c1c'):'#94a3b8')+';">'+(decided?rate+'%':'—')+'</td>'
+        +'<td style="text-align:center;padding:9px 10px;font-size:12px;color:#64748b;">'+(avgd!==null?avgd+'d':'—')+'</td></tr>';
+    }).join('')||'<tr><td colspan="6" style="padding:24px;text-align:center;color:#94a3b8;font-size:12px;">No candidates endorsed to clients yet.</td></tr>';
+    const decidedAll=totApp+totRej, overall=decidedAll?Math.round(totApp/decidedAll*100):0;
+    const summary='<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">'
+      +'<div class="bg-amber-50 border border-amber-100 rounded-xl p-3"><div class="text-2xl font-extrabold text-amber-700">'+totEnd+'</div><div class="text-[10px] text-slate-500 mt-0.5 font-semibold uppercase tracking-wide">Awaiting client</div></div>'
+      +'<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3"><div class="text-2xl font-extrabold text-emerald-700">'+totApp+'</div><div class="text-[10px] text-slate-500 mt-0.5 font-semibold uppercase tracking-wide">Approved</div></div>'
+      +'<div class="bg-red-50 border border-red-100 rounded-xl p-3"><div class="text-2xl font-extrabold text-red-700">'+totRej+'</div><div class="text-[10px] text-slate-500 mt-0.5 font-semibold uppercase tracking-wide">Declined</div></div>'
+      +'<div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-2xl font-extrabold" style="color:#7f1d1d">'+(decidedAll?overall+'%':'—')+'</div><div class="text-[10px] text-slate-500 mt-0.5 font-semibold uppercase tracking-wide">Overall approval</div></div>'
+      +'</div>';
+    return '<p class="text-[11px] text-slate-400 mb-3">How each client acts on the candidates you endorse. Approval rate = approved ÷ (approved + declined). Avg decision = endorsed → client decided.</p>'
+      +summary+_reportTable(['Client account','Awaiting','Approved','Declined','Approval rate','Avg decision'],rows);
   }
 
   // ── Source Analysis: source × outcome, with medium drill ──
