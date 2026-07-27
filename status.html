@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track My Application — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="Check the status of your job application with CNT Promo & Ads Specialists, Inc." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <style>
+  :root{
+    --red:#C8102E; --red-deep:#A50D24; --red-pale:#FFF0F2;
+    --ink:#111; --sub:#555; --line:#E5E7EB; --bg:#F6F7F9;
+    --amber:#B45309; --amber-bg:#FEF3C7; --green:#15803D; --green-bg:#DCFCE7; --slate:#475569; --slate-bg:#F1F5F9;
+    --radius:14px; --shadow:0 8px 32px rgba(0,0,0,.08);
+    --display:'Plus Jakarta Sans',sans-serif; --body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;min-height:100vh}
+  .mi{font-family:'Material Icons Outlined';font-style:normal;line-height:1;vertical-align:middle}
+  .wrap{max-width:560px;margin:0 auto;padding:40px 20px 80px}
+  .brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:22px}
+  .brand img{height:38px;object-fit:contain}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 26px}
+  h1{font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.01em}
+  .lead{color:var(--sub);font-size:14px;margin:6px 0 20px;line-height:1.55}
+  label{display:block;font-size:12px;font-weight:600;color:var(--sub);margin:0 0 5px}
+  .field{margin-bottom:14px}
+  input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:var(--body)}
+  input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-pale)}
+  .btn{width:100%;border:none;background:var(--red);color:#fff;font-weight:700;font-size:14px;padding:12px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn:hover{background:var(--red-deep)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .msg{font-size:13px;margin-top:12px;min-height:18px}
+  .msg.err{color:var(--red)}
+  .note{font-size:11px;color:#9aa0a6;line-height:1.55;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+  .hidden{display:none!important}
+
+  .result{margin-top:8px}
+  .app{border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:14px}
+  .app h2{font-family:var(--display);font-size:16px;font-weight:700}
+  .app .who{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .statusline{display:flex;align-items:center;gap:9px;margin:16px 0 4px;padding:11px 13px;border-radius:10px;font-size:13.5px;font-weight:600}
+  .steps{display:flex;gap:6px;margin:16px 0 6px}
+  .step{flex:1;text-align:center}
+  .dot{width:22px;height:22px;border-radius:99px;margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:var(--slate-bg);color:#94a3b8}
+  .step.done .dot{background:var(--green);color:#fff}
+  .step.current .dot{background:var(--red);color:#fff}
+  .step .lbl{font-size:9.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:#94a3b8;line-height:1.25}
+  .step.done .lbl,.step.current .lbl{color:var(--ink)}
+  .bar{height:3px;background:var(--slate-bg);border-radius:99px;margin:2px 0 14px;position:relative;overflow:hidden}
+  .bar > i{position:absolute;left:0;top:0;bottom:0;background:var(--green);border-radius:99px}
+  .kv{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid #f1f5f9}
+  .again{margin-top:16px;text-align:center}
+  .again button{background:none;border:none;color:var(--red);font-weight:600;font-size:13px;cursor:pointer;text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." /></div>
+
+    <div class="card" id="lookup-card">
+      <h1>Track your application</h1>
+      <p class="lead">Enter the email and mobile number you applied with, and we'll show you where your application stands.</p>
+      <form onsubmit="checkStatus(event)">
+        <div class="field"><label for="s-email">Email</label><input id="s-email" type="email" autocomplete="email" required placeholder="you@email.com" /></div>
+        <div class="field"><label for="s-phone">Mobile number</label><input id="s-phone" type="tel" autocomplete="tel" required placeholder="09xx xxx xxxx" /></div>
+        <button id="s-btn" type="submit" class="btn"><span class="mi" style="font-size:17px">search</span> Check status</button>
+        <p id="s-msg" class="msg"></p>
+      </form>
+      <p class="note">We only use your email and mobile number to find your own application — nothing is shown unless both match. Your data is handled under the <b>Data Privacy Act of 2012 (RA 10173)</b>.</p>
+    </div>
+
+    <div class="card result hidden" id="result-card">
+      <h1>Your application<span id="result-count"></span></h1>
+      <div id="result-list"></div>
+      <div class="again"><button onclick="resetStatus()">Check another application</button></div>
+    </div>
+  </div>
+
+  <script>
+  const $=s=>document.querySelector(s);
+  const sb=window.getSupabase?window.getSupabase():null;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // Candidate-facing pipeline. Maps the internal stage to a friendly step and
+  // a progress position; refused/pool are handled separately.
+  const STEPS=[
+    {key:'new',      lbl:'Received'},
+    {key:'interview',lbl:'Interview'},
+    {key:'exam',     lbl:'Assessment'},
+    {key:'bgcheck',  lbl:'Checks'},
+    {key:'hired',    lbl:'Offer'}
+  ];
+  const STAGE_STEP={ new:0, interview:1, exam:2, bgcheck:3, hired:4, onboarding:4 };
+
+  function fmtDate(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return String(d).slice(0,10); } }
+
+  function statusBanner(a){
+    if(a.stage==='rejected') return {bg:'var(--slate-bg)',fg:'var(--slate)',ic:'info',txt:'This application is not moving forward for this role. Thank you for your interest — you’re welcome to apply again.'};
+    if(a.stage==='pool')     return {bg:'var(--amber-bg)',fg:'var(--amber)',ic:'bookmark',txt:'You’re in our talent pool — we’ll reach out when a suitable role opens.'};
+    if(a.stage==='hired'||a.stage==='onboarding'){
+      if(a.client_status==='approved') return {bg:'var(--green-bg)',fg:'var(--green)',ic:'celebration',txt:'Great news — you’ve reached the offer stage and the client has approved. Our team will be in touch.'};
+      return {bg:'var(--green-bg)',fg:'var(--green)',ic:'workspace_premium',txt:'You’ve reached the offer stage. Our team will contact you with next steps.'};
+    }
+    if(a.stage==='interview') return {bg:'var(--red-pale)',fg:'var(--red)',ic:'event',txt:'You’ve been shortlisted and are at the interview stage. Watch your email for scheduling.'};
+    return {bg:'var(--amber-bg)',fg:'var(--amber)',ic:'hourglass_top',txt:'Your application has been received and is under review by our recruitment team.'};
+  }
+
+  function stepper(a){
+    if(a.stage==='rejected'||a.stage==='pool') return '';
+    const cur=STAGE_STEP[a.stage]!=null?STAGE_STEP[a.stage]:0;
+    const pct=STEPS.length>1?Math.round(cur/(STEPS.length-1)*100):0;
+    const cells=STEPS.map((s,i)=>{
+      const cls=i<cur?'done':i===cur?'current':'';
+      const inner=i<cur?'<span class="mi" style="font-size:13px">check</span>':(i+1);
+      return '<div class="step '+cls+'"><div class="dot">'+inner+'</div><div class="lbl">'+s.lbl+'</div></div>';
+    }).join('');
+    return '<div class="steps">'+cells+'</div><div class="bar"><i style="width:'+pct+'%"></i></div>';
+  }
+
+  function appCard(a){
+    const b=statusBanner(a);
+    return '<div class="app">'
+      +'<h2>'+esc(a.role||'Your application')+'</h2>'
+      +'<div class="who">'+esc(a.client||'CNT')+(a.location?(' · '+esc(a.location)):'')+'</div>'
+      +stepper(a)
+      +'<div class="statusline" style="background:'+b.bg+';color:'+b.fg+'"><span class="mi" style="font-size:17px">'+b.ic+'</span><span>'+b.txt+'</span></div>'
+      +'<div class="kv"><span>Applied</span><span>'+fmtDate(a.applied_date)+'</span></div>'
+      +'<div class="kv"><span>Last updated</span><span>'+fmtDate(a.updated_at)+'</span></div>'
+      +'</div>';
+  }
+
+  async function checkStatus(e){
+    e.preventDefault();
+    const msg=$('#s-msg'); msg.className='msg'; msg.textContent='';
+    const email=$('#s-email').value.trim(), phone=$('#s-phone').value.trim();
+    if(!email||!phone){ msg.className='msg err'; msg.textContent='Please enter both your email and mobile number.'; return; }
+    if(!sb){ msg.className='msg err'; msg.textContent='Status lookup is not available right now.'; return; }
+    const btn=$('#s-btn'); btn.disabled=true; btn.textContent='Checking…';
+    const { data, error } = await sb.rpc('cnt_application_status', { p_email:email, p_phone:phone });
+    btn.disabled=false; btn.innerHTML='<span class="mi" style="font-size:17px">search</span> Check status';
+    if(error){ msg.className='msg err'; msg.textContent='Something went wrong. Please try again shortly.'; return; }
+    const rows=data||[];
+    if(!rows.length){ msg.className='msg err'; msg.textContent='We couldn’t find an application matching that email and mobile number. Double-check both, exactly as you applied.'; return; }
+    $('#result-count').textContent = rows.length>1 ? ' ('+rows.length+')' : '';
+    $('#result-list').innerHTML = rows.map(appCard).join('');
+    $('#lookup-card').classList.add('hidden');
+    $('#result-card').classList.remove('hidden');
+    window.scrollTo(0,0);
+  }
+  function resetStatus(){
+    $('#result-card').classList.add('hidden');
+    $('#lookup-card').classList.remove('hidden');
+    $('#s-msg').textContent=''; $('#result-list').innerHTML='';
+  }
+  </script>
+</body>
+</html>

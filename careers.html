@@ -636,7 +636,8 @@
     const d=document.createElement('div'); d.className='success';
     d.innerHTML=`<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
       <h4>Application received!</h4>
-      <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b> (${esc(activeJob.client)}) has been submitted. Our team will review it and reach out if you’re a match.</p>`;
+      <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b> (${esc(activeJob.client)}) has been submitted. Our team will review it and reach out if you’re a match.</p>
+      <p style="margin-top:12px"><a href="status.html" style="color:var(--red);font-weight:600;text-decoration:underline">Track your application status &rarr;</a></p>`;
     $('#apply-inner').appendChild(d);
   }
 

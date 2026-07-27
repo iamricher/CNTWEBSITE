@@ -33,7 +33,7 @@ function inlineScripts(html) {
 
 // ── 1. inline scripts parse ────────────────────────────────────
 console.log('\nParsing inline scripts');
-for (const file of ['ats.html', 'careers.html', 'client.html', 'index.html']) {
+for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html', 'index.html']) {
   let html;
   try { html = read(file); } catch { continue; }          // index.html is optional
   const scripts = inlineScripts(html);
@@ -81,7 +81,7 @@ if (clientHtml) {
 
 // ── 3. inline handlers resolve to real functions ───────────────
 console.log('\nInline handlers resolve');
-for (const file of ['ats.html', 'careers.html', 'client.html']) {
+for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html']) {
   let html; try { html = read(file); } catch { continue; }
   const called = new Set();
   const re = /\bon(?:click|change|submit|input)\s*=\s*"([^"]*)"/g;
@@ -119,7 +119,7 @@ const SECRET_PATTERNS = [
   [/(?:SERVICE_ROLE|SECRET_KEY)\s*=\s*['"][^'"]+['"]/,   'secret assigned to a global'],
 ];
 let leaked = [];
-for (const file of ['ats.html', 'careers.html', 'client.html', 'assets/supabase-config.js']) {
+for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html', 'assets/supabase-config.js']) {
   let src; try { src = stripComments(read(file)); } catch { continue; }
   for (const [re, label] of SECRET_PATTERNS) if (re.test(src)) leaked.push(file + ': ' + label);
 }
