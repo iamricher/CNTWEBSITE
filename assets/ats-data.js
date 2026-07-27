@@ -608,6 +608,24 @@
     let iv=_stageIdx('interview'); if(iv<0) iv=1;             // fallback: anything past the first stage
     return i>=iv;
   }
+  function _nextStageKey(cur){
+    const i=_stageIdx(cur);
+    if(i<0 || i>=PIPELINE_STAGES.length-1) return null;      // unknown or already last
+    return PIPELINE_STAGES[i+1].key;
+  }
+  // Advance a client-bound candidate to the next pipeline stage ("Proceed to
+  // next level"), persisting like the refuse/reopen actions do.
+  function _proceedNextLevel(app){
+    const next=_nextStageKey(app.stage);
+    if(!next){ if(window.showToast) showToast('Already at the final stage.','info'); return; }
+    updateApplicant(app.id,{stage:next}); Object.assign(app,{stage:next});
+    _persistApp(app,{stage:next});
+    logAudit('stage','applicant', app._sid||app.id, 'Proceeded to '+getStageName(next));
+    cntLogActivity(app,'stage','Proceeded to '+getStageName(next));
+    if(window.showToast) showToast(app.name+' → '+getStageName(next),'success');
+    document.getElementById('cnt-panel-dialog')?.remove();
+    renderAll(); if(currentViewedApplicantId===app.id) cntProfileExtras(app);
+  }
   function renderEndorsement(app){
     // Lives in the Endorsement dialog now, not inline on the profile. When the
     // dialog is closed there is nothing to draw — the action-row chip carries
@@ -626,13 +644,18 @@
     let actions='';
     if(canEndorse){
       const btn=(bg,label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:#fff;background:'+bg+';border:none;">'+label+'</button>';
-      const outBtn=(label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:#b91c1c;background:#fff;border:1px solid #fecaca;">'+label+'</button>';
-      // After the interview it's a two-way decision: refuse, or endorse to client.
-      if(st==='none' && app.stage!=='rejected') actions+=btn('#7f1d1d','Endorse to client','endorse')+outBtn('Refuse','refuse');
+      const outBtn=(color,border,label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:'+color+';background:#fff;border:1px solid '+border+';">'+label+'</button>';
+      // After the interview it's a decision: endorse to client, proceed to the
+      // next level, or refuse.
+      if(st==='none' && app.stage!=='rejected'){
+        actions+=btn('#7f1d1d','Endorse to client','endorse');
+        if(_nextStageKey(app.stage)) actions+=outBtn('#1d4ed8','#bfdbfe','Proceed to next level','proceed');
+        actions+=outBtn('#b91c1c','#fecaca','Refuse','refuse');
+      }
       else if(st==='rejected') actions+=btn('#7f1d1d','Re-endorse to client','endorse');
     }
     const decisionHint=(canEndorse && st==='none' && app.stage!=='rejected')
-      ? '<div style="font-size:11.5px;color:#64748b;margin-top:10px;">After the interview, decide: <b style="color:#b91c1c;">refuse</b> the candidate, or <b style="color:#7f1d1d;">endorse</b> them to the client for approval.</div>' : '';
+      ? '<div style="font-size:11.5px;color:#64748b;margin-top:10px;">After the interview, decide: <b style="color:#7f1d1d;">endorse</b> to the client'+(_nextStageKey(app.stage)?', <b style="color:#1d4ed8;">proceed</b> to the next level':'')+', or <b style="color:#b91c1c;">refuse</b>.</div>' : '';
     const note = st==='endorsed'
       ? '<div style="font-size:11.5px;color:#64748b;margin-top:10px;display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #f1f5f9;padding:8px 10px;border-radius:8px;"><span class="material-icons-outlined" style="font-size:14px;color:#cbd5e1;">hourglass_empty</span>Awaiting the client’s decision in their portal.</div>'
       : (st==='approved' ? '<div style="font-size:11.5px;color:#166534;margin-top:8px;">The client approved this candidate.</div>' : '');
@@ -646,6 +669,7 @@
       +'</div>';
     panel.querySelectorAll('.cnt-endo-btn').forEach(b=>b.addEventListener('click',()=>{
       if(b.dataset.fn==='endorse') setClientStatus(app,'endorsed');
+      else if(b.dataset.fn==='proceed') _proceedNextLevel(app);
       else if(b.dataset.fn==='refuse'){ document.getElementById('cnt-panel-dialog')?.remove(); if(window.cntOpenRefuse) cntOpenRefuse(app.id); }
     }));
   }
