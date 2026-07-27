@@ -1125,6 +1125,7 @@
     injectLogout();
     injectAdminNav();
     injectReportsPanel();
+    injectEmailPanel();
     notifyOverdueMRFs();
     loadServerNotifications();
     if(!_notifPoll) _notifPoll=setInterval(loadServerNotifications, 60000);
@@ -1432,15 +1433,17 @@
   };
 
   // ── Stage-entry email drafts (compose only — recruiter copies / opens mail app) ──
+  // Keyed by the live pipeline stages (new, interview, exam, bgcheck, hired,
+  // onboarding) plus the pool/rejected states. A stage's own template set in
+  // Settings overrides these built-ins.
   const STAGE_EMAIL = {
     new:       { s:'Application received — {role}', b:'Dear {name},\n\nThank you for applying for the {role} position with CNT Recruitment ({account}). We have received your application and our team is reviewing your profile. We will contact you regarding the next steps.\n\nWarm regards,\nCNT Recruitment Team' },
-    phone:     { s:'Phone screening — {role}', b:'Dear {name},\n\nWe would like to schedule a short phone screening for the {role} position ({account}, {location}). Please reply with a few time slots that work for you.\n\nWarm regards,\nCNT Recruitment Team' },
-    qualified: { s:'Invitation to 1st interview — {role}', b:'Dear {name},\n\nCongratulations! We would like to invite you to a first interview for the {role} position ({account}). Kindly let us know your availability.\n\nWarm regards,\nCNT Recruitment Team' },
-    scheduled: { s:'Invitation to final/panel interview — {role}', b:'Dear {name},\n\nWe are pleased to move you forward to the final interview for the {role} position ({account}, {location}). Our team will confirm the schedule with you shortly.\n\nWarm regards,\nCNT Recruitment Team' },
+    interview: { s:'Interview invitation — {role}', b:'Dear {name},\n\nCongratulations! We would like to invite you to an interview for the {role} position ({account}, {location}). Please reply with a few time slots that work for you, and we will confirm the schedule.\n\nWarm regards,\nCNT Recruitment Team' },
     exam:      { s:'Pre-employment exam — {role}', b:'Dear {name},\n\nAs part of your application for {role} ({account}), please complete our pre-employment examination. Details will follow in a separate message.\n\nWarm regards,\nCNT Recruitment Team' },
     bgcheck:   { s:'Requirements & background check — {role}', b:'Dear {name},\n\nCongratulations on progressing in your application for {role} ({account}). Please prepare your pre-employment requirements (NBI, Medical, SSS, PhilHealth, Pag-IBIG, TIN, PSA, Diploma/TOR, Barangay Clearance) for verification.\n\nWarm regards,\nCNT Recruitment Team' },
     hired:     { s:'Job offer — {role} at CNT ({account})', b:'Dear {name},\n\nWe are delighted to offer you the position of {role} under our client account {account}, assigned at {location}. A formal offer letter will follow. Congratulations!\n\nWarm regards,\nCNT Recruitment Team' },
     onboarding:{ s:'Welcome & onboarding — {role}', b:'Dear {name},\n\nWelcome to the team! This message begins your onboarding for the {role} position ({account}, {location}). Our HR team will guide you through your first-day requirements.\n\nWarm regards,\nCNT Recruitment Team' },
+    pool:      { s:'You’re in our talent pool — {role}', b:'Dear {name},\n\nThank you for your interest in the {role} position ({account}). While we are not moving forward for this specific role right now, we were impressed with your profile and have added you to our talent pool. We will reach out when a suitable opening comes up.\n\nWarm regards,\nCNT Recruitment Team' },
     rejected:  { s:'Update on your application — {role}', b:'Dear {name},\n\nThank you for your interest in the {role} position ({account}) and for the time you invested in the process. After careful consideration we will not be moving forward at this time. We wish you all the best and encourage you to apply for future openings.\n\nWarm regards,\nCNT Recruitment Team' }
   };
   function _fillTpl(t, app){ return t.replace(/\{name\}/g,app.name||'').replace(/\{role\}/g,app.role||'the role').replace(/\{account\}/g,app.account||'CNT').replace(/\{location\}/g,app.location||''); }
@@ -1512,6 +1515,46 @@
     }finally{
       if(btn){ btn.disabled=false; btn.innerHTML='<span class="material-icons-outlined" style="font-size:13px;">send</span>Send'; }
     }
+  };
+
+  // ── Settings → Email delivery: status + self-test ──────────────
+  // Lets an admin confirm the Resend Edge Function is configured, by sending a
+  // real test email to their own address. A 503 means the secrets aren't set.
+  function injectEmailPanel(){
+    const sv=document.getElementById('view-settings'); if(!sv) return;
+    if(!['super_admin','recruitment_manager'].includes(currentRole)) return;   // admins only
+    let card=document.getElementById('cnt-email-panel');
+    if(!card){ card=document.createElement('div'); card.id='cnt-email-panel'; card.style.cssText='margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;'; sv.insertBefore(card, sv.firstChild); }
+    card.innerHTML='<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:3px;display:flex;align-items:center;gap:6px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">mail</span>Email Delivery</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-bottom:12px;">Recruitment emails (offers, interview invites, refusals) send from CNT via Resend. Set <code>RESEND_API_KEY</code> and <code>MAIL_FROM</code> in Supabase → Edge Functions → <b>send-email</b> → Secrets to enable real delivery; until then the app falls back to opening your mail app.</div>'
+      +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+      +'<button id="cnt-email-test-btn" onclick="cntEmailSelfTest()" style="font-size:12px;color:#fff;font-weight:600;border:none;background:#7f1d1d;padding:7px 13px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><span class="material-icons-outlined" style="font-size:15px;">send</span>Send test email to me</button>'
+      +'<span id="cnt-email-test-status" style="font-size:12px;color:#64748b;"></span></div>';
+  }
+  window.cntEmailSelfTest=async function(){
+    const to=currentUserEmail;
+    const st=document.getElementById('cnt-email-test-status'), btn=document.getElementById('cnt-email-test-btn');
+    if(!to){ if(st){ st.textContent='Your account has no email address.'; st.style.color='#b91c1c'; } return; }
+    if(!sb){ if(st){ st.textContent='Backend unavailable.'; st.style.color='#b91c1c'; } return; }
+    if(!confirm('Send a test email to '+to+'?')) return;
+    if(btn){ btn.disabled=true; }
+    if(st){ st.textContent='Sending…'; st.style.color='#64748b'; }
+    try{
+      const { data, error }=await sb.functions.invoke('send-email',{ body:{
+        to, subject:'CNT ATS — email test', kind:'test',
+        text:'This is a test email from the CNT Applicant Tracking System.\n\nIf you received this, real email delivery is working.\n\n— CNT Recruitment' } });
+      if(error){
+        let msg=error.message||'Send failed';
+        try{ const ctx=error.context&&await error.context.json(); if(ctx&&ctx.error) msg=ctx.error+(ctx.hint?(' — '+ctx.hint):''); }catch(_){}
+        throw new Error(msg);
+      }
+      if(data && data.error) throw new Error(data.error);
+      if(st){ st.textContent='✓ Sent — check '+to; st.style.color='#166534'; }
+      if(window.showToast) showToast('Test email sent to '+to,'success');
+    }catch(e){
+      if(st){ st.textContent='Not configured: '+e.message; st.style.color='#b91c1c'; }
+      if(window.showToast) showToast('Email not configured yet','error');
+    }finally{ if(btn){ btn.disabled=false; } }
   };
 
   // ══════════════════════════════════════════════════════════════
