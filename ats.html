@@ -985,9 +985,10 @@
       <input type="hidden" id="interview-applicant-id">
       <p class="text-sm text-slate-600">Candidate: <strong id="interview-applicant-name" class="text-slate-900"></strong></p>
       <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Date</label><input type="date" id="interview-date" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Time</label><input type="time" id="interview-time" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Date</label><input type="date" id="interview-date" required onchange="cntSyncMeetControls()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Time</label><input type="time" id="interview-time" required onchange="cntSyncMeetControls()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
       </div>
+      <div id="interview-past-warning" class="hidden text-[11px] font-semibold rounded-lg px-3 py-2" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;"></div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Round</label><select id="interview-round" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Initial Interview</option><option>Second Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Kind of Interview</label><select id="interview-type" onchange="cntToggleOnline()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option>Phone Call</option><option>Video</option><option>Onsite / Face-to-Face Interview</option></select></div>
@@ -998,7 +999,7 @@
         <div class="flex gap-2">
           <input type="text" id="interview-venue" placeholder="Office address, or paste/generate a video link" class="flex-1 min-w-0 px-3 py-2 border border-slate-200 rounded-lg text-sm">
           <span id="interview-online" class="flex gap-2 flex-none">
-            <button type="button" onclick="cntGenMeetLink()" title="Create an instant online meeting room" class="px-2.5 py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">videocam</span>Generate</button>
+            <button type="button" id="interview-gen-btn" onclick="cntGenMeetLink()" title="Create an instant online meeting room" class="px-2.5 py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">videocam</span>Generate</button>
             <button type="button" onclick="cntJoinMeet()" title="Open the meeting" class="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">login</span>Join</button>
           </span>
         </div>

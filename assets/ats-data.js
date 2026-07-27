@@ -25,7 +25,7 @@
       job_id:r.job_id||null,          // the posting this application belongs to
       experience:r.experience||'', resumePath:r.resume_url||null,
       client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null,
-      contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
+      preemp_requirements_at:r.preemp_requirements_at||null, contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
       priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[],
       recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', referral_relation:r.referral_relation||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||'',
       work_experience:r.work_experience||'', education:r.education||'', languages:r.languages||'',
@@ -595,6 +595,19 @@
       +'<span class="material-icons-outlined" style="font-size:14px;color:#cbd5e1;">lock</span>'
       +'Unlocks once the candidate reaches the <b style="color:#64748b;font-weight:700;">Job Offer</b> stage.</div>';
   }
+  function _lockNote(msg){
+    return '<div style="font-size:11.5px;color:#94a3b8;margin-top:10px;display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #f1f5f9;padding:8px 10px;border-radius:8px;">'
+      +'<span class="material-icons-outlined" style="font-size:14px;color:#cbd5e1;">lock</span>'+msg+'</div>';
+  }
+  // Endorsement opens once the candidate has reached the Interview stage (i.e.
+  // after they've been interviewed the recruiter decides whether to endorse).
+  function _stageIdx(key){ return PIPELINE_STAGES.findIndex(s=>s.key===key); }
+  function _atInterviewOrLater(app){
+    if(!app) return false;
+    const i=_stageIdx(app.stage); if(i<0) return false;       // pool / rejected / unknown
+    let iv=_stageIdx('interview'); if(iv<0) iv=1;             // fallback: anything past the first stage
+    return i>=iv;
+  }
   function renderEndorsement(app){
     // Lives in the Endorsement dialog now, not inline on the profile. When the
     // dialog is closed there is nothing to draw — the action-row chip carries
@@ -604,8 +617,8 @@
     if(!panel) return;
     if(!app){ panel.innerHTML=''; return; }
     const st=app.client_status||'none';
-    const atOffer=_atOfferStage(app);
-    const canEndorse=atOffer && ['super_admin','recruiter','recruitment_supervisor','account_officer'].includes(currentRole);
+    const canStage=_atInterviewOrLater(app);
+    const canEndorse=canStage && ['super_admin','recruiter','recruitment_supervisor','account_officer'].includes(currentRole);
     // Staff endorse only. The approve/reject decision is the client's, made in
     // the client portal — staff no longer record it on their behalf. Once
     // endorsed, this panel just shows we're waiting on the client, then their
@@ -625,7 +638,7 @@
       +_endorseBadge(st)+'</div>'
       +((app.client_reason&&st==='rejected')?'<div style="font-size:12px;color:#b91c1c;margin-top:9px;background:#fef2f2;padding:8px 10px;border-radius:8px;">Client’s reason: '+_escN(app.client_reason)+'</div>':'')
       +note
-      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!atOffer?_offerLockNote():''))
+      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!canStage?_lockNote('Unlocks after the candidate has been interviewed — then you can decide whether to endorse them to the client.'):''))
       +'</div>';
     panel.querySelectorAll('.cnt-endo-btn').forEach(b=>b.addEventListener('click',()=>{
       if(b.dataset.fn==='endorse') setClientStatus(app,'endorsed');
@@ -649,10 +662,11 @@
 
   // ── Contract → Deployment → New Hire Report milestones (Steps 8–10) ──
   const _MILESTONES=[
-    {f:'contract_signed_at', label:'Contract Signed'},
-    {f:'oriented_at',        label:'Orientation Attended'},
-    {f:'deployed_at',        label:'Deployed to Client'},
-    {f:'newhire_reported_at',label:'New Hire Report Filed'},
+    {f:'preemp_requirements_at', label:'Pre-Employment Requirements'},
+    {f:'contract_signed_at',     label:'Contract Signed'},
+    {f:'oriented_at',            label:'Orientation Attended'},
+    {f:'deployed_at',            label:'Deployed to Client'},
+    {f:'newhire_reported_at',    label:'New Hire Report Filed'},
   ];
   function _fmtDate(iso){ if(!iso) return ''; try{ return new Date(iso).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return String(iso).slice(0,10); } }
   function renderWorkflow(app){
@@ -660,8 +674,9 @@
     const panel=document.getElementById('cnt-workflow-panel');
     if(!panel) return;
     if(!app){ panel.innerHTML=''; return; }
-    const atOffer=_atOfferStage(app);
-    const canDo=atOffer && ['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
+    // Deployment steps open once the client has approved the endorsed candidate.
+    const approved=(app.client_status==='approved');
+    const canDo=approved && ['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
     const rows=_MILESTONES.map(m=>{
       const done=!!app[m.f];
       return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc;">'
@@ -672,7 +687,7 @@
     }).join('');
     panel.innerHTML='<div>'
       +rows
-      +(!atOffer?_offerLockNote():'')
+      +(!approved?_lockNote('Unlocks once the client approves this endorsed candidate.'):'')
       +(canDo?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;"><button class="cnt-print-dep" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>Deployment Notice</button><button class="cnt-print-nh" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>New Hire Report</button></div>':'')
       +'</div>';
     panel.querySelectorAll('.cnt-ms-btn').forEach(b=>b.addEventListener('click',()=>setMilestone(app,b.dataset.f)));
@@ -681,8 +696,20 @@
   }
   async function setMilestone(app, field){
     const val = app[field] ? null : new Date().toISOString();
-    const patch={}; patch[field]=val; Object.assign(app,patch);
-    if(sb && app._web && app._sid){ const {error}=await sb.from('applications').update(patch).eq('id',app._sid); if(error){ if(window.showToast) showToast('Save failed: '+error.message,'error'); return; } }
+    // Save to the DB first, so a failure (e.g. a not-yet-migrated column) doesn't
+    // leave the UI showing a step as done when it wasn't recorded.
+    if(sb && app._web && app._sid){
+      const patch={}; patch[field]=val;
+      const {error}=await sb.from('applications').update(patch).eq('id',app._sid);
+      if(error){
+        const missing=/does not exist|could not find|schema cache|column/i.test(error.message||'');
+        if(window.showToast) showToast(missing
+          ? 'This step needs the pre-employment migration — run supabase/2026-07-27-preemp-milestone.sql.'
+          : 'Save failed: '+error.message, 'error');
+        return;
+      }
+    }
+    app[field]=val;
     logAudit('milestone','applicant', app._sid||app.id, field+(val?' set':' cleared'));
     if(window.showToast) showToast(app.name+' — '+field.replace(/_at$/,'').replace(/_/g,' ')+(val?' recorded':' cleared'),'success');
     renderWorkflow(app);

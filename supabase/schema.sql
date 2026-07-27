@@ -171,6 +171,10 @@ alter table public.applications
 alter table public.applications
   add column if not exists confirmation_sent_at timestamptz;
 
+-- Pre-Employment Requirements deployment milestone
+alter table public.applications
+  add column if not exists preemp_requirements_at timestamptz;
+
 -- On every new application, asynchronously call the applicant-confirm Edge
 -- Function (via pg_net) to email the applicant a confirmation. Server-side, so
 -- it works despite the staff-only SELECT RLS, and wrapped so it can never block

@@ -1437,6 +1437,7 @@ function openInterviewModal(id,stageLabel){
   cntToggleOnline();
   document.getElementById('interview-interviewer').value=app.interviewInterviewer||'';
   document.getElementById('interview-venue').value=app.interviewVenue||'';
+  cntSyncMeetControls();
   document.getElementById('interview-modal').classList.remove('hidden');
 }
 function closeInterviewModal(){
@@ -1445,12 +1446,52 @@ function closeInterviewModal(){
 }
 // Online interview: generate an instant, account-free video room (Jitsi Meet)
 // so recruiters can conduct the interview in the browser. Or paste any link.
+// Is the scheduled interview time in the past? (no date → treat as upcoming)
+function _interviewIsPast(){
+  const d=(document.getElementById('interview-date')||{}).value||'';
+  let t=(document.getElementById('interview-time')||{}).value||'';
+  if(!d) return false;
+  if(!/^\d{2}:\d{2}/.test(t)) t='23:59';          // no time given → end of that day
+  const when=new Date(d+'T'+t.slice(0,5));
+  if(isNaN(when.getTime())) return false;
+  return when.getTime() < Date.now();
+}
 function cntGenMeetLink(){
+  const venue=(document.getElementById('interview-venue')||{}).value||'';
+  // One link per interview: while it's still upcoming you can't replace a link
+  // that's already been generated/shared. It reopens after the scheduled time.
+  if(_isMeetUrl(venue) && !_interviewIsPast()){
+    if(window.showToast) showToast('A meeting link is already set. You can regenerate it after the scheduled time passes.','info');
+    return;
+  }
   const id=(document.getElementById('interview-applicant-id').value||'').replace(/[^\w]/g,'');
   const rand=Math.random().toString(36).slice(2,8);
   document.getElementById('interview-venue').value='https://meet.jit.si/CNT-Interview-'+(id||'x')+'-'+rand;
   const t=document.getElementById('interview-type'); if(t && t.value!=='Video'){ t.value='Video'; cntToggleOnline(); }
+  cntSyncMeetControls();
   if(window.showToast) showToast('Online meeting link generated','success');
+}
+// Lock/unlock the Generate button and show the "time has passed" warning.
+function cntSyncMeetControls(){
+  const gen=document.getElementById('interview-gen-btn');
+  const venue=(document.getElementById('interview-venue')||{}).value||'';
+  const past=_interviewIsPast();
+  const hasLink=_isMeetUrl(venue);
+  if(gen){
+    const lock = hasLink && !past;   // link set + still upcoming → no regenerate
+    gen.disabled=lock;
+    gen.style.opacity=lock?'0.5':'';
+    gen.style.cursor=lock?'not-allowed':'pointer';
+    gen.title=lock?'A meeting link is set — regenerate after the scheduled time passes':'Create an instant online meeting room';
+  }
+  const warn=document.getElementById('interview-past-warning');
+  if(warn){
+    if(past){
+      warn.classList.remove('hidden');
+      warn.innerHTML='<span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">warning</span>'
+        +'The scheduled time has passed and this interview is still open. If the candidate didn’t attend, regenerate the link or reschedule the date/time — then move them forward or refuse.';
+    } else warn.classList.add('hidden');
+  }
 }
 function cntJoinMeet(){
   const v=(document.getElementById('interview-venue').value||'').trim();
@@ -1469,6 +1510,7 @@ function cntToggleOnline(){
   const input=document.getElementById('interview-venue');
   if(label) label.textContent = online?'Online meeting link' : (kind==='Phone Call'?'Contact number / notes':'Venue / office address');
   if(input) input.placeholder = online?'Paste or generate a video link' : (kind==='Phone Call'?'Number to call (optional)':'Office address');
+  cntSyncMeetControls();
 }
 function handleInterviewSubmit(e){
   e.preventDefault();
