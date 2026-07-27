@@ -626,9 +626,13 @@
     let actions='';
     if(canEndorse){
       const btn=(bg,label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:#fff;background:'+bg+';border:none;">'+label+'</button>';
-      if(st==='none') actions+=btn('#7f1d1d','Endorse to client','endorse');
+      const outBtn=(label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:#b91c1c;background:#fff;border:1px solid #fecaca;">'+label+'</button>';
+      // After the interview it's a two-way decision: refuse, or endorse to client.
+      if(st==='none' && app.stage!=='rejected') actions+=btn('#7f1d1d','Endorse to client','endorse')+outBtn('Refuse','refuse');
       else if(st==='rejected') actions+=btn('#7f1d1d','Re-endorse to client','endorse');
     }
+    const decisionHint=(canEndorse && st==='none' && app.stage!=='rejected')
+      ? '<div style="font-size:11.5px;color:#64748b;margin-top:10px;">After the interview, decide: <b style="color:#b91c1c;">refuse</b> the candidate, or <b style="color:#7f1d1d;">endorse</b> them to the client for approval.</div>' : '';
     const note = st==='endorsed'
       ? '<div style="font-size:11.5px;color:#64748b;margin-top:10px;display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #f1f5f9;padding:8px 10px;border-radius:8px;"><span class="material-icons-outlined" style="font-size:14px;color:#cbd5e1;">hourglass_empty</span>Awaiting the client’s decision in their portal.</div>'
       : (st==='approved' ? '<div style="font-size:11.5px;color:#166534;margin-top:8px;">The client approved this candidate.</div>' : '');
@@ -637,11 +641,12 @@
       +'<span style="font-size:12px;color:#64748b;font-weight:600;">Current status</span>'
       +_endorseBadge(st)+'</div>'
       +((app.client_reason&&st==='rejected')?'<div style="font-size:12px;color:#b91c1c;margin-top:9px;background:#fef2f2;padding:8px 10px;border-radius:8px;">Client’s reason: '+_escN(app.client_reason)+'</div>':'')
-      +note
-      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!canStage?_lockNote('Unlocks after the candidate has been interviewed — then you can decide whether to endorse them to the client.'):''))
+      +note+decisionHint
+      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!canStage?_lockNote('Unlocks after the candidate has been interviewed — then you can decide whether to refuse or endorse them.'):''))
       +'</div>';
     panel.querySelectorAll('.cnt-endo-btn').forEach(b=>b.addEventListener('click',()=>{
       if(b.dataset.fn==='endorse') setClientStatus(app,'endorsed');
+      else if(b.dataset.fn==='refuse'){ document.getElementById('cnt-panel-dialog')?.remove(); if(window.cntOpenRefuse) cntOpenRefuse(app.id); }
     }));
   }
   async function setClientStatus(app, status, reason){
