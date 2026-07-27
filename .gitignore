@@ -1,2 +1,9 @@
 .vercel
 .env*
+
+# Node / Playwright
+node_modules/
+package-lock.json
+/test-results/
+/playwright-report/
+/playwright/.cache/

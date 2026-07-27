@@ -1,0 +1,16 @@
+{
+  "name": "cnt-ats",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CNT Promo & Ads Specialists — recruitment ATS + client portal (single-file HTML apps on Supabase).",
+  "scripts": {
+    "serve": "node scripts/serve.js",
+    "test": "node scripts/smoke-test.js && node scripts/test-resume-parser.js && node scripts/test-client-portal.js",
+    "test:smoke": "node scripts/smoke-test.js",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}
