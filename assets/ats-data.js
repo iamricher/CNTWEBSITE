@@ -906,152 +906,6 @@
     }catch(e){ console.error('loadCurrentUser',e); currentRole='super_admin'; }
   }
 
-  // ═══ Multi-factor authentication (TOTP) ═══
-  // These roles must have 2FA; they are forced into self-enrollment at login if
-  // they have no verified factor (so they can never be locked out, but cannot use
-  // the app without it). Everyone else may enable it voluntarily in Settings.
-  const MFA_REQUIRED_ROLES = ['super_admin','recruitment_manager','recruitment_supervisor'];
-  function _mfaEl(id){ return document.getElementById(id); }
-  function _mfaShow(id, on){ const o=_mfaEl(id); if(o) o.style.display = on ? 'flex' : 'none'; }
-  async function _mfaVerifiedFactor(){
-    try{ const { data, error }=await sb.auth.mfa.listFactors(); if(error) return null;
-      const totp=(data && data.totp) || [];
-      return totp.find(f=>f.status==='verified') || null;
-    }catch(e){ return null; }
-  }
-  async function _mfaClearUnverified(){
-    try{ const { data }=await sb.auth.mfa.listFactors();
-      const all=(data && data.all) || [];
-      for(const f of all){ if(f.factor_type==='totp' && f.status!=='verified'){ try{ await sb.auth.mfa.unenroll({ factorId:f.id }); }catch(e){} } }
-    }catch(e){}
-  }
-  // Login-time challenge — only when a verified factor exists. Fail-open on any
-  // unexpected error so a Supabase MFA outage can never brick sign-in.
-  async function mfaChallengeThenStart(){
-    let needs=false;
-    try{
-      const { data, error }=await sb.auth.mfa.getAuthenticatorAssuranceLevel();
-      if(!error && data && data.nextLevel==='aal2' && data.currentLevel!=='aal2') needs=true;
-    }catch(e){ needs=false; }
-    if(!needs){ startApp(); return; }
-    const factor=await _mfaVerifiedFactor();
-    if(!factor){ startApp(); return; }
-    window._mfaChallengeFactor=factor.id;
-    _mfaShow('cnt-mfa-challenge', true);
-    const c=_mfaEl('cnt-mfa-code'); if(c){ c.value=''; setTimeout(()=>c.focus(),60); }
-  }
-  async function _mfaSubmitChallenge(e){
-    e.preventDefault();
-    const code=((_mfaEl('cnt-mfa-code')||{}).value||'').replace(/\D/g,'');
-    const err=_mfaEl('cnt-mfa-challenge-err'), btn=_mfaEl('cnt-mfa-challenge-btn');
-    if(err) err.style.display='none';
-    if(code.length!==6){ if(err){ err.textContent='Enter the 6-digit code.'; err.style.display='block'; } return; }
-    if(btn){ btn.disabled=true; btn.textContent='Verifying…'; }
-    try{
-      const factorId=window._mfaChallengeFactor;
-      const { data:ch, error:ce }=await sb.auth.mfa.challenge({ factorId }); if(ce) throw ce;
-      const { error:ve }=await sb.auth.mfa.verify({ factorId, challengeId:ch.id, code }); if(ve) throw ve;
-      _mfaShow('cnt-mfa-challenge', false);
-      startApp();
-    }catch(err2){
-      if(err){ err.textContent=(err2 && err2.message) || 'Incorrect code. Please try again.'; err.style.display='block'; }
-      if(btn){ btn.disabled=false; btn.textContent='Verify'; }
-      const c=_mfaEl('cnt-mfa-code'); if(c){ c.value=''; c.focus(); }
-    }
-  }
-  async function _mfaCancelChallenge(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} location.reload(); }
-  // Enrollment — mandatory gate for privileged roles (opts.required) or voluntary
-  // from Settings. onDone runs after a successful activation.
-  async function mfaBeginSetup(opts){
-    opts=opts||{};
-    window._mfaSetupDone=opts.onDone||null; window._mfaSetupBailout=null;
-    await _mfaClearUnverified();
-    const err=_mfaEl('cnt-mfa-setup-err'); if(err) err.style.display='none';
-    const sub=_mfaEl('cnt-mfa-setup-sub'); if(sub) sub.textContent = opts.required
-      ? 'Your role requires two-factor authentication. Scan the QR with an authenticator app, then enter the 6-digit code to activate.'
-      : 'Scan the QR code with an authenticator app, then enter the 6-digit code.';
-    const cancel=_mfaEl('cnt-mfa-setup-cancel'); if(cancel){ cancel.textContent='Cancel'; cancel.style.display = opts.required ? 'none' : ''; }
-    const qr=_mfaEl('cnt-mfa-qr'); if(qr) qr.innerHTML='<div style="font-size:12px;color:#94a3b8;">Generating…</div>';
-    _mfaShow('cnt-mfa-setup', true);
-    try{
-      const { data, error }=await sb.auth.mfa.enroll({ factorType:'totp', friendlyName:'CNT '+new Date().toISOString() });
-      if(error) throw error;
-      window._mfaSetupFactor=data.id;
-      const q=(data.totp && data.totp.qr_code) || '';
-      if(qr){
-        if(/^\s*</.test(q)){ qr.innerHTML=q; const svg=qr.querySelector('svg'); if(svg){ svg.setAttribute('width','180'); svg.setAttribute('height','180'); } }
-        else if(q){ qr.innerHTML='<img alt="Authenticator QR code" style="width:180px;height:180px;" src="'+q+'">'; }
-        else qr.innerHTML='<div style="font-size:12px;color:#b91c1c;">Could not render the QR — use the key below.</div>';
-      }
-      const sec=_mfaEl('cnt-mfa-secret'); if(sec) sec.textContent=(data.totp && data.totp.secret) || '';
-      const c=_mfaEl('cnt-mfa-setup-code'); if(c){ c.value=''; setTimeout(()=>c.focus(),60); }
-    }catch(e){
-      if(qr) qr.innerHTML='';
-      if(err){ err.textContent=(e && e.message) || 'Could not start MFA setup.'; err.style.display='block'; }
-      // If enrollment itself is unavailable (e.g. MFA disabled on the project),
-      // never trap a required user — offer a way through so they aren't locked out.
-      if(opts.required && cancel){
-        cancel.textContent='Continue without 2FA'; cancel.style.display='';
-        window._mfaSetupBailout=()=>{ const d=window._mfaSetupDone||startApp; window._mfaSetupDone=null; d(); };
-      }
-    }
-  }
-  async function _mfaSubmitSetup(e){
-    e.preventDefault();
-    const code=((_mfaEl('cnt-mfa-setup-code')||{}).value||'').replace(/\D/g,'');
-    const err=_mfaEl('cnt-mfa-setup-err'), btn=_mfaEl('cnt-mfa-setup-btn');
-    if(err) err.style.display='none';
-    if(code.length!==6){ if(err){ err.textContent='Enter the 6-digit code.'; err.style.display='block'; } return; }
-    if(btn){ btn.disabled=true; btn.textContent='Activating…'; }
-    try{
-      const factorId=window._mfaSetupFactor;
-      const { data:ch, error:ce }=await sb.auth.mfa.challenge({ factorId }); if(ce) throw ce;
-      const { error:ve }=await sb.auth.mfa.verify({ factorId, challengeId:ch.id, code }); if(ve) throw ve;
-      _mfaShow('cnt-mfa-setup', false);
-      if(window.showToast) showToast('Two-factor authentication enabled','success');
-      try{ logAudit('mfa_enroll','session',null,null); }catch(e){}
-      const done=window._mfaSetupDone; window._mfaSetupDone=null; window._mfaSetupBailout=null;
-      if(typeof done==='function') done();
-    }catch(err2){
-      if(err){ err.textContent=(err2 && err2.message) || 'Incorrect code. Please try again.'; err.style.display='block'; }
-      if(btn){ btn.disabled=false; btn.textContent='Activate'; }
-      const c=_mfaEl('cnt-mfa-setup-code'); if(c){ c.value=''; c.focus(); }
-    }
-  }
-  function _mfaCancelSetup(){ _mfaShow('cnt-mfa-setup', false); const b=window._mfaSetupBailout; window._mfaSetupBailout=null; if(typeof b==='function') b(); }
-  // Settings → Security card (all staff; shows status + enable/disable).
-  async function injectSecurityPanel(){
-    const sv=document.getElementById('view-settings'); if(!sv) return;
-    let card=document.getElementById('cnt-security-panel');
-    if(!card){ card=document.createElement('div'); card.id='cnt-security-panel'; card.style.cssText='margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;'; sv.insertBefore(card, sv.firstChild); }
-    card.innerHTML='<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:3px;display:flex;align-items:center;gap:6px;"><span class="material-icons-outlined" style="font-size:17px;color:#7f1d1d;">verified_user</span>Two-Factor Authentication</div>'
-      +'<div style="font-size:12px;color:#64748b;margin-bottom:12px;">Protect your account with a one-time code from an authenticator app, in addition to your password.</div>'
-      +'<div id="cnt-security-body" style="font-size:12.5px;color:#334155;">Checking…</div>';
-    const vf=await _mfaVerifiedFactor();
-    const body=document.getElementById('cnt-security-body'); if(!body) return;
-    const required=MFA_REQUIRED_ROLES.includes(currentRole);
-    if(vf){
-      body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">'
-        +'<span style="display:inline-flex;align-items:center;gap:6px;color:#166534;font-weight:600;"><span class="material-icons-outlined" style="font-size:16px;">check_circle</span>Enabled for '+_escN(currentUserName)+'</span>'
-        +'<button onclick="cntMfaDisable()" style="font-size:12px;color:#b91c1c;font-weight:600;border:1px solid #fecaca;background:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;">Disable</button></div>'
-        +(required?'<div style="font-size:11px;color:#94a3b8;margin-top:8px;">Your role requires 2FA — if you disable it you\'ll be asked to set it up again at your next sign-in.</div>':'');
-    } else {
-      body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">'
-        +'<span style="display:inline-flex;align-items:center;gap:6px;color:#b45309;font-weight:600;"><span class="material-icons-outlined" style="font-size:16px;">gpp_maybe</span>Not enabled'+(required?' — required for your role':'')+'</span>'
-        +'<button onclick="cntMfaEnroll()" style="font-size:12px;color:#fff;font-weight:600;border:none;background:#7f1d1d;padding:6px 12px;border-radius:8px;cursor:pointer;">Enable 2FA</button></div>';
-    }
-  }
-  window.cntMfaEnroll=function(){ mfaBeginSetup({ required:false, onDone:()=>injectSecurityPanel() }); };
-  window.cntMfaDisable=async function(){
-    const vf=await _mfaVerifiedFactor(); if(!vf) return;
-    if(!confirm('Disable two-factor authentication for your account?')) return;
-    try{ const { error }=await sb.auth.mfa.unenroll({ factorId:vf.id }); if(error) throw error;
-      if(window.showToast) showToast('Two-factor authentication disabled','info');
-      try{ logAudit('mfa_unenroll','session',null,null); }catch(e){}
-      injectSecurityPanel();
-    }catch(e){ if(window.showToast) showToast('Could not disable: '+((e&&e.message)||''),'error'); }
-  };
-
   function applyRoleScoping(){
     window.cntRole = currentRole;
     window.cntUserName = currentUserName || currentUserEmail || 'HR';
@@ -1253,13 +1107,6 @@
     hideLogin();
     await loadCurrentUser();
     if(currentRole==='no_access'){ showRevoked(); return; }
-    // Privileged roles must have 2FA. If not yet enrolled, force self-enrollment
-    // now (they can always set it up — never a lockout — but can't proceed
-    // without it). mfaBeginSetup re-runs startApp once activated.
-    if(MFA_REQUIRED_ROLES.includes(currentRole)){
-      const vf=await _mfaVerifiedFactor();
-      if(!vf){ mfaBeginSetup({ required:true, onDone:()=>startApp() }); return; }
-    }
     applyRoleScoping();
     relocateFilters();
     await loadStages();            // pipeline definition first — everything renders off it
@@ -1278,7 +1125,6 @@
     injectLogout();
     injectAdminNav();
     injectReportsPanel();
-    injectSecurityPanel();
     notifyOverdueMRFs();
     loadServerNotifications();
     if(!_notifPoll) _notifPoll=setInterval(loadServerNotifications, 60000);
@@ -2977,7 +2823,7 @@
     fillStageSelects();   // hidden stage <select> needs its options for stage restores
     if(!sb){ buildClientDropdown(); renderAll(); showDemoBanner(); return; }
     sb.auth.getSession().then(({data})=>{
-      if(data && data.session){ mfaChallengeThenStart(); } else { showLogin(); }
+      if(data && data.session){ startApp(); } else { showLogin(); }
     }).catch(err=>{ console.error(err); showLogin(); });
   };
 
@@ -3015,13 +2861,7 @@
       err.style.display='none'; btn.disabled=true; btn.textContent='Signing in…';
       const { error }=await sb.auth.signInWithPassword({ email, password:pass });
       if(error){ err.textContent=error.message; err.style.display='block'; btn.disabled=false; btn.textContent='Sign in'; return; }
-      btn.textContent='Sign in';
-      mfaChallengeThenStart();
+      startApp();
     });
-    // MFA overlay wiring (challenge at login, setup for enrollment)
-    const mcf=document.getElementById('cnt-mfa-challenge-form'); if(mcf) mcf.addEventListener('submit', _mfaSubmitChallenge);
-    const mcc=document.getElementById('cnt-mfa-challenge-cancel'); if(mcc) mcc.addEventListener('click', _mfaCancelChallenge);
-    const msf=document.getElementById('cnt-mfa-setup-form'); if(msf) msf.addEventListener('submit', _mfaSubmitSetup);
-    const msc=document.getElementById('cnt-mfa-setup-cancel'); if(msc) msc.addEventListener('click', _mfaCancelSetup);
   });
 })();

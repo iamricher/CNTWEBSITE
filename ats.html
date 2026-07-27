@@ -218,44 +218,6 @@
   </div>
 </div>
 
-<!-- ── MFA CHALLENGE (shown at login when the account has 2FA enabled) ── -->
-<div id="cnt-mfa-challenge" class="fixed inset-0 z-[510] items-center justify-center px-4 no-print" style="display:none;background:#0f172a;">
-  <div class="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8">
-    <div class="flex flex-col items-center text-center mb-5">
-      <span class="material-icons-outlined text-red-800" style="font-size:34px;">verified_user</span>
-      <h1 class="text-lg font-extrabold text-slate-900 mt-2">Two-factor verification</h1>
-      <p class="text-xs text-slate-500 mt-1">Enter the 6-digit code from your authenticator app.</p>
-    </div>
-    <form id="cnt-mfa-challenge-form">
-      <input id="cnt-mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" required
-        class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-center text-lg font-semibold mb-3 focus:outline-none focus:border-red-800" style="letter-spacing:0.4em;" placeholder="000000">
-      <div id="cnt-mfa-challenge-err" class="text-xs text-red-600 mb-2" style="display:none;"></div>
-      <button id="cnt-mfa-challenge-btn" type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white text-sm font-semibold py-2.5 rounded-lg transition">Verify</button>
-    </form>
-    <button id="cnt-mfa-challenge-cancel" type="button" class="w-full text-xs text-slate-400 hover:text-slate-600 mt-4">Sign out</button>
-  </div>
-</div>
-
-<!-- ── MFA SETUP (mandatory for privileged roles without 2FA; also from Settings) ── -->
-<div id="cnt-mfa-setup" class="fixed inset-0 z-[510] items-center justify-center px-4 no-print overflow-y-auto" style="display:none;background:#0f172a;">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 my-8">
-    <div class="text-center mb-5">
-      <span class="material-icons-outlined text-red-800" style="font-size:34px;">shield</span>
-      <h1 class="text-lg font-extrabold text-slate-900 mt-2">Set up two-factor authentication</h1>
-      <p id="cnt-mfa-setup-sub" class="text-xs text-slate-500 mt-1">Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password), then enter the 6-digit code.</p>
-    </div>
-    <div id="cnt-mfa-qr" class="flex justify-center mb-3" style="min-height:180px;align-items:center;"></div>
-    <div class="text-[11px] text-slate-500 text-center mb-4">Can't scan? Enter this key manually:<br><code id="cnt-mfa-secret" class="text-slate-800 font-semibold break-all"></code></div>
-    <form id="cnt-mfa-setup-form">
-      <input id="cnt-mfa-setup-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" required
-        class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-center text-lg font-semibold mb-3 focus:outline-none focus:border-red-800" style="letter-spacing:0.4em;" placeholder="000000">
-      <div id="cnt-mfa-setup-err" class="text-xs text-red-600 mb-2" style="display:none;"></div>
-      <button id="cnt-mfa-setup-btn" type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white text-sm font-semibold py-2.5 rounded-lg transition">Activate</button>
-    </form>
-    <button id="cnt-mfa-setup-cancel" type="button" class="w-full text-xs text-slate-400 hover:text-slate-600 mt-4">Cancel</button>
-  </div>
-</div>
-
 <div id="toast-container" class="fixed bottom-6 right-6 z-[300] flex flex-col gap-3 no-print"></div>
 
 <header class="bg-white border-b border-slate-200 px-5 py-2.5 flex items-center justify-between sticky top-0 z-40 no-print" style="min-height:52px;">
