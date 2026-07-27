@@ -29,7 +29,7 @@ test.describe('careers.html', () => {
 
   test('consent checkbox is required and the RA 10173 notice is present', async ({ page }) => {
     await expect(page.locator('#consent')).toHaveAttribute('required', '');
-    await expect(page.getByText('RA 10173', { exact: false })).toBeVisible();
+    await expect(page.locator('.consent')).toContainText('RA 10173');
   });
 
   test('honeypot field exists and is positioned off-screen', async ({ page }) => {

@@ -30,19 +30,40 @@ function inlineScripts(html) {
   while ((m = re.exec(html))) out.push(m[1]);
   return out;
 }
+// Local (same-origin) external scripts, e.g. the ats.html modules split out in
+// roadmap #8. Returns [{ path, code }] for each committed assets/*.js it loads.
+function localExternalScripts(html) {
+  const re = /<script[^>]*\bsrc="((?:\.\/)?assets\/[^"]+\.js)"[^>]*>/g;
+  const out = []; let m;
+  while ((m = re.exec(html))) {
+    const p = m[1].replace(/^\.\//, '');
+    try { out.push({ path: p, code: read(p) }); } catch { /* not a committed local file */ }
+  }
+  return out;
+}
+// Full JS corpus for a page = its inline scripts + its local external scripts.
+// Handler-resolution and definition checks must see functions wherever they live.
+function pageJs(html) {
+  return inlineScripts(html).join('\n') + '\n' + localExternalScripts(html).map(s => s.code).join('\n');
+}
 
-// ── 1. inline scripts parse ────────────────────────────────────
-console.log('\nParsing inline scripts');
+// ── 1. inline + local external scripts parse ───────────────────
+console.log('\nParsing scripts');
 for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html', 'index.html']) {
   let html;
   try { html = read(file); } catch { continue; }          // index.html is optional
   const scripts = inlineScripts(html);
+  const externals = localExternalScripts(html);
   let bad = 0;
   scripts.forEach((code, i) => {
     try { new Function(code); }
     catch (e) { bad++; fail(file + ' script #' + (i + 1) + ' parses', e.message); }
   });
-  if (!bad) ok(file + ' — ' + scripts.length + ' inline script(s) parse');
+  externals.forEach(({ path: p, code }) => {
+    try { new Function(code); }
+    catch (e) { bad++; fail(p + ' parses', e.message); }
+  });
+  if (!bad) ok(file + ' — ' + scripts.length + ' inline + ' + externals.length + ' external script(s) parse');
 }
 
 // ── 2. required elements still present ─────────────────────────
@@ -83,10 +104,14 @@ if (clientHtml) {
 console.log('\nInline handlers resolve');
 for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html']) {
   let html; try { html = read(file); } catch { continue; }
+  // Handlers appear both as HTML attributes and inside innerHTML template
+  // strings in the JS; their definitions may live in split-out modules. Scan
+  // the whole corpus so extracting scripts to files doesn't lose coverage.
+  const corpus = html + '\n' + pageJs(html);
   const called = new Set();
   const re = /\bon(?:click|change|submit|input)\s*=\s*"([^"]*)"/g;
   let m;
-  while ((m = re.exec(html))) {
+  while ((m = re.exec(corpus))) {
     const fnRe = /(?:^|[^.\w])([A-Za-z_$][\w$]*)\s*\(/g;
     let f;
     while ((f = fnRe.exec(m[1]))) called.add(f[1]);
@@ -96,10 +121,10 @@ for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html']) {
     'window','document','console','String','Number','Boolean','Array','Object','JSON','Math','Date',
     'parseInt','parseFloat','setTimeout','encodeURI','encodeURIComponent','print','open','remove']);
   const defined = name =>
-    new RegExp('function\\s+' + name + '\\s*\\(').test(html) ||
-    new RegExp('(?:window\\.)?' + name + '\\s*=\\s*(?:async\\s*)?function').test(html) ||
-    new RegExp('(?:const|let|var)\\s+' + name + '\\s*=').test(html) ||
-    new RegExp('window\\.' + name + '\\s*=').test(html);
+    new RegExp('function\\s+' + name + '\\s*\\(').test(corpus) ||
+    new RegExp('(?:window\\.)?' + name + '\\s*=\\s*(?:async\\s*)?function').test(corpus) ||
+    new RegExp('(?:const|let|var)\\s+' + name + '\\s*=').test(corpus) ||
+    new RegExp('window\\.' + name + '\\s*=').test(corpus);
   const unresolved = [...called].filter(n => !BUILTIN.has(n) && !defined(n));
   unresolved.length ? fail(file + ' — handlers resolve', 'undefined: ' + unresolved.join(', '))
                     : ok(file + ' — all ' + called.size + ' handler function(s) defined');
@@ -119,7 +144,8 @@ const SECRET_PATTERNS = [
   [/(?:SERVICE_ROLE|SECRET_KEY)\s*=\s*['"][^'"]+['"]/,   'secret assigned to a global'],
 ];
 let leaked = [];
-for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html', 'assets/supabase-config.js']) {
+for (const file of ['ats.html', 'careers.html', 'client.html', 'status.html',
+                    'assets/supabase-config.js', 'assets/ats-ui.js', 'assets/ats-data.js']) {
   let src; try { src = stripComments(read(file)); } catch { continue; }
   for (const [re, label] of SECRET_PATTERNS) if (re.test(src)) leaked.push(file + ': ' + label);
 }

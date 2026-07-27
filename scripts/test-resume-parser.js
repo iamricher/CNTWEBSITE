@@ -20,7 +20,18 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'ats.html'), 'utf8');
+// The parser + PDF line reconstruction were split out of ats.html into this
+// module (roadmap #8). Fall back to ats.html for older checkouts.
+function loadAtsJs() {
+  for (const f of ['assets/ats-data.js', 'ats.html']) {
+    try {
+      const s = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+      if (s.includes('const _SEC_PATTERNS=[')) return s;
+    } catch { /* try next */ }
+  }
+  return '';
+}
+const html = loadAtsJs();
 
 const START = '  const _SEC_PATTERNS=[';
 const END   = '  // Fields Digitize can fill.';
