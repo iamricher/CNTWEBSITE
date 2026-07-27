@@ -1126,6 +1126,9 @@ let _intvCalRef = new Date();   // any date within the shown month
 // everyone's. "Their" = they are the assigned recruiter or the interviewer.
 let _intvScope = 'mine';
 function _intvSeesAll(){ return ['super_admin','recruitment_manager','recruitment_supervisor'].includes(window.cntRole); }
+// Only the Account Officer approves MRFs and assigns recruiters (super_admin, as
+// the system owner, also can). Everyone else just views the requests.
+function _canManageMRF(){ return ['account_officer','super_admin'].includes(window.cntRole); }
 function _intvScopeApplied(list){
   const scope = _intvSeesAll() ? _intvScope : 'mine';   // non-managers always scoped to self
   if(scope==='all') return list;
@@ -1258,8 +1261,8 @@ function renderHiringRequests(){
       <td class="px-4 py-2.5 text-xs text-slate-400">${r.date}</td>
       <td class="px-4 py-2.5">${getCountdownChip(r.deadline)}</td>
       <td class="px-4 py-2.5 text-right">
-        ${(window.cntRole==='super_admin'||window.cntRole==='recruitment_supervisor')?`<select onchange="cntAssignRequest('${r.id}', this.value, this.value?this.options[this.selectedIndex].text:'')" class="text-[11px] border border-slate-200 rounded px-1 py-0.5 mr-2 align-middle bg-white"><option value="">Assign…</option>${(window.cntRecruiters||[]).map(u=>`<option value="${u.id}"${r.assigned_to===u.id?' selected':''}>${u.full_name||u.email}</option>`).join('')}</select>`:''}
-        <button onclick="approveRequest('${r.id}')" class="text-emerald-700 hover:underline text-[11px] font-bold cursor-pointer mr-2">Approve</button>
+        ${_canManageMRF()?`<select onchange="cntAssignRequest('${r.id}', this.value, this.value?this.options[this.selectedIndex].text:'')" class="text-[11px] border border-slate-200 rounded px-1 py-0.5 mr-2 align-middle bg-white"><option value="">Assign…</option>${(window.cntRecruiters||[]).map(u=>`<option value="${u.id}"${r.assigned_to===u.id?' selected':''}>${u.full_name||u.email}</option>`).join('')}</select>`:''}
+        ${(_canManageMRF()&&r.status==='Pending')?`<button onclick="approveRequest('${r.id}')" class="text-emerald-700 hover:underline text-[11px] font-bold cursor-pointer mr-2">Approve</button>`:''}
         <button onclick="fillRequest('${r.id}')" class="text-red-700 hover:underline text-[11px] font-bold cursor-pointer mr-2">Fill</button>
         <button onclick="deleteHiringRequest('${r.id}')" class="text-slate-400 hover:text-red-500 text-[11px] font-medium cursor-pointer">Remove</button>
       </td>
@@ -1569,7 +1572,7 @@ function openHiringRequestModal(){
   // Same gate as the Assign control on the requests list — opening this form
   // must not become a way around it.
   const wrap=document.getElementById('req-recruiter-wrap');
-  if(wrap) wrap.classList.toggle('hidden', !(window.cntRole==='super_admin'||window.cntRole==='recruitment_supervisor'));
+  if(wrap) wrap.classList.toggle('hidden', !_canManageMRF());
   document.getElementById('hiring-request-modal').classList.remove('hidden');
 }
 function closeHiringRequestModal(){document.getElementById('hiring-request-modal').classList.add('hidden');}
@@ -1577,8 +1580,7 @@ function handleHiringRequestSubmit(e){
   e.preventDefault();
   const req={id:'REQ-'+String(hiringRequests.length+1).padStart(3,'0'),account:document.getElementById('req-account').value,role:document.getElementById('req-role').value,location:document.getElementById('req-location').value,type:document.getElementById('req-type').value,count:parseInt(document.getElementById('req-count').value)||1,priority:document.getElementById('req-priority').value,status:'Pending',date:new Date().toISOString().split('T')[0],deadline:document.getElementById('req-deadline').value||'',requestor:document.getElementById('req-requestor').value,notes:document.getElementById('req-notes').value};
   // Only honour an assignment the role is actually allowed to make.
-  const canAssign=(window.cntRole==='super_admin'||window.cntRole==='recruitment_supervisor');
-  const rec=canAssign ? ((document.getElementById('req-recruiter')||{}).value||'') : '';
+  const rec=_canManageMRF() ? ((document.getElementById('req-recruiter')||{}).value||'') : '';
   if(rec){
     const u=(window.cntRecruiters||[]).find(x=>(x.full_name||x.email)===rec);
     req.assigned_to=u?u.id:null; req.assigned_name=rec; req.status='Open';

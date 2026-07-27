@@ -476,6 +476,18 @@ end; $$;
 revoke all on function public.cnt_notifications_read(bigint) from public, anon;
 grant execute on function public.cnt_notifications_read(bigint) to authenticated;
 
+-- Position/location option lists for the client portal vacancy form (the
+-- taxonomy table itself is staff-only, so clients read the names via this).
+create or replace function public.cnt_taxonomy_options()
+returns table(kind text, name text)
+language sql stable security definer set search_path=public as $$
+  select kind, name from public.taxonomy
+  where kind in ('position','location')
+  order by kind, name;
+$$;
+revoke all on function public.cnt_taxonomy_options() from public;
+grant execute on function public.cnt_taxonomy_options() to anon, authenticated;
+
 -- New sign-ups are inert ('pending') until an admin assigns a real role
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path=public as $$

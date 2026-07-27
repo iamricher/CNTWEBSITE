@@ -241,8 +241,12 @@
           <div class="panel-b">
             <form onsubmit="fileClientVacancy(event)">
               <div class="grid2">
-                <div class="field"><label for="cv-position">Position</label><input id="cv-position" list="cv-position-list" required placeholder="e.g. Sales Promoter" /><datalist id="cv-position-list"></datalist></div>
-                <div class="field"><label for="cv-location">Location</label><input id="cv-location" list="cv-location-list" required placeholder="e.g. Manila" /><datalist id="cv-location-list"></datalist></div>
+                <div class="field"><label for="cv-position">Position</label>
+                  <select id="cv-position" required onchange="cvOtherToggle('position')"><option value="">Select a position…</option></select>
+                  <input id="cv-position-other" class="hidden" placeholder="Enter the position" autocomplete="off" style="margin-top:8px" /></div>
+                <div class="field"><label for="cv-location">Location</label>
+                  <select id="cv-location" required onchange="cvOtherToggle('location')"><option value="">Select a location…</option></select>
+                  <input id="cv-location-other" class="hidden" placeholder="Enter the location" autocomplete="off" style="margin-top:8px" /></div>
                 <div class="field"><label for="cv-count">Headcount needed</label><input id="cv-count" type="number" min="1" value="1" /></div>
                 <div class="field"><label for="cv-type">Request type</label><select id="cv-type"><option>New Headcount</option><option>Replacement</option><option>Seasonal / Project-based</option><option>Staff Augmentation</option></select></div>
                 <div class="field"><label for="cv-priority">Priority</label><select id="cv-priority"><option>Normal</option><option>High</option><option>Urgent</option></select></div>
@@ -351,7 +355,7 @@
     else $('#confid-gate').classList.remove('hidden');
   }
   function _loadClientData(){
-    loadClientCandidates(); loadClientVacancies();
+    loadClientCandidates(); loadClientVacancies(); cvLoadTaxonomy();
     // Poll notifications so a fresh endorsement surfaces without a reload.
     if(!window._notifPoll) window._notifPoll=setInterval(renderNotifications, 60000);
   }
@@ -482,16 +486,51 @@
       +'<div class="kv">'+esc(v.count||1)+' needed · '+esc(v.type||'—')+' · '+esc(v.priority||'Normal')+(when?(' · filed '+when):'')+'</div></div>'
       +'<div>'+statusBadge(v.status)+'</div></div>';
   }
+  // Position/location dropdowns, fed from CNT's taxonomy (via a definer RPC —
+  // clients can't read the taxonomy table directly) plus any values they've
+  // filed before. "Other (specify)" reveals a free-text field for anything new.
+  let _cvTax={positions:[],locations:[]};
+  async function cvLoadTaxonomy(){
+    if(!sb) return;
+    try{
+      const { data, error } = await sb.rpc('cnt_taxonomy_options');
+      if(error || !Array.isArray(data)) return;
+      _cvTax.positions=[...new Set(data.filter(r=>r.kind==='position').map(r=>r.name).filter(Boolean))];
+      _cvTax.locations=[...new Set(data.filter(r=>r.kind==='location').map(r=>r.name).filter(Boolean))];
+      cvRenderOptions();
+    }catch(e){ /* leave whatever options are present */ }
+  }
+  function cvRenderOptions(){
+    const pastPos=[...new Set((_vacs||[]).map(v=>v.role).filter(Boolean))];
+    const pastLoc=[...new Set((_vacs||[]).map(v=>v.location).filter(Boolean))];
+    const positions=[...new Set([..._cvTax.positions,...pastPos])].sort((a,b)=>a.localeCompare(b));
+    const locations=[...new Set([..._cvTax.locations,...pastLoc])].sort((a,b)=>a.localeCompare(b));
+    const fill=(id,vals,ph)=>{ const s=$('#'+id); if(!s) return; const cur=s.value;
+      s.innerHTML='<option value="">'+ph+'</option>'
+        +vals.map(v=>'<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>').join('')
+        +'<option value="__other">Other (specify)…</option>'; };
+    fill('cv-position',positions,'Select a position…');
+    fill('cv-location',locations,'Select a location…');
+  }
+  window.cvOtherToggle=function(kind){
+    const sel=$('#cv-'+kind), other=$('#cv-'+kind+'-other'); if(!sel||!other) return;
+    const on=sel.value==='__other';
+    other.classList.toggle('hidden',!on);
+    if(on){ other.focus(); } else { other.value=''; }
+  };
+  function cvVal(kind){
+    const sel=$('#cv-'+kind); if(!sel) return '';
+    if(sel.value==='__other'){ return (($('#cv-'+kind+'-other')||{}).value||'').trim(); }
+    return (sel.value||'').trim();
+  }
+
   async function loadClientVacancies(){
     const el=$('#client-vacancy-list'); el.innerHTML='<div class="empty">Loading…</div>';
     const { data, error } = await sb.from('hiring_requests')
       .select('req_id,role,location,count,type,priority,status,created_at').order('created_at',{ascending:false});
     if(error){ el.innerHTML='<div class="empty">Could not load your vacancies.</div>'; return; }
     const rows=data||[]; _vacs=rows;
-    // Seed the position/location datalists from what they've filed before
-    const pos=[...new Set(rows.map(r=>r.role).filter(Boolean))], loc=[...new Set(rows.map(r=>r.location).filter(Boolean))];
-    $('#cv-position-list').innerHTML=pos.map(p=>'<option>'+esc(p)+'</option>').join('');
-    $('#cv-location-list').innerHTML=loc.map(l=>'<option>'+esc(l)+'</option>').join('');
+    cvRenderOptions();   // refresh the dropdowns (taxonomy + any past filings)
     // Active (Pending/Open) stay here; Filled ones move to History.
     const active=rows.filter(r=>r.status!=='Filled'), filled=rows.filter(r=>r.status==='Filled');
     el.innerHTML = active.length ? active.map(vacancyRow).join('') : '<div class="empty">No open vacancies — file your first above.</div>';
@@ -502,8 +541,8 @@
   async function fileClientVacancy(e){
     e.preventDefault();
     const msg=$('#cv-msg'); msg.className='msg'; msg.textContent='';
-    const role=$('#cv-position').value.trim(), location=$('#cv-location').value.trim();
-    if(!role || !location){ msg.className='msg err'; msg.textContent='Please enter a position and location.'; return; }
+    const role=cvVal('position'), location=cvVal('location');
+    if(!role || !location){ msg.className='msg err'; msg.textContent='Please choose a position and location.'; return; }
     const btn=$('#cv-submit'); btn.disabled=true;
     const rec={ req_id:'CLT-'+Date.now(), account:window.cntClientAccount, role, location,
       count:parseInt($('#cv-count').value)||1, type:$('#cv-type').value, priority:$('#cv-priority').value,
@@ -513,6 +552,7 @@
     btn.disabled=false;
     if(error){ msg.className='msg err'; msg.textContent='Could not submit — please try again.'; return; }
     e.target.reset(); $('#cv-count').value='1';
+    cvOtherToggle('position'); cvOtherToggle('location'); cvRenderOptions();
     toast('Vacancy submitted to CNT'); loadClientVacancies();
   }
 

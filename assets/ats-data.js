@@ -385,6 +385,7 @@
     if(typeof cntFillJobRecruiters==='function') cntFillJobRecruiters();
   }
   async function assignRequest(reqId, uid, name){
+    if(typeof _canManageMRF==='function' && !_canManageMRF()){ if(window.showToast) showToast('Only the Account Officer can assign recruiters.','error'); return; }
     const r=(typeof hiringRequests!=='undefined')?hiringRequests.find(x=>x.id===reqId):null; if(!r) return;
     r.assigned_to=uid||null; r.assigned_name=uid?name:null; if(uid && r.status==='Pending') r.status='Open';
     if(sb && r._sid){ const {error}=await sb.from('hiring_requests').update({ assigned_to:uid||null, assigned_name:uid?name:null, status:r.status }).eq('id',r._sid); if(error){ if(window.showToast) showToast('Assign failed: '+error.message,'error'); return; } }
@@ -467,6 +468,7 @@
   if (typeof approveRequest === 'function'){
     const _a=approveRequest;
     approveRequest=function(id){
+      if(typeof _canManageMRF==='function' && !_canManageMRF()){ if(window.showToast) showToast('Only the Account Officer can approve MRFs.','error'); return; }
       _a(id); syncRequestStatus(id,'Open');
       const r=(typeof hiringRequests!=='undefined')?hiringRequests.find(x=>x.id===id):null;
       if(r) jobFromRequest(r);
