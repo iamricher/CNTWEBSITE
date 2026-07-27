@@ -3209,6 +3209,15 @@ function showToast(msg,type='info'){
   setTimeout(()=>{toast.style.transition='all .25s ease';toast.style.opacity='0';toast.style.transform='translateX(20px)';setTimeout(()=>toast.remove(),280);},3200);
 }
 
+// Open the applicant profile from a DB id (notifications store the DB id, but
+// triggerResumeModal takes the local id). Used by the notification bell.
+function cntOpenApplicantByDbId(refId){
+  const rid=String(refId);
+  const app=(typeof getAllApplicants==='function'?getAllApplicants():[]).find(a=>String(a._sid)===rid||String(a.id)===rid);
+  if(app && typeof triggerResumeModal==='function'){ triggerResumeModal(app.id); return true; }
+  return false;
+}
+
 function toggleSidebar(){
   sidebarOpen=!sidebarOpen;
   const sb=document.getElementById('sidebar');
@@ -3725,17 +3734,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   function _escN(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function _timeAgo(ts){ const d=Math.floor((Date.now()-ts)/1000); if(d<60)return 'just now'; if(d<3600)return Math.floor(d/60)+'m ago'; if(d<86400)return Math.floor(d/3600)+'h ago'; return Math.floor(d/86400)+'d ago'; }
   function _unread(){ return notifStore.filter(n=>!n.read).length; }
+  function _notifIcon(kind){ return {endorsed:'how_to_reg',approved:'check_circle',rejected:'cancel',filled:'work',request:'assignment'}[kind]||'person_add'; }
+  function _openNotif(n){
+    const panel=document.getElementById('cnt-bell-panel'); if(panel) panel.style.display='none';
+    if(!n.read){ n.read=true; renderBell(); if(n._srvId!=null && sb){ sb.rpc('cnt_notifications_read',{p_id:n._srvId}).catch(()=>{}); } }
+    if(n._refType==='applicant' && n._refId && typeof cntOpenApplicantByDbId==='function') cntOpenApplicantByDbId(n._refId);
+  }
   function renderBell(){
     const badge=document.getElementById('cnt-bell-badge');
     if(badge){ const c=_unread(); if(c>0){ badge.style.display='flex'; badge.textContent=c>99?'99+':String(c); } else badge.style.display='none'; }
     const list=document.getElementById('cnt-bell-list');
     if(list){
-      list.innerHTML = notifStore.length ? notifStore.slice(0,30).map(n=>
-        '<div style="padding:11px 16px;border-bottom:1px solid #f8fafc;display:flex;gap:10px;align-items:flex-start;'+(n.read?'':'background:#fef2f2;')+'">'
+      list.innerHTML = notifStore.length ? notifStore.slice(0,30).map(n=>{
+        const clickable = n._refType==='applicant' && n._refId;
+        return '<div data-nkey="'+_escN(n.key||'')+'" style="padding:11px 16px;border-bottom:1px solid #f8fafc;display:flex;gap:10px;align-items:flex-start;'+(clickable?'cursor:pointer;':'')+(n.read?'':'background:#fef2f2;')+'">'
         +'<span class="material-icons-outlined" style="font-size:18px;color:#7f1d1d;margin-top:1px;">'+(n.icon||'person_add')+'</span>'
         +'<div style="flex:1;min-width:0;"><div style="font-size:12.5px;color:#0f172a;line-height:1.4;">'+n.html+'</div>'
-        +'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">'+_escN(n.sub||'')+' · '+_timeAgo(n.ts)+'</div></div></div>'
-      ).join('') : '<div style="padding:24px 16px;text-align:center;color:#94a3b8;font-size:12px;">No notifications yet</div>';
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">'+(n.sub?(_escN(n.sub)+' · '):'')+_timeAgo(n.ts)+'</div></div></div>';
+      }).join('') : '<div style="padding:24px 16px;text-align:center;color:#94a3b8;font-size:12px;">No notifications yet</div>';
+      list.querySelectorAll('[data-nkey]').forEach(el=>{
+        const n=notifStore.find(x=>x.key===el.getAttribute('data-nkey'));
+        if(n && n._refType==='applicant' && n._refId) el.addEventListener('click',()=>_openNotif(n));
+      });
     }
   }
   function addNotif(n, opts){
@@ -3755,7 +3775,35 @@ document.addEventListener('DOMContentLoaded',()=>{
       sub:r.client, ts:(r.created_at?new Date(r.created_at).getTime():Date.now()), read:false,
       toastMsg:r.name+' applied for '+r.role, title:'New application — CNT ATS', body:r.name+' applied for '+r.role+' ('+r.client+')' };
   }
-  function markAllRead(){ notifStore.forEach(n=>n.read=true); _setLastSeen(); renderBell(); }
+  // Persistent, server-backed notifications (roadmap #7). A recruiter now learns
+  // when a client approves/rejects a candidate they endorsed; these rows live in
+  // public.notifications and are pulled via cnt_notifications, feeding the same
+  // bell store so read/unread state survives reloads.
+  function notifFromServer(n){
+    return { key:'srv-'+n.id, _srvId:n.id, _refType:n.ref_type, _refId:n.ref_id,
+      icon:_notifIcon(n.kind),
+      html:'<b>'+_escN(n.title||'Notification')+'</b>'+(n.body?('<br>'+_escN(n.body)):''),
+      sub:'', ts:(n.created_at?new Date(n.created_at).getTime():Date.now()), read:!!n.read_at };
+  }
+  let _notifPoll=null;
+  async function loadServerNotifications(){
+    if(!sb) return;
+    try{
+      const { data, error } = await sb.rpc('cnt_notifications',{ p_limit:30 });
+      if(error || !Array.isArray(data)) return;
+      // Reverse so unshift leaves newest on top; sync read-state on ones we hold.
+      data.slice().reverse().forEach(n=>{
+        const existing=notifStore.find(x=>x.key==='srv-'+n.id);
+        if(existing) existing.read=!!n.read_at;
+        else addNotif(notifFromServer(n));
+      });
+      renderBell();
+    }catch(e){ /* offline / RPC missing: bell stays quiet */ }
+  }
+  function markAllRead(){
+    notifStore.forEach(n=>n.read=true); _setLastSeen(); renderBell();
+    if(sb) sb.rpc('cnt_notifications_read',{p_id:null}).catch(()=>{});
+  }
   function injectBell(){
     if(document.getElementById('cnt-bell-wrap')){ renderBell(); return; }
     const header=document.querySelector('header'); if(!header) return;
@@ -4321,6 +4369,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     injectAdminNav();
     injectReportsPanel();
     notifyOverdueMRFs();
+    loadServerNotifications();
+    if(!_notifPoll) _notifPoll=setInterval(loadServerNotifications, 60000);
     setupLiveUpdates();
     logAudit('login','session',null,null);
   }

@@ -91,6 +91,31 @@ if (!cvFn) {
   /a\.resume_url\s*=\s*p_path/i.test(b)                      ? ok('CV check matched by exact object path')                     : fail('CV path match', 'missing');
 }
 
+// ── 6. Notifications are reachable only through gated RPCs ─────
+console.log('\nNotifications isolation (roadmap #7)');
+// The table must have RLS on with NO policies, so direct reads are impossible;
+// everything flows through the SECURITY DEFINER RPCs that scope by audience.
+/create table if not exists public\.notifications/i.test(sql)
+  ? ok('notifications table present') : fail('notifications table present', 'not found');
+/alter table public\.notifications enable row level security/i.test(sql)
+  ? ok('notifications has RLS enabled') : fail('notifications RLS enabled', 'missing');
+const notifPolicies = sql.match(/create policy[^;]*on public\.notifications[^;]*;/gi) || [];
+notifPolicies.length === 0
+  ? ok('no direct policies on notifications (RPC-only access)')
+  : fail('notifications RPC-only', 'found policies: ' + notifPolicies.join(' | '));
+
+const readFn = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_notifications\(/i);
+readFn ? ok('cnt_notifications read RPC present') : fail('cnt_notifications present', 'not found');
+const readBody = (sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_notifications\([\s\S]*?\$\$;/i) || [])[0] || '';
+/security\s+definer/i.test(readBody)                 ? ok('read RPC runs SECURITY DEFINER')                : fail('read RPC SECURITY DEFINER', 'missing');
+/recipient_client\s*=\s*acct/i.test(readBody)        ? ok('clients scoped to their own account')           : fail('client scoping', 'missing');
+/recipient_name\s+is\s+null\s+or\s+recipient_name\s*=\s*nm/i.test(readBody) ? ok('staff scoped to self or broadcast') : fail('staff scoping', 'missing');
+
+const markFn = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_notifications_read\(/i);
+markFn ? ok('cnt_notifications_read RPC present') : fail('cnt_notifications_read present', 'not found');
+const trg = /create trigger cnt_app_notify_trg after update on public\.applications/i.test(sql);
+trg ? ok('applications trigger creates notifications') : fail('cnt_app_notify_trg present', 'not found');
+
 console.log('\n' + '─'.repeat(52));
 if (failures) {
   console.log('\x1b[31m' + failures + ' of ' + checks + ' checks FAILED\x1b[0m\n');

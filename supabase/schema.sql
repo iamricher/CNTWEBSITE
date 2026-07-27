@@ -359,6 +359,94 @@ $$;
 revoke all on function public.cnt_application_status(text, text) from public;
 grant execute on function public.cnt_application_status(text, text) to anon, authenticated;
 
+-- ── Persistent notifications (roadmap #7) ──────────────────────
+-- RLS-enabled with no policies: reachable only through the RPCs below. Clients
+-- are addressed by client_account, staff by recruiter full_name (null = all).
+create table if not exists public.notifications (
+  id               bigint generated always as identity primary key,
+  recipient_kind   text not null,           -- 'client' | 'staff'
+  recipient_client text,                     -- client account (when kind='client')
+  recipient_name   text,                     -- staff full_name (when kind='staff'); null = all staff
+  kind             text not null,            -- endorsed | approved | rejected | filled | request
+  title            text,
+  body             text,
+  ref_type         text,                     -- 'applicant' | 'vacancy' | 'request'
+  ref_id           text,
+  created_at       timestamptz default now(),
+  read_at          timestamptz
+);
+create index if not exists notifications_client_idx
+  on public.notifications (recipient_client, created_at desc) where recipient_kind='client';
+create index if not exists notifications_staff_idx
+  on public.notifications (recipient_name, created_at desc) where recipient_kind='staff';
+alter table public.notifications enable row level security;
+
+-- Applications changes create notifications. Fires from every path that flips
+-- client_status (ATS endorse, the client decide RPC).
+create or replace function public.cnt_app_notify() returns trigger
+language plpgsql security definer set search_path=public as $$
+begin
+  if TG_OP='UPDATE' and NEW.client_status is distinct from OLD.client_status then
+    if NEW.client_status='endorsed' then
+      insert into public.notifications(recipient_kind, recipient_client, kind, title, body, ref_type, ref_id)
+      values ('client', NEW.client, 'endorsed', 'New candidate to review',
+              coalesce(NEW.name,'A candidate')||' ('||coalesce(NEW.role,'—')||') is awaiting your decision.',
+              'applicant', NEW.id::text);
+    elsif NEW.client_status in ('approved','rejected') then
+      insert into public.notifications(recipient_kind, recipient_name, kind, title, body, ref_type, ref_id)
+      values ('staff', NEW.recruiter, NEW.client_status,
+              'Client '||NEW.client_status,
+              coalesce(NEW.client,'A client')||' '||NEW.client_status||' '||coalesce(NEW.name,'a candidate')
+                ||case when NEW.client_status='rejected' and coalesce(NEW.client_reason,'')<>''
+                       then ' — '||NEW.client_reason else '' end,
+              'applicant', NEW.id::text);
+    end if;
+  end if;
+  return NEW;
+end; $$;
+drop trigger if exists cnt_app_notify_trg on public.applications;
+create trigger cnt_app_notify_trg after update on public.applications
+  for each row execute function public.cnt_app_notify();
+
+-- Read my notifications (audience derived from the caller's profile).
+create or replace function public.cnt_notifications(p_limit int default 30)
+returns setof public.notifications
+language plpgsql stable security definer set search_path=public as $$
+declare acct text; nm text; r text;
+begin
+  select client_account, full_name, role into acct, nm, r
+    from public.profiles where id=auth.uid();
+  if acct is not null then
+    return query select * from public.notifications
+      where recipient_kind='client' and recipient_client=acct
+      order by created_at desc limit greatest(1, least(coalesce(p_limit,30), 100));
+  elsif r in ('super_admin','recruitment_manager','recruitment_supervisor','account_officer','recruiter') then
+    return query select * from public.notifications
+      where recipient_kind='staff' and (recipient_name is null or recipient_name=nm)
+      order by created_at desc limit greatest(1, least(coalesce(p_limit,30), 100));
+  end if;
+  return;
+end; $$;
+revoke all on function public.cnt_notifications(int) from public, anon;
+grant execute on function public.cnt_notifications(int) to authenticated;
+
+-- Mark read (one id, or all mine when null).
+create or replace function public.cnt_notifications_read(p_id bigint default null)
+returns void language plpgsql security definer set search_path=public as $$
+declare acct text; nm text; r text;
+begin
+  select client_account, full_name, role into acct, nm, r
+    from public.profiles where id=auth.uid();
+  update public.notifications set read_at=now()
+   where read_at is null
+     and (p_id is null or id=p_id)
+     and ( (acct is not null and recipient_kind='client' and recipient_client=acct)
+        or (acct is null and r in ('super_admin','recruitment_manager','recruitment_supervisor','account_officer','recruiter')
+            and recipient_kind='staff' and (recipient_name is null or recipient_name=nm)) );
+end; $$;
+revoke all on function public.cnt_notifications_read(bigint) from public, anon;
+grant execute on function public.cnt_notifications_read(bigint) to authenticated;
+
 -- New sign-ups are inert ('pending') until an admin assigns a real role
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path=public as $$

@@ -85,11 +85,17 @@
   .bell-btn:hover{background:#fff;box-shadow:var(--shadow)}
   .bell-dot{position:absolute;top:5px;right:6px;min-width:16px;height:16px;padding:0 3px;border-radius:99px;background:var(--red);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
   .bell-menu{position:absolute;right:0;top:46px;width:330px;max-height:64vh;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);z-index:40}
-  .bell-menu h4{font-size:12px;font-weight:800;padding:12px 14px;border-bottom:1px solid var(--line)}
-  .notif{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid #f1f5f9;cursor:pointer;text-align:left;width:100%;background:none}
+  .bell-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .bell-head h4{font-size:12px;font-weight:800}
+  .bell-head button{font-size:11px;font-weight:600;color:var(--red)}
+  .notif{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid #f1f5f9;cursor:pointer;text-align:left;width:100%;background:none;position:relative}
   .notif:hover{background:var(--bg)}
+  .notif.unread{background:var(--red-pale)}
+  .notif.unread::before{content:"";position:absolute;left:5px;top:16px;width:6px;height:6px;border-radius:99px;background:var(--red)}
   .notif .mi{font-size:18px;flex:none;margin-top:1px}
   .notif .nt{font-size:12.5px;color:#334155;line-height:1.4}
+  .notif .nt b{font-weight:700;color:#0f172a}
+  .notif .nt-time{display:block;font-size:10.5px;color:#94a3b8;margin-top:3px}
   /* dashboard */
   .dash-hero{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-bottom:16px}
   .dash-hero .logo{height:40px;max-width:120px;object-fit:contain;flex:none}
@@ -202,7 +208,7 @@
         <h1 id="page-title">Dashboard</h1>
         <div class="bell">
           <button class="bell-btn" onclick="toggleBell(event)" aria-label="Notifications"><span class="mi">notifications</span><span id="bell-dot" class="bell-dot hidden">0</span></button>
-          <div id="bell-menu" class="bell-menu hidden"><h4>Notifications</h4><div id="notif-list"></div></div>
+          <div id="bell-menu" class="bell-menu hidden"><div class="bell-head"><h4>Notifications</h4><button onclick="markAllNotifs(event)">Mark all read</button></div><div id="notif-list"></div></div>
         </div>
       </div>
 
@@ -344,7 +350,11 @@
     if(sessionStorage.getItem('cnt_confid_ok')==='1') _loadClientData();
     else $('#confid-gate').classList.remove('hidden');
   }
-  function _loadClientData(){ loadClientCandidates(); loadClientVacancies(); }
+  function _loadClientData(){
+    loadClientCandidates(); loadClientVacancies();
+    // Poll notifications so a fresh endorsement surfaces without a reload.
+    if(!window._notifPoll) window._notifPoll=setInterval(renderNotifications, 60000);
+  }
   // Best-effort access logging for accountability (RA 10173). Never blocks the
   // UI; ignores errors so a missing RPC or offline state can't break the portal.
   function clientAudit(action, ref){ try{ if(sb) sb.rpc('cnt_client_log', { p_action:String(action), p_ref: ref==null?null:String(ref) }); }catch(e){} }
@@ -420,24 +430,47 @@
       ? pending.map(candRow).join('')
       : '<div class="empty">Nothing needs your decision right now.</div>';
   }
-  function renderNotifications(){
-    const pending=_cands.filter(c=>c.client_status==='endorsed');
-    const filled=_vacs.filter(v=>v.status==='Filled');
-    const items=[];
-    pending.forEach(c=>items.push({icon:'how_to_reg',color:'#B45309',
-      html:'<b>'+esc(c.name||'A candidate')+'</b> ('+esc(c.role||'—')+') is awaiting your decision.',
-      go:()=>{ showClientTab('candidates'); openCandidate(c.id); }}));
-    filled.forEach(v=>items.push({icon:'work','color':'#15803D',
-      html:'Your <b>'+esc(v.role||'vacancy')+'</b> in '+esc(v.location||'—')+' has been filled.',
-      go:()=>showClientTab('history')}));
-    const dot=$('#bell-dot'); if(dot){ dot.textContent=pending.length; dot.classList.toggle('hidden', !pending.length); }
-    const list=$('#notif-list'); if(!list) return;
-    window._notifGo = items.map(i=>i.go);
-    list.innerHTML = items.length
-      ? items.map((i,idx)=>'<button class="notif" onclick="_notifClick('+idx+')"><span class="mi" style="color:'+i.color+'">'+i.icon+'</span><span class="nt">'+i.html+'</span></button>').join('')
-      : '<div class="empty">No notifications.</div>';
+  // Persistent, server-backed notifications (roadmap #7). Each event is a row
+  // in public.notifications, read via cnt_notifications; read/unread state and
+  // history survive reloads instead of being recomputed from current data.
+  let _notifs=[];
+  const NOTIF_ICON={endorsed:{i:'how_to_reg',c:'#B45309'}, approved:{i:'check_circle',c:'#15803D'},
+    rejected:{i:'cancel',c:'#B91C1C'}, filled:{i:'work',c:'#15803D'}, request:{i:'assignment',c:'#475569'}};
+  function notifTime(t){
+    if(!t) return ''; const d=new Date(t), s=(Date.now()-d)/1000;
+    if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago';
+    if(s<86400) return Math.floor(s/3600)+'h ago'; if(s<604800) return Math.floor(s/86400)+'d ago';
+    try{ return d.toLocaleDateString('en-PH',{month:'short',day:'numeric'}); }catch(e){ return ''; }
   }
-  window._notifClick=function(i){ $('#bell-menu').classList.add('hidden'); const fns=window._notifGo||[]; if(fns[i]) fns[i](); };
+  async function renderNotifications(){
+    const list=$('#notif-list'); if(!list) return;
+    if(!sb){ list.innerHTML='<div class="empty">No notifications.</div>'; return; }
+    const { data, error } = await sb.rpc('cnt_notifications',{ p_limit:30 });
+    if(error){ list.innerHTML='<div class="empty">Could not load notifications.</div>'; return; }
+    _notifs = data||[];
+    const unread=_notifs.filter(n=>!n.read_at).length;
+    const dot=$('#bell-dot'); if(dot){ dot.textContent=unread>9?'9+':unread; dot.classList.toggle('hidden', !unread); }
+    list.innerHTML = _notifs.length
+      ? _notifs.map(n=>{ const m=NOTIF_ICON[n.kind]||{i:'notifications',c:'#475569'};
+          return '<button class="notif'+(n.read_at?'':' unread')+'" onclick="_notifClick('+n.id+')">'
+            +'<span class="mi" style="color:'+m.c+'">'+m.i+'</span>'
+            +'<span class="nt"><b>'+esc(n.title||'')+'</b><br>'+esc(n.body||'')
+            +'<span class="nt-time">'+notifTime(n.created_at)+'</span></span></button>'; }).join('')
+      : '<div class="empty">No notifications yet.</div>';
+  }
+  window._notifClick=async function(id){
+    const n=_notifs.find(x=>x.id===id);
+    $('#bell-menu').classList.add('hidden');
+    if(n && !n.read_at && sb){ try{ await sb.rpc('cnt_notifications_read',{ p_id:id }); }catch(e){} }
+    if(n){ if(n.ref_type==='applicant' && n.ref_id){ showClientTab('candidates'); openCandidate(parseInt(n.ref_id,10)); }
+           else { showClientTab('history'); } }
+    renderNotifications();
+  };
+  window.markAllNotifs=async function(e){
+    if(e) e.stopPropagation();
+    if(sb){ try{ await sb.rpc('cnt_notifications_read',{ p_id:null }); }catch(err){} }
+    renderNotifications();
+  };
   window.toggleBell=function(e){ e.stopPropagation(); $('#bell-menu').classList.toggle('hidden'); };
   document.addEventListener('click',e=>{ const b=$('#bell-menu'); if(b && !b.classList.contains('hidden') && !e.target.closest('.bell')) b.classList.add('hidden'); });
 
