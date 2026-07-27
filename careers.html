@@ -619,6 +619,8 @@
       });
       if(ins.error) throw ins.error;
       localStorage.setItem('cnt_last_apply', String(Date.now()));
+      // The confirmation email is sent server-side by the cnt_application_confirm
+      // trigger (anon can't read the row back here — RLS is staff-only select).
       showSuccess(name);
     }catch(err){
       console.error(err);

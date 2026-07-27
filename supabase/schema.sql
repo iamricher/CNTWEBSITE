@@ -167,6 +167,31 @@ alter table public.applications
   add column if not exists endorsed_at   timestamptz,
   add column if not exists decided_at    timestamptz;
 
+-- Single-shot guard for the auto-confirmation email (applicant-confirm fn)
+alter table public.applications
+  add column if not exists confirmation_sent_at timestamptz;
+
+-- On every new application, asynchronously call the applicant-confirm Edge
+-- Function (via pg_net) to email the applicant a confirmation. Server-side, so
+-- it works despite the staff-only SELECT RLS, and wrapped so it can never block
+-- an insert. Deploy applicant-confirm with JWT verification off (see docs/email.md).
+create extension if not exists pg_net;
+create or replace function public.cnt_application_confirm()
+returns trigger language plpgsql security definer set search_path=public as $$
+begin
+  perform net.http_post(
+    url     := 'https://mtaknpmvvldmnsizvtuy.supabase.co/functions/v1/applicant-confirm',
+    headers := jsonb_build_object('Content-Type','application/json'),
+    body    := jsonb_build_object('application_id', NEW.id)
+  );
+  return NEW;
+exception when others then
+  return NEW;
+end; $$;
+drop trigger if exists cnt_application_confirm_trg on public.applications;
+create trigger cnt_application_confirm_trg after insert on public.applications
+  for each row execute function public.cnt_application_confirm();
+
 -- Which client a portal user represents (null for staff). Matches a taxonomy
 -- client name and applications.client / hiring_requests.account.
 alter table public.profiles
