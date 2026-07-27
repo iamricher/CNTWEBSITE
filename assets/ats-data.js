@@ -1476,7 +1476,7 @@
     if(meta){
       if(app.stage==='interview'&&(app.interviewRound||app.interviewType)){
         meta.className='mt-3 flex flex-wrap items-center gap-1.5';
-        meta.innerHTML='<span class="badge" style="background:#f3e8ff;color:#6d28d9;"><span class="material-icons-outlined" style="font-size:11px;margin-right:2px;">forum</span>'+_e([app.interviewRound,app.interviewType].filter(Boolean).join(' · '))+'</span>';
+        meta.innerHTML='<span class="badge" onclick="openInterviewModal(\''+app.id+'\')" title="Open interview details" style="background:#f3e8ff;color:#6d28d9;cursor:pointer;"><span class="material-icons-outlined" style="font-size:11px;margin-right:2px;">forum</span>'+_e([app.interviewRound,app.interviewType].filter(Boolean).join(' · '))+(app.interviewDate?(' · '+_e(_fmtDate(app.interviewDate))):'')+'</span>';
       } else { meta.className='hidden'; meta.innerHTML=''; }
     }
     renderActivityList(app);

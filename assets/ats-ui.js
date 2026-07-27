@@ -540,11 +540,11 @@ function renderDashboardInterviews(filtered){
         <span class="badge ${getStageBadge(app.stage)}">${getStageName(app.stage)}</span>
       </div>
       <div class="flex items-center gap-2">
-        <div class="bg-white border border-slate-200 rounded-lg p-1.5 flex flex-col items-center min-w-[38px]">
+        <div onclick="event.stopPropagation();openInterviewModal('${app.id}')" title="Open interview details" class="bg-white border border-slate-200 rounded-lg p-1.5 flex flex-col items-center min-w-[38px] cursor-pointer hover:border-red-300">
           <span class="text-[8px] uppercase font-bold text-slate-400">${fmtMonth(app.interviewDate)}</span>
           <span class="text-sm font-black text-slate-700">${fmtDay(app.interviewDate)}</span>
         </div>
-        <div><p class="text-[11px] font-semibold text-red-700">${fmtTime(app.interviewTime)}</p><p class="text-[10px] text-slate-400">${app.role} · ${app.account}</p></div>
+        <div onclick="event.stopPropagation();openInterviewModal('${app.id}')" title="Open interview details" class="cursor-pointer"><p class="text-[11px] font-semibold text-red-700">${fmtTime(app.interviewTime)}</p><p class="text-[10px] text-slate-400">${app.role} · ${app.account}</p></div>
       </div>
     </div>`).join('');
 }
@@ -652,8 +652,8 @@ function kanbanCardHtml(a, refused){
       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:${accColor}18;color:${accColor}">${a.account}</span>
       <span class="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">${a.location}</span>
     </div>
-    ${(a.stage==='interview'&&(a.interviewType||a.interviewRound))?`<div class="text-[9px] bg-violet-50 text-violet-700 rounded px-1.5 py-0.5 mb-1.5 font-bold inline-flex items-center gap-1"><span class="material-icons-outlined" style="font-size:10px;">forum</span>${a.interviewRound?a.interviewRound.replace(' Interview',''):''}${(a.interviewRound&&a.interviewType)?' · ':''}${a.interviewType||''}</div>`:''}
-    ${a.interviewDate?`<div class="text-[10px] bg-indigo-50 text-indigo-700 rounded-md px-1.5 py-0.5 mb-2 font-semibold inline-flex items-center gap-1"><span class="material-icons-outlined" style="font-size:11px;">event</span>${fmtMonth(a.interviewDate)} ${fmtDay(a.interviewDate)} ${fmtTime(a.interviewTime)}</div>`:''}
+    ${(a.stage==='interview'&&(a.interviewType||a.interviewRound))?`<div onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="Open interview details" class="text-[9px] bg-violet-50 text-violet-700 rounded px-1.5 py-0.5 mb-1.5 font-bold inline-flex items-center gap-1 cursor-pointer hover:bg-violet-100"><span class="material-icons-outlined" style="font-size:10px;">forum</span>${a.interviewRound?a.interviewRound.replace(' Interview',''):''}${(a.interviewRound&&a.interviewType)?' · ':''}${a.interviewType||''}</div>`:''}
+    ${a.interviewDate?`<div onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="Open interview details" class="text-[10px] bg-indigo-50 text-indigo-700 rounded-md px-1.5 py-0.5 mb-2 font-semibold inline-flex items-center gap-1 cursor-pointer hover:bg-indigo-100"><span class="material-icons-outlined" style="font-size:11px;">event</span>${fmtMonth(a.interviewDate)} ${fmtDay(a.interviewDate)} ${fmtTime(a.interviewTime)}</div>`:''}
     <div class="flex items-center justify-between pt-2 border-t border-slate-100">
       <span onclick="cntStatusMenu(event,'${a.id}')" title="${dot[1]} — click to change" class="cursor-pointer flex items-center flex-shrink-0" style="position:relative;"><span style="width:10px;height:10px;border-radius:50%;background:${dot[0]};display:inline-block;box-shadow:0 0 0 3px ${dot[0]}22;"></span></span>
       <div class="flex items-center gap-1.5">
