@@ -32,6 +32,8 @@
   .field{margin-bottom:14px}
   input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:var(--body)}
   input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-pale)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:6px}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{transition-duration:.001ms!important}}
   .btn{width:100%;border:none;background:var(--red);color:#fff;font-weight:700;font-size:14px;padding:12px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
   .btn:hover{background:var(--red-deep)}
   .btn:disabled{opacity:.6;cursor:default}

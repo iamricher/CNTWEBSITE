@@ -37,6 +37,8 @@
   ul{list-style:none}
   button{cursor:pointer;border:none;background:none;font-family:inherit}
   input,select,textarea{font-family:var(--font-body)}
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:6px}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
   .container{width:min(var(--max-w),100% - var(--gutter)*2);margin-inline:auto}
   .font-display{font-family:var(--font-display)}
 
