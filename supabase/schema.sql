@@ -563,6 +563,27 @@ create policy "hr client read"    on public.hiring_requests for select to authen
 create policy "hr client insert"  on public.hiring_requests for insert to authenticated
   with check (account = public.cnt_client_account() and status = 'Pending' and client_submitted = true);
 
+-- Only the Account Officer (or owner) may approve an MRF (Pending → Open) or
+-- change its assigned recruiter. RLS lets any staff UPDATE, so this trigger
+-- enforces the rule server-side (the UI gate alone is bypassable via the API).
+create or replace function public.cnt_mrf_guard() returns trigger
+language plpgsql security definer set search_path=public as $$
+declare r text;
+begin
+  if auth.uid() is null then return NEW; end if;
+  select role into r from public.profiles where id = auth.uid();
+  if ( (NEW.assigned_to   is distinct from OLD.assigned_to)
+    or (NEW.assigned_name is distinct from OLD.assigned_name)
+    or (OLD.status = 'Pending' and NEW.status = 'Open') )
+     and coalesce(r,'') not in ('account_officer','super_admin') then
+    raise exception 'Only the Account Officer may approve MRFs or assign recruiters';
+  end if;
+  return NEW;
+end; $$;
+drop trigger if exists cnt_mrf_guard_trg on public.hiring_requests;
+create trigger cnt_mrf_guard_trg before update on public.hiring_requests
+  for each row execute function public.cnt_mrf_guard();
+
 -- Audit log: staff append + read; no update/delete policy ⇒ rows are immutable
 create policy "audit insert staff" on public.audit_log for insert to authenticated with check (public.cnt_is_staff());
 create policy "audit read staff"   on public.audit_log for select to authenticated using (public.cnt_is_staff());
