@@ -171,9 +171,15 @@ alter table public.applications
 alter table public.applications
   add column if not exists confirmation_sent_at timestamptz;
 
--- Pre-Employment Requirements deployment milestone
+-- Deployment milestones (Contract → Orientation → Deployed → New Hire Report).
+-- These live in prod but were previously undocumented here (schema drift) —
+-- reconciled so a rebuild-from-schema keeps them.
 alter table public.applications
-  add column if not exists preemp_requirements_at timestamptz;
+  add column if not exists preemp_requirements_at timestamptz,
+  add column if not exists contract_signed_at     timestamptz,
+  add column if not exists oriented_at             timestamptz,
+  add column if not exists deployed_at             timestamptz,
+  add column if not exists newhire_reported_at     timestamptz;
 
 -- On every new application, asynchronously call the applicant-confirm Edge
 -- Function (via pg_net) to email the applicant a confirmation. Server-side, so
