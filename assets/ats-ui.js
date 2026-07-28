@@ -427,7 +427,11 @@ function handleGlobalSearch(val){ searchQuery=val.trim().toLowerCase(); renderAl
 
 function requestStageChange(id,targetStage,onSuccess,onCancel){
   targetStage=normStage(targetStage);
-  if(targetStage==='interview'){
+  // Moving to the Interview stage pops the scheduler so the recruiter sets it
+  // there and then. Match the built-in 'interview' key OR any stage whose name
+  // is an interview (covers renamed / custom stages in Settings).
+  const nm=(typeof getStageName==='function'?getStageName(targetStage):'')||'';
+  if(targetStage==='interview' || /interview/i.test(nm)){
     pendingStageChange={id,targetStage,onSuccess,onCancel};
     openInterviewModal(id,'Interview');
   }else{
