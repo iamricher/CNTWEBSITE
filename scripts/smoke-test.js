@@ -166,6 +166,29 @@ const gone = SAFEGUARDS.filter(([re]) => !re.test(careers)).map(([, l]) => l);
 gone.length ? fail('privacy/anti-spam controls present', 'missing: ' + gone.join(', '))
             : ok('all ' + SAFEGUARDS.length + ' privacy/anti-spam controls present');
 
+// ── 6. XSS guard: applicant-controlled fields escaped in render ─
+// Applicant data (name, role, …) reaches the ATS via the public careers form,
+// so it MUST be escaped everywhere it's rendered into innerHTML. This flags any
+// raw `${x.field}` interpolation of a risky field outside known-safe sinks
+// (toasts escape their own msg; CSV/map-keys/textContent aren't HTML).
+console.log('\nXSS: applicant fields escaped in render');
+const RISKY = 'name|role|account|location|phone|email|source|refuse_reason|requestor|assigned_name|interviewType|interviewRound|interviewVenue';
+// Flag raw VALUE output: ${x.field} or ${x.field||'…'} — NOT ternary tests
+// (${x.field ? … }) whose rendered branch is escaped separately.
+const rawFieldRe = new RegExp('\\$\\{\\s*(?:a|app|item|c|r)\\.(?:' + RISKY + ')\\b\\s*(?:\\}|\\|\\|)', 'g');
+const SAFE_LINE = /showToast\(|csv\s*\+=|\.textContent|const k\s*=|modal-title|confirm\(/;
+for (const f of ['assets/ats-ui.js', 'assets/ats-data.js']) {
+  let src; try { src = read(f); } catch { continue; }
+  const bad = [];
+  src.split('\n').forEach((line, i) => {
+    if (SAFE_LINE.test(line)) return;
+    if (rawFieldRe.test(line)) bad.push(i + 1);
+    rawFieldRe.lastIndex = 0;
+  });
+  bad.length ? fail(f + ' — applicant fields escaped', 'raw ${x.field} at line(s): ' + bad.join(', '))
+             : ok(f + ' — applicant fields escaped in HTML render');
+}
+
 // ── summary ────────────────────────────────────────────────────
 console.log('\n' + '─'.repeat(52));
 if (failures) {

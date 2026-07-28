@@ -536,7 +536,7 @@ function renderDashboardInterviews(filtered){
   dil.innerHTML=interviews.slice(0,4).map(app=>`
     <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:border-red-200 transition group" onclick="triggerResumeModal('${app.id}')">
       <div class="flex items-center justify-between mb-1.5">
-        <span class="text-xs font-bold text-slate-900 group-hover:text-red-800 transition truncate">${app.name}</span>
+        <span class="text-xs font-bold text-slate-900 group-hover:text-red-800 transition truncate">${_escForm(app.name)}</span>
         <span class="badge ${getStageBadge(app.stage)}">${getStageName(app.stage)}</span>
       </div>
       <div class="flex items-center gap-2">
@@ -544,7 +544,7 @@ function renderDashboardInterviews(filtered){
           <span class="text-[8px] uppercase font-bold text-slate-400">${fmtMonth(app.interviewDate)}</span>
           <span class="text-sm font-black text-slate-700">${fmtDay(app.interviewDate)}</span>
         </div>
-        <div onclick="event.stopPropagation();openInterviewModal('${app.id}')" title="Open interview details" class="cursor-pointer"><p class="text-[11px] font-semibold text-red-700">${fmtTime(app.interviewTime)}</p><p class="text-[10px] text-slate-400">${app.role} · ${app.account}</p></div>
+        <div onclick="event.stopPropagation();openInterviewModal('${app.id}')" title="Open interview details" class="cursor-pointer"><p class="text-[11px] font-semibold text-red-700">${fmtTime(app.interviewTime)}</p><p class="text-[10px] text-slate-400">${_escForm(app.role)} · ${_escForm(app.account)}</p></div>
       </div>
     </div>`).join('');
 }
@@ -557,7 +557,7 @@ function renderPendingRequestsMini(){
   el.innerHTML=pending.map(r=>{
     const pColor=r.priority==='Urgent'?'bg-red-50 text-red-700':r.priority==='High'?'bg-amber-50 text-amber-700':'bg-slate-100 text-slate-500';
     return `<div class="flex items-center justify-between gap-2 py-1.5">
-      <div class="flex-1 min-w-0"><p class="text-xs font-bold text-slate-800 truncate">${r.role}</p><p class="text-[10px] text-slate-400">${r.account} · ${r.location}</p></div>
+      <div class="flex-1 min-w-0"><p class="text-xs font-bold text-slate-800 truncate">${_escForm(r.role)}</p><p class="text-[10px] text-slate-400">${_escForm(r.account)} · ${_escForm(r.location)}</p></div>
       <div class="flex items-center gap-1.5 flex-shrink-0">${getCountdownChip(r.deadline)}<span class="badge ${pColor}">${r.priority}</span></div>
     </div>`;
   }).join('');
@@ -607,14 +607,14 @@ function renderApplicationsTable(pipeline){
   tb.innerHTML=pipeline.map(a=>{
     const acc=ACCOUNTS.find(ac=>ac.id===a.account);
     return `<tr>
-      <td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal('${a.id}')">${a.name}</td>
-      <td class="px-4 py-2.5 text-slate-600 text-xs">${a.role}</td>
-      <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${a.account}</span></td>
-      <td class="px-4 py-2.5 text-xs text-slate-400">${a.location}</td>
+      <td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal('${a.id}')">${_escForm(a.name)}</td>
+      <td class="px-4 py-2.5 text-slate-600 text-xs">${_escForm(a.role)}</td>
+      <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${_escForm(a.account)}</span></td>
+      <td class="px-4 py-2.5 text-xs text-slate-400">${_escForm(a.location)}</td>
       <td class="px-4 py-2.5"><span class="badge border ${getStageBadge(a.stage)}">${getStageName(a.stage)}</span>${a.client_status==='approved'?'<span class="badge ml-1" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0;">Client ✓</span>':a.client_status==='rejected'?'<span class="badge ml-1" style="background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;">Client ✗</span>':a.client_status==='endorsed'?'<span class="badge ml-1" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;">Endorsed</span>':''}${a.deployed_at?'<span class="badge ml-1" style="background:#e0e7ff;color:#4338ca;border:1px solid #c7d2fe;">Deployed</span>':''}</td>
-      <td class="px-4 py-2.5 text-xs text-slate-400">${a.source||'—'}</td>
+      <td class="px-4 py-2.5 text-xs text-slate-400">${_escForm(a.source||'—')}</td>
       <td class="px-4 py-2.5 text-xs text-slate-400">${a.appliedDate||'—'}</td>
-      <td class="px-4 py-2.5 text-xs text-slate-400 font-mono">${a.phone}</td>
+      <td class="px-4 py-2.5 text-xs text-slate-400 font-mono">${_escForm(a.phone)}</td>
       <td class="px-4 py-2.5 text-right">
         <button onclick="triggerResumeModal('${a.id}')" class="text-red-700 hover:text-red-900 text-[11px] font-bold cursor-pointer mr-2">View</button>
         <button onclick="openEditModal('${a.id}')" class="text-slate-500 hover:text-slate-800 text-[11px] font-medium cursor-pointer mr-2">Edit</button>
@@ -633,32 +633,32 @@ function kanbanCardHtml(a, refused){
   const stars=[1,2,3].map(n=>`<span onclick="event.stopPropagation();cntSetPriority('${a.id}',${(a.priority||0)===n?0:n})" title="${['','Good','Very Good','Excellent'][n]}" class="cursor-pointer material-icons-outlined" style="font-size:15px;color:${(a.priority||0)>=n?'#f59e0b':'#e2e8f0'};">star</span>`).join('');
   if(refused){
     return `<div class="kanban-card" style="opacity:.72;cursor:pointer;border-left:3px solid #cbd5e1;" onclick="triggerResumeModal('${a.id}')">
-      <p class="font-bold text-slate-600 text-[13px] leading-tight line-through truncate mb-0.5">${a.name}</p>
-      <p class="text-[11px] text-slate-400 mb-1.5 truncate">${a.role} · ${a.account}</p>
-      ${a.refuse_reason?`<div class="text-[10px] bg-slate-100 text-slate-500 rounded-md px-2 py-1 mb-2"><span class="font-semibold">Refused:</span> ${a.refuse_reason}</div>`:''}
+      <p class="font-bold text-slate-600 text-[13px] leading-tight line-through truncate mb-0.5">${_escForm(a.name)}</p>
+      <p class="text-[11px] text-slate-400 mb-1.5 truncate">${_escForm(a.role)} · ${_escForm(a.account)}</p>
+      ${a.refuse_reason?`<div class="text-[10px] bg-slate-100 text-slate-500 rounded-md px-2 py-1 mb-2"><span class="font-semibold">Refused:</span> ${_escForm(a.refuse_reason)}</div>`:''}
       <div class="flex justify-end pt-1.5 border-t border-slate-100"><button onclick="event.stopPropagation();cntReopen('${a.id}')" class="text-[11px] text-emerald-700 font-bold hover:underline cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Reopen</button></div>
     </div>`;
   }
   return `<div class="kanban-card" draggable="true" ondragstart="drag(event,'${a.id}')" onclick="triggerResumeModal('${a.id}')" style="border-left:3px solid ${accColor};">
     <div class="flex items-start justify-between gap-1 mb-0.5">
-      <p class="font-bold text-slate-900 text-[13px] leading-tight truncate">${a.name}</p>
+      <p class="font-bold text-slate-900 text-[13px] leading-tight truncate">${_escForm(a.name)}</p>
       <span class="kmenu flex gap-1 flex-shrink-0">
         <button onclick="event.stopPropagation();openEditModal('${a.id}')" title="Edit" class="text-slate-300 hover:text-slate-600 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:14px;">edit</span></button>
         <button onclick="event.stopPropagation();cntOpenRefuse('${a.id}')" title="Refuse" class="text-slate-300 hover:text-red-600 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:14px;">block</span></button>
       </span>
     </div>
-    <p class="text-[11px] text-slate-500 mb-1.5 truncate">${a.role}</p>
+    <p class="text-[11px] text-slate-500 mb-1.5 truncate">${_escForm(a.role)}</p>
     <div class="flex items-center gap-1 flex-wrap mb-2">
-      <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:${accColor}18;color:${accColor}">${a.account}</span>
-      <span class="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">${a.location}</span>
+      <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:${accColor}18;color:${accColor}">${_escForm(a.account)}</span>
+      <span class="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">${_escForm(a.location)}</span>
     </div>
-    ${(a.stage==='interview'&&(a.interviewType||a.interviewRound))?`<div onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="Open interview details" class="text-[9px] bg-violet-50 text-violet-700 rounded px-1.5 py-0.5 mb-1.5 font-bold inline-flex items-center gap-1 cursor-pointer hover:bg-violet-100"><span class="material-icons-outlined" style="font-size:10px;">forum</span>${a.interviewRound?a.interviewRound.replace(' Interview',''):''}${(a.interviewRound&&a.interviewType)?' · ':''}${a.interviewType||''}</div>`:''}
+    ${(a.stage==='interview'&&(a.interviewType||a.interviewRound))?`<div onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="Open interview details" class="text-[9px] bg-violet-50 text-violet-700 rounded px-1.5 py-0.5 mb-1.5 font-bold inline-flex items-center gap-1 cursor-pointer hover:bg-violet-100"><span class="material-icons-outlined" style="font-size:10px;">forum</span>${_escForm(a.interviewRound?a.interviewRound.replace(' Interview',''):'')}${(a.interviewRound&&a.interviewType)?' · ':''}${_escForm(a.interviewType||'')}</div>`:''}
     ${a.interviewDate?`<div onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="Open interview details" class="text-[10px] bg-indigo-50 text-indigo-700 rounded-md px-1.5 py-0.5 mb-2 font-semibold inline-flex items-center gap-1 cursor-pointer hover:bg-indigo-100"><span class="material-icons-outlined" style="font-size:11px;">event</span>${fmtMonth(a.interviewDate)} ${fmtDay(a.interviewDate)} ${fmtTime(a.interviewTime)}</div>`:''}
     <div class="flex items-center justify-between pt-2 border-t border-slate-100">
       <span onclick="cntStatusMenu(event,'${a.id}')" title="${dot[1]} — click to change" class="cursor-pointer flex items-center flex-shrink-0" style="position:relative;"><span style="width:10px;height:10px;border-radius:50%;background:${dot[0]};display:inline-block;box-shadow:0 0 0 3px ${dot[0]}22;"></span></span>
       <div class="flex items-center gap-1.5">
         <span class="flex items-center">${stars}</span>
-        <span class="flex items-center justify-center flex-shrink-0" title="${a.account}" style="width:20px;height:20px;border-radius:50%;background:${accColor};color:#fff;font-size:8px;font-weight:700;">${initials}</span>
+        <span class="flex items-center justify-center flex-shrink-0" title="${_escForm(a.account)}" style="width:20px;height:20px;border-radius:50%;background:${accColor};color:#fff;font-size:8px;font-weight:700;">${_escForm(initials)}</span>
       </div>
     </div>
   </div>`;
@@ -844,8 +844,8 @@ function renderAnalyticsDashboard(pipeline, filtered) {
       return `<div class="flex items-start gap-3 cursor-pointer group" onclick="triggerResumeModal('${a.id}')">
         <div class="activity-dot mt-1" style="background:${col};"></div>
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-bold text-slate-800 group-hover:text-red-800 transition truncate">${a.name}</p>
-          <p class="text-[10px] text-slate-500">${a.role} · <span style="color:${acc?.color||'#64748b'};font-weight:700">${a.account}</span></p>
+          <p class="text-xs font-bold text-slate-800 group-hover:text-red-800 transition truncate">${_escForm(a.name)}</p>
+          <p class="text-[10px] text-slate-500">${_escForm(a.role)} · <span style="color:${acc?.color||'#64748b'};font-weight:700">${_escForm(a.account)}</span></p>
           <div class="flex items-center gap-1.5 mt-0.5">
             <span class="material-icons-outlined" style="font-size:11px;color:${col};">${icon}</span>
             <span class="text-[10px] font-semibold" style="color:${col};">${getStageName(a.stage)}</span>
@@ -1058,12 +1058,12 @@ function renderTalentPool(pool){
   tpt.innerHTML=pool.map(c=>{
     const acc=ACCOUNTS.find(a=>a.id===c.account);
     return `<tr>
-      <td class="px-4 py-3 font-bold text-slate-800 text-sm cursor-pointer hover:text-red-700" onclick="triggerResumeModal('${c.id}')">${c.name}</td>
-      <td class="px-4 py-3 text-xs text-slate-600">${c.role}</td>
-      <td class="px-4 py-3"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${c.account}</span></td>
-      <td class="px-4 py-3 text-xs text-slate-400">${c.location}</td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm cursor-pointer hover:text-red-700" onclick="triggerResumeModal('${c.id}')">${_escForm(c.name)}</td>
+      <td class="px-4 py-3 text-xs text-slate-600">${_escForm(c.role)}</td>
+      <td class="px-4 py-3"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${_escForm(c.account)}</span></td>
+      <td class="px-4 py-3 text-xs text-slate-400">${_escForm(c.location)}</td>
       <td class="px-4 py-3"><span class="badge bg-amber-50 text-amber-700 border-amber-200">Available</span></td>
-      <td class="px-4 py-3 text-xs text-slate-400 font-mono">${c.phone}</td>
+      <td class="px-4 py-3 text-xs text-slate-400 font-mono">${_escForm(c.phone)}</td>
       <td class="px-4 py-3"><button onclick="activateFromPool('${c.id}')" class="bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 font-bold text-[11px] px-2.5 py-1 rounded-lg transition cursor-pointer">→ Move to Pipeline</button></td>
     </tr>`;
   }).join('');
@@ -1096,19 +1096,19 @@ function renderInterviewsGrid(filtered){
         </div>
         <div class="flex-1">
           <div class="flex items-start justify-between gap-1">
-            <h4 class="font-bold text-slate-900 text-sm">${item.name}</h4>
+            <h4 class="font-bold text-slate-900 text-sm">${_escForm(item.name)}</h4>
             <span class="badge border ${getStageBadge(item.stage)} text-[9px] flex-shrink-0">${getStageName(item.stage)}</span>
           </div>
           <p class="text-[11px] font-bold text-red-700 mt-0.5">${fmtTime(item.interviewTime)}</p>
-          <p class="text-[11px] text-slate-500 mt-0.5">${item.interviewType||'Interview'}</p>
-          <p class="text-xs text-slate-600 mt-0.5">${item.role}</p>
-          <p class="text-[10px] text-slate-400">${item.account} · ${item.location}</p>
+          <p class="text-[11px] text-slate-500 mt-0.5">${_escForm(item.interviewType||'Interview')}</p>
+          <p class="text-xs text-slate-600 mt-0.5">${_escForm(item.role)}</p>
+          <p class="text-[10px] text-slate-400">${_escForm(item.account)} · ${_escForm(item.location)}</p>
         </div>
       </div>
       <div class="pt-2.5 border-t border-slate-200 flex justify-between items-center gap-2">
-        <span class="text-[10px] text-slate-400 truncate min-w-0">${_isMeetUrl(item.interviewVenue)?'Online meeting':(item.interviewVenue||item.interviewType||'—')}</span>
+        <span class="text-[10px] text-slate-400 truncate min-w-0">${_isMeetUrl(item.interviewVenue)?'Online meeting':_escForm(item.interviewVenue||item.interviewType||'—')}</span>
         <div class="flex items-center gap-2 flex-none">
-          ${_isMeetUrl(item.interviewVenue)?`<a href="${item.interviewVenue}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-xs text-white bg-emerald-600 hover:bg-emerald-700 font-semibold px-2 py-1 rounded-lg cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">videocam</span>Join</a>`:''}
+          ${_isMeetUrl(item.interviewVenue)?`<a href="${_escForm(item.interviewVenue)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-xs text-white bg-emerald-600 hover:bg-emerald-700 font-semibold px-2 py-1 rounded-lg cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">videocam</span>Join</a>`:''}
           <button onclick="event.stopPropagation();openInterviewModal('${item.id}')" class="text-xs text-red-700 font-semibold hover:underline cursor-pointer flex items-center gap-1">
             <span class="material-icons-outlined" style="font-size:12px;">edit_calendar</span>Reschedule
           </button>
@@ -1201,10 +1201,10 @@ function renderOnboarding(onboarding){
     const pct=Math.round((filled/PH_REQUIREMENTS.length)*100);
     const acc=ACCOUNTS.find(ac=>ac.id===a.account);
     return `<tr>
-      <td class="px-4 py-3 font-bold text-slate-800 text-xs cursor-pointer hover:text-red-700" onclick="triggerResumeModal('${a.id}')">${a.name}</td>
-      <td class="px-4 py-3"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;font-size:10px;">${a.account}</span></td>
-      <td class="px-4 py-3 text-xs text-slate-600">${a.role}</td>
-      <td class="px-4 py-3 text-xs text-slate-400">${a.location}</td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-xs cursor-pointer hover:text-red-700" onclick="triggerResumeModal('${a.id}')">${_escForm(a.name)}</td>
+      <td class="px-4 py-3"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;font-size:10px;">${_escForm(a.account)}</span></td>
+      <td class="px-4 py-3 text-xs text-slate-600">${_escForm(a.role)}</td>
+      <td class="px-4 py-3 text-xs text-slate-400">${_escForm(a.location)}</td>
       <td class="px-4 py-3"><div class="flex items-center gap-2"><div class="h-1.5 bg-slate-200 rounded-full w-16 overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:${pct}%"></div></div><span class="text-[10px] font-bold text-slate-600">${filled}/${PH_REQUIREMENTS.length}</span></div></td>
       <td class="px-4 py-3 text-xs text-slate-400">${a.startDate||'TBD'}</td>
       <td class="px-4 py-3"><span class="badge ${pct===100?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-amber-50 text-amber-700 border-amber-200'} border">${pct===100?'Ready to Deploy':'Incomplete'}</span></td>
@@ -1250,11 +1250,11 @@ function renderHiringRequests(){
     const pColor=r.priority==='Urgent'?'bg-red-50 text-red-700':r.priority==='High'?'bg-amber-50 text-amber-700':'bg-slate-100 text-slate-500';
     const acc=ACCOUNTS.find(a=>a.id===r.account);
     return `<tr>
-      <td class="px-4 py-2.5 font-bold text-slate-700 text-xs">${r.id}</td>
-      <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${r.account}</span></td>
-      <td class="px-4 py-2.5 text-xs font-semibold text-slate-800">${r.role}${r.client_submitted?` <span class="badge" style="background:#cffafe;color:#0e7490;font-size:9px;vertical-align:middle;">Client-submitted</span>`:''}${r.assigned_name?`<div class="text-[10px] text-slate-400 font-normal mt-0.5">→ ${r.assigned_name}</div>`:''}</td>
-      <td class="px-4 py-2.5 text-xs text-slate-500">${r.location}</td>
-      <td class="px-4 py-2.5 text-xs text-slate-500">${r.type}</td>
+      <td class="px-4 py-2.5 font-bold text-slate-700 text-xs">${_escForm(r.id)}</td>
+      <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${_escForm(r.account)}</span></td>
+      <td class="px-4 py-2.5 text-xs font-semibold text-slate-800">${_escForm(r.role)}${r.client_submitted?` <span class="badge" style="background:#cffafe;color:#0e7490;font-size:9px;vertical-align:middle;">Client-submitted</span>`:''}${r.assigned_name?`<div class="text-[10px] text-slate-400 font-normal mt-0.5">→ ${_escForm(r.assigned_name)}</div>`:''}</td>
+      <td class="px-4 py-2.5 text-xs text-slate-500">${_escForm(r.location)}</td>
+      <td class="px-4 py-2.5 text-xs text-slate-500">${_escForm(r.type)}</td>
       <td class="px-4 py-2.5 text-center font-bold text-slate-700">${r.count}</td>
       <td class="px-4 py-2.5"><span class="priority-badge ${pColor}">${r.priority}</span></td>
       <td class="px-4 py-2.5"><span class="badge border ${sColor}">${r.status}</span></td>
@@ -1637,17 +1637,17 @@ function renderStrictResume(app){
     <h2 style="font-family:Inter,sans-serif;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7f1d1d;border-bottom:2px solid #7f1d1d;padding-bottom:3px;margin:0 0 8px;">Interview Schedule</h2>
     ${app.interviewDate ? `
     <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px;">
-      <tr><td style="padding:3px 0;color:#64748b;width:160px;">Date:</td><td style="font-weight:700;color:#1e293b;">${app.interviewDate}</td></tr>
+      <tr><td style="padding:3px 0;color:#64748b;width:160px;">Date:</td><td style="font-weight:700;color:#1e293b;">${_escForm(app.interviewDate)}</td></tr>
       <tr><td style="padding:3px 0;color:#64748b;">Time:</td><td style="font-weight:700;color:#1e293b;">${fmtTime(app.interviewTime)}</td></tr>
-      <tr><td style="padding:3px 0;color:#64748b;">Type:</td><td style="font-weight:700;color:#1e293b;">${app.interviewType||'—'}</td></tr>
-      <tr><td style="padding:3px 0;color:#64748b;">Interviewer:</td><td style="font-weight:700;color:#1e293b;">${app.interviewInterviewer||'—'}</td></tr>
-      <tr><td style="padding:3px 0;color:#64748b;">Venue / Link:</td><td style="font-weight:700;color:#1e293b;">${app.interviewVenue||'—'}</td></tr>
+      <tr><td style="padding:3px 0;color:#64748b;">Type:</td><td style="font-weight:700;color:#1e293b;">${_escForm(app.interviewType||'—')}</td></tr>
+      <tr><td style="padding:3px 0;color:#64748b;">Interviewer:</td><td style="font-weight:700;color:#1e293b;">${_escForm(app.interviewInterviewer||'—')}</td></tr>
+      <tr><td style="padding:3px 0;color:#64748b;">Venue / Link:</td><td style="font-weight:700;color:#1e293b;">${_escForm(app.interviewVenue||'—')}</td></tr>
     </table>` : '<p style="font-size:12px;color:#94a3b8;margin:0 0 14px;">No interview scheduled yet.</p>'}
     <h2 style="font-family:Inter,sans-serif;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7f1d1d;border-bottom:2px solid #7f1d1d;padding-bottom:3px;margin:0 0 8px;">Character Reference</h2>
     <p style="font-size:12px;color:#64748b;margin:0 0 14px;font-style:italic;">Available upon request.</p>
     <div style="border-top:1px solid #e2e8f0;margin-top:16px;padding-top:12px;font-size:11px;color:#94a3b8;text-align:center;font-style:italic;">
       I hereby certify that the above information is true and correct to the best of my knowledge and beliefs.<br>
-      <strong style="color:#1e293b;font-style:normal;">${app.name}</strong>
+      <strong style="color:#1e293b;font-style:normal;">${_escForm(app.name)}</strong>
     </div>`;
 }
 
@@ -1747,14 +1747,14 @@ function renderRecruiterComments(app){
   if(!comments.length){list.innerHTML=`<div class="text-center py-6 text-slate-400 text-xs"><span class="material-icons-outlined text-2xl mb-1 block">chat_bubble_outline</span>No recruiter notes yet.</div>`;return;}
   list.innerHTML=comments.map((c,idx)=>`
     <div class="flex gap-3 p-3 rounded-xl ${c.flagged?'bg-red-50 border border-red-100':'bg-slate-50 border border-slate-100'}">
-      <div class="recruiter-note-avatar flex-shrink-0">${c.author.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+      <div class="recruiter-note-avatar flex-shrink-0">${_escForm(String(c.author||'').split(' ').map(w=>w[0]).join('').slice(0,2))}</div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
-          <span class="text-[11px] font-bold text-slate-700">${c.author}</span>
+          <span class="text-[11px] font-bold text-slate-700">${_escForm(c.author)}</span>
           ${c.flagged?'<span class="badge bg-red-100 text-red-700 border-red-200"><span class="material-icons-outlined" style="font-size:10px;">flag</span> Flagged</span>':''}
-          <span class="ml-auto text-[10px] text-slate-400">${c.ts}</span>
+          <span class="ml-auto text-[10px] text-slate-400">${_escForm(c.ts)}</span>
         </div>
-        <p class="text-xs text-slate-600 leading-relaxed">${c.text}</p>
+        <p class="text-xs text-slate-600 leading-relaxed">${_escForm(c.text)}</p>
         <button onclick="deleteRecruiterComment('${app.id}',${idx})" class="text-[10px] text-slate-400 hover:text-red-500 mt-1 cursor-pointer">Delete</button>
       </div>
     </div>`).join('');
@@ -1857,26 +1857,26 @@ function generateOfferLetter(){
       <div><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Recruitment & Manpower Services" class="h-12 w-auto" /></div>
       <div class="text-right text-xs text-slate-500"><p>${today}</p><p>Ref: OFFER-${Date.now().toString().slice(-6)}</p></div>
     </div>
-    <p class="mb-2">Dear <strong>${app.name}</strong>,</p>
-    <p class="mb-4">We are pleased to inform you that you have been selected for the position of <strong>${app.role}</strong> under our client account <strong>${app.account}</strong> assigned at <strong>${app.location}</strong>.</p>
+    <p class="mb-2">Dear <strong>${_escForm(app.name)}</strong>,</p>
+    <p class="mb-4">We are pleased to inform you that you have been selected for the position of <strong>${_escForm(app.role)}</strong> under our client account <strong>${_escForm(app.account)}</strong> assigned at <strong>${_escForm(app.location)}</strong>.</p>
     <div class="my-5 p-4 bg-emerald-50 border border-emerald-200 rounded-xl grid grid-cols-2 gap-4 text-center">
-      <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Position Offered</p><p class="text-base font-extrabold text-slate-900">${app.role}</p><p class="text-[11px] text-slate-500">${app.account} · ${app.location}</p></div>
-      <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Offer Amount</p><p class="text-base font-extrabold text-emerald-700">${offerAmt}</p><p class="text-[11px] text-slate-500">Monthly Basic Salary</p></div>
+      <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Position Offered</p><p class="text-base font-extrabold text-slate-900">${_escForm(app.role)}</p><p class="text-[11px] text-slate-500">${_escForm(app.account)} · ${_escForm(app.location)}</p></div>
+      <div><p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Offer Amount</p><p class="text-base font-extrabold text-emerald-700">${_escForm(offerAmt)}</p><p class="text-[11px] text-slate-500">Monthly Basic Salary</p></div>
     </div>
     <p class="mb-2 font-semibold text-slate-800 border-b pb-1 border-slate-200">Terms of Employment</p>
     <table class="w-full text-sm mb-4" style="border-collapse:collapse;">
-      <tr><td class="py-1 text-slate-500 w-40">Position:</td><td class="font-semibold">${app.role}</td></tr>
-      <tr><td class="py-1 text-slate-500">Client Account:</td><td class="font-semibold">${app.account}</td></tr>
-      <tr><td class="py-1 text-slate-500">Location:</td><td class="font-semibold">${app.location}</td></tr>
-      <tr><td class="py-1 text-slate-500">Basic Salary:</td><td class="font-semibold">${offerAmt}</td></tr>
-      <tr><td class="py-1 text-slate-500">Start Date:</td><td class="font-semibold">${app.availability||app.startDate||'To be confirmed'}</td></tr>
+      <tr><td class="py-1 text-slate-500 w-40">Position:</td><td class="font-semibold">${_escForm(app.role)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Client Account:</td><td class="font-semibold">${_escForm(app.account)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Location:</td><td class="font-semibold">${_escForm(app.location)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Basic Salary:</td><td class="font-semibold">${_escForm(offerAmt)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Start Date:</td><td class="font-semibold">${_escForm(app.availability||app.startDate||'To be confirmed')}</td></tr>
       <tr><td class="py-1 text-slate-500">Offer Valid Until:</td><td class="font-semibold">${validUntil}</td></tr>
     </table>
     <p class="mb-4">This offer is subject to the submission of complete pre-employment requirements including NBI Clearance, Medical Certificate, SSS, PhilHealth, Pag-IBIG, TIN, PSA Birth Certificate, Diploma/TOR, and Barangay Clearance.</p>
     <p class="mb-6">Please confirm your acceptance of this offer by signing below and returning a copy to our office on or before <strong>${validUntil}</strong>.</p>
     <div class="grid grid-cols-2 gap-8 mt-8">
       <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">HR Manager / Authorized Representative</p><p class="text-xs font-semibold">CNT Recruitment Services</p></div>
-      <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">Candidate's Signature</p><p class="text-xs font-semibold">${app.name} · Date:</p></div>
+      <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">Candidate's Signature</p><p class="text-xs font-semibold">${_escForm(app.name)} · Date:</p></div>
     </div>`;
   document.getElementById('offer-modal').classList.remove('hidden');
   showToast('Offer letter generated','success');
@@ -1902,7 +1902,7 @@ function showToast(msg,type='info'){
   const bg=type==='success'?'bg-emerald-700':type==='info'?'bg-red-800':'bg-slate-900';
   const icon=type==='success'?'check_circle':'info';
   toast.className=`${bg} text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-xl flex items-center gap-2 toast-in`;
-  toast.innerHTML=`<span class="material-icons-outlined" style="font-size:15px;">${icon}</span><span>${msg}</span>`;
+  toast.innerHTML=`<span class="material-icons-outlined" style="font-size:15px;">${icon}</span><span>${_escForm(msg)}</span>`;
   cont.appendChild(toast);
   setTimeout(()=>{toast.style.transition='all .25s ease';toast.style.opacity='0';toast.style.transform='translateX(20px)';setTimeout(()=>toast.remove(),280);},3200);
 }

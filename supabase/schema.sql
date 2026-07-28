@@ -525,8 +525,17 @@ do $wipe$ declare p record; begin
   end loop;
 end $wipe$;
 
--- Applications: anyone may APPLY; only staff read/update; managers delete
-create policy "apps insert public" on public.applications for insert to anon, authenticated with check (true);
+-- Applications: anyone may APPLY (as a fresh 'new' row only); only staff
+-- read/update; managers delete. Anon can't pre-set stage/decision fields — a
+-- blanket `with check (true)` let a direct call inject a pre-approved candidate.
+create policy "apps insert anon" on public.applications for insert to anon
+  with check (
+    coalesce(stage,'new')='new' and coalesce(status,'active')='active'
+    and coalesce(client_status,'none')='none' and coalesce(priority,0)=0
+    and endorsed_at is null and decided_at is null and client_reason is null
+    and refuse_reason is null and confirmation_sent_at is null and preemp_requirements_at is null
+  );
+create policy "apps insert staff"  on public.applications for insert to authenticated with check (public.cnt_is_staff());
 create policy "apps read staff"    on public.applications for select to authenticated using (public.cnt_is_staff());
 create policy "apps update staff"  on public.applications for update to authenticated using (public.cnt_is_staff()) with check (public.cnt_is_staff());
 create policy "apps delete mgr"    on public.applications for delete to authenticated using (public.cnt_is_manager());
@@ -595,6 +604,14 @@ create policy "resumes read client" on storage.objects
 -- managers may delete CVs — required for the RA 10173 retention purge / erasure
 create policy "resumes delete mgr" on storage.objects
   for delete to authenticated using (bucket_id='resumes' and public.cnt_is_manager());
+
+-- Constrain résumé uploads: 5 MB cap + CV file types only (anon upload otherwise
+-- has no size/type limit — a storage-abuse vector).
+update storage.buckets
+   set file_size_limit    = 5242880,
+       allowed_mime_types = array['application/pdf','application/msword',
+         'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+ where id = 'resumes';
 
 -- ────────────────────────────────────────────────────────────
 -- 6. SEED MASTER DATA + OPEN POSITIONS  (only when empty — never wipes live data)
