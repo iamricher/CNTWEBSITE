@@ -52,6 +52,33 @@ bodies are scrubbed before send so applicant PII isn't shipped to Sentry.
 
 The Edge Functions still log to Supabase → Edge Functions → Logs (not Sentry).
 
+## Application intake proxy + spam protection
+
+The public careers form posts to a Vercel Function (`api/apply.js`) instead of
+straight to Supabase, so the endpoint can be protected at the edge and validated
+server-side. It inserts with the public anon key, so the tightened
+`apps insert anon` RLS still governs the write. If the function is ever
+unavailable the form falls back to a direct insert, so applying never breaks.
+
+**To turn on edge protection** (Vercel dashboard → your project → **Firewall**):
+1. **Bot Protection** — enable the managed Bot Protection ruleset (blocks known
+   bad bots hitting the site, including `/api/apply`).
+2. **Rate-limit rule** on `/api/apply` — e.g. Firewall → Custom Rules → add a
+   rate-limit: path starts-with `/api/apply`, method `POST`, ~5 requests / 60s
+   per IP, action `deny`. Stage with `log` first, review, then enforce.
+
+**Optional — full Vercel BotID** (invisible verification): requires bundling the
+BotID client SDK (a build step this static site doesn't currently have). Add
+`@vercel/botid`, call `initBotId()` on the careers page via a bundler, and enable
+BotID on the project — the function already calls `checkBotId()` (fail-open) and
+will start rejecting bots once it's active.
+
+**Optional — fully close the direct-Supabase path** (so ALL applications must go
+through the protected proxy): set `SUPABASE_SERVICE_ROLE_KEY` as an env var on
+the Vercel project, switch `api/apply.js` to insert with that key, then drop the
+`apps insert anon` policy. Do this only after confirming the proxy works, or the
+public apply form will stop accepting submissions.
+
 ## Tests
 
 - `npm test` — static smoke tests, résumé-parser unit tests, client-portal

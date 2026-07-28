@@ -610,15 +610,35 @@
       const path=`${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safe}`;
       const up=await sb.storage.from('resumes').upload(path,file,{cacheControl:'3600',upsert:false});
       if(up.error) throw up.error;
-      const ins=await sb.from('applications').insert({
-        job_id:activeJob.id??null, name, email, phone,
+      // Submit through the /api/apply proxy so the endpoint can be bot/rate
+      // protected + validated server-side. Falls back to a direct insert if the
+      // proxy is unavailable, so applying never breaks (RLS still enforces a
+      // fresh 'new' row either way).
+      const payload={ job_id:activeJob.id??null, name, email, phone,
         role:activeJob.role, client:activeJob.client, location:activeJob.location,
         experience:f.experience.value||null, source:f.source.value||'Website',
-        cover_note:f.cover_note.value.trim()||null, resume_url:path, stage:'new',
+        cover_note:f.cover_note.value.trim()||null, resume_url:path,
         referred_by:referredBy||null, referral_relation:referralRelation||null,
-        consent_at:new Date().toISOString()
-      });
-      if(ins.error) throw ins.error;
+        company_website:(f.company_website&&f.company_website.value)||'' };
+      let submitted=false, proxyErr=null;
+      try{
+        const resp=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if(resp.ok){ submitted=true; }
+        else if(resp.status>=400 && resp.status<500){ const j=await resp.json().catch(()=>({})); proxyErr=j.error||'Your submission could not be accepted.'; }
+        // 5xx → leave submitted=false to fall back
+      }catch(_){ /* proxy unreachable → fall back */ }
+      if(proxyErr) throw new Error(proxyErr);
+      if(!submitted){
+        const ins=await sb.from('applications').insert({
+          job_id:activeJob.id??null, name, email, phone,
+          role:activeJob.role, client:activeJob.client, location:activeJob.location,
+          experience:f.experience.value||null, source:f.source.value||'Website',
+          cover_note:f.cover_note.value.trim()||null, resume_url:path, stage:'new',
+          referred_by:referredBy||null, referral_relation:referralRelation||null,
+          consent_at:new Date().toISOString()
+        });
+        if(ins.error) throw ins.error;
+      }
       localStorage.setItem('cnt_last_apply', String(Date.now()));
       // The confirmation email is sent server-side by the cnt_application_confirm
       // trigger (anon can't read the row back here — RLS is staff-only select).
