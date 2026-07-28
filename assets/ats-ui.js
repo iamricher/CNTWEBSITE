@@ -355,6 +355,7 @@ function cntRenderApplicantForm(app){
   const rd=document.getElementById('cnt-resume-details');
   if(rd) rd.classList.toggle('hidden', !anyDetail);
   cntRenderStageStepper(app);
+  cntProfIntPopulate(app);
 }
 function cntRenderStageStepper(app){
   const el=document.getElementById('resume-stage-stepper'); if(!el) return;
@@ -1817,24 +1818,113 @@ function updateApplicantStageFromModal(newStage){
   if(!currentViewedApplicantId)return;
   const app=findApplicant(currentViewedApplicantId);if(!app||app.stage===newStage)return;
   const oldStage=app.stage;
-  requestStageChange(currentViewedApplicantId,newStage,
-    ()=>{
-      const sb=document.getElementById('resume-stage-badge');
-      sb.textContent=getStageName(newStage);
-      sb.className='badge border '+getStageBadge(newStage);
-      const freshApp=findApplicant(currentViewedApplicantId);
-      const st=PIPELINE_STAGES.find(s=>s.key===newStage);
-      const isHired = st?st.is_hired:(newStage==='hired'||newStage==='onboarding');
-      const offerBtn=document.getElementById('offer-letter-btn');
-      const offerBox=document.getElementById('offer-summary-box');
-      if(isHired){
-        offerBtn.classList.remove('hidden');offerBox.classList.remove('hidden');
-        if(window.cntRenderOfferBox) cntRenderOfferBox(freshApp);
-      }else{offerBtn.classList.add('hidden');offerBox.classList.add('hidden');}
-      if(freshApp){ if(window.cntRenderApplicantForm) cntRenderApplicantForm(freshApp); if(window.cntProfileExtras) cntProfileExtras(freshApp); if(window.cntRefreshProfilePanels) cntRefreshProfilePanels(freshApp); }
-    },
-    ()=>{ const sel=document.getElementById('resume-stage-select'); if(sel) sel.value=oldStage; }
-  );
+  const afterChange=()=>{
+    const sb=document.getElementById('resume-stage-badge');
+    if(sb){ sb.textContent=getStageName(newStage); sb.className='badge border '+getStageBadge(newStage); }
+    const freshApp=findApplicant(currentViewedApplicantId);
+    const st=PIPELINE_STAGES.find(s=>s.key===newStage);
+    const isHired = st?st.is_hired:(newStage==='hired'||newStage==='onboarding');
+    const offerBtn=document.getElementById('offer-letter-btn');
+    const offerBox=document.getElementById('offer-summary-box');
+    if(offerBtn&&offerBox){ if(isHired){ offerBtn.classList.remove('hidden');offerBox.classList.remove('hidden'); if(window.cntRenderOfferBox) cntRenderOfferBox(freshApp); } else { offerBtn.classList.add('hidden');offerBox.classList.add('hidden'); } }
+    if(freshApp){ if(window.cntRenderApplicantForm) cntRenderApplicantForm(freshApp); if(window.cntProfileExtras) cntProfileExtras(freshApp); if(window.cntRefreshProfilePanels) cntRefreshProfilePanels(freshApp); }
+  };
+  // Interview scheduling is inline in the profile — move the stage and focus the
+  // Interview Schedule panel instead of opening a separate popup.
+  const norm=normStage(newStage);
+  const nm=(typeof getStageName==='function'?getStageName(norm):'')||'';
+  if(norm==='interview' || /interview/i.test(nm)){
+    executeStageChange(currentViewedApplicantId,norm);
+    afterChange();
+    if(typeof cntProfIntFocus==='function') cntProfIntFocus();
+    return;
+  }
+  requestStageChange(currentViewedApplicantId,newStage, afterChange,
+    ()=>{ const sel=document.getElementById('resume-stage-select'); if(sel) sel.value=oldStage; });
+}
+
+// ── Inline "Interview Schedule" panel in the applicant profile ──────────
+// The schedule lives with the applicant (one dashboard) instead of a popup.
+function _profIntPast(){
+  const d=(document.getElementById('prof-int-date')||{}).value||'';
+  let t=(document.getElementById('prof-int-time')||{}).value||'';
+  if(!d) return false;
+  if(!/^\d{2}:\d{2}/.test(t)) t='23:59';
+  const when=new Date(d+'T'+t.slice(0,5));
+  return !isNaN(when.getTime()) && when.getTime()<Date.now();
+}
+function cntProfIntPopulate(app){
+  if(!app) return;
+  const g=id=>document.getElementById(id);
+  if(g('prof-int-date'))        g('prof-int-date').value=app.interviewDate||'';
+  if(g('prof-int-time'))        g('prof-int-time').value=app.interviewTime||'';
+  if(g('prof-int-round'))       g('prof-int-round').value=app.interviewRound||'Initial Interview';
+  if(g('prof-int-kind'))        g('prof-int-kind').value=app.interviewType||'Phone Call';
+  if(g('prof-int-interviewer')) g('prof-int-interviewer').value=app.interviewInterviewer||'';
+  if(g('prof-int-venue'))       g('prof-int-venue').value=app.interviewVenue||'';
+  const st=g('prof-int-status'); if(st){ st.textContent=''; }
+  cntProfIntToggle();
+}
+function cntProfIntToggle(){
+  const kind=(document.getElementById('prof-int-kind')||{}).value||'';
+  const online=kind==='Video';
+  const box=document.getElementById('prof-int-online'); if(box) box.style.display=online?'':'none';
+  const label=document.getElementById('prof-int-venue-label');
+  const input=document.getElementById('prof-int-venue');
+  if(label) label.textContent = online?'Online meeting link' : (kind==='Phone Call'?'Contact number / notes':'Venue / office address');
+  if(input) input.placeholder = online?'Paste or generate a video link' : (kind==='Phone Call'?'Number to call (optional)':'Office address');
+  cntProfIntSync();
+}
+function cntProfIntSync(){
+  const gen=document.getElementById('prof-int-gen');
+  const venue=(document.getElementById('prof-int-venue')||{}).value||'';
+  const past=_profIntPast(), hasLink=_isMeetUrl(venue);
+  if(gen){ const lock=hasLink&&!past; gen.disabled=lock; gen.style.opacity=lock?'0.5':''; gen.style.cursor=lock?'not-allowed':'pointer';
+    gen.title=lock?'A meeting link is set — regenerate after the scheduled time passes':'Create an instant online meeting room'; }
+  const warn=document.getElementById('prof-int-warning');
+  if(warn){ if(past){ warn.classList.remove('hidden'); warn.innerHTML='<span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">warning</span>The scheduled time has passed and this interview is still open. If the candidate didn’t attend, regenerate the link or reschedule, then move them forward or refuse.'; } else warn.classList.add('hidden'); }
+}
+function cntProfIntGen(){
+  const venue=(document.getElementById('prof-int-venue')||{}).value||'';
+  if(_isMeetUrl(venue) && !_profIntPast()){ if(window.showToast) showToast('A meeting link is already set. You can regenerate it after the scheduled time passes.','info'); return; }
+  const id=String(currentViewedApplicantId||'').replace(/[^\w]/g,'');
+  const rand=Math.random().toString(36).slice(2,8);
+  document.getElementById('prof-int-venue').value='https://meet.jit.si/CNT-Interview-'+(id||'x')+'-'+rand;
+  const k=document.getElementById('prof-int-kind'); if(k && k.value!=='Video'){ k.value='Video'; cntProfIntToggle(); }
+  cntProfIntSync();
+  if(window.showToast) showToast('Online meeting link generated','success');
+}
+function cntProfIntJoin(){
+  const v=((document.getElementById('prof-int-venue')||{}).value||'').trim();
+  if(/^https?:\/\//i.test(v)) window.open(v,'_blank','noopener');
+  else if(window.showToast) showToast('No online meeting link set — press Generate or paste one','info');
+}
+function cntProfIntFocus(){
+  const p=document.getElementById('prof-interview');
+  if(p) p.scrollIntoView({behavior:'smooth',block:'center'});
+  const d=document.getElementById('prof-int-date'); if(d) setTimeout(()=>{ try{ d.focus(); }catch(e){} },320);
+}
+function cntProfInterviewSave(){
+  const id=currentViewedApplicantId; const app=findApplicant(id); if(!app) return;
+  const date=(document.getElementById('prof-int-date')||{}).value||'';
+  const time=(document.getElementById('prof-int-time')||{}).value||'';
+  const round=(document.getElementById('prof-int-round')||{}).value||'Initial Interview';
+  const type=(document.getElementById('prof-int-kind')||{}).value||'Phone Call';
+  const interviewer=(document.getElementById('prof-int-interviewer')||{}).value||'';
+  const venue=(document.getElementById('prof-int-venue')||{}).value||'';
+  if(!date || !time){ if(window.showToast) showToast('Set an interview date and time first.','info'); return; }
+  updateApplicant(id,{interviewDate:date,interviewTime:time,interviewType:type,interviewRound:round,interviewInterviewer:interviewer,interviewVenue:venue});
+  const fresh=findApplicant(id);
+  if(window.cntPersistInterview && fresh) cntPersistInterview(fresh,{interview_date:date,interview_time:time,interview_type:type,interview_round:round,interview_link:venue||null});
+  if(window.cntLogActivity && fresh) cntLogActivity(fresh,'stage',round+' scheduled — '+type+(date?(' on '+date):''));
+  // Move to the Interview stage if the candidate hasn't reached it yet.
+  const cur=PIPELINE_STAGES.findIndex(s=>s.key===app.stage);
+  const iv=PIPELINE_STAGES.findIndex(s=>s.key==='interview');
+  if(iv>=0 && cur>=0 && cur<iv && typeof executeStageChange==='function') executeStageChange(id,'interview');
+  const st=document.getElementById('prof-int-status'); if(st){ st.textContent='✓ Saved'; st.style.color='#166534'; }
+  if(window.showToast) showToast('Interview scheduled for '+app.name,'success');
+  renderAll();
+  const fr=findApplicant(id); if(fr && typeof cntProfileExtras==='function') cntProfileExtras(fr);
 }
 
 function toggleRequirement(id,req,checked){

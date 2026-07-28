@@ -1131,7 +1131,7 @@
               <button id="offer-letter-btn" onclick="generateOfferLetter()" class="hidden bg-red-800 hover:bg-red-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 cursor-pointer offer-glow">
                 <span class="material-icons-outlined" style="font-size:13px;">description</span> Generate Offer
               </button>
-              <button onclick="openInterviewModal(currentViewedApplicantId)" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
+              <button onclick="cntProfIntFocus()" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
                 <span class="material-icons-outlined" style="font-size:13px;">event</span> Send Interview
               </button>
               <button onclick="cntDraftEmail(currentViewedApplicantId)" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
@@ -1187,6 +1187,31 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0.5">
               <div class="cnt-frow"><span class="cnt-frow-l">Applied Job</span><span class="cnt-frow-v font-semibold text-red-800" id="resume-appliedjob-val">—</span></div>
               <div class="cnt-frow"><span class="cnt-frow-l">Client</span><span class="cnt-frow-v" id="resume-department-val">—</span></div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100" id="prof-interview">
+            <p class="cnt-sec-title">Interview Schedule</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5">
+              <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Date</label><input id="prof-int-date" type="date" onchange="cntProfIntSync()" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs"></div>
+              <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Time</label><input id="prof-int-time" type="time" onchange="cntProfIntSync()" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs"></div>
+              <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Round</label><select id="prof-int-round" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white"><option>Initial Interview</option><option>Second Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
+              <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Kind of Interview</label><select id="prof-int-kind" onchange="cntProfIntToggle()" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs bg-white"><option>Phone Call</option><option>Video</option><option>Onsite / Face-to-Face Interview</option></select></div>
+              <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Interviewer</label><input id="prof-int-interviewer" placeholder="HR Manager / Account Manager" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs"></div>
+              <div><label id="prof-int-venue-label" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Venue / Online meeting link</label>
+                <div class="flex gap-1.5">
+                  <input id="prof-int-venue" placeholder="Office address, or paste/generate a link" class="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                  <span id="prof-int-online" class="flex gap-1.5 flex-none" style="display:none;">
+                    <button type="button" id="prof-int-gen" onclick="cntProfIntGen()" title="Create an instant online meeting room" class="px-2 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-[11px] font-semibold hover:bg-slate-50 cursor-pointer">Generate</button>
+                    <button type="button" onclick="cntProfIntJoin()" title="Open the meeting" class="px-2 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold cursor-pointer">Join</button>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div id="prof-int-warning" class="hidden text-[11px] font-semibold rounded-lg px-3 py-2 mt-2.5" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;"></div>
+            <div class="flex items-center gap-2.5 mt-3">
+              <button type="button" onclick="cntProfInterviewSave()" class="text-xs font-semibold text-white bg-red-800 hover:bg-red-900 rounded-lg px-4 py-2 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:14px;">event_available</span>Confirm slot</button>
+              <span id="prof-int-status" class="text-[11px] text-slate-400"></span>
             </div>
           </div>
 
