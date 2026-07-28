@@ -35,6 +35,23 @@ To diagnose without breaking users, temporarily change the header key to
 `Content-Security-Policy-Report-Only` — the browser will report violations
 without enforcing them.
 
+## Error monitoring (Sentry)
+
+Production errors are captured with Sentry so failures don't die silently in the
+browser console. It's **off until you set a DSN**:
+
+1. Create a free project at <https://sentry.io> (platform: Browser / JavaScript).
+2. Copy the project's **DSN** (a public URL, e.g. `https://abc@o123.ingest.us.sentry.io/456`
+   — safe to embed, like the anon key).
+3. Paste it into `assets/supabase-config.js` as `window.SENTRY_DSN = '…'` and redeploy.
+
+`assets/sentry-init.js` then loads the SDK (from jsDelivr, already CSP-allowed) and
+initialises it on the ATS, careers, client, and status pages. The CSP already
+permits Sentry's ingest host (`connect-src … https://*.sentry.io`). Request
+bodies are scrubbed before send so applicant PII isn't shipped to Sentry.
+
+The Edge Functions still log to Supabase → Edge Functions → Logs (not Sentry).
+
 ## Tests
 
 - `npm test` — static smoke tests, résumé-parser unit tests, client-portal

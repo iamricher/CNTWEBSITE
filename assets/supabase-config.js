@@ -14,6 +14,10 @@
 window.SUPABASE_URL      = 'https://mtaknpmvvldmnsizvtuy.supabase.co';
 window.SUPABASE_ANON_KEY = 'sb_publishable_GYmTJWeUriWXjFkO9j2J7w_cwJNV0Au';
 
+/* Error monitoring (optional). Paste your Sentry DSN to turn it on — it's a
+   public URL, safe to embed (like the anon key). Empty = monitoring off. */
+window.SENTRY_DSN = '';
+
 /* --- do not edit below --------------------------------------------------- */
 window.SUPABASE_READY =
   !!window.SUPABASE_URL &&
