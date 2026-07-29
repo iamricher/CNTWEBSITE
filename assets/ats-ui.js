@@ -356,6 +356,7 @@ function cntRenderApplicantForm(app){
   if(rd) rd.classList.toggle('hidden', !anyDetail);
   cntRenderStageStepper(app);
   cntRenderProfileTabs(app);
+  cntRenderStageOverride(app);
   cntProfIntPopulate(app);
 }
 function cntRenderStageStepper(app){
@@ -368,7 +369,7 @@ function cntRenderStageStepper(app){
   el.innerHTML=PIPELINE_STAGES.map((s,i)=>{
     const cls = i===idx ? 's active' : (idx>=0 && i<idx ? 's done' : 's');
     return (i>0?'<span class="sep">›</span>':'')
-      +'<span class="'+cls+'" onclick="updateApplicantStageFromModal(\''+_escForm(s.key)+'\')">'+_escForm(s.short||s.label)+'</span>';
+      +'<span class="'+cls+'" onclick="gotoStageTab(\''+_escForm(s.key)+'\')">'+_escForm(s.short||s.label)+'</span>';
   }).join('');
 }
 
@@ -1598,16 +1599,24 @@ function handleHiringRequestSubmit(e){
 function approveRequest(id){const r=hiringRequests.find(x=>x.id===id);if(r){r.status='Open';showToast(`${r.id} approved`,'success');renderAll();}}
 function fillRequest(id){const r=hiringRequests.find(x=>x.id===id);if(r){r.status='Filled';showToast(`${r.id} marked as filled`,'success');renderAll();}}
 
-// ── Profile tab bar = the pipeline stages (mirrors the stepper) + Pre-Employment ──
-// Clicking a stage tab "syncs" the applicant to that stage. Interview is special:
-// the tab opens the scheduler and the stage only advances once the slot is
-// confirmed (cntProfInterviewSave), so an unscheduled candidate stays put — e.g.
-// in the first "New Applicant" stage — until a slot exists.
+// ── Profile tab bar = the pipeline stages (mirrors the stepper) ──────────
+// Clicking a stage tab shows that stage's pane and, when it's FORWARD of the
+// candidate's current stage, advances ("syncs") them to it. Clicking the current
+// stage or an earlier one just VIEWS its pane — tabs never demote. To move a
+// candidate backward (correct a mis-set stage) use the stage-badge override.
+// Interview opens the scheduler and only advances on Confirm slot. The
+// Pre-Employment checklist lives inside the Background Check stage.
 const STAGE_TAB_ICONS  = { new:'person', interview:'event', exam:'quiz', bgcheck:'fact_check', hired:'workspace_premium', onboarding:'badge' };
 const PROFILE_CONTENTS = ['profile','interview','checklist'];
 
-// Which content pane a stage/tab key shows.
-function _profTabContentFor(key){ return key==='interview' ? 'interview' : (key==='checklist' ? 'checklist' : 'profile'); }
+// Which content pane a stage/tab key shows. Background Check surfaces the
+// Pre-Employment checklist; Interview surfaces the scheduler; everything else
+// shows the main profile pane.
+function _profTabContentFor(key){
+  if(key==='interview') return 'interview';
+  if(key==='bgcheck' || key==='checklist') return 'checklist';
+  return 'profile';
+}
 
 function _showProfileContent(name){
   activeProfileTab = name;
@@ -1616,8 +1625,8 @@ function _showProfileContent(name){
 }
 function _setActiveProfileTabBtn(key){
   document.querySelectorAll('#profile-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
-  const id = key==='checklist' ? 'tab-btn-checklist' : 'tab-btn-stage-'+key;
-  document.getElementById(id)?.classList.add('active');
+  const stageKey = key==='checklist' ? 'bgcheck' : key;   // Pre-Employment is the Background Check tab
+  document.getElementById('tab-btn-stage-'+stageKey)?.classList.add('active');
 }
 
 // Build the tab bar from the live pipeline stages, highlight the applicant's
@@ -1625,14 +1634,12 @@ function _setActiveProfileTabBtn(key){
 function cntRenderProfileTabs(app){
   const bar=document.getElementById('profile-tabs'); if(!bar) return;
   const activeKey = app ? normStage(app.stage) : 'new';
-  let html = PIPELINE_STAGES.map(s=>{
+  bar.innerHTML = PIPELINE_STAGES.map(s=>{
     const ic = STAGE_TAB_ICONS[s.key] || 'radio_button_unchecked';
+    const label = s.key==='bgcheck' ? _escForm(getStageName(s.key))+' <span class="text-[9px] font-normal opacity-60">· Pre-Emp</span>' : _escForm(getStageName(s.key));
     return '<button class="tab-btn'+(s.key===activeKey?' active':'')+'" id="tab-btn-stage-'+_escForm(s.key)+'" onclick="gotoStageTab(\''+_escForm(s.key)+'\')">'
-      +'<span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">'+ic+'</span>'+_escForm(getStageName(s.key))+'</button>';
+      +'<span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">'+ic+'</span>'+label+'</button>';
   }).join('');
-  html += '<button class="tab-btn" id="tab-btn-checklist" onclick="switchProfileTab(\'checklist\')">'
-    +'<span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">checklist</span>Pre-Employment</button>';
-  bar.innerHTML=html;
   _showProfileContent(_profTabContentFor(activeKey));
 }
 
@@ -1640,28 +1647,61 @@ function cntRenderProfileTabs(app){
 function gotoStageTab(key){
   const app=findApplicant(currentViewedApplicantId); if(!app) return;
   if(key==='interview'){
-    // Open the scheduler — do NOT advance the stage yet. Confirming the slot moves
-    // the candidate into Interview; until then they remain in their current stage.
+    // Interview tab opens the scheduler. It never demotes: the stage only advances
+    // (via Confirm slot) when the candidate hasn't reached Interview yet.
     _showProfileContent('interview');
     _setActiveProfileTabBtn('interview');
     cntProfIntPopulate(app);
     const d=document.getElementById('prof-int-date'); if(d) setTimeout(()=>{ try{ d.focus(); }catch(e){} },200);
     return;
   }
-  // Current stage: just show the profile pane.
-  if(normStage(app.stage)===key){ _showProfileContent('profile'); _setActiveProfileTabBtn(key); return; }
-  // Otherwise let the shared mover sync it — it advances forward and blocks any
-  // backward move, re-rendering the tabs to match the candidate's real stage.
-  updateApplicantStageFromModal(key);
+  const keys=PIPELINE_STAGES.map(s=>s.key);
+  const cur=keys.indexOf(normStage(app.stage)), tgt=keys.indexOf(key);
+  if(cur>=0 && tgt>cur){
+    // Forward — advance ("sync") the candidate; the re-render lands on the pane.
+    updateApplicantStageFromModal(key);
+    return;
+  }
+  // Current or earlier stage — just VIEW its pane (no demotion). Use the stage
+  // badge's "Change stage" override to actually move a candidate backward.
+  _showProfileContent(_profTabContentFor(key));
+  _setActiveProfileTabBtn(key);
 }
 
 // Back-compat wrapper: callers pass a CONTENT name ('profile' | 'interview' | 'checklist').
 function switchProfileTab(tab){
-  if(tab==='checklist'){ _showProfileContent('checklist'); _setActiveProfileTabBtn('checklist'); return; }
+  if(tab==='checklist'){ _showProfileContent('checklist'); _setActiveProfileTabBtn('bgcheck'); return; }
   if(tab==='interview'){ _showProfileContent('interview'); _setActiveProfileTabBtn('interview'); return; }
   _showProfileContent('profile');
   const app=findApplicant(currentViewedApplicantId);
   _setActiveProfileTabBtn(app?normStage(app.stage):'new');
+}
+
+// ── Stage-badge override (escape hatch) ─────────────────────────────────
+// The pipeline is forward-only, so the tabs/stepper won't demote a candidate.
+// This dropdown by the stage badge sets the stage directly in EITHER direction
+// so a recruiter can correct a mistake (e.g. someone advanced too far).
+function cntRenderStageOverride(app){
+  const sel=document.getElementById('resume-stage-override'); if(!sel||!app) return;
+  const cur=normStage(app.stage);
+  let html=PIPELINE_STAGES.map(s=>'<option value="'+_escForm(s.key)+'"'+(s.key===cur?' selected':'')+'>'+_escForm(getStageName(s.key))+'</option>').join('');
+  ['pool','rejected'].forEach(k=>{ html+='<option value="'+k+'"'+(cur===k?' selected':'')+'>'+_escForm(getStageName(k))+'</option>'; });
+  sel.innerHTML=html;
+  sel.value=cur;
+}
+function cntStageOverride(newStage){
+  if(!newStage) return;
+  const id=currentViewedApplicantId; const app=findApplicant(id); if(!app) return;
+  const norm=normStage(newStage);
+  if(normStage(app.stage)===norm) return;
+  // Direct set — bypasses the forward-only guard on purpose.
+  if(typeof executeStageChange==='function') executeStageChange(id,norm);
+  const fr=findApplicant(id);
+  if(fr){
+    const sb=document.getElementById('resume-stage-badge'); if(sb){ sb.textContent=getStageName(fr.stage); sb.className='badge border '+getStageBadge(fr.stage); }
+    if(typeof cntRenderApplicantForm==='function') cntRenderApplicantForm(fr);
+    if(typeof cntProfileExtras==='function') cntProfileExtras(fr);
+  }
 }
 
 function renderStrictResume(app){

@@ -1154,6 +1154,10 @@
           <div class="flex items-center gap-2 mt-2 mb-4 flex-wrap">
             <span class="badge border border-slate-200 bg-slate-100 text-slate-600" id="resume-account-badge"></span>
             <span class="badge border" id="resume-stage-badge"></span>
+            <span class="inline-flex items-center gap-1 text-[10px] text-slate-400" title="Manually set the stage — overrides the forward-only pipeline (use to correct a mistake)">
+              <span class="material-icons-outlined" style="font-size:13px;">tune</span>
+              <select id="resume-stage-override" onchange="cntStageOverride(this.value)" class="text-[11px] text-slate-600 border border-slate-200 rounded-md px-1.5 py-0.5 bg-white cursor-pointer hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-red-200"></select>
+            </span>
           </div>
           <!-- hidden legacy targets kept so existing populate code never breaks -->
           <span id="resume-avatar" class="hidden"></span><span id="resume-name-display" class="hidden"></span><span id="resume-role-display" class="hidden"></span>
