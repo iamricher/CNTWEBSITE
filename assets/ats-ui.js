@@ -1648,10 +1648,11 @@ function gotoStageTab(key){
     const d=document.getElementById('prof-int-date'); if(d) setTimeout(()=>{ try{ d.focus(); }catch(e){} },200);
     return;
   }
-  // Any other stage: show the profile pane and sync the applicant to that stage.
-  _showProfileContent('profile');
-  _setActiveProfileTabBtn(key);
-  if(normStage(app.stage)!==key) updateApplicantStageFromModal(key);
+  // Current stage: just show the profile pane.
+  if(normStage(app.stage)===key){ _showProfileContent('profile'); _setActiveProfileTabBtn(key); return; }
+  // Otherwise let the shared mover sync it — it advances forward and blocks any
+  // backward move, re-rendering the tabs to match the candidate's real stage.
+  updateApplicantStageFromModal(key);
 }
 
 // Back-compat wrapper: callers pass a CONTENT name ('profile' | 'interview' | 'checklist').
@@ -1892,6 +1893,16 @@ function updateApplicantStageFromModal(newStage){
     // slot (cntProfInterviewSave) is what moves the candidate into the Interview
     // stage, so an unscheduled candidate stays in their current stage.
     if(typeof cntProfIntFocus==='function') cntProfIntFocus();
+    return;
+  }
+  // Forward-only: candidates progress up the pipeline. Clicking an earlier stage
+  // (tab or stepper) must not demote them — once a step is set they move forward.
+  const _keys=PIPELINE_STAGES.map(s=>s.key);
+  const _cur=_keys.indexOf(normStage(oldStage));
+  const _tgt=_keys.indexOf(norm);
+  if(_cur>=0 && _tgt>=0 && _tgt<_cur){
+    if(window.showToast) showToast('Candidates move forward only — already at '+getStageName(oldStage)+'.','info');
+    if(typeof cntRenderProfileTabs==='function') cntRenderProfileTabs(app); // resync tabs/content to the real stage
     return;
   }
   requestStageChange(currentViewedApplicantId,newStage, afterChange,
