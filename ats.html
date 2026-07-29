@@ -884,6 +884,19 @@
           </div>
           <div class="p-2 max-h-80 overflow-y-auto custom-scroll" id="set-list-location"></div>
         </div>
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+            <span class="material-icons-outlined text-slate-400" style="font-size:16px;">block</span>
+            <h4 class="font-bold text-slate-800 text-sm">Refuse Reasons</h4>
+            <span class="ml-auto text-[10px] font-bold text-slate-400" id="set-count-refuse_reason">0</span>
+          </div>
+          <div class="p-3 border-b border-slate-100 flex gap-2">
+            <input id="set-new-refuse_reason" placeholder="New refuse reason…" class="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5">
+            <button onclick="cntTaxAdd('refuse_reason')" class="bg-red-800 hover:bg-red-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer whitespace-nowrap">Add</button>
+          </div>
+          <div class="p-2 max-h-80 overflow-y-auto custom-scroll" id="set-list-refuse_reason"></div>
+          <p class="px-4 pb-3 text-[10px] text-slate-400">Built-in reasons always appear; these are added to the Refuse dialog dropdown.</p>
+        </div>
       </div>
 
       <!-- Pipeline stages -->

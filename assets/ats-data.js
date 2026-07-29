@@ -1425,9 +1425,16 @@
 
   // Refuse dialog — Odoo style: pick a reason → its email template loads → send toggle
   function _closeRefuseModal(){ const m=document.getElementById('cnt-refuse-modal'); if(m) m.classList.add('hidden'); }
+  // Built-in reasons + any configured in Settings (taxonomy kind='refuse_reason').
+  // Custom reasons default to the generic 'refuse' email template.
+  function _refuseReasons(){
+    const extra=((window.cntTax&&window.cntTax.refuse_reason)||[]).map(x=>({r:x.name,t:'refuse'}));
+    return REFUSE_REASONS.concat(extra);
+  }
   function _refuseTemplateFor(idx){
     if(idx==='custom') return REFUSE_EMAIL.refuse;
-    const t=(REFUSE_REASONS[idx]||REFUSE_REASONS[0]).t;
+    const list=_refuseReasons();
+    const t=(list[idx]||list[0]).t;
     return REFUSE_EMAIL[t]||REFUSE_EMAIL.refuse;
   }
   window.cntRefuseReasonChange = function(id){
@@ -1460,7 +1467,7 @@
       +'<div class="p-4 space-y-3">'
       +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Refuse Reason</label>'
         +'<select id="cnt-refuse-reason" onchange="cntRefuseReasonChange(\''+id+'\')" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white">'
-        +REFUSE_REASONS.map((o,i)=>'<option value="'+i+'">'+_e(o.r)+'</option>').join('')
+        +_refuseReasons().map((o,i)=>'<option value="'+i+'">'+_e(o.r)+'</option>').join('')
         +'<option value="custom">Other reason…</option></select></div>'
       +'<div id="cnt-refuse-custom-wrap" style="display:none;"><input id="cnt-refuse-custom" placeholder="Type a custom reason…" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
       +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pt-1"><input type="checkbox" id="cnt-refuse-send" checked onchange="cntToggleRefuseEmail()" class="accent-red-800 w-4 h-4"> Send email to applicant</label>'
@@ -1480,7 +1487,7 @@
     const sel=document.getElementById('cnt-refuse-reason');
     let reason;
     if(sel && sel.value==='custom'){ reason=(document.getElementById('cnt-refuse-custom').value||'').trim()||'Other'; }
-    else { reason=REFUSE_REASONS[parseInt(sel?sel.value:'0',10)||0].r; }
+    else { const list=_refuseReasons(); reason=(list[parseInt(sel?sel.value:'0',10)||0]||list[0]).r; }
     const send=document.getElementById('cnt-refuse-send');
     const wantEmail=send && send.checked;
     const subj=(document.getElementById('cnt-refuse-subj')||{}).value||'';
@@ -1953,7 +1960,7 @@
   //  SETTINGS — master data (clients · positions · locations)
   //  Super-admin manages these; they feed every dropdown/facet.
   // ══════════════════════════════════════════════════════════════
-  const TAX_KINDS=['client','position','location'];
+  const TAX_KINDS=['client','position','location','refuse_reason'];
   const TAX_COLORS=['#1d4ed8','#0f766e','#7c3aed','#b91c1c','#0369a1','#d97706','#be185d','#4338ca','#047857','#9d174d'];
   const ACCOUNT_META={}; ACCOUNTS.forEach(a=>{ ACCOUNT_META[a.id]={sub:a.sub,color:a.color,region:a.region}; });
   const TAX_FALLBACK={
@@ -1961,7 +1968,7 @@
     position: ['Sales Promoter','Merchandiser','Area Supervisor','Brand Ambassador','Trade Marketing Specialist','Field Sales Representative','Product Demonstrator','Store Supervisor','In-Store Activator','Content Marketer','Logistics Coordinator'],
     location: ['Manila','Tarlac','Bulacan','Pampanga','Cavite','Pangasinan','Batangas']
   };
-  window.cntTax={client:[],position:[],location:[]};
+  window.cntTax={client:[],position:[],location:[],refuse_reason:[]};
 
   function _taxNames(kind){
     const t=(window.cntTax[kind]||[]).map(x=>x.name);
@@ -1979,7 +1986,7 @@
 
   function _applyTaxonomy(rows){
     if(!rows) return false;
-    const t={client:[],position:[],location:[]};
+    const t={client:[],position:[],location:[],refuse_reason:[]};
     rows.forEach(r=>{ if(t[r.kind]) t[r.kind].push({id:r.id,name:r.name,color:r.color}); });
     window.cntTax=t;
     if(t.client.length){   // taxonomy is the source of truth for client accounts
