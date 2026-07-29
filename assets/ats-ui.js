@@ -1599,9 +1599,9 @@ function fillRequest(id){const r=hiringRequests.find(x=>x.id===id);if(r){r.statu
 
 function switchProfileTab(tab){
   activeProfileTab = tab;
-  // Recruiter notes used to be a third tab; it now lives inside the profile
-  // under the résumé, so only these two remain.
-  ['profile','checklist'].forEach(t=>{
+  // Recruiter notes used to be a tab; it now lives inside the profile under the
+  // résumé. Interview scheduling has its own tab alongside Profile and Pre-Employment.
+  ['profile','interview','checklist'].forEach(t=>{
     document.getElementById('tab-'+t)?.classList.add('hidden');
     document.getElementById('tab-btn-'+t)?.classList.remove('active');
   });
@@ -1900,6 +1900,8 @@ function cntProfIntJoin(){
   else if(window.showToast) showToast('No online meeting link set — press Generate or paste one','info');
 }
 function cntProfIntFocus(){
+  // The interview scheduler now lives in its own tab — surface it, then focus the date.
+  if(typeof switchProfileTab==='function') switchProfileTab('interview');
   const p=document.getElementById('prof-interview');
   if(p) p.scrollIntoView({behavior:'smooth',block:'center'});
   const d=document.getElementById('prof-int-date'); if(d) setTimeout(()=>{ try{ d.focus(); }catch(e){} },320);
