@@ -1623,10 +1623,18 @@ function _showProfileContent(name){
   PROFILE_CONTENTS.forEach(t=>document.getElementById('tab-'+t)?.classList.add('hidden'));
   document.getElementById('tab-'+name)?.classList.remove('hidden');
 }
-function _setActiveProfileTabBtn(key){
-  document.querySelectorAll('#profile-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
-  const stageKey = key==='checklist' ? 'bgcheck' : key;   // Pre-Employment is the Background Check tab
-  document.getElementById('tab-btn-stage-'+stageKey)?.classList.add('active');
+// Mark the tabs: the candidate's real current stage is always solid (.active);
+// if the pane being VIEWED belongs to a different (earlier) stage, that tab gets
+// an outline (.viewing) so it's clear you're looking back, not standing there.
+function _setActiveProfileTabBtn(viewedKey){
+  const bar=document.getElementById('profile-tabs'); if(!bar) return;
+  bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active','viewing'));
+  const toStage = k => k==='checklist' ? 'bgcheck' : k;   // Pre-Employment is the Background Check tab
+  const app=findApplicant(currentViewedApplicantId);
+  const curStage  = toStage(app ? normStage(app.stage) : 'new');
+  const viewStage = toStage(viewedKey);
+  document.getElementById('tab-btn-stage-'+curStage)?.classList.add('active');
+  if(viewStage!==curStage) document.getElementById('tab-btn-stage-'+viewStage)?.classList.add('viewing');
 }
 
 // Build the tab bar from the live pipeline stages, highlight the applicant's
