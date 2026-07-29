@@ -984,6 +984,14 @@
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Character References</label><textarea id="app-char-references" rows="2" placeholder="Name, position, contact number…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Languages</label><textarea id="app-languages" rows="2" placeholder="e.g. Filipino, English" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Notes / Remarks</label><textarea id="app-notes" rows="2" placeholder="Add recruiter notes here…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+        <div class="col-span-2">
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Résumé / CV <span class="text-slate-400 font-normal normal-case">— PDF or Word (.doc/.docx) only, max 5 MB</span></label>
+          <label id="app-resume-box" for="app-resume-file" class="flex items-center gap-3 px-3 py-2.5 border border-dashed border-slate-300 rounded-lg text-sm cursor-pointer hover:border-red-400 hover:bg-red-50/40 transition">
+            <span class="material-icons-outlined text-slate-400" style="font-size:20px;">upload_file</span>
+            <span id="app-resume-text" class="text-slate-500 truncate">Click to upload a PDF or Word document</span>
+          </label>
+          <input type="file" id="app-resume-file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" onchange="cntAppResumePick(this)">
+        </div>
       </div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
         <button type="button" onclick="closeCrudModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition cursor-pointer">Cancel</button>
@@ -1176,11 +1184,12 @@
 
     <!-- FIX: min-height:0 on a flex child allows it to shrink/scroll properly
          while the parent's fixed height keeps the modal from resizing -->
-    <div class="flex-1 overflow-y-auto custom-scroll bg-slate-100 print-area" style="min-height:0;">
+    <div class="flex-1 overflow-y-auto custom-scroll bg-slate-100 print-area flex flex-col" style="min-height:0;">
 
-      <!-- PROFILE TAB — applicant form left, résumé right (Odoo Résumé Display).
-           Collapses to a single column on narrow screens, as Odoo notes. -->
-      <div id="tab-profile" class="p-5">
+      <!-- PROFILE — applicant form left, résumé right (Odoo Résumé Display).
+           Always visible; stage panes (interview/checklist) stack above it via
+           flex order, so every tab shows the profile, résumé and recruiter notes. -->
+      <div id="tab-profile" class="p-5" style="order:2;">
       <div id="cnt-digitize-banner" class="hidden"></div>
       <div id="profile-split" class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <div id="profile-left" class="space-y-4 min-w-0">
@@ -1369,7 +1378,7 @@
       </div>
 
       <!-- INTERVIEW TAB -->
-      <div id="tab-interview" class="hidden p-5">
+      <div id="tab-interview" class="hidden p-5" style="order:1;">
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5 max-w-2xl" id="prof-interview">
           <div class="flex items-center gap-2 mb-1"><span class="material-icons-outlined text-red-800" style="font-size:18px;">event</span><h4 class="font-bold text-slate-900 text-sm">Interview Schedule</h4></div>
           <p class="text-[11px] text-slate-400 mb-4">Set the date, time, round and kind of interview. Confirming the slot moves the candidate to the Interview stage.</p>
@@ -1398,7 +1407,7 @@
       </div>
 
       <!-- PRE-EMPLOYMENT TAB -->
-      <div id="tab-checklist" class="hidden p-5">
+      <div id="tab-checklist" class="hidden p-5" style="order:1;">
         <div class="bg-white mx-auto shadow-sm border border-slate-200 p-6 rounded-xl max-w-2xl">
           <div class="flex items-center justify-between mb-4">
             <div><h4 class="font-bold text-slate-900 text-sm">Pre-Employment Requirements</h4><p class="text-[11px] text-slate-400 mt-0.5">Track document submission status for <span id="checklist-name" class="font-semibold text-slate-600"></span></p></div>

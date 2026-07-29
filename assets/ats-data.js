@@ -312,12 +312,29 @@
     };
   }
 
+  // Upload a résumé/CV from the ATS applicant form to the same 'resumes' bucket
+  // the public careers form uses. PDF or Word only, ≤5 MB. Returns the storage
+  // path (stored as applications.resume_url) or null when no file was chosen.
+  async function _uploadResumeFile(file){
+    if(!file) return null;
+    const ext=(file.name.split('.').pop()||'').toLowerCase();
+    if(['pdf','doc','docx'].indexOf(ext)<0) throw new Error('Résumé must be a PDF or Word (.doc/.docx) file.');
+    if(file.size>5*1048576) throw new Error('Résumé is larger than 5 MB.');
+    const safe=file.name.replace(/[^\w.\-]/g,'_');
+    const path=Date.now()+'_'+Math.random().toString(36).slice(2,8)+'_'+safe;
+    const up=await sb.storage.from('resumes').upload(path,file,{cacheControl:'3600',upsert:false});
+    if(up.error) throw up.error;
+    return path;
+  }
+
   // Persist ATS-added applicants → Supabase applications (with dedup vs the realtime fetch)
   if (typeof handleFormSubmit === 'function'){
     const _origFormSubmit = handleFormSubmit;
     handleFormSubmit = function(e){
       const editId = document.getElementById('applicant-id').value;
       const isEdit = !!editId;
+      const _resumeInput = document.getElementById('app-resume-file');
+      const _resumeFile = (_resumeInput && _resumeInput.files && _resumeInput.files[0]) || null;
       const snap = {
         name: document.getElementById('app-name').value,
         account: document.getElementById('app-account').value,
@@ -349,10 +366,13 @@
       if (sb && !isEdit && snap.name){
         (async ()=>{
           try{
+            let resumePath=null;
+            try{ resumePath=await _uploadResumeFile(_resumeFile); }
+            catch(upErr){ if(window.showToast) showToast(upErr.message||'Résumé upload failed','error'); }
             const { data, error } = await sb.from('applications').insert({
               name:snap.name, email:snap.email||null, phone:snap.phone||null,
               role:snap.role, client:snap.account, location:snap.location,
-              source:snap.source||'ATS', cover_note:snap.notes||null, stage:snap.stage||'new',
+              source:snap.source||'ATS', cover_note:snap.notes||null, stage:snap.stage||'new', resume_url:resumePath,
               recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
               referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null,
               work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null,
@@ -365,7 +385,7 @@
             if(!findApplicant('web-'+data.id)){
               addApplicant(mapRow({ id:data.id, name:snap.name, email:snap.email, phone:snap.phone,
                 role:snap.role, client:snap.account, location:snap.location,
-                source:snap.source||'ATS', cover_note:snap.notes, stage:snap.stage||'new',
+                source:snap.source||'ATS', cover_note:snap.notes, stage:snap.stage||'new', resume_url:resumePath,
                 recruiter:snap.recruiter, tags:snap.tags, degree:snap.degree, medium:snap.medium, referred_by:snap.referred_by, linkedin:snap.linkedin, proposed_salary:snap.proposed_salary, availability:snap.availability,
                 applied_date:new Date().toISOString().slice(0,10) }));
             }
@@ -376,15 +396,25 @@
       } else if (sb && isEdit){
         const app = findApplicant(editId);
         if (app && app._web && app._sid){
-          sb.from('applications').update({
-            name:snap.name, email:snap.email||null, phone:snap.phone||null,
-            role:snap.role, client:snap.account, location:snap.location,
-            cover_note:snap.notes||null, stage:snap.stage||app.stage,
-            recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
-            referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null,
-            work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null,
+          (async ()=>{
+            let resumePath=null;
+            try{ resumePath=await _uploadResumeFile(_resumeFile); }
+            catch(upErr){ if(window.showToast) showToast(upErr.message||'Résumé upload failed','error'); }
+            const patch={
+              name:snap.name, email:snap.email||null, phone:snap.phone||null,
+              role:snap.role, client:snap.account, location:snap.location,
+              cover_note:snap.notes||null, stage:snap.stage||app.stage,
+              recruiter:snap.recruiter||null, tags:snap.tags||null, degree:snap.degree||null, medium:snap.medium||null,
+              referred_by:snap.referred_by||null, linkedin:snap.linkedin||null, proposed_salary:snap.proposed_salary||null, availability:snap.availability||null,
+              work_experience:snap.work_experience||null, education:snap.education||null, languages:snap.languages||null,
               certifications:snap.certifications||null, seminars:snap.seminars||null, awards:snap.awards||null, char_references:snap.char_references||null
-          }).eq('id', app._sid).then(({error})=>{ if(error) console.error('applicant edit sync',error); else if(window.showToast) showToast('Changes saved to backend','success'); });
+            };
+            if(resumePath) patch.resume_url=resumePath;   // only replace the CV when a new file was uploaded
+            const { error } = await sb.from('applications').update(patch).eq('id', app._sid);
+            if(error){ console.error('applicant edit sync',error); return; }
+            if(resumePath && typeof updateApplicant==='function') updateApplicant(app.id,{resumePath:resumePath});
+            if(window.showToast) showToast('Changes saved to backend','success');
+          })();
         }
       }
     };

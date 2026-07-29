@@ -1379,10 +1379,28 @@ function allowDrop(ev){ev.preventDefault();}
 function drag(ev,id){ev.dataTransfer.setData('text/plain',id);}
 function drop(ev,targetStage){ev.preventDefault();const id=ev.dataTransfer.getData('text/plain');const app=findApplicant(id);if(app&&app.stage!==targetStage)requestStageChange(id,targetStage);}
 
+// Résumé upload box on the add/edit applicant form: reflect the chosen file and
+// enforce PDF / Word only, ≤5 MB (same limits as the public careers form).
+function cntAppResumeReset(label){
+  const t=document.getElementById('app-resume-text'), f=document.getElementById('app-resume-file');
+  if(f) f.value='';
+  if(t){ t.textContent=label||'Click to upload a PDF or Word document'; t.className='truncate '+(label&&label!=='Click to upload a PDF or Word document'?'text-slate-700 font-medium':'text-slate-500'); }
+}
+function cntAppResumePick(input){
+  const t=document.getElementById('app-resume-text');
+  const file=input&&input.files&&input.files[0];
+  if(!file){ cntAppResumeReset(); return; }
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  if(['pdf','doc','docx'].indexOf(ext)<0){ if(window.showToast) showToast('Résumé must be a PDF or Word (.doc/.docx) file.','error'); cntAppResumeReset(); return; }
+  if(file.size>5*1048576){ if(window.showToast) showToast('Résumé is larger than 5 MB.','error'); cntAppResumeReset(); return; }
+  if(t){ t.textContent=file.name+' ('+(file.size/1048576).toFixed(1)+' MB)'; t.className='truncate text-slate-700 font-medium'; }
+}
+
 function openCreateApplicationModal(){
   document.getElementById('crud-form').reset();
   document.getElementById('applicant-id').value='';
   document.getElementById('modal-title').textContent='Add Applicant';
+  cntAppResumeReset();
   // reset() only restores the markup defaults; rebuild from the live taxonomy.
   if(window.cntRepopulateTaxonomyUI) cntRepopulateTaxonomyUI();
   if(currentAccount!=='all'){ const a=document.getElementById('app-account'); if(a && [...a.options].some(o=>o.value===currentAccount)) a.value=currentAccount; }
@@ -1413,6 +1431,7 @@ function openEditModal(id){
   _s('app-experience',app.work_experience); _s('app-education',app.education); _s('app-languages',app.languages);
   _s('app-certifications',app.certifications); _s('app-seminars',app.seminars);
   _s('app-awards',app.awards); _s('app-char-references',app.char_references);
+  cntAppResumeReset(app.resumePath ? 'Résumé on file — choose a file to replace it' : '');
   document.getElementById('modal-title').textContent='Edit Applicant — '+app.name;
   document.getElementById('crud-modal').classList.remove('hidden');
 }
@@ -1681,8 +1700,12 @@ function _profTabContentFor(key){
 
 function _showProfileContent(name){
   activeProfileTab = name;
-  PROFILE_CONTENTS.forEach(t=>document.getElementById('tab-'+t)?.classList.add('hidden'));
-  document.getElementById('tab-'+name)?.classList.remove('hidden');
+  // The profile (form + résumé + recruiter notes) is visible on EVERY tab. The
+  // stage panes (interview scheduler / pre-employment checklist) stack above it
+  // via flex order, so a tab just adds its stage-specific section on top.
+  document.getElementById('tab-profile')?.classList.remove('hidden');
+  document.getElementById('tab-interview')?.classList.toggle('hidden', name!=='interview');
+  document.getElementById('tab-checklist')?.classList.toggle('hidden', name!=='checklist');
 }
 // Mark the tabs: the candidate's real current stage is always solid (.active);
 // if the pane being VIEWED belongs to a different (earlier) stage, that tab gets
@@ -1712,22 +1735,33 @@ function cntRenderProfileTabs(app){
   _showProfileContent(_profTabContentFor(activeKey));
 }
 
+// Advancing a candidate is a real, forward-only decision, so confirm it first.
+function _confirmStageMove(app,key){
+  const name=app.name||'this candidate';
+  if(key==='interview') return window.confirm('Schedule an interview for '+name+'?\n\nThey will move into the Interview stage once you confirm a slot.');
+  return window.confirm('Move '+name+' to '+getStageName(key)+'?');
+}
+
 // Click handler for a stage tab.
 function gotoStageTab(key){
   const app=findApplicant(currentViewedApplicantId); if(!app) return;
+  const keys=PIPELINE_STAGES.map(s=>s.key);
+  const cur=keys.indexOf(normStage(app.stage)), tgt=keys.indexOf(key);
+  const forward = cur>=0 && tgt>cur;
   if(key==='interview'){
     // Interview tab opens the scheduler. It never demotes: the stage only advances
-    // (via Confirm slot) when the candidate hasn't reached Interview yet.
+    // (via Confirm slot) when the candidate hasn't reached Interview yet. Confirm
+    // first only when this is a forward move into the Interview stage.
+    if(forward && !_confirmStageMove(app,'interview')) return;
     _showProfileContent('interview');
     _setActiveProfileTabBtn('interview');
     cntProfIntPopulate(app);
     const d=document.getElementById('prof-int-date'); if(d) setTimeout(()=>{ try{ d.focus(); }catch(e){} },200);
     return;
   }
-  const keys=PIPELINE_STAGES.map(s=>s.key);
-  const cur=keys.indexOf(normStage(app.stage)), tgt=keys.indexOf(key);
-  if(cur>=0 && tgt>cur){
-    // Forward — advance ("sync") the candidate; the re-render lands on the pane.
+  if(forward){
+    // Forward — confirm, then advance ("sync"); the re-render lands on the pane.
+    if(!_confirmStageMove(app,key)) return;
     updateApplicantStageFromModal(key);
     return;
   }
