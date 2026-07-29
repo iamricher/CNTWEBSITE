@@ -1218,6 +1218,36 @@ function intvCalMove(delta){
 function intvCalToday(){ _intvCalRef=new Date(); renderInterviewsCalendar(window._intvFiltered||[]); }
 function intvJumpTo(ds){ const p=ds.split('-'); _intvCalRef=new Date(+p[0],+p[1]-1,+p[2]); renderInterviewsCalendar(window._intvFiltered||[]); }
 
+// Export scheduled interviews as a real .ics calendar file (Google/Outlook/Apple
+// all import it). Replaces the old fake "Sync Calendar" toast.
+function cntExportInterviewsICS(){
+  const items=(getAllApplicants()||[]).filter(a=>a.stage==='interview'&&a.interviewDate);
+  if(!items.length){ showToast('No scheduled interviews to export yet.','info'); return; }
+  const pad=n=>String(n).padStart(2,'0');
+  const at=(d,t,addHrs)=>{ const m=(t||'09:00').match(/^(\d{1,2}):(\d{2})/); let hh=m?+m[1]:9; const mm=m?+m[2]:0; if(addHrs) hh=(hh+addHrs)%24; return d.replace(/-/g,'')+'T'+pad(hh)+pad(mm)+'00'; };
+  const esc=s=>String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\r?\n/g,'\\n');
+  const now=new Date(), stamp=now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'T'+pad(now.getHours())+pad(now.getMinutes())+pad(now.getSeconds());
+  let ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//CNT ATS//Interviews//EN\r\nCALSCALE:GREGORIAN\r\n';
+  items.forEach(a=>{
+    const desc=[a.interviewType?('Type: '+a.interviewType):'', a.interviewInterviewer?('Interviewer: '+a.interviewInterviewer):'', a.account?('Client: '+a.account):''].filter(Boolean).join('\n');
+    ics+='BEGIN:VEVENT\r\n'
+      +'UID:cnt-intv-'+esc(a.id)+'@cnt-ats\r\n'
+      +'DTSTAMP:'+stamp+'\r\n'
+      +'DTSTART:'+at(a.interviewDate,a.interviewTime,0)+'\r\n'
+      +'DTEND:'+at(a.interviewDate,a.interviewTime,1)+'\r\n'
+      +'SUMMARY:'+esc((a.interviewRound||'Interview')+' — '+a.name+(a.role?(' ('+a.role+')'):''))+'\r\n'
+      +(desc?('DESCRIPTION:'+esc(desc)+'\r\n'):'')
+      +(a.interviewVenue?('LOCATION:'+esc(a.interviewVenue)+'\r\n'):'')
+      +'END:VEVENT\r\n';
+  });
+  ics+='END:VCALENDAR\r\n';
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob), link=document.createElement('a');
+  link.href=url; link.download='cnt-interviews.ics'; document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast('Exported '+items.length+' interview'+(items.length!==1?'s':'')+' to calendar (.ics)','success');
+}
+
 function _localDateStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function _intvByDate(filtered){
   const by={};
