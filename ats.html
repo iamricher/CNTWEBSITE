@@ -1186,7 +1186,13 @@
 
     <!-- FIX: min-height:0 on a flex child allows it to shrink/scroll properly
          while the parent's fixed height keeps the modal from resizing -->
-    <div class="flex-1 overflow-y-auto custom-scroll bg-slate-100 print-area flex flex-col" style="min-height:0;">
+    <div class="flex-1 overflow-y-auto custom-scroll bg-slate-100 print-area flex" style="min-height:0;">
+
+      <!-- Candidate summary sidebar (Odoo-style) — always visible, filled by cntRenderProfileSidebar() -->
+      <aside id="profile-sidebar" class="w-64 flex-none border-r border-slate-200 bg-white p-5 hidden md:block no-print"></aside>
+
+      <!-- Main column: stage panes stack via flex order -->
+      <div class="flex-1 min-w-0 flex flex-col">
 
       <!-- PROFILE — applicant form left, résumé right (Odoo Résumé Display).
            Always visible; stage panes (interview/checklist) stack above it via
@@ -1435,6 +1441,7 @@
 
       <!-- RECRUITER NOTES TAB -->
 
+      </div><!-- end main column -->
     </div><!-- end print-area -->
   </div><!-- end modal-box -->
 </div><!-- end resume-modal -->

@@ -357,7 +357,44 @@ function cntRenderApplicantForm(app){
   cntRenderStageStepper(app);
   cntRenderProfileTabs(app);
   cntRenderStageOverride(app);
+  cntRenderProfileSidebar(app);
   cntProfIntPopulate(app);
+}
+
+// Candidate summary sidebar — avatar, stage, contact, and a persistent interview
+// card so the interview shows on every tab. Always visible beside the main panes.
+function cntRenderProfileSidebar(app){
+  const el=document.getElementById('profile-sidebar'); if(!el||!app) return;
+  const acc=ACCOUNTS.find(a=>a.id===app.account), ac=acc?.color||'#64748b';
+  const initials=(app.name||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+  const row=(icon,val)=> val ? '<div class="flex items-start gap-2 text-xs text-slate-600 mb-2"><span class="material-icons-outlined text-slate-400" style="font-size:15px;">'+icon+'</span><span class="min-w-0 break-words">'+_escForm(val)+'</span></div>' : '';
+  let intCard;
+  if(app.interviewDate){
+    const when=_escForm(app.interviewDate)+(app.interviewTime?(' · '+_escForm(fmtTime(app.interviewTime))):'');
+    const sub=[app.interviewRound,app.interviewType].filter(Boolean).map(_escForm).join(' · ');
+    intCard='<div class="mt-4 rounded-xl border border-violet-200 bg-violet-50 p-3">'
+      +'<div class="flex items-center gap-1.5 mb-1"><span class="material-icons-outlined text-violet-700" style="font-size:15px;">event</span><span class="text-[10px] font-bold text-violet-800 uppercase tracking-wide">Interview</span></div>'
+      +'<div class="text-xs font-bold text-slate-800">'+when+'</div>'
+      +(sub?'<div class="text-[11px] text-slate-500 mt-0.5">'+sub+'</div>':'')
+      +'<button onclick="cntProfIntFocus()" class="mt-2 text-[11px] font-semibold text-violet-700 hover:underline cursor-pointer">Open scheduler →</button></div>';
+  } else {
+    intCard='<div class="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3">'
+      +'<div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Interview</div>'
+      +'<div class="text-xs text-slate-500">Not scheduled yet.</div>'
+      +'<button onclick="cntProfIntFocus()" class="mt-2 text-[11px] font-semibold text-red-700 hover:underline cursor-pointer">Schedule now →</button></div>';
+  }
+  el.innerHTML=
+    '<div class="flex flex-col items-center text-center">'
+      +'<div style="width:64px;height:64px;border-radius:50%;background:'+ac+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;">'+_escForm(initials)+'</div>'
+      +'<div class="mt-2 font-bold text-slate-900 text-sm leading-tight">'+_escForm(app.name||'')+'</div>'
+      +'<div class="text-xs text-slate-500">'+_escForm(app.role||'')+'</div>'
+      +'<div class="flex flex-wrap gap-1 justify-center mt-2">'
+        +'<span class="badge border" style="background:'+ac+'18;color:'+ac+';border-color:'+ac+'30;font-size:10px;">'+_escForm(app.account||'')+'</span>'
+        +'<span class="badge border '+getStageBadge(app.stage)+'" style="font-size:10px;">'+_escForm(getStageName(app.stage))+'</span>'
+      +'</div></div>'
+    +'<div class="mt-4 pt-4 border-t border-slate-100">'
+      +row('mail',app.email)+row('call',app.phone)+row('place',app.location)+row('badge',app.recruiter?('Recruiter · '+app.recruiter):'')
+    +'</div>'+intCard;
 }
 function cntRenderStageStepper(app){
   const el=document.getElementById('resume-stage-stepper'); if(!el) return;
