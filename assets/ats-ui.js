@@ -1551,9 +1551,70 @@ function openCreateJobModal(){
   // current taxonomy before preselecting the account being viewed.
   if(window.cntRepopulateTaxonomyUI) cntRepopulateTaxonomyUI();
   if(currentAccount!=='all'){ const a=document.getElementById('job-account'); if(a && [...a.options].some(o=>o.value===currentAccount)) a.value=currentAccount; }
+  // Fresh Odoo-style editor state: no skills/interviewers, published on, back to
+  // the Recruitment tab, generic title.
+  _jobSkills=[]; _jobInterviewers=[];
+  cntJobSkillsRender(); cntJobInterviewersRender();
+  cntJobSetPublished(true);
+  cntJobSyncTitle();
+  switchJobTab('recruitment');
   document.getElementById('job-modal').classList.remove('hidden');
 }
 function closeJobModal(){document.getElementById('job-modal').classList.add('hidden');}
+
+// ── Odoo-style Job Position editor: tabs, title, published, skills, interviewers ──
+function switchJobTab(tab){
+  ['recruitment','description'].forEach(t=>{
+    document.getElementById('job-tab-'+t)?.classList.toggle('hidden', t!==tab);
+    document.getElementById('job-tab-btn-'+t)?.classList.toggle('active', t===tab);
+  });
+}
+function cntJobSyncTitle(){
+  const role=(document.getElementById('job-role')||{}).value||'';
+  const el=document.getElementById('job-title-display'); if(el) el.textContent = role || 'New Job Position';
+}
+function cntJobSetPublished(on){
+  const sw=document.getElementById('job-published'), lbl=document.getElementById('job-published-label');
+  if(sw){ sw.dataset.on=on?'1':'0'; sw.setAttribute('aria-checked', on?'true':'false'); }
+  if(lbl){ lbl.textContent=on?'Published':'Unpublished'; lbl.className='text-xs font-semibold w-20 '+(on?'text-emerald-700':'text-slate-400'); }
+}
+function cntJobTogglePublished(){ const sw=document.getElementById('job-published'); cntJobSetPublished(!(sw&&sw.dataset.on==='1')); }
+function cntJobIsPublished(){ const sw=document.getElementById('job-published'); return !sw || sw.dataset.on==='1'; }
+
+// Expected Skills — coloured, removable tags like Odoo.
+let _jobSkills=[];
+const _JOB_SKILL_COLORS=[['#6d28d9','#ede9fe'],['#047857','#d1fae5'],['#b45309','#fef3c7'],['#1d4ed8','#dbeafe'],['#be185d','#fce7f3'],['#0f766e','#ccfbf1']];
+function cntJobSkillsRender(){
+  const box=document.getElementById('job-skills-chips'), hid=document.getElementById('job-skills');
+  if(hid) hid.value=_jobSkills.join(', ');
+  if(box) box.innerHTML=_jobSkills.map((s,i)=>{ const c=_JOB_SKILL_COLORS[i%_JOB_SKILL_COLORS.length];
+    return '<span class="cnt-chip" style="color:'+c[0]+';background:'+c[1]+';">'+_escForm(s)+'<span class="x" onclick="cntJobSkillRemove('+i+')">×</span></span>'; }).join('');
+}
+function cntJobSetSkills(str){ _jobSkills=String(str||'').split(',').map(s=>s.trim()).filter(Boolean); cntJobSkillsRender(); }
+function cntJobSkillAdd(name){ name=String(name||'').trim(); if(name && !_jobSkills.some(s=>s.toLowerCase()===name.toLowerCase())){ _jobSkills.push(name); cntJobSkillsRender(); } }
+function cntJobSkillRemove(i){ _jobSkills.splice(i,1); cntJobSkillsRender(); }
+function cntJobSkillAddFromInput(){ const inp=document.getElementById('job-skills-input'); if(!inp) return; cntJobSkillAdd(inp.value); inp.value=''; inp.focus(); }
+function cntJobSkillKey(e){ if(e.key==='Enter'||e.key===','){ e.preventDefault(); cntJobSkillAddFromInput(); } }
+
+// Interviewers — staff avatar chips, sourced from the assignable team list.
+let _jobInterviewers=[];
+function _cntAvaColor(name){ const p=['#7f1d1d','#9a3412','#065f46','#1e40af','#5b21b6','#9d174d','#0f766e','#b45309']; let h=0; const s=String(name||''); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return p[h%p.length]; }
+function _cntInitials(name){ return String(name||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?'; }
+function cntJobInterviewersRender(){
+  const box=document.getElementById('job-interviewers-chips'), hid=document.getElementById('job-interviewers');
+  if(hid) hid.value=_jobInterviewers.join(', ');
+  if(box) box.innerHTML=_jobInterviewers.map((n,i)=>'<span class="cnt-chip" style="color:#334155;background:#f1f5f9;"><span class="cnt-ava" style="background:'+_cntAvaColor(n)+';">'+_escForm(_cntInitials(n))+'</span>'+_escForm(n)+'<span class="x" onclick="cntJobInterviewerRemove('+i+')">×</span></span>').join('');
+  cntJobFillInterviewerOptions();
+}
+function cntJobFillInterviewerOptions(){
+  const sel=document.getElementById('job-interviewers-add'); if(!sel) return;
+  const names=[]; (window.cntRecruiters||[]).forEach(u=>{ const n=u.full_name||u.email; if(n && names.indexOf(n)<0 && _jobInterviewers.indexOf(n)<0) names.push(n); });
+  sel.innerHTML='<option value="">+ Add interviewer…</option>'+names.map(n=>'<option value="'+_escForm(n)+'">'+_escForm(n)+'</option>').join('');
+  sel.value='';
+}
+function cntJobSetInterviewers(str){ _jobInterviewers=String(str||'').split(',').map(s=>s.trim()).filter(Boolean); cntJobInterviewersRender(); }
+function cntJobInterviewerAdd(name){ name=String(name||'').trim(); if(name && _jobInterviewers.indexOf(name)<0){ _jobInterviewers.push(name); cntJobInterviewersRender(); } }
+function cntJobInterviewerRemove(i){ _jobInterviewers.splice(i,1); cntJobInterviewersRender(); }
 function handleJobSubmit(e){
   e.preventDefault();
   const account=document.getElementById('job-account').value;

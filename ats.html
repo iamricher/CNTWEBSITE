@@ -101,6 +101,21 @@
      isn't there. Outline/ring instead of the solid current-stage highlight. */
   .tab-btn.viewing { color:#7f1d1d; background:#7f1d1d0d; box-shadow:inset 0 0 0 1.5px #7f1d1d; }
   .tab-btn:not(.active):hover { background:#f1f5f9; }
+  /* ── Odoo-style Job Position editor ── */
+  .cnt-jrow { display:grid; grid-template-columns:132px 1fr; align-items:center; gap:10px; }
+  .cnt-jrow > label { font-size:12px; font-weight:600; color:#64748b; }
+  .cnt-jrow input:not([type=hidden]), .cnt-jrow select { width:100%; padding:6px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; background:#fff; }
+  .cnt-jrow input:focus, .cnt-jrow select:focus { outline:none; border-color:#7f1d1d; box-shadow:0 0 0 2px #7f1d1d22; }
+  .job-tab-btn { padding:8px 16px; font-size:13px; font-weight:600; color:#64748b; border:none; background:none; border-bottom:2px solid transparent; cursor:pointer; margin-bottom:-1px; }
+  .job-tab-btn.active { color:#7f1d1d; border-bottom-color:#7f1d1d; }
+  .job-tab-btn:not(.active):hover { color:#334155; }
+  .cnt-switch { width:38px; height:22px; border-radius:99px; background:#cbd5e1; position:relative; transition:.15s; cursor:pointer; border:none; padding:0; flex:none; }
+  .cnt-switch[data-on="1"] { background:#10b981; }
+  .cnt-switch-dot { position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:.15s; box-shadow:0 1px 2px #0003; }
+  .cnt-switch[data-on="1"] .cnt-switch-dot { left:18px; }
+  .cnt-chip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600; line-height:1.4; }
+  .cnt-chip .x { cursor:pointer; opacity:.6; font-weight:700; } .cnt-chip .x:hover { opacity:1; }
+  .cnt-ava { width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; flex:none; }
   select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; padding-right:24px !important; }
   .priority-badge { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:700; }
   .offer-letter-preview { font-family:'Georgia',serif; line-height:1.8; }
@@ -1019,36 +1034,86 @@
 
 <!-- ── Job Modal ── -->
 <div id="job-modal" class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[100] hidden modal-overlay no-print">
-  <div class="bg-white rounded-2xl max-w-lg w-full mx-4 p-6 shadow-2xl border border-slate-100 modal-box overflow-y-auto" style="max-height:92vh;">
-    <div class="flex items-center justify-between mb-5">
-      <h3 class="text-base font-bold text-slate-900">Create Job Posting</h3>
-      <button onclick="closeJobModal()" class="text-slate-400 hover:text-red-700 cursor-pointer p-1 rounded-lg hover:bg-slate-100 transition"><span class="material-icons-outlined">close</span></button>
+  <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 shadow-2xl border border-slate-100 modal-box flex flex-col" style="max-height:94vh;">
+    <!-- Header: Job Position title + Published toggle -->
+    <div class="flex items-start justify-between px-6 pt-5 pb-3 flex-none">
+      <div class="min-w-0">
+        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Job Position</p>
+        <h2 id="job-title-display" class="text-2xl font-extrabold text-slate-900 tracking-tight truncate">New Job Position</h2>
+      </div>
+      <div class="flex items-center gap-3 flex-none">
+        <button type="button" id="job-published" role="switch" aria-checked="true" data-on="1" onclick="cntJobTogglePublished()" class="cnt-switch" title="Show this position on the website careers page"><span class="cnt-switch-dot"></span></button>
+        <span id="job-published-label" class="text-xs font-semibold text-emerald-700 w-20">Published</span>
+        <button onclick="closeJobModal()" class="text-slate-400 hover:text-red-700 cursor-pointer p-1 rounded-lg hover:bg-slate-100 transition"><span class="material-icons-outlined">close</span></button>
+      </div>
     </div>
-    <form id="job-form" onsubmit="handleJobSubmit(event)" class="space-y-4">
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client Account</label><select id="job-account" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a client…</option></select></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position Title</label><select id="job-role" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a position…</option></select></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location</label><select id="job-location" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a location…</option></select></div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Target Headcount</label><input type="number" id="job-needed" required min="1" value="5" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Salary Range</label><input type="text" id="job-salary" placeholder="₱15,000 – ₱20,000" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Priority</label><select id="job-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Employment Type</label><select id="job-employment" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="Full-Time">Full-Time</option><option value="Project-based">Project-based</option><option value="Seasonal">Seasonal</option><option value="Part-Time">Part-Time</option><option value="Contract">Contract</option><option value="Internship">Internship</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Deadline to Fill <span class="text-slate-400 font-normal normal-case">— optional</span></label><input type="date" id="job-deadline" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
-      </div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Recruiter <span class="text-slate-400 font-normal normal-case">— person accountable for this role</span></label><select id="job-recruiter" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Unassigned</option></select></div>
 
-      <div class="pt-3 mt-1 border-t border-slate-100"><p class="text-[11px] font-bold text-red-800 uppercase tracking-wide">Job Description <span class="text-slate-400 font-normal normal-case">— shown on the website (optional; leave blank to auto-generate)</span></p></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">About the role</label><textarea id="job-about" rows="2" placeholder="Short overview of what this role is about…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Responsibilities <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-responsibilities" rows="4" placeholder="Maintain product displays&#10;Achieve daily sales targets&#10;Report stock and competitor activity" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Must have <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-must" rows="3" placeholder="At least high school graduate&#10;Willing to do fieldwork" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Nice to have <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-nice" rows="2" placeholder="Retail / FMCG experience" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
-      <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">What we offer <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-offer" rows="3" placeholder="Government-mandated benefits&#10;Competitive salary with incentives" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
+    <!-- Tabs -->
+    <div class="flex items-center gap-1 px-6 border-b border-slate-200 flex-none">
+      <button type="button" class="job-tab-btn active" id="job-tab-btn-recruitment" onclick="switchJobTab('recruitment')">Recruitment</button>
+      <button type="button" class="job-tab-btn" id="job-tab-btn-description" onclick="switchJobTab('description')">Job Description</button>
+    </div>
 
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+    <form id="job-form" onsubmit="handleJobSubmit(event)" class="flex flex-col flex-1 min-h-0">
+      <div class="flex-1 overflow-y-auto custom-scroll px-6 py-5">
+        <!-- RECRUITMENT TAB -->
+        <div id="job-tab-recruitment">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3.5">
+            <!-- LEFT COLUMN -->
+            <div class="space-y-3.5">
+              <div class="cnt-jrow"><label>Client Account</label><select id="job-account" required><option value="">Select a client…</option></select></div>
+              <div class="cnt-jrow"><label>Position Title</label><select id="job-role" required onchange="cntJobSyncTitle()"><option value="">Select a position…</option></select></div>
+              <div class="cnt-jrow"><label>Job Location</label><select id="job-location" required><option value="">Select a location…</option></select></div>
+              <div class="cnt-jrow"><label>Department</label><input id="job-department" placeholder="e.g. Sales &amp; Marketing"></div>
+              <div class="cnt-jrow"><label>Industry</label><input id="job-industry" placeholder="e.g. Retail / FMCG"></div>
+              <div class="cnt-jrow"><label>Employment Type</label><select id="job-employment"><option value="Full-Time">Full-Time</option><option value="Project-based">Project-based</option><option value="Seasonal">Seasonal</option><option value="Part-Time">Part-Time</option><option value="Contract">Contract</option><option value="Internship">Internship</option></select></div>
+              <div class="cnt-jrow"><label>Working Schedule</label><input id="job-schedule" placeholder="Standard 40 hours/week"></div>
+              <div class="cnt-jrow"><label>Salary Range</label><input id="job-salary" placeholder="₱15,000 – ₱20,000"></div>
+            </div>
+            <!-- RIGHT COLUMN -->
+            <div class="space-y-3.5">
+              <div class="cnt-jrow"><label>Target Headcount</label><input type="number" id="job-needed" required min="1" value="5"></div>
+              <div class="cnt-jrow"><label>Priority</label><select id="job-priority"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+              <div class="cnt-jrow"><label>Deadline to Fill</label><input type="date" id="job-deadline"></div>
+              <div class="cnt-jrow"><label>Recruiter</label><select id="job-recruiter"><option value="">Unassigned</option></select></div>
+              <div class="cnt-jrow" style="align-items:start;"><label style="padding-top:6px;">Interviewers</label>
+                <div>
+                  <div id="job-interviewers-chips" class="flex flex-wrap gap-1.5 mb-1.5 empty:mb-0"></div>
+                  <select id="job-interviewers-add" onchange="cntJobInterviewerAdd(this.value)"><option value="">+ Add interviewer…</option></select>
+                  <input type="hidden" id="job-interviewers">
+                </div>
+              </div>
+              <div class="cnt-jrow"><label>Contract Template</label><input id="job-contract" placeholder="e.g. CNT Employee Contract"></div>
+            </div>
+          </div>
+
+          <!-- Expected Skills (full width) -->
+          <div class="mt-5 pt-4 border-t border-slate-100">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2">Expected Skills</label>
+            <div id="job-skills-chips" class="flex flex-wrap gap-1.5 mb-2 empty:mb-0"></div>
+            <div class="flex gap-2 max-w-md">
+              <input id="job-skills-input" onkeydown="cntJobSkillKey(event)" placeholder="Type a skill and press Enter…" class="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-800">
+              <button type="button" onclick="cntJobSkillAddFromInput()" class="px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 cursor-pointer">Add</button>
+            </div>
+            <input type="hidden" id="job-skills">
+          </div>
+        </div>
+
+        <!-- JOB DESCRIPTION TAB -->
+        <div id="job-tab-description" class="hidden space-y-4">
+          <p class="text-[11px] text-slate-400">Shown on the website careers page (optional; leave blank to auto-generate).</p>
+          <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">About the role</label><textarea id="job-about" rows="2" placeholder="Short overview of what this role is about…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
+          <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Responsibilities <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-responsibilities" rows="4" placeholder="Maintain product displays&#10;Achieve daily sales targets&#10;Report stock and competitor activity" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
+          <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Must have <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-must" rows="3" placeholder="At least high school graduate&#10;Willing to do fieldwork" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
+          <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Nice to have <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-nice" rows="2" placeholder="Retail / FMCG experience" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
+          <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">What we offer <span class="text-slate-400 font-normal normal-case">— one per line</span></label><textarea id="job-offer" rows="3" placeholder="Government-mandated benefits&#10;Competitive salary with incentives" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-100 flex-none">
         <button type="button" onclick="closeJobModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition cursor-pointer">Cancel</button>
-        <button type="submit" class="px-4 py-2 bg-red-800 hover:bg-red-900 text-white rounded-lg text-sm font-medium shadow transition cursor-pointer">Deploy Position</button>
+        <button type="submit" onclick="if(!document.getElementById('job-form').checkValidity()) switchJobTab('recruitment')" class="px-4 py-2 bg-red-800 hover:bg-red-900 text-white rounded-lg text-sm font-medium shadow transition cursor-pointer">Save Position</button>
       </div>
     </form>
   </div>

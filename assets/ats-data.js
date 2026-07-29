@@ -169,7 +169,9 @@
         needed:j.openings||1, salary:j.salary_range||'', priority:(j.priority||'normal').toLowerCase(),
         about:j.about||'', responsibilities:j.responsibilities||'', must_have:j.must_have||'', nice_to_have:j.nice_to_have||'', we_offer:j.we_offer||'',
         employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open',
-        deadline:j.deadline||'', created_at:j.created_at||null });
+        deadline:j.deadline||'', created_at:j.created_at||null,
+        department:j.department||'', industry:j.industry||'', working_schedule:j.working_schedule||'',
+        contract_template:j.contract_template||'', expected_skills:j.expected_skills||'', interviewers:j.interviewers||'' });
     });
     return true;
   }
@@ -181,6 +183,25 @@
     if(error){ console.error('load jobs',error); return; }
     cacheSet('jobs',data||[]);
     _applyJobs(data||[]);                                        // then the live copy
+  }
+
+  // The Odoo-style editor writes extra columns (department, industry, …). If the
+  // 2026-07-29-job-odoo-fields migration hasn't run yet, Postgres rejects them —
+  // so retry once without those keys and nudge the user to run the migration.
+  const _JOB_EXT=['department','industry','working_schedule','contract_template','expected_skills','interviewers'];
+  const _extMiss=e=>/column|schema cache|42703/i.test((e&&(e.message||e.code))||'');
+  const _stripExt=o=>{ const c=Object.assign({},o); _JOB_EXT.forEach(k=>delete c[k]); return c; };
+  async function _jobsUpdate(payload,id){
+    let {error}=await sb.from('jobs').update(payload).eq('id',id);
+    if(error && _extMiss(error)){ ({error}=await sb.from('jobs').update(_stripExt(payload)).eq('id',id));
+      if(!error && window.showToast) showToast('Saved. Run the job-fields migration to store Department/Skills/Interviewers.','info'); }
+    if(error) throw error;
+  }
+  async function _jobsInsert(payload){
+    let {data,error}=await sb.from('jobs').insert(payload).select('id').single();
+    if(error && _extMiss(error)){ ({data,error}=await sb.from('jobs').insert(_stripExt(payload)).select('id').single());
+      if(!error && window.showToast) showToast('Posted. Run the job-fields migration to store Department/Skills/Interviewers.','info'); }
+    if(error) throw error; return data;
   }
 
   if (typeof openCreateJobModal === 'function'){
@@ -209,6 +230,16 @@
     document.getElementById('job-must').value=job.must_have||'';
     document.getElementById('job-nice').value=job.nice_to_have||'';
     document.getElementById('job-offer').value=job.we_offer||'';
+    // Odoo-style fields
+    document.getElementById('job-department').value=job.department||'';
+    document.getElementById('job-industry').value=job.industry||'';
+    document.getElementById('job-schedule').value=job.working_schedule||'';
+    document.getElementById('job-contract').value=job.contract_template||'';
+    if(window.cntJobSetSkills) cntJobSetSkills(job.expected_skills||'');
+    if(window.cntJobSetInterviewers) cntJobSetInterviewers(job.interviewers||'');
+    if(window.cntJobSetPublished) cntJobSetPublished((job.status||'open')!=='paused');
+    if(window.cntJobSyncTitle) cntJobSyncTitle();
+    if(window.switchJobTab) switchJobTab('recruitment');
     if(window.cntFillJobRecruiters) cntFillJobRecruiters();
     _editingJobSid=sid;
     document.getElementById('job-modal').classList.remove('hidden');
@@ -245,29 +276,32 @@
         we_offer: document.getElementById('job-offer').value || null,
         employment_type: (document.getElementById('job-employment')||{}).value || 'Full-Time',
         recruiter: (document.getElementById('job-recruiter')||{}).value || null,
-        deadline: (document.getElementById('job-deadline')||{}).value || null
+        deadline: (document.getElementById('job-deadline')||{}).value || null,
+        department: (document.getElementById('job-department')||{}).value || null,
+        industry: (document.getElementById('job-industry')||{}).value || null,
+        working_schedule: (document.getElementById('job-schedule')||{}).value || null,
+        contract_template: (document.getElementById('job-contract')||{}).value || null,
+        expected_skills: (document.getElementById('job-skills')||{}).value || null,
+        interviewers: (document.getElementById('job-interviewers')||{}).value || null
       };
-      // Editing must not republish a position someone deliberately took down,
-      // so only a brand new posting defaults to 'open'.
-      if(editingSid){
-        let cur=null;
-        for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ cur=j; break; } }
-        job.status = (cur && cur.status) ? cur.status : 'open';
-      } else job.status='open';
+      // The Published toggle is the single source of truth for whether the
+      // position is live on the website (open) or taken down (paused).
+      job.status = (typeof cntJobIsPublished==='function' ? cntJobIsPublished() : true) ? 'open' : 'paused';
       _origJobSubmit(e);   // in-memory update + closeJobModal + renderAll
       if (sb && job.role && job.client){
         (async ()=>{
           try{
+            const _mem={role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status,department:job.department||'',industry:job.industry||'',working_schedule:job.working_schedule||'',contract_template:job.contract_template||'',expected_skills:job.expected_skills||'',interviewers:job.interviewers||''};
             if(editingSid){
-              const {error}=await sb.from('jobs').update(job).eq('id',editingSid); if(error) throw error;
-              for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ Object.assign(j,{role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status}); break; } }
+              await _jobsUpdate(job,editingSid);
+              for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ Object.assign(j,_mem); break; } }
               logAudit('job_edit','job', editingSid, job.role+' · '+job.client); if(window.showToast) showToast('Updated on website careers page','success');
             } else {
               const { data } = await sb.from('jobs').select('id').eq('role',job.role).eq('client',job.client).eq('location',job.location).limit(1);
               let sid;
-              if (data && data.length){ const {error}=await sb.from('jobs').update(job).eq('id',data[0].id); if(error) throw error; sid=data[0].id; }
-              else { const {data:ins,error}=await sb.from('jobs').insert(job).select('id').single(); if(error) throw error; sid=ins&&ins.id; }
-              const arr=jobDatabase[job.client]||[]; const entry=arr.find(x=>x.role===job.role&&x.location===job.location&&!x._sid)||arr[arr.length-1]; if(entry&&sid){ entry._sid=sid; Object.assign(entry,{about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||''}); }
+              if (data && data.length){ await _jobsUpdate(job,data[0].id); sid=data[0].id; }
+              else { const ins=await _jobsInsert(job); sid=ins&&ins.id; }
+              const arr=jobDatabase[job.client]||[]; const entry=arr.find(x=>x.role===job.role&&x.location===job.location&&!x._sid)||arr[arr.length-1]; if(entry&&sid){ entry._sid=sid; Object.assign(entry,_mem); }
               logAudit('job_post','job', sid, job.role+' · '+job.client); if(window.showToast) showToast('Posted to website careers page','success');
             }
             renderAll(); if(typeof renderJobPositions==='function') renderJobPositions();
