@@ -355,6 +355,7 @@ function cntRenderApplicantForm(app){
   const rd=document.getElementById('cnt-resume-details');
   if(rd) rd.classList.toggle('hidden', !anyDetail);
   cntRenderStageStepper(app);
+  cntRenderProfileTabs(app);
   cntProfIntPopulate(app);
 }
 function cntRenderStageStepper(app){
@@ -1597,16 +1598,69 @@ function handleHiringRequestSubmit(e){
 function approveRequest(id){const r=hiringRequests.find(x=>x.id===id);if(r){r.status='Open';showToast(`${r.id} approved`,'success');renderAll();}}
 function fillRequest(id){const r=hiringRequests.find(x=>x.id===id);if(r){r.status='Filled';showToast(`${r.id} marked as filled`,'success');renderAll();}}
 
+// ── Profile tab bar = the pipeline stages (mirrors the stepper) + Pre-Employment ──
+// Clicking a stage tab "syncs" the applicant to that stage. Interview is special:
+// the tab opens the scheduler and the stage only advances once the slot is
+// confirmed (cntProfInterviewSave), so an unscheduled candidate stays put — e.g.
+// in the first "New Applicant" stage — until a slot exists.
+const STAGE_TAB_ICONS  = { new:'person', interview:'event', exam:'quiz', bgcheck:'fact_check', hired:'workspace_premium', onboarding:'badge' };
+const PROFILE_CONTENTS = ['profile','interview','checklist'];
+
+// Which content pane a stage/tab key shows.
+function _profTabContentFor(key){ return key==='interview' ? 'interview' : (key==='checklist' ? 'checklist' : 'profile'); }
+
+function _showProfileContent(name){
+  activeProfileTab = name;
+  PROFILE_CONTENTS.forEach(t=>document.getElementById('tab-'+t)?.classList.add('hidden'));
+  document.getElementById('tab-'+name)?.classList.remove('hidden');
+}
+function _setActiveProfileTabBtn(key){
+  document.querySelectorAll('#profile-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  const id = key==='checklist' ? 'tab-btn-checklist' : 'tab-btn-stage-'+key;
+  document.getElementById(id)?.classList.add('active');
+}
+
+// Build the tab bar from the live pipeline stages, highlight the applicant's
+// current stage, and show the matching content pane.
+function cntRenderProfileTabs(app){
+  const bar=document.getElementById('profile-tabs'); if(!bar) return;
+  const activeKey = app ? normStage(app.stage) : 'new';
+  let html = PIPELINE_STAGES.map(s=>{
+    const ic = STAGE_TAB_ICONS[s.key] || 'radio_button_unchecked';
+    return '<button class="tab-btn'+(s.key===activeKey?' active':'')+'" id="tab-btn-stage-'+_escForm(s.key)+'" onclick="gotoStageTab(\''+_escForm(s.key)+'\')">'
+      +'<span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">'+ic+'</span>'+_escForm(getStageName(s.key))+'</button>';
+  }).join('');
+  html += '<button class="tab-btn" id="tab-btn-checklist" onclick="switchProfileTab(\'checklist\')">'
+    +'<span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">checklist</span>Pre-Employment</button>';
+  bar.innerHTML=html;
+  _showProfileContent(_profTabContentFor(activeKey));
+}
+
+// Click handler for a stage tab.
+function gotoStageTab(key){
+  const app=findApplicant(currentViewedApplicantId); if(!app) return;
+  if(key==='interview'){
+    // Open the scheduler — do NOT advance the stage yet. Confirming the slot moves
+    // the candidate into Interview; until then they remain in their current stage.
+    _showProfileContent('interview');
+    _setActiveProfileTabBtn('interview');
+    cntProfIntPopulate(app);
+    const d=document.getElementById('prof-int-date'); if(d) setTimeout(()=>{ try{ d.focus(); }catch(e){} },200);
+    return;
+  }
+  // Any other stage: show the profile pane and sync the applicant to that stage.
+  _showProfileContent('profile');
+  _setActiveProfileTabBtn(key);
+  if(normStage(app.stage)!==key) updateApplicantStageFromModal(key);
+}
+
+// Back-compat wrapper: callers pass a CONTENT name ('profile' | 'interview' | 'checklist').
 function switchProfileTab(tab){
-  activeProfileTab = tab;
-  // Recruiter notes used to be a tab; it now lives inside the profile under the
-  // résumé. Interview scheduling has its own tab alongside Profile and Pre-Employment.
-  ['profile','interview','checklist'].forEach(t=>{
-    document.getElementById('tab-'+t)?.classList.add('hidden');
-    document.getElementById('tab-btn-'+t)?.classList.remove('active');
-  });
-  document.getElementById('tab-'+tab)?.classList.remove('hidden');
-  document.getElementById('tab-btn-'+tab)?.classList.add('active');
+  if(tab==='checklist'){ _showProfileContent('checklist'); _setActiveProfileTabBtn('checklist'); return; }
+  if(tab==='interview'){ _showProfileContent('interview'); _setActiveProfileTabBtn('interview'); return; }
+  _showProfileContent('profile');
+  const app=findApplicant(currentViewedApplicantId);
+  _setActiveProfileTabBtn(app?normStage(app.stage):'new');
 }
 
 function renderStrictResume(app){
@@ -1834,8 +1888,9 @@ function updateApplicantStageFromModal(newStage){
   const norm=normStage(newStage);
   const nm=(typeof getStageName==='function'?getStageName(norm):'')||'';
   if(norm==='interview' || /interview/i.test(nm)){
-    executeStageChange(currentViewedApplicantId,norm);
-    afterChange();
+    // Do NOT advance to Interview here — just open the scheduler. Confirming the
+    // slot (cntProfInterviewSave) is what moves the candidate into the Interview
+    // stage, so an unscheduled candidate stays in their current stage.
     if(typeof cntProfIntFocus==='function') cntProfIntFocus();
     return;
   }
@@ -1900,8 +1955,9 @@ function cntProfIntJoin(){
   else if(window.showToast) showToast('No online meeting link set — press Generate or paste one','info');
 }
 function cntProfIntFocus(){
-  // The interview scheduler now lives in its own tab — surface it, then focus the date.
+  // The interview scheduler lives in its own stage tab — surface it, then focus the date.
   if(typeof switchProfileTab==='function') switchProfileTab('interview');
+  const app=findApplicant(currentViewedApplicantId); if(app) cntProfIntPopulate(app);
   const p=document.getElementById('prof-interview');
   if(p) p.scrollIntoView({behavior:'smooth',block:'center'});
   const d=document.getElementById('prof-int-date'); if(d) setTimeout(()=>{ try{ d.focus(); }catch(e){} },320);
@@ -1926,7 +1982,15 @@ function cntProfInterviewSave(){
   const st=document.getElementById('prof-int-status'); if(st){ st.textContent='✓ Saved'; st.style.color='#166534'; }
   if(window.showToast) showToast('Interview scheduled for '+app.name,'success');
   renderAll();
-  const fr=findApplicant(id); if(fr && typeof cntProfileExtras==='function') cntProfileExtras(fr);
+  // Sync the stepper, the stage badge and the tab bar now the candidate is in Interview.
+  const fr=findApplicant(id);
+  if(fr){
+    if(typeof cntRenderStageStepper==='function') cntRenderStageStepper(fr);
+    const sb=document.getElementById('resume-stage-badge');
+    if(sb){ sb.textContent=getStageName(fr.stage); sb.className='badge border '+getStageBadge(fr.stage); }
+    if(typeof cntRenderProfileTabs==='function') cntRenderProfileTabs(fr);
+    if(typeof cntProfileExtras==='function') cntProfileExtras(fr);
+  }
 }
 
 function toggleRequirement(id,req,checked){
