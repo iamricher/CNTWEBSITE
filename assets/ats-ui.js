@@ -1125,9 +1125,10 @@ function renderInterviewsGrid(filtered){
   }).join('');
 }
 
-// ── Interviews calendar (monthly) ───────────────────────────────
-let _intvView = 'calendar';
-let _intvCalRef = new Date();   // any date within the shown month
+// ── Interviews calendar (day / week / month time-grid) ───────────────────
+let _intvView = 'week';         // 'day' | 'week' | 'month' | 'list'
+let _intvCalRef = new Date();   // any date within the shown period
+const _DAY_START = 6, _DAY_END = 20, _HOUR_PX = 44;   // time grid spans 06:00–20:00
 
 // Each recruiter sees their own scheduled interviews; managers/admins can see
 // everyone's. "Their" = they are the assigned recruiter or the interviewer.
@@ -1156,28 +1157,61 @@ function _intvSyncScopeUI(){
   if(tog) tog.classList.toggle('flex', mgr);
   if(note) note.textContent = mgr ? '' : 'Showing your interviews';
 }
-function setIntvView(v){
-  _intvView = v;
-  document.getElementById('interviews-calendar-container').classList.toggle('hidden', v!=='calendar');
-  document.getElementById('interviews-grid-container').classList.toggle('hidden', v!=='list');
-  const cal=document.getElementById('intv-view-calendar'), lst=document.getElementById('intv-view-list');
-  if(cal&&lst){
-    cal.className='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer '+(v==='calendar'?'bg-white text-red-800 shadow-sm':'text-slate-500');
-    lst.className='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer '+(v==='list'?'bg-white text-red-800 shadow-sm':'text-slate-500');
-  }
+// Back-compat: the old toggle called setIntvView('calendar'|'list').
+function setIntvView(v){ setIntvCalMode(v==='calendar'?'week':v); }
+function setIntvCalMode(mode){
+  _intvView = mode;
+  const isList = mode==='list';
+  document.getElementById('interviews-calendar-container')?.classList.toggle('hidden', isList);
+  document.getElementById('interviews-grid-container')?.classList.toggle('hidden', !isList);
+  ['day','week','month','list'].forEach(m=>{
+    const b=document.getElementById('intv-mode-'+m); if(!b) return;
+    b.className='intv-mode-btn text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer '+(m===mode?'bg-white text-red-800 shadow-sm':'text-slate-500');
+  });
+  if(isList) renderInterviewsGrid(window._intvFiltered||[]);
+  else renderInterviewsCalendar(window._intvFiltered||[]);
 }
-function intvCalMove(delta){ _intvCalRef=new Date(_intvCalRef.getFullYear(), _intvCalRef.getMonth()+delta, 1); renderInterviewsCalendar(window._intvFiltered||[]); }
+function intvCalMove(delta){
+  const r=_intvCalRef;
+  if(_intvView==='month') _intvCalRef=new Date(r.getFullYear(), r.getMonth()+delta, 1);
+  else if(_intvView==='day') _intvCalRef=new Date(r.getFullYear(), r.getMonth(), r.getDate()+delta);
+  else _intvCalRef=new Date(r.getFullYear(), r.getMonth(), r.getDate()+delta*7);
+  renderInterviewsCalendar(window._intvFiltered||[]);
+}
 function intvCalToday(){ _intvCalRef=new Date(); renderInterviewsCalendar(window._intvFiltered||[]); }
+function intvJumpTo(ds){ const p=ds.split('-'); _intvCalRef=new Date(+p[0],+p[1]-1,+p[2]); renderInterviewsCalendar(window._intvFiltered||[]); }
+
+function _localDateStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _intvByDate(filtered){
+  const by={};
+  (filtered||[]).filter(a=>a.stage==='interview'&&a.interviewDate).forEach(a=>{ (by[a.interviewDate]=by[a.interviewDate]||[]).push(a); });
+  return by;
+}
+// Assign overlapping same-day interviews to side-by-side lanes.
+function _layoutDayEvents(evs){
+  evs.sort((a,b)=>a.startMin-b.startMin||a.endMin-b.endMin);
+  let cluster=[], curEnd=-1;
+  const flush=()=>{ if(!cluster.length) return; const laneEnds=[];
+    cluster.forEach(e=>{ let placed=false; for(let i=0;i<laneEnds.length;i++){ if(e.startMin>=laneEnds[i]){ e.lane=i; laneEnds[i]=e.endMin; placed=true; break; } } if(!placed){ e.lane=laneEnds.length; laneEnds.push(e.endMin); } });
+    const n=laneEnds.length; cluster.forEach(e=>e.lanes=n); cluster=[]; curEnd=-1; };
+  evs.forEach(e=>{ if(cluster.length && e.startMin>=curEnd) flush(); cluster.push(e); curEnd=Math.max(curEnd,e.endMin); });
+  flush();
+  return evs;
+}
+
 function renderInterviewsCalendar(filtered){
   const host=document.getElementById('interviews-calendar-container'); if(!host) return;
   filtered=_intvScopeApplied(filtered);
+  if(_intvView==='month') return _renderIntvMonth(host, filtered);
+  return _renderIntvTimeGrid(host, filtered, _intvView==='day'?1:7);
+}
+
+function _renderIntvMonth(host, filtered){
   const title=document.getElementById('intv-cal-title');
   const ref=_intvCalRef, y=ref.getFullYear(), m=ref.getMonth();
   if(title) title.textContent=new Date(y,m,1).toLocaleString('default',{month:'long',year:'numeric'});
-  // interviews indexed by date string
-  const byDate={};
-  (filtered||[]).filter(a=>a.stage==='interview'&&a.interviewDate).forEach(a=>{ (byDate[a.interviewDate]=byDate[a.interviewDate]||[]).push(a); });
-  const todayStr=new Date().toISOString().split('T')[0];
+  const byDate=_intvByDate(filtered);
+  const todayStr=_localDateStr(new Date());
   const first=new Date(y,m,1), startDow=first.getDay(), daysInMonth=new Date(y,m+1,0).getDate();
   const dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   let cells='';
@@ -1196,6 +1230,69 @@ function renderInterviewsCalendar(filtered){
       <div class="text-[11px] font-bold ${isToday?'text-red-700':'text-slate-500'} px-0.5">${day}</div>${chips}${more}</div>`;
   }
   host.innerHTML=`<div class="grid grid-cols-7 gap-1.5">${cells}</div>`;
+}
+
+function _weekStart(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-x.getDay()); return x; }
+function _miniMonthHtml(ref){
+  const y=ref.getFullYear(), m=ref.getMonth();
+  const first=new Date(y,m,1), startDow=first.getDay(), dim=new Date(y,m+1,0).getDate();
+  const todayStr=_localDateStr(new Date()), selStr=_localDateStr(ref);
+  let html='<div class="flex items-center justify-between mb-2"><button onclick="intvCalMove(-1)" class="text-slate-400 hover:text-slate-700 cursor-pointer"><span class="material-icons-outlined" style="font-size:16px;">chevron_left</span></button>'
+    +'<span class="text-xs font-bold text-slate-700">'+new Date(y,m,1).toLocaleString('default',{month:'long',year:'numeric'})+'</span>'
+    +'<button onclick="intvCalMove(1)" class="text-slate-400 hover:text-slate-700 cursor-pointer"><span class="material-icons-outlined" style="font-size:16px;">chevron_right</span></button></div>';
+  html+='<div class="grid grid-cols-7 gap-0.5 text-center">';
+  ['S','M','T','W','T','F','S'].forEach(d=>html+='<div class="text-[9px] font-bold text-slate-400 pb-1">'+d+'</div>');
+  for(let i=0;i<startDow;i++) html+='<div></div>';
+  for(let day=1;day<=dim;day++){ const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    const isToday=ds===todayStr, isSel=ds===selStr;
+    html+='<button onclick="intvJumpTo(\''+ds+'\')" class="text-[10px] rounded-full w-6 h-6 mx-auto flex items-center justify-center cursor-pointer '+(isSel?'bg-red-800 text-white font-bold':isToday?'text-red-700 font-bold ring-1 ring-red-300':'text-slate-600 hover:bg-slate-100')+'">'+day+'</button>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function _renderIntvTimeGrid(host, filtered, nDays){
+  const title=document.getElementById('intv-cal-title');
+  const start = nDays===1 ? new Date(_intvCalRef.getFullYear(),_intvCalRef.getMonth(),_intvCalRef.getDate()) : _weekStart(_intvCalRef);
+  const days=[]; for(let i=0;i<nDays;i++){ const d=new Date(start); d.setDate(start.getDate()+i); days.push(d); }
+  if(title){
+    if(nDays===1) title.textContent=days[0].toLocaleDateString('default',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    else { const a=days[0], b=days[6], sameM=a.getMonth()===b.getMonth();
+      title.textContent=a.toLocaleDateString('default',{month:'short',day:'numeric'})+' – '+b.toLocaleDateString('default',sameM?{day:'numeric',year:'numeric'}:{month:'short',day:'numeric',year:'numeric'}); }
+  }
+  const byDate=_intvByDate(filtered), todayStr=_localDateStr(new Date());
+  const dow=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const gridCols='48px repeat('+nDays+', minmax(0,1fr))';
+  let header='<div class="grid" style="grid-template-columns:'+gridCols+';"><div></div>';
+  days.forEach(d=>{ const today=_localDateStr(d)===todayStr;
+    header+='<div class="text-center py-1.5 border-l border-slate-100"><div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">'+dow[d.getDay()]+'</div>'
+      +'<div class="text-sm font-bold mt-0.5">'+(today?'<span style="display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:50%;background:#b91c1c;color:#fff;">'+d.getDate()+'</span>':'<span class="text-slate-700">'+d.getDate()+'</span>')+'</div></div>'; });
+  header+='</div>';
+  const hours=[]; for(let h=_DAY_START;h<=_DAY_END;h++) hours.push(h);
+  const bodyH=(_DAY_END-_DAY_START)*_HOUR_PX;
+  let gutter='<div style="position:relative;height:'+bodyH+'px;">';
+  hours.forEach((h,i)=>{ gutter+='<div style="position:absolute;top:'+(i*_HOUR_PX-6)+'px;right:6px;font-size:10px;color:#94a3b8;white-space:nowrap;">'+fmtTime(String(h).padStart(2,'0')+':00').replace(':00','')+'</div>'; });
+  gutter+='</div>';
+  let cols='';
+  days.forEach(d=>{
+    const ds=_localDateStr(d);
+    let inner='<div style="position:relative;height:'+bodyH+'px;" class="border-l border-slate-100">';
+    hours.forEach((h,i)=>{ inner+='<div style="position:absolute;left:0;right:0;top:'+(i*_HOUR_PX)+'px;border-top:1px solid #f1f5f9;"></div>'; });
+    const evs=(byDate[ds]||[]).map(a=>{ const t=(a.interviewTime||'').match(/^(\d{1,2}):(\d{2})/); const sh=t?+t[1]:9, sm=t?+t[2]:0; const startMin=Math.max(0,(sh-_DAY_START)*60+sm); return {a,startMin,endMin:startMin+60}; });
+    _layoutDayEvents(evs);
+    evs.forEach(e=>{ const acc=ACCOUNTS.find(x=>x.id===e.a.account), c=acc?.color||'#7f1d1d';
+      const top=e.startMin/60*_HOUR_PX, hgt=Math.max(24,(e.endMin-e.startMin)/60*_HOUR_PX-2), w=100/(e.lanes||1), left=(e.lane||0)*w;
+      inner+='<button onclick="openInterviewModal(\''+e.a.id+'\')" title="'+_escForm(e.a.name)+' · '+_escForm(e.a.interviewType||'Interview')+'" '
+        +'style="position:absolute;top:'+top+'px;height:'+hgt+'px;left:calc('+left+'% + 2px);width:calc('+w+'% - 4px);background:'+c+'1a;border-left:3px solid '+c+';color:'+c+';border-radius:5px;padding:2px 5px;overflow:hidden;text-align:left;cursor:pointer;" class="hover:brightness-95">'
+        +'<div style="font-size:10px;font-weight:700;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_escForm(e.a.name)+'</div>'
+        +'<div style="font-size:9px;opacity:.85;overflow:hidden;white-space:nowrap;">'+(e.a.interviewTime?fmtTime(e.a.interviewTime):'')+(e.a.interviewType?' · '+_escForm(e.a.interviewType):'')+'</div></button>';
+    });
+    inner+='</div>'; cols+=inner;
+  });
+  const grid='<div class="grid" style="grid-template-columns:'+gridCols+';">'+gutter+cols+'</div>';
+  const calHtml='<div class="overflow-x-auto"><div style="min-width:'+(nDays===1?300:660)+'px;">'+header+'<div class="overflow-y-auto custom-scroll" style="max-height:520px;">'+grid+'</div></div></div>';
+  host.innerHTML='<div class="flex gap-4 items-start"><div class="flex-1 min-w-0">'+calHtml+'</div>'
+    +'<div class="w-56 flex-none hidden lg:block bg-slate-50 rounded-xl p-3 border border-slate-100">'+_miniMonthHtml(_intvCalRef)+'</div></div>';
 }
 
 function renderOnboarding(onboarding){

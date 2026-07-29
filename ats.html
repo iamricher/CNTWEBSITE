@@ -763,8 +763,10 @@
             </div>
             <span id="intv-scope-note" class="text-[11px] text-slate-400 font-medium"></span>
             <div class="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
-              <button id="intv-view-calendar" onclick="setIntvView('calendar')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm">Calendar</button>
-              <button id="intv-view-list" onclick="setIntvView('list')" class="text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">List</button>
+              <button id="intv-mode-day" onclick="setIntvCalMode('day')" class="intv-mode-btn text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">Day</button>
+              <button id="intv-mode-week" onclick="setIntvCalMode('week')" class="intv-mode-btn text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm">Week</button>
+              <button id="intv-mode-month" onclick="setIntvCalMode('month')" class="intv-mode-btn text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">Month</button>
+              <button id="intv-mode-list" onclick="setIntvCalMode('list')" class="intv-mode-btn text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500">List</button>
             </div>
           </div>
         </div>
