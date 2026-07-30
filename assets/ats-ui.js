@@ -1159,24 +1159,55 @@ function _setSelect(id,value){
   sel.value=value;
 };
 
+// ── Talent-pool re-engagement: match pooled candidates to OPEN job openings ──
+function _poolOpenJobs(){
+  const jobs=[];
+  Object.keys(jobDatabase||{}).forEach(k=>(jobDatabase[k]||[]).forEach(j=>{ if((j.status||'open')==='open') jobs.push(j); }));
+  return jobs;
+}
+function _skillSet(str){ return new Set(String(str||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean)); }
+// A pooled candidate matches an open job when the role is the same OR their skills
+// overlap the job's expected skills.
+function _poolMatches(c){
+  const cSkills=_skillSet(c.tags), cRole=(c.role||'').trim().toLowerCase();
+  return _poolOpenJobs().filter(j=>{
+    const roleMatch=!!cRole && (j.role||'').trim().toLowerCase()===cRole;
+    if(roleMatch) return true;
+    const js=_skillSet(j.expected_skills);
+    for(const s of cSkills){ if(js.has(s)) return true; }
+    return false;
+  });
+}
 function renderTalentPool(pool){
   const tpt=document.getElementById('talent-pool-table');
   if(!tpt)return;
+  const matchMap={}; let withMatch=0;
+  pool.forEach(c=>{ const m=_poolMatches(c); matchMap[c.id]=m; if(m.length) withMatch++; });
   const poolTotal=document.getElementById('pool-total');if(poolTotal)poolTotal.textContent=pool.length;
-  const poolReady=document.getElementById('pool-ready');if(poolReady)poolReady.textContent=Math.round(pool.length*0.6);
-  const poolFollowup=document.getElementById('pool-followup');if(poolFollowup)poolFollowup.textContent=Math.round(pool.length*0.3);
-  const poolDeployed=document.getElementById('pool-deployed');if(poolDeployed)poolDeployed.textContent=Math.round(pool.length*0.1);
-  if(!pool.length){tpt.innerHTML=`<tr><td colspan="7"><div class="empty-state"><span class="material-icons-outlined text-4xl mb-2">person_search</span><p class="text-sm font-semibold">Talent pool is empty</p><p class="text-xs mt-1">Candidates tagged as Talent Pool will appear here.</p></div></td></tr>`;return;}
-  tpt.innerHTML=pool.map(c=>{
+  const poolReady=document.getElementById('pool-ready');if(poolReady)poolReady.textContent=withMatch;
+  const poolFollowup=document.getElementById('pool-followup');if(poolFollowup)poolFollowup.textContent=pool.length-withMatch;
+  const poolDeployed=document.getElementById('pool-deployed');if(poolDeployed)poolDeployed.textContent=_poolOpenJobs().length;
+  if(!pool.length){tpt.innerHTML=`<tr><td colspan="8"><div class="empty-state"><span class="material-icons-outlined text-4xl mb-2">person_search</span><p class="text-sm font-semibold">Talent pool is empty</p><p class="text-xs mt-1">Candidates tagged as Talent Pool will appear here.</p></div></td></tr>`;return;}
+  // Surface the best re-engagement candidates first (most open matches on top).
+  const sorted=[...pool].sort((a,b)=>(matchMap[b.id].length)-(matchMap[a.id].length));
+  tpt.innerHTML=sorted.map(c=>{
     const acc=ACCOUNTS.find(a=>a.id===c.account);
+    const matches=matchMap[c.id]||[];
+    const tip=matches.map(m=>m.role+' · '+m.account+(m.location?(' ('+m.location+')'):'')).join('\n');
+    const matchCell=matches.length
+      ? `<span title="${_escForm(tip)}" class="badge bg-emerald-50 text-emerald-700 border-emerald-200">${matches.length} open match${matches.length!==1?'es':''}</span>`
+      : `<span class="text-[11px] text-slate-300">No match</span>`;
+    const actBtn=matches.length
+      ? `<button onclick="activateFromPool('${c.id}')" title="${_escForm(tip)}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg transition cursor-pointer">↺ Re-engage</button>`
+      : `<button onclick="activateFromPool('${c.id}')" class="bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 font-bold text-[11px] px-2.5 py-1 rounded-lg transition cursor-pointer">→ Move to Pipeline</button>`;
     return `<tr>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm cursor-pointer hover:text-red-700" onclick="triggerResumeModal('${c.id}')">${_escForm(c.name)}</td>
       <td class="px-4 py-3 text-xs text-slate-600">${_escForm(c.role)}</td>
       <td class="px-4 py-3"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${_escForm(c.account)}</span></td>
       <td class="px-4 py-3 text-xs text-slate-400">${_escForm(c.location)}</td>
-      <td class="px-4 py-3"><span class="badge bg-amber-50 text-amber-700 border-amber-200">Available</span></td>
+      <td class="px-4 py-3">${matchCell}</td>
       <td class="px-4 py-3 text-xs text-slate-400 font-mono">${_escForm(c.phone)}</td>
-      <td class="px-4 py-3"><button onclick="activateFromPool('${c.id}')" class="bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 font-bold text-[11px] px-2.5 py-1 rounded-lg transition cursor-pointer">→ Move to Pipeline</button></td>
+      <td class="px-4 py-3">${actBtn}</td>
     </tr>`;
   }).join('');
 }
