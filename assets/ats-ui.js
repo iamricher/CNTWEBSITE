@@ -1892,7 +1892,7 @@ function cntRenderProfileTabs(app){
   const activeKey = app ? normStage(app.stage) : 'new';
   bar.innerHTML = PIPELINE_STAGES.map(s=>{
     const ic = STAGE_TAB_ICONS[s.key] || 'radio_button_unchecked';
-    const label = s.key==='bgcheck' ? _escForm(getStageName(s.key))+' <span class="text-[9px] font-normal opacity-60">· Pre-Emp</span>' : _escForm(getStageName(s.key));
+    const label = _escForm(getStageName(s.key));
     return '<button class="tab-btn'+(s.key===activeKey?' active':'')+'" id="tab-btn-stage-'+_escForm(s.key)+'" onclick="gotoStageTab(\''+_escForm(s.key)+'\')">'
       +'<span class="material-icons-outlined align-middle mr-1" style="font-size:13px;">'+ic+'</span>'+label+'</button>';
   }).join('');

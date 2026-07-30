@@ -68,6 +68,8 @@
         sb.from('applications').update({ stage:targetStage }).eq('id',app._sid)
           .then(({error})=>{ if(error) console.error('stage writeback',error); });
       }
+      // Opt-in, default-off: auto-send the stage's email if that stage enabled it.
+      if(app && typeof _maybeAutoStageEmail==='function') _maybeAutoStageEmail(app, targetStage);
     };
   }
 
@@ -1576,6 +1578,35 @@
     rejected:  { s:'Update on your application — {role}', b:'Dear {name},\n\nThank you for your interest in the {role} position ({account}) and for the time you invested in the process. After careful consideration we will not be moving forward at this time. We wish you all the best and encourage you to apply for future openings.\n\nWarm regards,\nCNT Recruitment Team' }
   };
   function _fillTpl(t, app){ return t.replace(/\{name\}/g,app.name||'').replace(/\{role\}/g,app.role||'the role').replace(/\{account\}/g,app.account||'CNT').replace(/\{location\}/g,app.location||''); }
+
+  // Opt-in, default-off stage-entry email automation. Fires from executeStageChange
+  // ONLY when the entered stage has auto_email enabled (Settings → Pipeline Stages).
+  // Never sends without an email on file, and never falls back to the mail app —
+  // silent automation. Deduped per candidate+stage for the session.
+  const _autoSentStageEmail = new Set();
+  async function _maybeAutoStageEmail(app, stageKey){
+    if(!sb || !app) return;
+    const st=PIPELINE_STAGES.find(s=>s.key===stageKey);
+    if(!st || !st.auto_email) return;                       // stage not opted in
+    if(!app.email){ cntLogActivity(app,'email','Auto stage email skipped — no email on file'); return; }
+    const dedupe=String(app._sid||app.id)+':'+stageKey;
+    if(_autoSentStageEmail.has(dedupe)) return;             // already sent this session
+    _autoSentStageEmail.add(dedupe);
+    const fallback=STAGE_EMAIL[stageKey]||STAGE_EMAIL.new;
+    const subject=_fillTpl((st.email_subject)||fallback.s, app);
+    const text=_fillTpl((st.email_body)||fallback.b, app);
+    try{
+      const { data, error } = await sb.functions.invoke('send-email',{ body:{ to:app.email, subject, text, kind:'stage', applicant_ref:String(app._sid||app.id) } });
+      if(error || (data&&data.error)) throw new Error((data&&data.error)||(error&&error.message)||'send failed');
+      cntLogActivity(app,'email','Auto stage email sent to '+app.email+' — '+getStageName(stageKey));
+      if(window.showToast) showToast('Stage email sent to '+app.email,'success');
+    }catch(e){
+      console.warn('auto stage email',e);
+      _autoSentStageEmail.delete(dedupe);                   // let it retry on a later entry
+      cntLogActivity(app,'email','Auto stage email not sent (email not configured?) — '+getStageName(stageKey));
+    }
+  }
+  window._maybeAutoStageEmail = _maybeAutoStageEmail;
   window.cntDraftEmail = function(id){
     const app=findApplicant(id); if(!app) return;
     // A stage configured with its own template in Settings wins over the built-in one
@@ -2513,7 +2544,7 @@
     rows.forEach(r=>PIPELINE_STAGES.push({
       _id:r.id, key:r.key, label:r.name, short:r.short||r.name, color:r.color||'#64748b',
       sequence:r.sequence||0, folded:!!r.folded, is_hired:!!r.is_hired,
-      email_subject:r.email_subject||'', email_body:r.email_body||'', requirements:r.requirements||''
+      email_subject:r.email_subject||'', email_body:r.email_body||'', auto_email:!!r.auto_email, requirements:r.requirements||''
     }));
     applyStageStyles();
     fillStageSelects();
@@ -2591,7 +2622,9 @@
           +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer"><input type="checkbox" id="st-hired" '+((s&&s.is_hired)?'checked':'')+' class="accent-red-800 w-4 h-4"> Hired stage</label>'
         +'</div>'
         +'<p class="text-[10px] text-slate-400 -mt-1">“Hired stage” marks the candidate as hired and unlocks Client Endorsement and the deployment milestones.</p>'
-        +'<div class="pt-2 border-t border-slate-100"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Auto email on entering this stage <span class="text-slate-400 font-normal normal-case">— optional</span></p>'
+        +'<div class="pt-2 border-t border-slate-100">'
+          +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer mb-1"><input type="checkbox" id="st-auto-email" '+((s&&s.auto_email)?'checked':'')+' class="accent-red-800 w-4 h-4"> Auto-send this email when a candidate enters this stage</label>'
+          +'<p class="text-[10px] text-slate-400 mb-2">Off by default. Sends only when the candidate has an email on file and <code>RESEND_API_KEY</code> is configured. Leave the fields blank to use the built-in template.</p>'
           +'<input id="st-subj" value="'+v(s&&s.email_subject)+'" placeholder="Subject — use {name} {role} {account} {location}" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 mb-2">'
           +'<textarea id="st-body" rows="4" placeholder="Message body — leave blank to use the built-in template" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(s&&s.email_body)+'</textarea></div>'
         +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Requirements <span class="text-slate-400 font-normal normal-case">— internal note</span></label><textarea id="st-req" rows="2" placeholder="What must happen in this stage?" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(s&&s.requirements)+'</textarea></div>'
@@ -2616,6 +2649,7 @@
       is_hired:!!(document.getElementById('st-hired')||{}).checked,
       email_subject:((document.getElementById('st-subj')||{}).value||'').trim()||null,
       email_body:((document.getElementById('st-body')||{}).value||'').trim()||null,
+      auto_email:!!(document.getElementById('st-auto-email')||{}).checked,
       requirements:((document.getElementById('st-req')||{}).value||'').trim()||null
     };
     let error;
