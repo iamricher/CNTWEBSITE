@@ -1087,6 +1087,27 @@
     try{ sb.from('audit_log').insert({ actor_email: currentUserEmail||null, actor_role: currentRole||null, action, entity, entity_ref: ref?String(ref):null, details: details||null }).then(({error})=>{ if(error) console.warn('audit',error.message); }); }catch(e){}
   }
 
+  // Settings → Audit Log viewer. Reads the staff-only audit_log table (RLS-gated).
+  window.cntLoadAuditLog = async function(){
+    const el=document.getElementById('audit-log-list'); if(!el) return;
+    if(!sb){ el.innerHTML='<p class="text-[11px] text-slate-400 text-center py-6">Backend unavailable.</p>'; return; }
+    el.innerHTML='<p class="text-[11px] text-slate-400 text-center py-6">Loading…</p>';
+    const f=((document.getElementById('audit-filter')||{}).value||'').trim();
+    let q=sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(200);
+    if(f) q=q.ilike('action', f+'%');
+    const { data, error } = await q;
+    if(error){ el.innerHTML='<p class="text-[11px] text-red-500 text-center py-6">Could not load audit log: '+_e(error.message)+'</p>'; return; }
+    if(!data || !data.length){ el.innerHTML='<p class="text-[11px] text-slate-400 text-center py-6">No matching activity.</p>'; return; }
+    const icon=a=>({stage_change:'sync',refuse:'block',reopen:'restart_alt',job_edit:'work',job_post:'work',job_remove:'work_off',settings_add:'add',settings_remove:'remove',stage_add:'view_column',stage_edit:'view_column',applicant_remove:'person_remove'})[a]||'radio_button_unchecked';
+    el.innerHTML='<div class="divide-y divide-slate-50">'+data.map(r=>{
+      const when=r.created_at?new Date(r.created_at).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+      return '<div class="flex items-start gap-3 py-2">'
+        +'<span class="material-icons-outlined text-slate-400 mt-0.5" style="font-size:15px;">'+icon(r.action)+'</span>'
+        +'<div class="min-w-0 flex-1"><div class="text-slate-700"><span class="font-semibold">'+_e(r.action||'')+'</span> <span class="text-slate-300">·</span> '+_e(r.entity||'')+(r.details?' <span class="text-slate-500">— '+_e(r.details)+'</span>':'')+'</div>'
+        +'<div class="text-[10px] text-slate-400">'+_e(r.actor_email||'system')+(r.actor_role?(' ('+_e(r.actor_role)+')'):'')+' · '+when+'</div></div></div>';
+    }).join('')+'</div>';
+  };
+
   function injectAdminNav(){
     if(currentRole!=='super_admin' || document.getElementById('nav-admin')) return;
     const dash=document.getElementById('nav-dashboard'); if(!dash) return;
