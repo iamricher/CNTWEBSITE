@@ -1409,6 +1409,24 @@
     if(window.showToast) showToast(app.name+' refused','info');
     _closeRefuseModal(); renderAll(); if(currentViewedApplicantId===id) cntProfileExtras(app);
   }
+  // ── Bulk helpers for the List view's multi-select action bar ──
+  window.cntBulkRefuse = function(ids, reason){
+    reason=(reason||'').trim()||'Bulk refuse';
+    let n=0;
+    (ids||[]).forEach(id=>{
+      const app=findApplicant(id); if(!app) return;
+      updateApplicant(id,{ stage:'rejected', status:'refused', refuse_reason:reason });
+      Object.assign(app,{ stage:'rejected', status:'refused', refuse_reason:reason });
+      _persistApp(app,{ stage:'rejected', status:'refused', refuse_reason:reason });
+      logAudit('refuse','applicant', app._sid||id, app.name+' — '+reason);
+      cntLogActivity(app,'refuse','Refused — '+reason); n++;
+    });
+    if(window.showToast) showToast(n+' candidate'+(n!==1?'s':'')+' refused','info');
+    renderAll();
+  };
+  // Force-send a candidate's current-stage email (bulk "Email" — bypasses the opt-in flag).
+  window.cntSendStageEmailNow = function(id){ const a=findApplicant(id); if(a) _maybeAutoStageEmail(a, a.stage, true); };
+
   window.cntReopen = function(id){
     const app=findApplicant(id); if(!app) return;
     updateApplicant(id,{ stage:'new', status:'active', refuse_reason:'' });
@@ -1584,14 +1602,14 @@
   // Never sends without an email on file, and never falls back to the mail app —
   // silent automation. Deduped per candidate+stage for the session.
   const _autoSentStageEmail = new Set();
-  async function _maybeAutoStageEmail(app, stageKey){
+  async function _maybeAutoStageEmail(app, stageKey, force){
     if(!sb || !app) return;
     const st=PIPELINE_STAGES.find(s=>s.key===stageKey);
-    if(!st || !st.auto_email) return;                       // stage not opted in
-    if(!app.email){ cntLogActivity(app,'email','Auto stage email skipped — no email on file'); return; }
+    if(!force && (!st || !st.auto_email)) return;           // stage not opted in (bulk "Email" forces it)
+    if(!app.email){ if(!force) cntLogActivity(app,'email','Auto stage email skipped — no email on file'); return; }
     const dedupe=String(app._sid||app.id)+':'+stageKey;
-    if(_autoSentStageEmail.has(dedupe)) return;             // already sent this session
-    _autoSentStageEmail.add(dedupe);
+    if(!force && _autoSentStageEmail.has(dedupe)) return;   // already sent this session
+    if(!force) _autoSentStageEmail.add(dedupe);
     const fallback=STAGE_EMAIL[stageKey]||STAGE_EMAIL.new;
     const subject=_fillTpl((st.email_subject)||fallback.s, app);
     const text=_fillTpl((st.email_body)||fallback.b, app);

@@ -647,10 +647,14 @@ function renderStageProgressBar(counts){
 function renderApplicationsTable(pipeline){
   const tb=document.getElementById('applications-table-body');
   if(!tb)return;
-  if(!pipeline.length){tb.innerHTML=`<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400 text-sm">No applicants match current filters</td></tr>`;return;}
+  window._lastAppRows=pipeline.map(a=>a.id);
+  // Drop selections that fell out of the current filter, then refresh the bar.
+  _bulkSel.forEach(id=>{ if(!window._lastAppRows.includes(id)) _bulkSel.delete(id); });
+  if(!pipeline.length){tb.innerHTML=`<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400 text-sm">No applicants match current filters</td></tr>`;cntBulkSyncBar();return;}
   tb.innerHTML=pipeline.map(a=>{
     const acc=ACCOUNTS.find(ac=>ac.id===a.account);
     return `<tr>
+      <td class="px-3 py-2.5"><input type="checkbox" class="bulk-cb accent-red-800 w-4 h-4 cursor-pointer" data-id="${a.id}" ${_bulkSel.has(a.id)?'checked':''} onclick="event.stopPropagation();cntBulkToggle('${a.id}',this.checked)"></td>
       <td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal('${a.id}')">${_escForm(a.name)}</td>
       <td class="px-4 py-2.5 text-slate-600 text-xs">${_escForm(a.role)}</td>
       <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${_escForm(a.account)}</span></td>
@@ -667,6 +671,70 @@ function renderApplicationsTable(pipeline){
       </td>
     </tr>`;
   }).join('');
+  cntBulkSyncBar();
+}
+
+// ── Bulk actions on the List view (multi-select) ──
+let _bulkSel = new Set();
+function _bulkIds(){ return [..._bulkSel]; }
+function cntBulkToggle(id, checked){
+  if(checked) _bulkSel.add(id); else _bulkSel.delete(id);
+  const sa=document.getElementById('bulk-select-all');
+  if(sa){ const all=window._lastAppRows||[]; sa.checked = all.length>0 && all.every(x=>_bulkSel.has(x)); }
+  cntBulkSyncBar();
+}
+function cntBulkToggleAll(checked){
+  document.querySelectorAll('#applications-table-body input.bulk-cb').forEach(cb=>{ cb.checked=checked; const id=cb.dataset.id; if(checked) _bulkSel.add(id); else _bulkSel.delete(id); });
+  cntBulkSyncBar();
+}
+function cntBulkClear(){
+  _bulkSel.clear();
+  const sa=document.getElementById('bulk-select-all'); if(sa) sa.checked=false;
+  document.querySelectorAll('#applications-table-body input.bulk-cb').forEach(cb=>cb.checked=false);
+  cntBulkSyncBar();
+}
+function cntBulkSyncBar(){
+  const bar=document.getElementById('bulk-action-bar'); if(!bar) return;
+  const n=_bulkSel.size;
+  if(!n){ bar.classList.add('hidden'); bar.innerHTML=''; return; }
+  bar.classList.remove('hidden');
+  const opts=PIPELINE_STAGES.map(s=>'<option value="'+_escForm(s.key)+'">'+_escForm(getStageName(s.key))+'</option>').join('');
+  bar.innerHTML='<div class="flex items-center gap-3 flex-wrap">'
+    +'<span class="text-xs font-bold text-red-800 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:15px;">check_box</span>'+n+' selected</span>'
+    +'<div class="h-4 w-px bg-slate-200"></div>'
+    +'<div class="flex items-center gap-1.5"><span class="text-[11px] text-slate-500">Move to</span><select id="bulk-stage" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white">'+opts+'</select><button onclick="cntBulkMove()" class="text-xs font-semibold text-white bg-red-800 hover:bg-red-900 rounded-lg px-3 py-1.5 cursor-pointer">Apply</button></div>'
+    +'<button onclick="cntBulkEmail()" class="text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-lg px-3 py-1.5 hover:bg-indigo-50 cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">mail</span>Email</button>'
+    +'<button onclick="cntBulkPool()" class="text-xs font-semibold text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 hover:bg-amber-50 cursor-pointer">Add to Pool</button>'
+    +'<button onclick="cntBulkRefuseUI()" class="text-xs font-semibold text-red-700 border border-red-200 rounded-lg px-3 py-1.5 hover:bg-red-50 cursor-pointer">Refuse</button>'
+    +'<button onclick="cntBulkClear()" class="ml-auto text-[11px] font-semibold text-slate-500 hover:text-slate-800 cursor-pointer">Clear</button>'
+    +'</div>';
+}
+function cntBulkMove(){
+  const stage=(document.getElementById('bulk-stage')||{}).value; const ids=_bulkIds();
+  if(!stage||!ids.length) return;
+  if(!confirm('Move '+ids.length+' candidate'+(ids.length!==1?'s':'')+' to '+getStageName(stage)+'?')) return;
+  ids.forEach(id=>{ if(typeof executeStageChange==='function') executeStageChange(id,stage); });
+  cntBulkClear(); renderAll();
+}
+function cntBulkPool(){
+  const ids=_bulkIds(); if(!ids.length) return;
+  if(!confirm('Add '+ids.length+' candidate'+(ids.length!==1?'s':'')+' to the Talent Pool?')) return;
+  ids.forEach(id=>{ if(typeof executeStageChange==='function') executeStageChange(id,'pool'); });
+  cntBulkClear(); renderAll();
+}
+function cntBulkRefuseUI(){
+  const ids=_bulkIds(); if(!ids.length) return;
+  const reason=prompt('Refuse '+ids.length+' candidate'+(ids.length!==1?'s':'')+'. Reason:','Position filled');
+  if(reason===null) return;
+  if(window.cntBulkRefuse) cntBulkRefuse(ids, reason);
+  cntBulkClear();
+}
+function cntBulkEmail(){
+  const ids=_bulkIds(); if(!ids.length) return;
+  if(!confirm('Send each of the '+ids.length+' selected candidate'+(ids.length!==1?'s':'')+' their current-stage email?')) return;
+  ids.forEach(id=>{ if(window.cntSendStageEmailNow) cntSendStageEmailNow(id); });
+  if(window.showToast) showToast('Sending stage email to '+ids.length+' candidate'+(ids.length!==1?'s':'')+'…','info');
+  cntBulkClear();
 }
 
 function kanbanCardHtml(a, refused){
