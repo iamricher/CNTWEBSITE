@@ -360,6 +360,39 @@ function cntRenderApplicantForm(app){
   cntRenderProfileSidebar(app);
   cntProfIntPopulate(app);
   cntRenderScorecard(app);
+  cntRenderDupBanner(app);
+}
+
+// ── Duplicate-applicant detection (match on email or mobile) ──
+function _normEmail(e){ return String(e||'').trim().toLowerCase(); }
+function _normPhone(p){ const d=String(p||'').replace(/\D/g,''); return d.length>=10?d.slice(-10):''; }
+function cntFindDuplicates(app){
+  if(!app) return [];
+  const em=_normEmail(app.email), ph=_normPhone(app.phone);
+  if(!em && !ph) return [];
+  return getAllApplicants().filter(o=>{
+    if(o.id===app.id) return false;
+    return (em && _normEmail(o.email)===em) || (ph && _normPhone(o.phone)===ph);
+  });
+}
+// Ids that share an email or mobile with at least one other applicant.
+function cntDupIdSet(){
+  const all=getAllApplicants(), byEmail={}, byPhone={}, dup=new Set();
+  all.forEach(a=>{ const e=_normEmail(a.email); if(e){(byEmail[e]=byEmail[e]||[]).push(a.id);} const p=_normPhone(a.phone); if(p){(byPhone[p]=byPhone[p]||[]).push(a.id);} });
+  Object.values(byEmail).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dup.add(id)); });
+  Object.values(byPhone).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dup.add(id)); });
+  return dup;
+}
+function cntRenderDupBanner(app){
+  const el=document.getElementById('cnt-dup-banner'); if(!el) return;
+  const dups=app?cntFindDuplicates(app):[];
+  if(!dups.length){ el.classList.add('hidden'); el.innerHTML=''; return; }
+  el.classList.remove('hidden');
+  const links=dups.slice(0,5).map(d=>`<button onclick="triggerResumeModal('${d.id}')" class="underline font-semibold hover:opacity-80 cursor-pointer">${_escForm(d.name)}</button> <span style="opacity:.7;">(${_escForm(getStageName(d.stage))})</span>`).join(', ');
+  const more=dups.length>5?` and ${dups.length-5} more`:'';
+  el.innerHTML=`<div class="flex items-start gap-2 rounded-xl px-4 py-2.5 mb-3" style="background:#fef3c7;border:1px solid #fde68a;color:#92400e;">
+    <span class="material-icons-outlined flex-none" style="font-size:17px;">content_copy</span>
+    <div class="text-xs leading-relaxed"><span class="font-bold">Possible duplicate.</span> Same email or mobile as ${links}${more}. Review before processing as a new applicant.</div></div>`;
 }
 
 // ── Interview scorecard / evaluation (Odoo "interview survey" equivalent) ──
@@ -693,11 +726,13 @@ function renderApplicationsTable(pipeline){
   // Drop selections that fell out of the current filter, then refresh the bar.
   _bulkSel.forEach(id=>{ if(!window._lastAppRows.includes(id)) _bulkSel.delete(id); });
   if(!pipeline.length){tb.innerHTML=`<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400 text-sm">No applicants match current filters</td></tr>`;cntBulkSyncBar();return;}
+  const dupSet=cntDupIdSet();
   tb.innerHTML=pipeline.map(a=>{
     const acc=ACCOUNTS.find(ac=>ac.id===a.account);
+    const dupBadge=dupSet.has(a.id)?` <span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;vertical-align:middle;" title="Shares an email or mobile with another applicant">DUP</span>`:'';
     return `<tr>
       <td class="px-3 py-2.5"><input type="checkbox" class="bulk-cb accent-red-800 w-4 h-4 cursor-pointer" data-id="${a.id}" ${_bulkSel.has(a.id)?'checked':''} onclick="event.stopPropagation();cntBulkToggle('${a.id}',this.checked)"></td>
-      <td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal('${a.id}')">${_escForm(a.name)}</td>
+      <td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal('${a.id}')">${_escForm(a.name)}${dupBadge}</td>
       <td class="px-4 py-2.5 text-slate-600 text-xs">${_escForm(a.role)}</td>
       <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${_escForm(a.account)}</span></td>
       <td class="px-4 py-2.5 text-xs text-slate-400">${_escForm(a.location)}</td>
