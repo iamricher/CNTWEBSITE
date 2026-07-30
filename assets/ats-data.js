@@ -28,6 +28,7 @@
       preemp_requirements_at:r.preemp_requirements_at||null, contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
       priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[],
       requirements:(r.requirements&&typeof r.requirements==='object')?r.requirements:{}, requirement_docs:(r.requirement_docs&&typeof r.requirement_docs==='object')?r.requirement_docs:{},
+      interview_scorecard:(r.interview_scorecard&&typeof r.interview_scorecard==='object')?r.interview_scorecard:{},
       recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', referral_relation:r.referral_relation||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||'',
       work_experience:r.work_experience||'', education:r.education||'', languages:r.languages||'',
       certifications:r.certifications||'', seminars:r.seminars||'', awards:r.awards||'', char_references:r.char_references||''
@@ -1371,6 +1372,9 @@
   // Persists the checklist ticks + a stored file path per requirement.
   window.cntPersistRequirements = function(id){
     const a=findApplicant(id); if(a) _persistApp(a,{ requirements:a.requirements||{}, requirement_docs:a.requirement_docs||{} });
+  };
+  window.cntPersistScorecard = function(id){
+    const a=findApplicant(id); if(a) _persistApp(a,{ interview_scorecard:a.interview_scorecard||{} });
   };
   window.cntUploadReqDoc = async function(id, req, inputEl){
     const app=findApplicant(id); if(!app) return;

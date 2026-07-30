@@ -359,6 +359,48 @@ function cntRenderApplicantForm(app){
   cntRenderStageOverride(app);
   cntRenderProfileSidebar(app);
   cntProfIntPopulate(app);
+  cntRenderScorecard(app);
+}
+
+// ── Interview scorecard / evaluation (Odoo "interview survey" equivalent) ──
+const SCORE_CRITERIA = ['Communication','Role / Technical Fit','Relevant Experience','Attitude & Culture Fit','Presentation'];
+function _scoreObj(app){ if(!app.interview_scorecard||typeof app.interview_scorecard!=='object') app.interview_scorecard={}; if(!app.interview_scorecard.scores||typeof app.interview_scorecard.scores!=='object') app.interview_scorecard.scores={}; return app.interview_scorecard; }
+function _scoreUpdateOverall(app){
+  const scores=(app.interview_scorecard&&app.interview_scorecard.scores)||{};
+  const vals=SCORE_CRITERIA.map(c=>scores[c]).filter(v=>v>0);
+  const el=document.getElementById('score-overall');
+  if(el) el.textContent = vals.length ? ('Overall '+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)+'/5') : 'Not rated';
+}
+function cntRenderScorecard(app){
+  const box=document.getElementById('score-criteria'); if(!box||!app) return;
+  const sc=app.interview_scorecard||{}, scores=sc.scores||{};
+  box.innerHTML=SCORE_CRITERIA.map(c=>{
+    const cq=c.replace(/'/g,"\\'"), val=scores[c]||0;
+    const dots=[1,2,3,4,5].map(n=>`<button type="button" onclick="cntScoreSet('${cq}',${n})" title="${n} / 5" class="cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:19px;color:${val>=n?'#f59e0b':'#e2e8f0'};">star</span></button>`).join('');
+    return `<div class="flex items-center justify-between gap-3"><span class="text-xs font-medium text-slate-600">${_escForm(c)}</span><span class="flex items-center gap-0.5">${dots}</span></div>`;
+  }).join('');
+  const rec=document.getElementById('score-recommendation'); if(rec) rec.value=sc.recommendation||'';
+  const notes=document.getElementById('score-notes'); if(notes) notes.value=sc.notes||'';
+  const st=document.getElementById('score-status');
+  if(st){ st.textContent = sc.at ? ('Last saved by '+(sc.by||'HR')+' · '+String(sc.at).slice(0,10)) : ''; st.style.color=''; }
+  _scoreUpdateOverall(app);
+}
+function cntScoreSet(criterion, val){
+  const app=findApplicant(currentViewedApplicantId); if(!app) return;
+  _scoreObj(app).scores[criterion]=val;
+  cntRenderScorecard(app);
+}
+function cntSaveScorecard(){
+  const app=findApplicant(currentViewedApplicantId); if(!app) return;
+  const sc=_scoreObj(app);
+  sc.recommendation=(document.getElementById('score-recommendation')||{}).value||'';
+  sc.notes=(document.getElementById('score-notes')||{}).value||'';
+  sc.by=window.cntUserName||'HR';
+  sc.at=new Date().toISOString();
+  if(window.cntPersistScorecard) cntPersistScorecard(currentViewedApplicantId);
+  if(window.cntLogActivity) cntLogActivity(app,'evaluation','Interview evaluation saved'+(sc.recommendation?(' — '+sc.recommendation):''));
+  const st=document.getElementById('score-status'); if(st){ st.textContent='✓ Saved'; st.style.color='#166534'; }
+  if(window.showToast) showToast('Evaluation saved','success');
 }
 
 // Candidate summary sidebar — avatar, stage, contact, and a persistent interview
