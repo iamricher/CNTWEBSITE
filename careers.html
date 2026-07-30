@@ -200,12 +200,12 @@
         <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo & Ads Specialists, Inc." />
       </a>
       <ul class="nav-links">
-        <li><a href="index.html#about" class="nav-link">About</a></li>
-        <li><a href="index.html#services" class="nav-link">Services</a></li>
-        <li><a href="index.html#industries" class="nav-link">Industries</a></li>
-        <li><a href="careers.html" class="nav-link active">Careers</a></li>
+        <li><a href="index.html#about" class="nav-link" data-i18n="nav_about">About</a></li>
+        <li><a href="index.html#services" class="nav-link" data-i18n="nav_services">Services</a></li>
+        <li><a href="index.html#industries" class="nav-link" data-i18n="nav_industries">Industries</a></li>
+        <li><a href="careers.html" class="nav-link active" data-i18n="nav_careers">Careers</a></li>
       </ul>
-      <div class="nav-actions"><a href="index.html#contact" class="btn-nav">Contact Us</a></div>
+      <div class="nav-actions"><button id="lang-toggle" onclick="cntToggleLang()" class="btn-nav" style="cursor:pointer;border:1px solid rgba(0,0,0,.12);background:#fff;" title="Switch language">Tagalog</button><a href="index.html#contact" class="btn-nav" data-i18n="nav_contact">Contact Us</a></div>
     </div>
   </nav>
 
@@ -213,13 +213,13 @@
   <div id="view-list">
     <header class="hero">
       <div class="container hero-inner">
-        <span class="eyebrow">Join CNT</span>
-        <h1>A Million Jobs for a <em>Million Filipinos.</em></h1>
-        <p>Your next opportunity starts below. Browse our open positions across leading client brands and apply online in minutes — no account needed.</p>
+        <span class="eyebrow" data-i18n="hero_eyebrow">Join CNT</span>
+        <h1 data-i18n="hero_title">A Million Jobs for a <em>Million Filipinos.</em></h1>
+        <p data-i18n="hero_sub">Your next opportunity starts below. Browse our open positions across leading client brands and apply online in minutes — no account needed.</p>
         <div class="hero-search">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
-          <input id="q" type="text" placeholder="Search a role or client…" />
-          <button onclick="document.getElementById('board').scrollIntoView({behavior:'smooth'})">Search</button>
+          <input id="q" type="text" placeholder="Search a role or client…" data-i18n-ph="search_ph" />
+          <button onclick="document.getElementById('board').scrollIntoView({behavior:'smooth'})" data-i18n="search_btn">Search</button>
         </div>
       </div>
     </header>
@@ -234,18 +234,18 @@
         <div class="layout">
           <aside class="sidebar">
             <div class="filter-group">
-              <h4>Location</h4>
+              <h4 data-i18n="filter_location">Location</h4>
               <div id="filter-location"></div>
             </div>
             <div class="filter-group">
-              <h4>Positions</h4>
+              <h4 data-i18n="filter_positions">Positions</h4>
               <div id="filter-position"></div>
             </div>
           </aside>
 
           <section>
             <div class="list-head">
-              <h2>Open Positions</h2>
+              <h2 data-i18n="open_positions">Open Positions</h2>
               <span id="results-count"></span>
             </div>
             <div id="groups"></div>
@@ -260,7 +260,7 @@
   <div id="view-detail">
     <header class="detail-head">
       <div class="container">
-        <a class="backlink" href="careers.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All open positions</a>
+        <a class="backlink" href="careers.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="back_all">All open positions</span></a>
         <div class="client" id="d-client">CLIENT</div>
         <h1 id="d-title">Role</h1>
         <div class="detail-meta">
@@ -268,7 +268,7 @@
           <span id="d-salary"></span>
           <span id="d-openings"></span>
         </div>
-        <button class="btn-apply-top" onclick="document.getElementById('apply-anchor').scrollIntoView({behavior:'smooth'})">Apply for this position →</button>
+        <button class="btn-apply-top" onclick="document.getElementById('apply-anchor').scrollIntoView({behavior:'smooth'})" data-i18n="apply_top">Apply for this position →</button>
       </div>
     </header>
 
@@ -278,16 +278,16 @@
           <div class="prose" id="d-prose"></div>
 
           <div class="apply-card" id="apply-anchor">
-            <div class="cap">Apply now</div>
+            <div class="cap" data-i18n="apply_now">Apply now</div>
             <div class="inner" id="apply-inner">
               <form id="apply-form" novalidate>
-                <div class="field"><label>Full name <span class="req">*</span></label><input name="name" type="text" required placeholder="Juan Dela Cruz" /></div>
-                <div class="field"><label>Mobile number <span class="req">*</span></label><input name="phone" type="tel" required placeholder="+63 9XX XXX XXXX" /></div>
-                <div class="field"><label>Email address <span class="req">*</span></label><input name="email" type="email" required placeholder="you@email.com" /></div>
-                <div class="field"><label>Years of experience</label>
+                <div class="field"><label><span data-i18n="lbl_name">Full name</span> <span class="req">*</span></label><input name="name" type="text" required placeholder="Juan Dela Cruz" /></div>
+                <div class="field"><label><span data-i18n="lbl_phone">Mobile number</span> <span class="req">*</span></label><input name="phone" type="tel" required placeholder="+63 9XX XXX XXXX" /></div>
+                <div class="field"><label><span data-i18n="lbl_email">Email address</span> <span class="req">*</span></label><input name="email" type="email" required placeholder="you@email.com" /></div>
+                <div class="field"><label data-i18n="lbl_experience">Years of experience</label>
                   <select name="experience"><option value="">Select…</option><option>No experience</option><option>Less than 1 year</option><option>1–2 years</option><option>3–5 years</option><option>5+ years</option></select>
                 </div>
-                <div class="field"><label>How did you hear about us?</label>
+                <div class="field"><label data-i18n="lbl_source">How did you hear about us?</label>
                   <select name="source" id="source-select"><option value="Website">Company Website</option><option>JobStreet</option><option>Indeed</option><option>Facebook</option><option>LinkedIn</option><option>Kalibrr</option><option>Referral</option><option>Walk-in</option><option>Other</option></select>
                 </div>
                 <!-- Shown only for Referral. Hidden fields stay out of the way
@@ -301,14 +301,14 @@
                   <label for="referral_relation">How are you related to that person? <span class="req">*</span></label>
                   <input id="referral_relation" name="referral_relation" type="text" placeholder="e.g. former colleague, friend, relative" autocomplete="off" />
                 </div>
-                <div class="field"><label>Resume / CV <span class="req">*</span></label>
+                <div class="field"><label><span data-i18n="lbl_resume">Resume / CV</span> <span class="req">*</span></label>
                   <label class="filebox" id="filebox">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    <div id="filebox-text">Upload PDF or DOC (max 5 MB)</div>
+                    <div id="filebox-text" data-i18n="filebox">Upload PDF or DOC (max 5 MB)</div>
                     <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx" hidden required />
                   </label>
                 </div>
-                <div class="field"><label>Cover note <span style="color:var(--gray-400);font-weight:400">(optional)</span></label><textarea name="cover_note" placeholder="Why are you a great fit?"></textarea></div>
+                <div class="field"><label><span data-i18n="lbl_cover">Cover note</span> <span style="color:var(--gray-400);font-weight:400" data-i18n="optional">(optional)</span></label><textarea name="cover_note" placeholder="Why are you a great fit?" data-i18n-ph="cover_ph"></textarea></div>
 
                 <!-- Honeypot: hidden from people, tempting to bots. Never filled by a real applicant. -->
                 <div class="hp-field" aria-hidden="true"><label>Company website</label><input name="company_website" type="text" tabindex="-1" autocomplete="off" /></div>
@@ -316,7 +316,7 @@
                 <div class="consent">
                   <label class="consent-row">
                     <input type="checkbox" name="consent" id="consent" required />
-                    <span>I consent to CNT Promo &amp; Ads Specialists, Inc. collecting and processing my personal data and CV for recruitment purposes, and to <b>sharing my profile with the prospective employer</b> for the role I am applying to, in accordance with the <b>Data Privacy Act of 2012 (RA 10173)</b>.</span>
+                    <span data-i18n="consent" data-i18n-html="1">I consent to CNT Promo &amp; Ads Specialists, Inc. collecting and processing my personal data and CV for recruitment purposes, and to <b>sharing my profile with the prospective employer</b> for the role I am applying to, in accordance with the <b>Data Privacy Act of 2012 (RA 10173)</b>.</span>
                   </label>
                   <p class="consent-note">
                     Your data is used only to assess your application and to endorse you to the client for this role. It is stored securely, accessible only to authorised CNT recruitment staff, and kept for up to <b>12 months</b> unless you ask us to remove it sooner. You may request access to, correction of, or deletion of your data any time by emailing
@@ -324,7 +324,7 @@
                   </p>
                 </div>
 
-                <button type="submit" class="btn-submit" id="submit-btn">Submit application</button>
+                <button type="submit" class="btn-submit" id="submit-btn" data-i18n="submit_btn">Submit application</button>
                 <div class="form-msg" id="form-msg"></div>
               </form>
             </div>
@@ -368,6 +368,35 @@
 
   <script>
   'use strict';
+
+  // ── Tagalog / English toggle for the static careers UI ──
+  // Job content comes from the database in English (data, not translated);
+  // this switches the surrounding chrome. English is the source of truth
+  // captured from the DOM; the TL map overrides it.
+  const I18N_TL = {
+    nav_about:'Tungkol', nav_services:'Serbisyo', nav_industries:'Industriya', nav_careers:'Trabaho', nav_contact:'Makipag-ugnayan',
+    hero_eyebrow:'Sumali sa CNT',
+    hero_title:'Isang Milyong Trabaho para sa <em>Isang Milyong Pilipino.</em>',
+    hero_sub:'Nagsisimula rito ang iyong susunod na oportunidad. Tingnan ang aming mga bukas na posisyon sa mga nangungunang brand at mag-apply online sa loob ng ilang minuto — walang kailangang account.',
+    search_ph:'Maghanap ng posisyon o kliyente…', search_btn:'Hanapin',
+    filter_location:'Lokasyon', filter_positions:'Mga Posisyon', open_positions:'Mga Bukas na Posisyon',
+    back_all:'Lahat ng bukas na posisyon', apply_top:'Mag-apply para sa posisyong ito →', apply_now:'Mag-apply na',
+    lbl_name:'Buong pangalan', lbl_phone:'Numero ng cellphone', lbl_email:'Email address', lbl_experience:'Taon ng karanasan',
+    lbl_source:'Paano mo nalaman ang tungkol sa amin?', lbl_resume:'Resume / CV', filebox:'Mag-upload ng PDF o DOC (hanggang 5 MB)',
+    lbl_cover:'Cover note', optional:'(opsyonal)', cover_ph:'Bakit ka angkop sa trabahong ito?',
+    consent:'Pumapayag ako na kolektahin at iproseso ng CNT Promo &amp; Ads Specialists, Inc. ang aking personal na datos at CV para sa layuning rekrutment, at na <b>ibahagi ang aking profile sa posibleng employer</b> para sa posisyong ini-a-apply-an ko, alinsunod sa <b>Data Privacy Act of 2012 (RA 10173)</b>.',
+    submit_btn:'Isumite ang aplikasyon'
+  };
+  const _i18nOrig = {}, _i18nOrigPh = {};
+  function cntSetLang(lang){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.getAttribute('data-i18n'); if(!(k in _i18nOrig)) _i18nOrig[k]=el.innerHTML; el.innerHTML=(lang==='tl' && I18N_TL[k]!=null)?I18N_TL[k]:_i18nOrig[k]; });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ const k=el.getAttribute('data-i18n-ph'); if(!(k in _i18nOrigPh)) _i18nOrigPh[k]=el.getAttribute('placeholder')||''; el.setAttribute('placeholder',(lang==='tl' && I18N_TL[k]!=null)?I18N_TL[k]:_i18nOrigPh[k]); });
+    try{ localStorage.setItem('cnt_lang',lang); }catch(e){}
+    document.documentElement.lang = lang==='tl'?'tl':'en';
+    const btn=document.getElementById('lang-toggle'); if(btn) btn.textContent = lang==='tl'?'English':'Tagalog';
+  }
+  window.cntToggleLang=function(){ let cur='en'; try{ cur=localStorage.getItem('cnt_lang')||'en'; }catch(e){} cntSetLang(cur==='tl'?'en':'tl'); };
+  (function(){ let saved='en'; try{ saved=localStorage.getItem('cnt_lang')||'en'; }catch(e){} cntSetLang(saved); })();
 
   const SEED_JOBS = [
     {id:1,role:'Merchandiser',client:'SONY',location:'Manila',salary_range:'17,000-19,000',openings:5,priority:'high'},
