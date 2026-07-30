@@ -2214,13 +2214,23 @@ function renderChecklistTab(app){
   document.getElementById('checklist-total-count').textContent=PH_REQUIREMENTS.length;
   const ring=document.getElementById('checklist-ring');
   if(ring){const circ=Math.PI*2*15.9;ring.style.strokeDasharray=`${(pct/100)*circ} ${circ}`;ring.style.stroke=pct===100?'#10b981':pct>60?'#f59e0b':'#ef4444';}
+  const docs=app.requirement_docs||{};
   const cl=document.getElementById('resume-checklist');
-  cl.innerHTML=PH_REQUIREMENTS.map(req=>`
+  cl.innerHTML=PH_REQUIREMENTS.map(req=>{
+    const rq=req.replace(/'/g,"\\'");
+    const hasDoc=!!docs[req];
+    const docCtrl=hasDoc
+      ? `<button onclick="cntViewReqDoc('${app.id}','${rq}')" class="text-[11px] font-semibold text-indigo-600 hover:underline cursor-pointer flex items-center gap-0.5"><span class="material-icons-outlined" style="font-size:13px;">description</span>View</button>
+         <button onclick="cntRemoveReqDoc('${app.id}','${rq}')" title="Remove file" class="text-slate-300 hover:text-red-500 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:14px;">close</span></button>`
+      : `<label title="Attach a PDF, image or Word file" class="text-[11px] font-semibold text-slate-400 hover:text-red-700 cursor-pointer flex items-center gap-0.5"><span class="material-icons-outlined" style="font-size:14px;">upload_file</span>Upload<input type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="cntUploadReqDoc('${app.id}','${rq}',this)"></label>`;
+    return `
     <div class="flex items-center gap-3 py-2 border-b border-slate-50 last:border-0">
-      <input type="checkbox" ${reqs[req]?'checked':''} onchange="toggleRequirement('${app.id}','${req}',this.checked)" class="cursor-pointer accent-red-800 w-4 h-4 flex-shrink-0">
-      <span class="text-xs text-slate-700 flex-1">${req}</span>
-      ${reqs[req]?'<span class="material-icons-outlined text-emerald-500" style="font-size:15px;">check_circle</span>':'<span class="material-icons-outlined text-slate-300" style="font-size:15px;">radio_button_unchecked</span>'}
-    </div>`).join('');
+      <input type="checkbox" ${reqs[req]?'checked':''} onchange="toggleRequirement('${app.id}','${rq}',this.checked)" class="cursor-pointer accent-red-800 w-4 h-4 flex-shrink-0">
+      <span class="text-xs text-slate-700 flex-1 min-w-0">${req}</span>
+      <div class="flex items-center gap-1.5 flex-none">${docCtrl}</div>
+      ${reqs[req]?'<span class="material-icons-outlined text-emerald-500 flex-none" style="font-size:15px;">check_circle</span>':'<span class="material-icons-outlined text-slate-300 flex-none" style="font-size:15px;">radio_button_unchecked</span>'}
+    </div>`;
+  }).join('');
 }
 
 function renderRecruiterTab(app){
@@ -2469,6 +2479,7 @@ function toggleRequirement(id,req,checked){
   if(!app.requirements)app.requirements={};
   app.requirements[req]=checked;
   updateApplicant(id,{requirements:app.requirements});
+  if(window.cntPersistRequirements) cntPersistRequirements(id);   // persist ticks to the DB
   renderChecklistTab(app);
   const filled=PH_REQUIREMENTS.filter(r=>app.requirements[r]).length;
   if(filled===PH_REQUIREMENTS.length)showToast('All requirements complete! Ready to deploy.','success');

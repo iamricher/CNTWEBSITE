@@ -27,6 +27,7 @@
       client_status:r.client_status||'none', client_reason:r.client_reason||'', endorsed_at:r.endorsed_at||null, decided_at:r.decided_at||null,
       preemp_requirements_at:r.preemp_requirements_at||null, contract_signed_at:r.contract_signed_at||null, oriented_at:r.oriented_at||null, deployed_at:r.deployed_at||null, newhire_reported_at:r.newhire_reported_at||null,
       priority:r.priority||0, refuse_reason:r.refuse_reason||'', kanban_state:r.kanban_state||'normal', activity:Array.isArray(r.activity)?r.activity:[],
+      requirements:(r.requirements&&typeof r.requirements==='object')?r.requirements:{}, requirement_docs:(r.requirement_docs&&typeof r.requirement_docs==='object')?r.requirement_docs:{},
       recruiter:r.recruiter||'', tags:r.tags||'', degree:r.degree||'', medium:r.medium||'', referred_by:r.referred_by||'', referral_relation:r.referral_relation||'', linkedin:r.linkedin||'', proposed_salary:r.proposed_salary||'', availability:r.availability||'', offer_validity:r.offer_validity||'',
       work_experience:r.work_experience||'', education:r.education||'', languages:r.languages||'',
       certifications:r.certifications||'', seminars:r.seminars||'', awards:r.awards||'', char_references:r.char_references||''
@@ -1365,6 +1366,52 @@
     if(currentViewedApplicantId===app.id) renderActivityList(app);
   }
   window.cntLogActivity = cntLogActivity;
+
+  // ── Pre-employment document uploads (Background Check 201-file) ──
+  // Persists the checklist ticks + a stored file path per requirement.
+  window.cntPersistRequirements = function(id){
+    const a=findApplicant(id); if(a) _persistApp(a,{ requirements:a.requirements||{}, requirement_docs:a.requirement_docs||{} });
+  };
+  window.cntUploadReqDoc = async function(id, req, inputEl){
+    const app=findApplicant(id); if(!app) return;
+    const file=inputEl && inputEl.files && inputEl.files[0]; if(!file) return;
+    const ext=(file.name.split('.').pop()||'').toLowerCase();
+    if(['pdf','jpg','jpeg','png','doc','docx'].indexOf(ext)<0){ if(window.showToast) showToast('Use a PDF, image (JPG/PNG) or Word file.','error'); inputEl.value=''; return; }
+    if(file.size>5*1048576){ if(window.showToast) showToast(req+': file is larger than 5 MB.','error'); inputEl.value=''; return; }
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const slug=String(req).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    const safe=file.name.replace(/[^\w.\-]/g,'_');
+    const path='reqdocs/'+String(app._sid||app.id)+'/'+slug+'_'+Date.now()+'_'+safe;
+    if(window.showToast) showToast('Uploading '+req+'…','info');
+    const up=await sb.storage.from('documents').upload(path,file,{cacheControl:'3600',upsert:false});
+    if(up.error){ console.error('reqdoc upload',up.error); if(window.showToast) showToast('Upload failed: '+up.error.message,'error'); return; }
+    if(!app.requirement_docs || typeof app.requirement_docs!=='object') app.requirement_docs={};
+    if(!app.requirements || typeof app.requirements!=='object') app.requirements={};
+    app.requirement_docs[req]=path; app.requirements[req]=true;   // an uploaded doc counts as received
+    cntPersistRequirements(id);
+    cntLogActivity(app,'document','Uploaded '+req);
+    if(typeof renderChecklistTab==='function') renderChecklistTab(app);
+    if(window.showToast) showToast(req+' uploaded','success');
+  };
+  window.cntViewReqDoc = async function(id, req){
+    const app=findApplicant(id); if(!app) return;
+    const path=app.requirement_docs && app.requirement_docs[req]; if(!path){ if(window.showToast) showToast('No file on record.','info'); return; }
+    if(!sb) return;
+    const { data, error } = await sb.storage.from('documents').createSignedUrl(path, 300);
+    if(error){ console.error('reqdoc view',error); if(window.showToast) showToast('Could not open: '+error.message,'error'); return; }
+    window.open(data.signedUrl,'_blank','noopener');
+  };
+  window.cntRemoveReqDoc = async function(id, req){
+    const app=findApplicant(id); if(!app) return;
+    const path=app.requirement_docs && app.requirement_docs[req]; if(!path) return;
+    if(!confirm('Remove the uploaded '+req+' file?')) return;
+    if(sb){ try{ await sb.storage.from('documents').remove([path]); }catch(e){ console.warn('reqdoc remove',e); } }
+    delete app.requirement_docs[req];
+    cntPersistRequirements(id);
+    cntLogActivity(app,'document','Removed '+req+' file');
+    if(typeof renderChecklistTab==='function') renderChecklistTab(app);
+    if(window.showToast) showToast(req+' file removed','info');
+  };
 
   // ── Star evaluation (0–3 : None / Good / Very Good / Excellent) ──
   window.cntSetPriority = function(id, n){
