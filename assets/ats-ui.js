@@ -1455,13 +1455,16 @@ function renderOnboarding(onboarding){
 function renderReports(){
   const rag=document.getElementById('reports-account-grid');
   if(!rag)return;
+  const _hired=a=>typeof stageIsHired==='function'?stageIsHired(a.stage):['hired','onboarding'].includes(a.stage);
   rag.innerHTML=ACCOUNTS.map(acc=>{
     const all=accountData[acc.id]||[];
     const act=all.filter(a=>a.stage!=='pool'&&a.stage!=='rejected');
+    const hiredN=all.filter(_hired).length; const conv=all.length?Math.round(hiredN/all.length*100):0;
     return `<div class="border border-slate-200 rounded-xl p-4">
       <div class="flex items-center gap-2 mb-3"><span class="w-2 h-2 rounded-full" style="background:${acc.color}"></span><span class="text-xs font-bold text-slate-800">${acc.label}</span><span class="ml-auto text-[10px] text-slate-400">${acc.sub}</span></div>
       <div class="text-2xl font-extrabold text-slate-900">${act.length}</div>
-      <div class="text-[10px] text-slate-400 mt-0.5 mb-3">in pipeline</div>
+      <div class="text-[10px] text-slate-400 mt-0.5 mb-1">in pipeline</div>
+      <div class="text-[10px] font-semibold text-emerald-600 mb-3">${hiredN} hired · ${conv}% conversion</div>
       <div class="space-y-1">
         ${PIPELINE_STAGES.map(s=>`<div class="flex justify-between text-[11px]"><span class="text-slate-500">${s.short}</span><span class="font-bold text-slate-700">${act.filter(a=>a.stage===s.key).length}</span></div>`).join('')}
         <div class="flex justify-between text-[11px] border-t border-slate-100 pt-1 mt-1"><span class="text-amber-600 font-semibold">Talent Pool</span><span class="font-bold text-amber-600">${all.filter(a=>a.stage==='pool').length}</span></div>
@@ -1472,6 +1475,57 @@ function renderReports(){
   if(sb){const srcMap={};getAllApplicants().forEach(a=>{const s=a.source||'Unknown';srcMap[s]=(srcMap[s]||0)+1;});const total=getAllApplicants().length||1;sb.innerHTML=Object.entries(srcMap).sort((a,b)=>b[1]-a[1]).map(([src,cnt])=>`<div class="flex items-center gap-2"><span class="text-xs text-slate-600 w-24 font-medium">${src}</span><div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-red-700 rounded-full" style="width:${Math.round(cnt/total*100)}%"></div></div><span class="text-[11px] font-bold text-slate-700">${cnt}</span></div>`).join('');}
   const lb=document.getElementById('location-breakdown');
   if(lb){const locMap={};getAllApplicants().forEach(a=>{const l=a.location||'Unknown';locMap[l]=(locMap[l]||0)+1;});const total=getAllApplicants().length||1;lb.innerHTML=Object.entries(locMap).sort((a,b)=>b[1]-a[1]).map(([loc,cnt])=>`<div class="flex items-center gap-2"><span class="text-xs text-slate-600 w-24 font-medium">${loc}</span><div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-indigo-600 rounded-full" style="width:${Math.round(cnt/total*100)}%"></div></div><span class="text-[11px] font-bold text-slate-700">${cnt}</span></div>`).join('');}
+  cntRenderInsights();
+}
+
+// Deeper analytics: real time-to-hire, hire rate, interview pass rate, source-of-hire
+// ROI and per-recruiter productivity — all computed from live data (no fake numbers).
+function cntRenderInsights(){
+  const all=getAllApplicants();
+  const isHired=a=>typeof stageIsHired==='function'?stageIsHired(a.stage):['hired','onboarding'].includes(a.stage);
+  const active=all.filter(a=>a.stage!=='pool'&&a.stage!=='rejected');
+  const hires=all.filter(isHired);
+  const _set=(id,v)=>{const el=document.getElementById(id); if(el) el.innerHTML=v;};
+  // Time to hire: applied → earliest hire milestone, averaged over hires that have both dates
+  const _hd=a=>a.deployed_at||a.newhire_reported_at||a.contract_signed_at||a.oriented_at||null;
+  const spans=hires.map(a=>{ const hd=_hd(a); if(!a.appliedDate||!hd) return null; const d=(new Date(hd)-new Date(a.appliedDate))/86400000; return (isFinite(d)&&d>=0)?d:null; }).filter(x=>x!=null);
+  const tth=spans.length?Math.round(spans.reduce((s,x)=>s+x,0)/spans.length):null;
+  _set('kpi-tth', tth!=null?(tth+' <span class="text-sm font-semibold text-slate-400">days</span>'):'—');
+  _set('kpi-tth-note', tth!=null?('from '+spans.length+' hire'+(spans.length!==1?'s':'')):'needs deployment dates');
+  // Hire rate = hired ÷ active pipeline (active already includes hired-stage candidates)
+  const hr=active.length?Math.round(hires.length/active.length*100):0;
+  _set('kpi-hire-rate', hr+'<span class="text-sm font-semibold text-slate-400">%</span>');
+  _set('kpi-hire-note', hires.length+' hired of '+active.length+' active');
+  // Interview pass rate: advanced past interview ÷ reached interview
+  const ivIdx=PIPELINE_STAGES.findIndex(s=>s.key==='interview');
+  const idxOf=a=>PIPELINE_STAGES.findIndex(s=>s.key===normStage(a.stage));
+  const reached=ivIdx<0?[]:all.filter(a=>a.stage!=='rejected'&&a.stage!=='pool'&&idxOf(a)>=ivIdx);
+  const passed=ivIdx<0?[]:all.filter(a=>idxOf(a)>ivIdx);
+  const pr=reached.length?Math.round(passed.length/reached.length*100):0;
+  _set('kpi-interview-pass', pr+'<span class="text-sm font-semibold text-slate-400">%</span>');
+  _set('kpi-interview-note', passed.length+' advanced of '+reached.length);
+  _set('kpi-active', String(active.length));
+  // Source performance (source-of-hire ROI)
+  const srcEl=document.getElementById('insights-source-perf');
+  if(srcEl){
+    const m={}; all.forEach(a=>{ const s=a.source||'Unknown'; (m[s]=m[s]||{t:0,h:0}); m[s].t++; if(isHired(a)) m[s].h++; });
+    const rows=Object.entries(m).sort((a,b)=>b[1].t-a[1].t);
+    srcEl.innerHTML=rows.length?rows.map(([s,v])=>{ const c=v.t?Math.round(v.h/v.t*100):0;
+      return '<div class="flex items-center gap-2"><span class="text-xs text-slate-600 w-24 font-medium truncate">'+_escForm(s)+'</span>'
+        +'<div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-600 rounded-full" style="width:'+c+'%"></div></div>'
+        +'<span class="text-[11px] font-bold text-slate-700 w-20 text-right">'+v.h+'/'+v.t+' · '+c+'%</span></div>'; }).join(''):'<p class="text-[11px] text-slate-400">No data yet.</p>';
+  }
+  // Recruiter productivity
+  const recEl=document.getElementById('insights-recruiter');
+  if(recEl){
+    const m={}; all.forEach(a=>{ const r=(a.recruiter||'').trim()||'Unassigned'; (m[r]=m[r]||{a:0,h:0}); if(a.stage!=='pool'&&a.stage!=='rejected') m[r].a++; if(isHired(a)) m[r].h++; });
+    const rows=Object.entries(m).sort((a,b)=>b[1].a-a[1].a);
+    const max=Math.max(1,...rows.map(r=>r[1].a));
+    recEl.innerHTML=rows.length?rows.map(([r,v])=>
+      '<div class="flex items-center gap-2"><span class="text-xs text-slate-600 w-28 font-medium truncate">'+_escForm(r)+'</span>'
+      +'<div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-indigo-600 rounded-full" style="width:'+Math.round(v.a/max*100)+'%"></div></div>'
+      +'<span class="text-[11px] font-bold text-slate-700 w-24 text-right">'+v.a+' active · '+v.h+' hired</span></div>').join(''):'<p class="text-[11px] text-slate-400">No data yet.</p>';
+  }
 }
 
 function renderHiringRequests(){
