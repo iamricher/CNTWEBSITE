@@ -469,7 +469,22 @@ function cntRenderProfileSidebar(app){
       +'</div></div>'
     +'<div class="mt-4 pt-4 border-t border-slate-100">'
       +row('mail',app.email)+row('call',app.phone)+row('place',app.location)+row('badge',app.recruiter?('Recruiter · '+app.recruiter):'')
-    +'</div>'+intCard;
+    +'</div>'+intCard+_sidebarScorecard(app);
+}
+// Compact interview-evaluation summary for the sidebar (visible on every tab).
+function _sidebarScorecard(app){
+  const sc=(app&&app.interview_scorecard)||{}, scores=sc.scores||{};
+  const vals=Object.values(scores).filter(v=>v>0);
+  if(!vals.length && !sc.recommendation) return '';
+  const ov=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):null;
+  const recMap={endorse:['Endorse to client','#065f46','#d1fae5'],proceed:['Proceed','#1e40af','#dbeafe'],hold:['Talent pool','#b45309','#fef3c7'],refuse:['Refuse','#b91c1c','#fee2e2']};
+  const rec=recMap[sc.recommendation];
+  return '<div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">'
+    +'<div class="flex items-center gap-1.5 mb-1"><span class="material-icons-outlined text-slate-600" style="font-size:15px;">grading</span><span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Evaluation</span>'
+      +(ov?'<span class="ml-auto text-xs font-bold text-amber-600">'+ov+'/5</span>':'')+'</div>'
+    +(rec?'<span class="badge border" style="background:'+rec[2]+';color:'+rec[1]+';border-color:'+rec[1]+'33;font-size:10px;">'+_escForm(rec[0])+'</span>':'<span class="text-xs text-slate-400">Rated, no recommendation yet</span>')
+    +(sc.notes?'<div class="text-[11px] text-slate-500 mt-1.5" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+_escForm(sc.notes)+'</div>':'')
+    +'<button onclick="switchProfileTab(\'interview\')" class="mt-2 text-[11px] font-semibold text-slate-600 hover:underline cursor-pointer">Open evaluation →</button></div>';
 }
 function cntRenderStageStepper(app){
   const el=document.getElementById('resume-stage-stepper'); if(!el) return;

@@ -1704,12 +1704,20 @@
     reminder: 'Hi {name}, reminder: your {role} interview with CNT is on {idate} {itime}. Please be on time. Reply if you cannot make it.',
     general:  'Hi {name}, this is CNT Recruitment regarding your {role} application. Please reply if you have any questions. Salamat!'
   };
-  function _fillSms(t, app){ return _fillTpl(t,app).replace(/\{idate\}/g, app.interviewDate||'').replace(/\{itime\}/g, app.interviewTime||''); }
+  function _fillSms(t, app){
+    const d=app.interviewDate||'', tm=app.interviewTime||'';
+    const niceD = (d && typeof fmtMonth==='function' && typeof fmtDay==='function') ? (fmtMonth(d)+' '+fmtDay(d)) : d;
+    const niceT = (tm && typeof fmtTime==='function') ? fmtTime(tm) : tm;
+    return _fillTpl(t,app).replace(/\{idate\}/g, niceD).replace(/\{itime\}/g, niceT);
+  }
   window.cntSmsCount = function(){ const b=document.getElementById('cnt-sms-body'), c=document.getElementById('cnt-sms-count'); if(b&&c){ const n=b.value.length, seg=Math.max(1,Math.ceil(n/160)); c.textContent=n+' chars · '+seg+' SMS segment'+(seg!==1?'s':''); } };
   window.cntSmsTpl = function(id){ const app=findApplicant(id), sel=document.getElementById('cnt-sms-tpl'), body=document.getElementById('cnt-sms-body'); if(app&&sel&&body){ body.value=_fillSms(SMS_TEMPLATES[sel.value]||SMS_TEMPLATES.general, app); cntSmsCount(); } };
   window.cntDraftSMS = function(id){
     const app=findApplicant(id); if(!app) return;
-    const msg=_fillSms(SMS_TEMPLATES.interview, app);
+    // If an interview is already scheduled, start on the reminder template (which
+    // auto-fills the date/time); otherwise start on the invite.
+    const startTpl = app.interviewDate ? 'reminder' : 'interview';
+    const msg=_fillSms(SMS_TEMPLATES[startTpl], app);
     let m=document.getElementById('cnt-sms-modal');
     if(!m){ m=document.createElement('div'); m.id='cnt-sms-modal'; m.className='hidden fixed inset-0 z-[400] flex items-center justify-center p-4'; document.body.appendChild(m); }
     m.innerHTML='<div class="absolute inset-0 bg-slate-900/50" onclick="document.getElementById(\'cnt-sms-modal\').classList.add(\'hidden\')"></div>'
@@ -1717,7 +1725,7 @@
       +'<div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-icons-outlined text-emerald-600" style="font-size:18px;">sms</span><h3 class="font-bold text-sm text-slate-800">Send SMS — '+_e(app.name)+'</h3></div><button onclick="document.getElementById(\'cnt-sms-modal\').classList.add(\'hidden\')" class="text-slate-400 hover:text-red-700 cursor-pointer"><span class="material-icons-outlined">close</span></button></div>'
       +'<div class="p-4 space-y-3">'
       +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">To (mobile)</label><input id="cnt-sms-to" value="'+_e(app.phone||'')+'" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
-      +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Template</label><select id="cnt-sms-tpl" onchange="cntSmsTpl(\''+id+'\')" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white"><option value="interview">Interview invite</option><option value="reminder">Interview reminder</option><option value="general">General</option></select></div>'
+      +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Template</label><select id="cnt-sms-tpl" onchange="cntSmsTpl(\''+id+'\')" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white"><option value="interview"'+(startTpl==='interview'?' selected':'')+'>Interview invite</option><option value="reminder"'+(startTpl==='reminder'?' selected':'')+'>Interview reminder</option><option value="general">General</option></select></div>'
       +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Message</label><textarea id="cnt-sms-body" rows="5" oninput="cntSmsCount()" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+_e(msg)+'</textarea><div class="text-[10px] text-slate-400 mt-1" id="cnt-sms-count"></div></div>'
       +'<p class="text-[10px] text-slate-400">Sends via Semaphore (PH SMS). Set <code>SEMAPHORE_API_KEY</code> on the send-sms function to enable delivery.</p>'
       +'<div class="flex justify-end gap-2 pt-1"><button onclick="document.getElementById(\'cnt-sms-modal\').classList.add(\'hidden\')" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-4 py-2 hover:bg-slate-50 cursor-pointer">Cancel</button>'
