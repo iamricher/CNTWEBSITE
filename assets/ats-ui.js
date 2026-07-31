@@ -2612,8 +2612,58 @@ function generateOfferLetter(){
       <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">HR Manager / Authorized Representative</p><p class="text-xs font-semibold">CNT Recruitment Services</p></div>
       <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">Candidate's Signature</p><p class="text-xs font-semibold">${_escForm(app.name)} · Date:</p></div>
     </div>`;
+  _setDocTab('offer');
   document.getElementById('offer-modal').classList.remove('hidden');
   showToast('Offer letter generated','success');
+}
+function _setDocTab(which){
+  const o=document.getElementById('doc-tab-offer'), c=document.getElementById('doc-tab-contract');
+  const on='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer bg-white text-red-800 shadow-sm', off='text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer text-slate-500';
+  if(o) o.className = which==='offer'?on:off;
+  if(c) c.className = which==='contract'?on:off;
+}
+// Employment contract (DOLE-style template). Fills the same print-friendly modal.
+function generateContract(){
+  const app=findApplicant(currentViewedApplicantId); if(!app) return;
+  if(!stageIsHired(app.stage)){ showToast('The contract is available once the candidate reaches a Job Offer stage.','info'); return; }
+  const today=new Date().toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'});
+  const salary=app.proposed_salary||app.salary||'As agreed';
+  const start=_escForm(app.availability||app.startDate||'To be confirmed');
+  const content=document.getElementById('offer-letter-content'); if(!content) return;
+  content.innerHTML=`
+    <div class="text-center border-b-2 border-slate-800 pb-3 mb-5">
+      <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT" class="h-10 w-auto mx-auto mb-2" />
+      <h2 class="text-lg font-extrabold tracking-wide text-slate-900">EMPLOYMENT CONTRACT</h2>
+      <p class="text-[11px] text-slate-500">Kontrata sa Empleyo · Ref: CON-${Date.now().toString().slice(-6)} · ${today}</p>
+    </div>
+    <p class="mb-3">This Employment Contract is entered into by and between:</p>
+    <p class="mb-2"><strong>CNT Promo &amp; Ads Specialists, Inc.</strong>, a DOLE-licensed employment agency (the "Employer"), and <strong>${_escForm(app.name)}</strong>, of legal age, Filipino (the "Employee").</p>
+    <table class="w-full text-sm my-4" style="border-collapse:collapse;">
+      <tr><td class="py-1 text-slate-500 w-44">Position:</td><td class="font-semibold">${_escForm(app.role)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Client Account:</td><td class="font-semibold">${_escForm(app.account)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Place of Assignment:</td><td class="font-semibold">${_escForm(app.location)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Basic Monthly Salary:</td><td class="font-semibold">${_escForm(salary)}</td></tr>
+      <tr><td class="py-1 text-slate-500">Start Date:</td><td class="font-semibold">${start}</td></tr>
+    </table>
+    <ol class="list-decimal ml-5 space-y-2 text-[13px] leading-relaxed mb-5">
+      <li><strong>Position &amp; Assignment.</strong> The Employee is engaged as <strong>${_escForm(app.role)}</strong> and assigned to the Employer's client <strong>${_escForm(app.account)}</strong> at <strong>${_escForm(app.location)}</strong>, performing the duties reasonably associated with the role.</li>
+      <li><strong>Compensation.</strong> The Employee shall receive a basic salary of <strong>${_escForm(salary)}</strong> per month, plus all government-mandated benefits (SSS, PhilHealth, Pag-IBIG, 13th-month pay) in accordance with Philippine law.</li>
+      <li><strong>Hours of Work.</strong> Eight (8) hours per day, exclusive of a one-hour meal break, following the client's approved schedule, with overtime and premium pay as provided by the Labor Code.</li>
+      <li><strong>Probationary Period.</strong> The first six (6) months are probationary; regularization follows upon satisfactory performance against standards made known to the Employee at engagement.</li>
+      <li><strong>Duties &amp; Conduct.</strong> The Employee shall perform assigned duties diligently, observe company and client policies, and maintain professional conduct at all times.</li>
+      <li><strong>Confidentiality.</strong> The Employee shall keep confidential all proprietary information of the Employer and its clients during and after employment.</li>
+      <li><strong>Term &amp; Termination.</strong> Employment may be terminated by either party for just or authorized causes and with due process, in accordance with the Labor Code of the Philippines (P.D. 442, as amended).</li>
+      <li><strong>Governing Law.</strong> This Contract is governed by the laws of the Republic of the Philippines. Any dispute shall be resolved under DOLE rules and Philippine labor law.</li>
+    </ol>
+    <p class="mb-6 text-[13px]">IN WITNESS WHEREOF, the parties have signed this Contract on the date first written above.</p>
+    <div class="grid grid-cols-2 gap-8 mt-8">
+      <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">Employer — Authorized Representative</p><p class="text-xs font-semibold">CNT Promo &amp; Ads Specialists, Inc.</p></div>
+      <div><div class="border-b border-slate-400 mb-1 h-8"></div><p class="text-xs text-slate-500">Employee's Signature over Printed Name</p><p class="text-xs font-semibold">${_escForm(app.name)} · Date:</p></div>
+    </div>
+    <p class="text-[10px] text-slate-400 mt-6 no-print">Template only — have it reviewed by your labor counsel before signing.</p>`;
+  _setDocTab('contract');
+  document.getElementById('offer-modal').classList.remove('hidden');
+  showToast('Employment contract generated','success');
 }
 function closeOfferModal(){document.getElementById('offer-modal').classList.add('hidden');}
 
