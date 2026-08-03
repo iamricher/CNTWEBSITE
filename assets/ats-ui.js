@@ -361,6 +361,7 @@ function cntRenderApplicantForm(app){
   cntRenderProfileSidebar(app);
   cntProfIntPopulate(app);
   cntRenderScorecard(app);
+  cntRenderInterviewExtras(app);
   cntRenderDupBanner(app);
 }
 
@@ -417,7 +418,23 @@ function cntRenderScorecard(app){
   const notes=document.getElementById('score-notes'); if(notes) notes.value=sc.notes||'';
   const st=document.getElementById('score-status');
   if(st){ st.textContent = sc.at ? ('Last saved by '+(sc.by||'HR')+' · '+String(sc.at).slice(0,10)) : ''; st.style.color=''; }
+  _renderScoreVerdict(app);
   _scoreUpdateOverall(app);
+}
+// Greenhouse-style overall verdict scale (Strong Yes → Strong No).
+const SCORE_VERDICTS=[['strong_yes','Strong Yes','#065f46','#d1fae5'],['yes','Yes','#166534','#dcfce7'],['no','No','#b91c1c','#fee2e2'],['strong_no','Strong No','#7f1d1d','#fecaca']];
+function _renderScoreVerdict(app){
+  const box=document.getElementById('score-verdict'); if(!box) return;
+  const cur=(app.interview_scorecard||{}).verdict||'';
+  box.innerHTML=SCORE_VERDICTS.map(v=>{
+    const on=cur===v[0];
+    return '<button type="button" onclick="cntScoreVerdict(\''+v[0]+'\')" class="text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer border transition" style="'+(on?('background:'+v[3]+';color:'+v[2]+';border-color:'+v[2]+';'):'background:#fff;color:#64748b;border-color:#e2e8f0;')+'">'+_escForm(v[1])+'</button>';
+  }).join('');
+}
+function cntScoreVerdict(v){
+  const app=findApplicant(currentViewedApplicantId); if(!app) return;
+  _scoreObj(app).verdict = (_scoreObj(app).verdict===v ? '' : v);
+  _renderScoreVerdict(app);
 }
 function cntScoreSet(criterion, val){
   const app=findApplicant(currentViewedApplicantId); if(!app) return;
@@ -435,6 +452,73 @@ function cntSaveScorecard(){
   if(window.cntLogActivity) cntLogActivity(app,'evaluation','Interview evaluation saved'+(sc.recommendation?(' — '+sc.recommendation):''));
   const st=document.getElementById('score-status'); if(st){ st.textContent='✓ Saved'; st.style.color='#166534'; }
   if(window.showToast) showToast('Evaluation saved','success');
+}
+
+// ── Interview-panel context: candidate snapshot, skills match, interview guide ──
+function _findAppJob(app){
+  const arr=(typeof jobDatabase!=='undefined' && jobDatabase[app.account])||[];
+  return arr.find(j=>j.role===app.role && j.location===app.location) || arr.find(j=>j.role===app.role) || null;
+}
+function _skillList(str){ return String(str||'').split(',').map(s=>s.trim()).filter(Boolean); }
+function _firstLine(t){ const s=String(t||'').split('\n').map(x=>x.trim()).filter(Boolean); return s[0]||''; }
+
+const INTERVIEW_GUIDE={
+  'Initial Interview':{focus:'Screening — fit, basics, logistics',q:['Walk me through your relevant experience for this role.','Why are you interested in this position and our client?','What is your current availability / notice period?','What are your salary expectations?','Are you comfortable with the location and schedule?']},
+  'Second Interview':{focus:'Depth — skills and problem-solving',q:['Describe a challenging situation in your last role and how you handled it.','Walk me through how you would approach a key task of this role.','Which tools/systems are you most proficient with?','How do you prioritise when handling multiple tasks at once?']},
+  'Client Interview':{focus:'Client fit — culture and communication',q:['How do you handle feedback or difficult stakeholders?','Tell me about a time you delivered under pressure.','What do you know about our client and their industry?','How do you represent a brand or company to customers?']},
+  'Final Interview':{focus:'Closing — readiness and expectations',q:['Do you have any concerns about the role or the offer?','When could you start if selected?','Please confirm your expected salary and requirement readiness.','What questions do you have for us?']}
+};
+function cntRenderInterviewGuide(){
+  const el=document.getElementById('prof-int-guide'); if(!el) return;
+  const round=(document.getElementById('prof-int-round')||{}).value||'Initial Interview';
+  const g=INTERVIEW_GUIDE[round]||INTERVIEW_GUIDE['Initial Interview'];
+  el.innerHTML='<div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">'
+    +'<div class="px-5 py-3 bg-indigo-600 flex items-center gap-2"><span class="material-icons-outlined text-white" style="font-size:16px;">quiz</span><h4 class="font-bold text-white text-sm tracking-wide">Interview Guide — '+_escForm(round)+'</h4></div>'
+    +'<div class="p-5"><p class="text-[11px] text-slate-400 mb-2">Focus: '+_escForm(g.focus)+'. Suggested questions:</p>'
+    +'<ul class="list-disc ml-5 space-y-1 text-[13px] text-slate-700 leading-relaxed">'+g.q.map(q=>'<li>'+_escForm(q)+'</li>').join('')+'</ul></div></div>';
+}
+function cntRenderInterviewExtras(app){
+  const snap=document.getElementById('prof-int-snapshot');
+  if(snap && app){
+    const acc=ACCOUNTS.find(a=>a.id===app.account), ac=acc?.color||'#64748b';
+    const initials=(app.name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
+    const facts=[
+      ['work','Experience', _firstLine(app.work_experience)||'—'],
+      ['school','Education', _firstLine(app.education)||app.degree||'—'],
+      ['payments','Expected salary', app.salary||app.proposed_salary||'—'],
+      ['place','Location', app.location||'—'],
+    ];
+    const skillChips=_skillList(app.tags).slice(0,12).map(s=>'<span class="cnt-chip" style="color:#3730a3;background:#e0e7ff;">'+_escForm(s)+'</span>').join('');
+    // skills match vs the job's expected skills
+    let matchHtml='';
+    const job=_findAppJob(app);
+    if(job && job.expected_skills){
+      const need=_skillList(job.expected_skills);
+      const have=new Set(_skillList(app.tags).map(s=>s.toLowerCase()));
+      const matched=need.filter(n=>have.has(n.toLowerCase())), missing=need.filter(n=>!have.has(n.toLowerCase()));
+      const pct=need.length?Math.round(matched.length/need.length*100):0;
+      const col=pct>=70?'#10b981':pct>=40?'#f59e0b':'#ef4444', tcol=pct>=70?'text-emerald-600':pct>=40?'text-amber-600':'text-red-600';
+      matchHtml='<div class="mt-3 pt-3 border-t border-slate-100">'
+        +'<div class="flex items-center justify-between mb-1.5"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Skills match vs '+_escForm(app.role)+'</span><span class="text-xs font-bold '+tcol+'">'+matched.length+'/'+need.length+' · '+pct+'%</span></div>'
+        +'<div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2"><div class="h-full rounded-full" style="width:'+pct+'%;background:'+col+';"></div></div>'
+        +'<div class="flex flex-wrap gap-1">'
+          +matched.map(s=>'<span class="cnt-chip" style="color:#065f46;background:#d1fae5;">✓ '+_escForm(s)+'</span>').join('')
+          +missing.map(s=>'<span class="cnt-chip" style="color:#991b1b;background:#fee2e2;">✕ '+_escForm(s)+'</span>').join('')
+        +'</div></div>';
+    }
+    snap.innerHTML='<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4">'
+      +'<div class="flex items-center gap-3">'
+        +'<div style="width:44px;height:44px;border-radius:50%;background:'+ac+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex:none;">'+_escForm(initials)+'</div>'
+        +'<div class="min-w-0"><div class="font-bold text-slate-900 text-sm truncate">'+_escForm(app.name||'')+'</div><div class="text-xs text-slate-500 truncate">'+_escForm(app.role||'')+' · '+_escForm(app.account||'')+'</div></div>'
+      +'</div>'
+      +'<div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3">'
+        +facts.map(f=>'<div class="flex items-start gap-1.5 text-xs min-w-0"><span class="material-icons-outlined text-slate-400" style="font-size:14px;">'+f[0]+'</span><div class="min-w-0"><div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">'+f[1]+'</div><div class="text-slate-700 truncate">'+_escForm(f[2])+'</div></div></div>').join('')
+      +'</div>'
+      +(skillChips?'<div class="flex flex-wrap gap-1 mt-3">'+skillChips+'</div>':'')
+      +matchHtml
+    +'</div>';
+  }
+  cntRenderInterviewGuide();
 }
 
 // Candidate summary sidebar — avatar, stage, contact, and a persistent interview

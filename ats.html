@@ -1436,6 +1436,7 @@
 
       <!-- INTERVIEW TAB -->
       <div id="tab-interview" class="hidden p-5" style="order:1;">
+        <div id="prof-int-snapshot" class="max-w-3xl mx-auto mb-4"></div>
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden max-w-3xl mx-auto" id="prof-interview">
           <div class="px-5 py-3 bg-red-800 flex items-center gap-2">
             <span class="material-icons-outlined text-white" style="font-size:16px;">event</span>
@@ -1446,7 +1447,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Date</label><input id="prof-int-date" type="date" onchange="cntProfIntSync()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-800"></div>
               <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Time</label><input id="prof-int-time" type="time" onchange="cntProfIntSync()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-800"></div>
-              <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Round</label><select id="prof-int-round" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-red-800"><option>Initial Interview</option><option>Second Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
+              <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Round</label><select id="prof-int-round" onchange="cntRenderInterviewGuide()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-red-800"><option>Initial Interview</option><option>Second Interview</option><option>Client Interview</option><option>Final Interview</option></select></div>
               <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Kind of Interview</label><select id="prof-int-kind" onchange="cntProfIntToggle()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-red-800"><option>Phone Call</option><option>Video</option><option>Onsite / Face-to-Face Interview</option></select></div>
               <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Interviewer</label><input id="prof-int-interviewer" placeholder="HR Manager / Account Manager" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-red-800"></div>
               <div><label id="prof-int-venue-label" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Venue / Online meeting link</label>
@@ -1467,6 +1468,9 @@
           </div>
         </div>
 
+        <!-- Interview guide / suggested questions -->
+        <div id="prof-int-guide" class="max-w-3xl mx-auto mt-4"></div>
+
         <!-- Interview evaluation / scorecard -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden max-w-3xl mx-auto mt-4" id="prof-scorecard">
           <div class="px-5 py-3 bg-slate-800 flex items-center gap-2">
@@ -1478,7 +1482,11 @@
             <p class="text-xs text-slate-500 mb-4">Rate the candidate on each criterion (1–5), give a recommendation, and add notes. This backs the Endorse / Proceed / Refuse decision.</p>
             <div id="score-criteria" class="space-y-2.5"></div>
             <div class="mt-5">
-              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Recommendation</label>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Overall recommendation</label>
+              <div id="score-verdict" class="flex flex-wrap gap-2"></div>
+            </div>
+            <div class="mt-3">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Next action</label>
               <select id="score-recommendation" class="w-full md:w-72 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-red-800">
                 <option value="">Undecided</option>
                 <option value="endorse">Endorse to client</option>
