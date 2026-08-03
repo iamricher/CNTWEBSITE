@@ -560,14 +560,18 @@ function cntRenderProfileSidebar(app){
 function _sidebarScorecard(app){
   const sc=(app&&app.interview_scorecard)||{}, scores=sc.scores||{};
   const vals=Object.values(scores).filter(v=>v>0);
-  if(!vals.length && !sc.recommendation) return '';
+  if(!vals.length && !sc.recommendation && !sc.verdict) return '';
   const ov=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):null;
-  const recMap={endorse:['Endorse to client','#065f46','#d1fae5'],proceed:['Proceed','#1e40af','#dbeafe'],hold:['Talent pool','#b45309','#fef3c7'],refuse:['Refuse','#b91c1c','#fee2e2']};
+  const vd=(typeof SCORE_VERDICTS!=='undefined')?SCORE_VERDICTS.find(v=>v[0]===sc.verdict):null;   // [key,label,textCol,bgCol]
+  const recMap={endorse:'Endorse to client',proceed:'Proceed to next stage',hold:'Keep in talent pool',refuse:'Refuse'};
   const rec=recMap[sc.recommendation];
   return '<div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">'
-    +'<div class="flex items-center gap-1.5 mb-1"><span class="material-icons-outlined text-slate-600" style="font-size:15px;">grading</span><span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Evaluation</span>'
+    +'<div class="flex items-center gap-1.5 mb-2"><span class="material-icons-outlined text-slate-600" style="font-size:15px;">grading</span><span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Evaluation</span>'
       +(ov?'<span class="ml-auto text-xs font-bold text-amber-600">'+ov+'/5</span>':'')+'</div>'
-    +(rec?'<span class="badge border" style="background:'+rec[2]+';color:'+rec[1]+';border-color:'+rec[1]+'33;font-size:10px;">'+_escForm(rec[0])+'</span>':'<span class="text-xs text-slate-400">Rated, no recommendation yet</span>')
+    +(vd
+        ? '<div class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-extrabold" style="background:'+vd[3]+';color:'+vd[2]+';"><span class="material-icons-outlined" style="font-size:14px;">'+(String(sc.verdict).indexOf('yes')>=0?'thumb_up':'thumb_down')+'</span>'+_escForm(vd[1])+'</div>'
+        : '<span class="text-xs text-slate-400">Rated — no verdict yet</span>')
+    +(rec?'<div class="text-[11px] text-slate-500 mt-1.5"><span class="font-semibold text-slate-600">Next:</span> '+_escForm(rec)+'</div>':'')
     +(sc.notes?'<div class="text-[11px] text-slate-500 mt-1.5" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+_escForm(sc.notes)+'</div>':'')
     +'<button onclick="switchProfileTab(\'interview\')" class="mt-2 text-[11px] font-semibold text-slate-600 hover:underline cursor-pointer">Open evaluation →</button></div>';
 }
