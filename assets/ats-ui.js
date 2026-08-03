@@ -365,6 +365,15 @@ function cntRenderApplicantForm(app){
   cntRenderDupBanner(app);
 }
 
+// Compact interview-verdict badge for lists (Strong Yes → Strong No).
+function _verdictBadge(app){
+  const v=(app&&app.interview_scorecard||{}).verdict;
+  if(!v || typeof SCORE_VERDICTS==='undefined') return '';
+  const vd=SCORE_VERDICTS.find(x=>x[0]===v); if(!vd) return '';
+  const icon=String(v).indexOf('yes')>=0?'thumb_up':'thumb_down';
+  return ` <span class="badge" title="Interview verdict: ${_escForm(vd[1])}" style="background:${vd[3]};color:${vd[2]};font-size:9px;vertical-align:middle;display:inline-flex;align-items:center;gap:2px;"><span class="material-icons-outlined" style="font-size:10px;">${icon}</span>${_escForm(vd[1])}</span>`;
+}
+
 // ── Duplicate-applicant detection (match on email or mobile) ──
 function _normEmail(e){ return String(e||'').trim().toLowerCase(); }
 function _normPhone(p){ const d=String(p||'').replace(/\D/g,''); return d.length>=10?d.slice(-10):''; }
@@ -836,7 +845,7 @@ function renderApplicationsTable(pipeline){
     const dupBadge=dupSet.has(a.id)?` <span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;vertical-align:middle;" title="Shares an email or mobile with another applicant">DUP</span>`:'';
     return `<tr>
       <td class="px-3 py-2.5"><input type="checkbox" class="bulk-cb accent-red-800 w-4 h-4 cursor-pointer" data-id="${a.id}" ${_bulkSel.has(a.id)?'checked':''} onclick="event.stopPropagation();cntBulkToggle('${a.id}',this.checked)"></td>
-      <td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal('${a.id}')">${_escForm(a.name)}${dupBadge}</td>
+      <td class="px-4 py-2.5 font-semibold text-slate-900 text-xs cursor-pointer hover:text-red-800" onclick="triggerResumeModal('${a.id}')">${_escForm(a.name)}${dupBadge}${_verdictBadge(a)}</td>
       <td class="px-4 py-2.5 text-slate-600 text-xs">${_escForm(a.role)}</td>
       <td class="px-4 py-2.5"><span class="badge" style="background:${acc?.color||'#64748b'}18;color:${acc?.color||'#64748b'};border-color:${acc?.color||'#64748b'}30;">${_escForm(a.account)}</span></td>
       <td class="px-4 py-2.5 text-xs text-slate-400">${_escForm(a.location)}</td>
