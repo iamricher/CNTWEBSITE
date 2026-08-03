@@ -191,6 +191,7 @@ function getFilteredDataset(){
   const role = document.getElementById('filter-role').value;
   const stg  = document.getElementById('filter-stage').value;
   const src  = (document.getElementById('filter-source')||{}).value||'all';
+  const vd   = (document.getElementById('filter-verdict')||{}).value||'all';
   // When we drilled in from a job card, scope to that exact posting so the
   // pipeline shows the same candidates the card counted. Without this the card
   // would say "12 Applications" and open a list holding a different number.
@@ -206,6 +207,11 @@ function getFilteredDataset(){
     const ms = stg==='all'||a.stage===stg;
     const mrc= src==='all'||(a.source||'')===src;
     if(!mrc) return false;
+    if(vd!=='all'){
+      const av=(a.interview_scorecard||{}).verdict||'';
+      const mvd = vd==='rated' ? !!av : vd==='none' ? !av : av===vd;
+      if(!mvd) return false;
+    }
     const mq = searchQuery===''||a.name.toLowerCase().includes(searchQuery)||a.role.toLowerCase().includes(searchQuery)||(a.account||'').toLowerCase().includes(searchQuery);
     return ml&&mr&&ms&&mq;
   });
@@ -953,6 +959,7 @@ function kanbanCardHtml(a, refused){
     <div class="flex items-center gap-1 flex-wrap mb-2">
       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:${accColor}18;color:${accColor}">${_escForm(a.account)}</span>
       <span class="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">${_escForm(a.location)}</span>
+      ${_verdictBadge(a)}
     </div>
     ${(a.stage==='interview'&&(a.interviewType||a.interviewRound))?`<div onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="Open interview details" class="text-[9px] bg-violet-50 text-violet-700 rounded px-1.5 py-0.5 mb-1.5 font-bold inline-flex items-center gap-1 cursor-pointer hover:bg-violet-100"><span class="material-icons-outlined" style="font-size:10px;">forum</span>${_escForm(a.interviewRound?a.interviewRound.replace(' Interview',''):'')}${(a.interviewRound&&a.interviewType)?' · ':''}${_escForm(a.interviewType||'')}</div>`:''}
     ${a.interviewDate?`<div onclick="event.stopPropagation();openInterviewModal('${a.id}')" title="Open interview details" class="text-[10px] bg-indigo-50 text-indigo-700 rounded-md px-1.5 py-0.5 mb-2 font-semibold inline-flex items-center gap-1 cursor-pointer hover:bg-indigo-100"><span class="material-icons-outlined" style="font-size:11px;">event</span>${fmtMonth(a.interviewDate)} ${fmtDay(a.interviewDate)} ${fmtTime(a.interviewTime)}</div>`:''}
@@ -1868,7 +1875,7 @@ function quickJumpStage(stage){ cntOpenPipelineList(stage); }
 
 // Dashboard funnel / stat cards → full pipeline in LIST view (no board)
 function cntOpenPipelineList(stage){
-  ['filter-role','filter-location','filter-source'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
+  ['filter-role','filter-location','filter-source','filter-verdict'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value='all'; });
   const st=document.getElementById('filter-stage'); if(st) st.value=stage||'all';
   if(typeof selectClient==='function') selectClient('all');
   window.cntPipelineJob=null;
