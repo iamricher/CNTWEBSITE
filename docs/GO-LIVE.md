@@ -27,8 +27,24 @@ Project ref: `mtaknpmvvldmnsizvtuy`
 - Secrets page: https://supabase.com/dashboard/project/mtaknpmvvldmnsizvtuy/functions/secrets
 
 ### 2. SMS (unlocks the SMS button + interview reminders)
-- Sign up at **semaphore.co**, load credits (~₱0.50–0.80 per SMS), copy the API key.
-- Set secrets on the `send-sms` function:
+Pick ONE backend. The `send-sms` function auto-selects: if `SMS_GATEWAY_URL`
+is set it uses the DIY gateway, otherwise Semaphore. **Redeploy the function
+once after the SMS-gateway update** (git commit 4ec9ef1).
+
+**Option A — FREE, your own phone + SIM (DIY Android gateway)**
+1. Get an Android phone with an **unli-text SIM**.
+2. Install **SMSGate** (sms-gate.app) → choose **Cloud mode** (free). It shows a
+   **username + password**.
+3. Set secrets on `send-sms`:
+   - `SMS_GATEWAY_URL` = `https://api.sms-gate.app/3rdparty/v1/message`
+   - `SMS_GATEWAY_USER` = the app's username
+   - `SMS_GATEWAY_PASS` = the app's password
+4. Keep the phone on, charged, and with signal. Best for low volume.
+   Caveats: unli-text fair-use limits, no custom sender name (sends from your SIM).
+
+**Option B — Semaphore (paid, ~₱0.50–0.80/SMS)**
+- Sign up at **semaphore.co**, load credits, copy the API key.
+- Set secrets on `send-sms`:
   - `SEMAPHORE_API_KEY` = your Semaphore key
   - `SEMAPHORE_SENDER` = e.g. `CNT` (optional; needs Semaphore approval)
 
