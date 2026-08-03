@@ -2125,12 +2125,14 @@ function _cntDockStagePanes(){
 }
 function _showProfileContent(name){
   activeProfileTab = name;
-  // The profile (form + résumé + recruiter notes) is visible on EVERY tab. The
-  // stage panes (interview scheduler / pre-employment checklist) stack above it
-  // via flex order, so a tab just adds its stage-specific section on top.
-  document.getElementById('tab-profile')?.classList.remove('hidden');
+  // Market-ATS pattern (Greenhouse/Lever/Ashby): a stage pane replaces the
+  // editable profile form in the LEFT column, with the résumé sticky on the
+  // right. Interview → scheduler + evaluation; Background Check → checklist;
+  // everything else (New Applicant / Exam / Offer / Onboarding) → profile form.
+  document.getElementById('tab-profile')?.classList.remove('hidden');   // wrapper always visible
   document.getElementById('tab-interview')?.classList.toggle('hidden', name!=='interview');
   document.getElementById('tab-checklist')?.classList.toggle('hidden', name!=='checklist');
+  document.getElementById('profile-form-body')?.classList.toggle('hidden', name!=='profile');
 }
 // Mark the tabs: the candidate's real current stage is always solid (.active);
 // if the pane being VIEWED belongs to a different (earlier) stage, that tab gets

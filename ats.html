@@ -1242,6 +1242,10 @@
       <div id="cnt-digitize-banner" class="hidden"></div>
       <div id="profile-split" class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <div id="profile-left" class="space-y-4 min-w-0">
+        <!-- Editable profile form — shown on profile-type tabs (New Applicant /
+             Exam / Offer / Onboarding); hidden on Interview & Background Check,
+             where the stage pane takes the left column (market-ATS pattern). -->
+        <div id="profile-form-body" class="space-y-4">
 
         <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <!-- Action row + stage stepper (Odoo applicant form) -->
@@ -1414,6 +1418,7 @@
             <div id="recruiter-notes-fade"></div>
           </div>
         </div>
+        </div><!-- /profile-form-body -->
 
         </div><!-- /profile-left -->
 
