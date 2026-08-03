@@ -354,6 +354,7 @@ function cntRenderApplicantForm(app){
   ].some(Boolean);
   const rd=document.getElementById('cnt-resume-details');
   if(rd) rd.classList.toggle('hidden', !anyDetail);
+  _cntDockStagePanes();
   cntRenderStageStepper(app);
   cntRenderProfileTabs(app);
   cntRenderStageOverride(app);
@@ -2107,6 +2108,21 @@ function _profTabContentFor(key){
   return 'profile';
 }
 
+// Dock the Interview & Pre-Employment panes into the profile's LEFT column, so
+// they render BESIDE the always-visible (sticky) résumé — an interview-panel
+// workstation — instead of stacked above with empty space. Idempotent: only
+// moves each pane once, and widens its cards to fill the column.
+function _cntDockStagePanes(){
+  const pl=document.getElementById('profile-left'); if(!pl) return;
+  ['tab-checklist','tab-interview'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && el.parentElement!==pl){
+      el.classList.remove('p-5'); el.style.order='';
+      for(const c of el.children) c.classList.remove('max-w-3xl','max-w-2xl','mx-auto');
+      pl.insertBefore(el, pl.firstChild);   // stage pane sits above the profile form
+    }
+  });
+}
 function _showProfileContent(name){
   activeProfileTab = name;
   // The profile (form + résumé + recruiter notes) is visible on EVERY tab. The
