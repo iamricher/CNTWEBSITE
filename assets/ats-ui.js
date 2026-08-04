@@ -371,6 +371,11 @@ function cntRenderApplicantForm(app){
   cntRenderDupBanner(app);
 }
 
+// Verdict ranking for sorting — Strong Yes floats to the top, Strong No sinks;
+// candidates with no verdict keep their place (rank 2, stable sort).
+const VERDICT_RANK={strong_yes:0,yes:1,no:3,strong_no:4};
+function _verdictRank(a){ const v=(a&&a.interview_scorecard||{}).verdict; return (v in VERDICT_RANK)?VERDICT_RANK[v]:2; }
+
 // Compact interview-verdict badge for lists (Strong Yes → Strong No).
 function _verdictBadge(app){
   const v=(app&&app.interview_scorecard||{}).verdict;
@@ -841,12 +846,15 @@ function renderStageProgressBar(counts){
 function renderApplicationsTable(pipeline){
   const tb=document.getElementById('applications-table-body');
   if(!tb)return;
-  window._lastAppRows=pipeline.map(a=>a.id);
+  // Sort Strong Yes → Yes → (unrated, in place) → No → Strong No. Stable sort,
+  // so with no verdicts the order is unchanged.
+  const rows=[...pipeline].sort((a,b)=>_verdictRank(a)-_verdictRank(b));
+  window._lastAppRows=rows.map(a=>a.id);
   // Drop selections that fell out of the current filter, then refresh the bar.
   _bulkSel.forEach(id=>{ if(!window._lastAppRows.includes(id)) _bulkSel.delete(id); });
-  if(!pipeline.length){tb.innerHTML=`<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400 text-sm">No applicants match current filters</td></tr>`;cntBulkSyncBar();return;}
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400 text-sm">No applicants match current filters</td></tr>`;cntBulkSyncBar();return;}
   const dupSet=cntDupIdSet();
-  tb.innerHTML=pipeline.map(a=>{
+  tb.innerHTML=rows.map(a=>{
     const acc=ACCOUNTS.find(ac=>ac.id===a.account);
     const dupBadge=dupSet.has(a.id)?` <span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:9px;vertical-align:middle;" title="Shares an email or mobile with another applicant">DUP</span>`:'';
     return `<tr>
