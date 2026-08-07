@@ -1150,7 +1150,13 @@
           +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Category</label><input id="ev-category" list="ev-cat-list" value="'+v(ev.category)+'" placeholder="Hiring Drive" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"><datalist id="ev-cat-list">'+cats.map(c=>'<option value="'+c+'">').join('')+'</datalist></div>'
           +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Date label</label><input id="ev-date" value="'+v(ev.event_date)+'" placeholder="Aug 2026" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
         +'</div>'
-        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Image URL <span class="text-slate-400 font-normal normal-case">— optional</span></label><input id="ev-image" value="'+v(ev.image_url)+'" placeholder="https://…" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Image <span class="text-slate-400 font-normal normal-case">— upload a photo or paste a URL (optional)</span></label>'
+          +'<div class="flex gap-2 items-center">'
+            +'<label class="text-[11px] font-semibold text-slate-600 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-50 flex items-center gap-1 whitespace-nowrap flex-none"><span class="material-icons-outlined" style="font-size:14px;">upload</span>Upload<input type="file" accept="image/*" class="hidden" onchange="cntEventImageUpload(this)"></label>'
+            +'<input id="ev-image" value="'+v(ev.image_url)+'" placeholder="https://…" class="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-3 py-2">'
+          +'</div>'
+          +'<div id="ev-image-preview">'+(ev.image_url?'<img src="'+v(ev.image_url)+'" alt="" style="max-height:120px;border-radius:8px;margin-top:8px;">':'')+'</div>'
+        +'</div>'
         +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Summary <span class="text-slate-400 font-normal normal-case">— short blurb on the card</span></label><textarea id="ev-summary" rows="2" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(ev.summary)+'</textarea></div>'
         +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Full details <span class="text-slate-400 font-normal normal-case">— shown on the detail page</span></label><textarea id="ev-body" rows="6" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(ev.body)+'</textarea></div>'
         +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer"><input type="checkbox" id="ev-published" '+((id?ev.published:true)?'checked':'')+' class="accent-red-800 w-4 h-4"> Published (visible on the website)</label>'
@@ -1191,6 +1197,21 @@
     logAudit('event_remove','event', id, ev?ev.title:'');
     cntLoadEventsAdmin();
     if(window.showToast) showToast('Post deleted','info');
+  };
+  window.cntEventImageUpload = async function(input){
+    const f=input&&input.files&&input.files[0]; if(!f) return;
+    if(!/^image\//.test(f.type)){ if(window.showToast) showToast('Please choose an image file.','error'); input.value=''; return; }
+    if(f.size>5*1048576){ if(window.showToast) showToast('Image is larger than 5 MB.','error'); input.value=''; return; }
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
+    const path='events/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    if(window.showToast) showToast('Uploading image…','info');
+    const up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+    if(up.error){ console.error('event image',up.error); if(window.showToast) showToast('Upload failed: '+up.error.message,'error'); return; }
+    const url=sb.storage.from('event-images').getPublicUrl(path).data.publicUrl;
+    const inp=document.getElementById('ev-image'); if(inp) inp.value=url;
+    const prev=document.getElementById('ev-image-preview'); if(prev) prev.innerHTML='<img src="'+_e(url)+'" alt="" style="max-height:120px;border-radius:8px;margin-top:8px;">';
+    if(window.showToast) showToast('Image uploaded','success');
   };
 
   function injectAdminNav(){

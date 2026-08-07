@@ -2849,6 +2849,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     grid.innerHTML=data.map(function(ev){
       var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='event.html?id='+encodeURIComponent(ev.id);
       return '<div class="service-card">'
+        +(ev.image_url?'<a href="'+link+'"><img src="'+esc(ev.image_url)+'" alt="" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:16px;"></a>':'')
         +'<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'
           +(date?'<span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">'+date+'</span>':'')
           +'<span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">'+cat+'</span>'
