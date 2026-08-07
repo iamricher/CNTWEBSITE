@@ -1296,6 +1296,7 @@ input, select, textarea { font-family: var(--font-body); }
       </li>
       <li><a href="#industries" class="nav-link">Industries</a></li>
       <li><a href="#projects" class="nav-link">Success Stories</a></li>
+      <li><a href="#events" class="nav-link">Events</a></li>
       <li><a href="careers.html" class="nav-link">Careers</a></li>
       <li><a href="status.html" class="nav-link">Track Application</a></li>
     </ul>
@@ -1316,6 +1317,7 @@ input, select, textarea { font-family: var(--font-body); }
     <li><a href="#services">Services</a></li>
     <li><a href="#industries">Industries</a></li>
     <li><a href="#projects">Success Stories</a></li>
+    <li><a href="#events">Events</a></li>
     <li><a href="careers.html">Careers</a></li>
     <li><a href="status.html">Track Application</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -1835,6 +1837,47 @@ input, select, textarea { font-family: var(--font-body); }
 </section>
 
 <!-- ============================= STATS ============================= -->
+<!-- ═══════════════ EVENTS & UPDATES ═══════════════
+     Edit these cards to post CNT's latest events, hiring drives and news. -->
+<section class="events section section-gray" id="events" aria-label="Events and Updates">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-eyebrow center" data-reveal>News &amp; Events</div>
+      <h2 class="section-heading" data-reveal>Latest from <em>CNT</em></h2>
+      <p class="section-sub" data-reveal>Job fairs, hiring drives and company announcements — follow along for the newest opportunities across the Philippines.</p>
+    </div>
+    <div class="services-grid" data-reveal>
+      <div class="service-card">
+        <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">AUG 2026</span>
+          <span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">Hiring Drive</span>
+        </div>
+        <h3>Nationwide Mall Hiring Fair</h3>
+        <p>We're hiring promoters, merchandisers and sales associates across Metro Manila, Central and Southern Luzon malls. Walk in with your résumé or apply online.</p>
+        <a href="careers.html" class="service-link">View openings <span>→</span></a>
+      </div>
+      <div class="service-card">
+        <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">JUL 2026</span>
+          <span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">Announcement</span>
+        </div>
+        <h3>New Retail Partnership</h3>
+        <p>CNT has expanded its FMCG and consumer-electronics staffing portfolio with a leading brand — opening dozens of new field and in-store roles this quarter.</p>
+        <a href="careers.html" class="service-link">Explore roles <span>→</span></a>
+      </div>
+      <div class="service-card">
+        <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">2026</span>
+          <span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">Milestone</span>
+        </div>
+        <h3>Thousands of Filipinos Deployed</h3>
+        <p>Another milestone in our mission — a million jobs for a million Filipinos — as we place more workers with the country's leading brands nationwide.</p>
+        <a href="#contact" class="service-link">Partner with us <span>→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="stats-section section" id="stats" aria-label="Company Statistics">
   <div class="container">
     <div class="stats-grid" data-reveal>
@@ -2789,6 +2832,41 @@ function initHeroAnimations() {
 console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ', 
   'background: #0A1628; color: #F4620F; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
 
+</script>
+
+<!-- Re:amaze support chat widget -->
+<script type="text/javascript" async src="https://cdn.reamaze.com/assets/reamaze-loader.js"></script>
+<script type="text/javascript">
+  var _support = _support || { 'ui': {}, 'user': {} };
+  _support['account'] = '896189c9-39c3-405a-8127-a9dfa2479639';
+  _support['ui']['contactMode'] = 'mixed';
+  _support['ui']['enableKb'] = 'true';
+  _support['ui']['mailbox'] = '88094638';
+  _support['ui']['styles'] = {
+    widgetColor: '#c51010',
+    gradient: true,
+  };
+  _support['ui']['shoutboxFacesMode'] = '';
+  _support['ui']['widget'] = {
+    allowBotProcessing: 'true',
+    slug: 'https-slash-slash-cnt-website-ats-dot-vercel-dot-app-slash',
+    label: {
+      text: 'Let us know if you have any questions! 😊',
+      mode: "notification",
+      delay: 3,
+      duration: 30,
+      primary: '',
+      secondary: '',
+      sound: true,
+    },
+    position: 'bottom-right'
+  };
+  _support['ui']['overrides'] = _support['ui']['overrides'] || {};
+  _support['ui']['overrides']['confirmationMessage'] = '';
+  _support['apps'] = {
+    recentConversations: {},
+    faq: {"enabled":true}
+  };
 </script>
 </body>
 </html>
