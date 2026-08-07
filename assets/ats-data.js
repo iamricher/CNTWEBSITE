@@ -1110,6 +1110,89 @@
     }).join('')+'</div>';
   };
 
+  // ── Events & Updates: super-admin-only posting to the public website ──
+  let _eventsData=[];
+  window.cntRenderEventsAdmin = function(){
+    const card=document.getElementById('events-admin-card'); if(!card) return;
+    const isSuper = (window.cntRole||currentRole)==='super_admin';
+    card.classList.toggle('hidden', !isSuper);
+    if(isSuper) cntLoadEventsAdmin();
+  };
+  window.cntLoadEventsAdmin = async function(){
+    const el=document.getElementById('events-admin-list'); if(!el||!sb) return;
+    el.innerHTML='<p class="text-[11px] text-slate-400 text-center py-4">Loading…</p>';
+    const { data, error } = await sb.from('events').select('*').order('created_at',{ascending:false});
+    if(error){ el.innerHTML='<p class="text-[11px] text-red-500 text-center py-4">'+_e(error.message)+'</p>'; return; }
+    _eventsData=data||[];
+    if(!_eventsData.length){ el.innerHTML='<p class="text-[11px] text-slate-400 text-center py-4">No posts yet. Click “New post”.</p>'; return; }
+    el.innerHTML='<div class="divide-y divide-slate-50">'+_eventsData.map(ev=>
+      '<div class="flex items-start gap-3 py-2">'
+      +'<div class="min-w-0 flex-1"><div class="font-semibold text-slate-800">'+_e(ev.title||'')+(ev.published?'':' <span class="badge" style="background:#f1f5f9;color:#64748b;font-size:9px;">Draft</span>')+'</div>'
+      +'<div class="text-[10px] text-slate-400">'+_e(ev.event_date||'')+(ev.category?(' · '+_e(ev.category)):'')+'</div></div>'
+      +'<a href="event.html?id='+ev.id+'" target="_blank" class="text-indigo-600 hover:underline text-[11px] font-semibold cursor-pointer">View</a>'
+      +'<button onclick="cntEventForm('+ev.id+')" class="text-slate-500 hover:text-slate-800 text-[11px] font-semibold cursor-pointer">Edit</button>'
+      +'<button onclick="cntDeleteEvent('+ev.id+')" class="text-slate-400 hover:text-red-500 text-[11px] font-semibold cursor-pointer">Delete</button>'
+      +'</div>').join('')+'</div>';
+  };
+  window.cntEventForm = function(id){
+    const ev = id ? (_eventsData.find(x=>x.id===id)||{}) : {};
+    let m=document.getElementById('cnt-event-modal');
+    if(!m){ m=document.createElement('div'); m.id='cnt-event-modal'; m.className='hidden fixed inset-0 z-[400] flex items-center justify-center p-4'; document.body.appendChild(m); }
+    const v=x=>_e(x||'');
+    const cats=['Hiring Drive','Announcement','Milestone','Job Fair','Update'];
+    m.innerHTML='<div class="absolute inset-0 bg-slate-900/50" onclick="document.getElementById(\'cnt-event-modal\').classList.add(\'hidden\')"></div>'
+      +'<div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl z-10 border border-slate-200 overflow-hidden" style="max-height:92vh;display:flex;flex-direction:column;">'
+      +'<div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between"><h3 class="font-bold text-sm text-slate-800">'+(id?'Edit post':'New post')+'</h3><button onclick="document.getElementById(\'cnt-event-modal\').classList.add(\'hidden\')" class="text-slate-400 hover:text-red-700 cursor-pointer"><span class="material-icons-outlined">close</span></button></div>'
+      +'<div class="p-4 space-y-3 overflow-y-auto custom-scroll">'
+        +'<input type="hidden" id="ev-id" value="'+(id||'')+'">'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Title <span class="text-red-500">*</span></label><input id="ev-title" value="'+v(ev.title)+'" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
+        +'<div class="grid grid-cols-2 gap-3">'
+          +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Category</label><input id="ev-category" list="ev-cat-list" value="'+v(ev.category)+'" placeholder="Hiring Drive" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"><datalist id="ev-cat-list">'+cats.map(c=>'<option value="'+c+'">').join('')+'</datalist></div>'
+          +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Date label</label><input id="ev-date" value="'+v(ev.event_date)+'" placeholder="Aug 2026" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
+        +'</div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Image URL <span class="text-slate-400 font-normal normal-case">— optional</span></label><input id="ev-image" value="'+v(ev.image_url)+'" placeholder="https://…" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2"></div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Summary <span class="text-slate-400 font-normal normal-case">— short blurb on the card</span></label><textarea id="ev-summary" rows="2" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(ev.summary)+'</textarea></div>'
+        +'<div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Full details <span class="text-slate-400 font-normal normal-case">— shown on the detail page</span></label><textarea id="ev-body" rows="6" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 resize-none">'+v(ev.body)+'</textarea></div>'
+        +'<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer"><input type="checkbox" id="ev-published" '+((id?ev.published:true)?'checked':'')+' class="accent-red-800 w-4 h-4"> Published (visible on the website)</label>'
+      +'</div>'
+      +'<div class="px-4 py-3 border-t border-slate-100 flex justify-end gap-2"><button onclick="document.getElementById(\'cnt-event-modal\').classList.add(\'hidden\')" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg px-4 py-2 hover:bg-slate-50 cursor-pointer">Cancel</button>'
+        +'<button onclick="cntSaveEvent()" class="text-xs font-semibold text-white bg-red-800 hover:bg-red-900 rounded-lg px-4 py-2 cursor-pointer">Save post</button></div>'
+      +'</div>';
+    m.classList.remove('hidden');
+  };
+  window.cntSaveEvent = async function(){
+    if(!sb){ if(window.showToast) showToast('Backend unavailable','error'); return; }
+    const id=(document.getElementById('ev-id')||{}).value||'';
+    const row={
+      title:((document.getElementById('ev-title')||{}).value||'').trim(),
+      category:((document.getElementById('ev-category')||{}).value||'').trim()||null,
+      event_date:((document.getElementById('ev-date')||{}).value||'').trim()||null,
+      image_url:((document.getElementById('ev-image')||{}).value||'').trim()||null,
+      summary:((document.getElementById('ev-summary')||{}).value||'').trim()||null,
+      body:((document.getElementById('ev-body')||{}).value||'').trim()||null,
+      published:!!(document.getElementById('ev-published')||{}).checked
+    };
+    if(!row.title){ if(window.showToast) showToast('Title is required','info'); return; }
+    let error;
+    if(id){ ({ error } = await sb.from('events').update(row).eq('id',id)); }
+    else  { ({ error } = await sb.from('events').insert(row)); }
+    if(error){ console.error('event save',error); if(window.showToast) showToast('Save failed: '+error.message,'error'); return; }
+    logAudit(id?'event_edit':'event_post','event', id||'', row.title);
+    const m=document.getElementById('cnt-event-modal'); if(m) m.classList.add('hidden');
+    cntLoadEventsAdmin();
+    if(window.showToast) showToast(id?'Post updated':'Post published','success');
+  };
+  window.cntDeleteEvent = async function(id){
+    if(!sb) return;
+    const ev=_eventsData.find(x=>x.id===id);
+    if(!confirm('Delete “'+(ev?ev.title:'this post')+'” from the website?')) return;
+    const { error } = await sb.from('events').delete().eq('id',id);
+    if(error){ console.error('event delete',error); if(window.showToast) showToast('Delete failed: '+error.message,'error'); return; }
+    logAudit('event_remove','event', id, ev?ev.title:'');
+    cntLoadEventsAdmin();
+    if(window.showToast) showToast('Post deleted','info');
+  };
+
   function injectAdminNav(){
     if(currentRole!=='super_admin' || document.getElementById('nav-admin')) return;
     const dash=document.getElementById('nav-dashboard'); if(!dash) return;
@@ -2256,6 +2339,7 @@
           +'</div>';
       }).join(''):'<p style="font-size:11.5px;color:#94a3b8;padding:14px;text-align:center;">Nothing yet — add one above.</p>';
     });
+    if(window.cntRenderEventsAdmin) cntRenderEventsAdmin();
   }
   window.cntTaxAdd=async function(kind){
     const input=document.getElementById('set-new-'+kind); if(!input) return;

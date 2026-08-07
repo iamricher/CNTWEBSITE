@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="Latest event and updates from CNT Promo & Ads Specialists, Inc." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <style>
+    :root{--red:#C8102E;--red-deep:#A50D24;--red-pale:#FFF0F2;--charcoal:#1A1A1A;--gray-400:#9CA3AF;--gray-600:#6B7280;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;color:#111;background:#FAFAFA;-webkit-font-smoothing:antialiased;line-height:1.7}
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%;height:auto}
+    .container{width:min(760px,100% - 40px);margin-inline:auto}
+    .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid #EBEBEB}
+    .nav-inner{width:min(1100px,100% - 40px);margin-inline:auto;display:flex;align-items:center;justify-content:space-between;height:68px}
+    .nav-inner img{height:38px}
+    .nav-links{display:flex;gap:22px;align-items:center;font-size:.9rem;font-weight:500}
+    .nav-links a:hover{color:var(--red)}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:.6rem 1.2rem;border-radius:99px;background:var(--red);color:#fff;font-weight:600;font-size:.85rem;transition:.2s}
+    .btn:hover{background:var(--red-deep)}
+    .article{padding:56px 0 80px}
+    .backlink{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--gray-600);margin-bottom:24px}
+    .backlink:hover{color:var(--red)}
+    .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .pill-date{font-size:.72rem;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--red);padding:5px 12px;border-radius:7px}
+    .pill-cat{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--red)}
+    h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--charcoal);margin-bottom:20px}
+    .cover{width:100%;border-radius:16px;margin:8px 0 28px;box-shadow:0 12px 40px rgba(0,0,0,.10)}
+    .body p{font-size:1.05rem;color:#333;margin-bottom:1.1rem}
+    .state{padding:80px 0;text-align:center;color:var(--gray-600)}
+    .footer{background:#111;color:#9CA3AF;padding:32px 0;text-align:center;font-size:.85rem}
+    .footer a{color:#fff;font-weight:600}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." /></a>
+      <div class="nav-links">
+        <a href="index.html#events">Events</a>
+        <a href="careers.html">Careers</a>
+        <a href="careers.html" class="btn">View Jobs</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="article">
+    <div class="container">
+      <a class="backlink" href="index.html#events"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All events &amp; updates</a>
+      <div id="event-content"><div class="state">Loading…</div></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc. · <a href="careers.html">Careers</a> · <a href="index.html">Home</a></div>
+  </footer>
+
+  <script>
+  (function(){
+    document.getElementById('yr').textContent=new Date().getFullYear();
+    var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    var el=document.getElementById('event-content');
+    var id=new URLSearchParams(location.search).get('id');
+    var sb=(window.getSupabase&&window.getSupabase());
+    if(!id){ el.innerHTML='<div class="state">No event selected. <a href="index.html#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
+    if(!sb){ el.innerHTML='<div class="state">Unable to load right now. Please try again later.</div>'; return; }
+    sb.from('events').select('*').eq('id',id).eq('published',true).single().then(function(res){
+      var ev=res.data;
+      if(res.error||!ev){ el.innerHTML='<div class="state">This event was not found or is no longer available.<br><a href="index.html#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
+      document.title=(ev.title||'Event')+' — CNT';
+      var paras=String(ev.body||ev.summary||'').split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
+      el.innerHTML=
+        '<div class="meta">'
+          +(ev.event_date?'<span class="pill-date">'+esc(ev.event_date)+'</span>':'')
+          +(ev.category?'<span class="pill-cat">'+esc(ev.category)+'</span>':'')
+        +'</div>'
+        +'<h1>'+esc(ev.title||'')+'</h1>'
+        +(ev.image_url?'<img class="cover" src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'')+'">':'')
+        +'<div class="body">'+(paras||'<p></p>')+'</div>';
+    });
+  })();
+  </script>
+
+<!-- Re:amaze support chat widget -->
+<script type="text/javascript" async src="https://cdn.reamaze.com/assets/reamaze-loader.js"></script>
+<script type="text/javascript">
+  var _support = _support || { 'ui': {}, 'user': {} };
+  _support['account'] = '896189c9-39c3-405a-8127-a9dfa2479639';
+  _support['ui']['contactMode'] = 'mixed';
+  _support['ui']['enableKb'] = 'true';
+  _support['ui']['mailbox'] = '88094638';
+  _support['ui']['styles'] = { widgetColor: '#c51010', gradient: true };
+  _support['ui']['widget'] = { allowBotProcessing: 'true', slug: 'https-slash-slash-cnt-website-ats-dot-vercel-dot-app-slash', position: 'bottom-right' };
+  _support['apps'] = { recentConversations: {}, faq: {"enabled":true} };
+</script>
+</body>
+</html>

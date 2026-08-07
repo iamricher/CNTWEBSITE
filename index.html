@@ -1846,7 +1846,7 @@ input, select, textarea { font-family: var(--font-body); }
       <h2 class="section-heading" data-reveal>Latest from <em>CNT</em></h2>
       <p class="section-sub" data-reveal>Job fairs, hiring drives and company announcements — follow along for the newest opportunities across the Philippines.</p>
     </div>
-    <div class="services-grid" data-reveal>
+    <div class="services-grid" data-reveal id="events-grid">
       <div class="service-card">
         <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
           <span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">AUG 2026</span>
@@ -2832,6 +2832,34 @@ function initHeroAnimations() {
 console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ', 
   'background: #0A1628; color: #F4620F; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
 
+</script>
+
+<!-- Live Events & Updates from the database (super-admin posts them in the ATS) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-config.js"></script>
+<script>
+(function(){
+  var grid=document.getElementById('events-grid');
+  var sb=(window.getSupabase&&window.getSupabase());
+  if(!grid||!sb) return;   // keep the built-in sample cards as a fallback
+  var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  sb.from('events').select('*').eq('published',true).order('created_at',{ascending:false}).limit(9).then(function(res){
+    var data=res.data;
+    if(res.error||!data||!data.length) return;   // nothing published yet → keep fallback
+    grid.innerHTML=data.map(function(ev){
+      var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='event.html?id='+encodeURIComponent(ev.id);
+      return '<div class="service-card">'
+        +'<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'
+          +(date?'<span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">'+date+'</span>':'')
+          +'<span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">'+cat+'</span>'
+        +'</div>'
+        +'<h3>'+esc(ev.title||'')+'</h3>'
+        +'<p>'+esc(ev.summary||'')+'</p>'
+        +'<a href="'+link+'" class="service-link">Read more <span>→</span></a>'
+      +'</div>';
+    }).join('');
+  });
+})();
 </script>
 
 <!-- Re:amaze support chat widget -->
