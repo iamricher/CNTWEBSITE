@@ -2360,7 +2360,6 @@
           +'</div>';
       }).join(''):'<p style="font-size:11.5px;color:#94a3b8;padding:14px;text-align:center;">Nothing yet — add one above.</p>';
     });
-    if(window.cntRenderEventsAdmin) cntRenderEventsAdmin();
   }
   window.cntTaxAdd=async function(kind){
     const input=document.getElementById('set-new-'+kind); if(!input) return;
