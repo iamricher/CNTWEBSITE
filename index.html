@@ -133,7 +133,6 @@ body {
   background: var(--white);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  cursor: none;
 }
 img { display: block; max-width: 100%; height: auto; }
 a { text-decoration: none; color: inherit; }
@@ -160,26 +159,6 @@ input, select, textarea { font-family: var(--font-body); }
   width: 0%; z-index: 9999;
   transition: width .05s linear;
 }
-
-/* ── CURSOR ────────────────────────────────────────────────── */
-.cursor {
-  position: fixed; width: 8px; height: 8px;
-  background: var(--red); border-radius: 50%;
-  pointer-events: none; z-index: 9998;
-  transform: translate(-50%,-50%);
-  transition: width .2s, height .2s, opacity .2s;
-  mix-blend-mode: multiply;
-}
-.cursor-follower {
-  position: fixed; width: 38px; height: 38px;
-  border: 1.5px solid var(--red); border-radius: 50%;
-  pointer-events: none; z-index: 9997;
-  transform: translate(-50%,-50%);
-  transition: transform .12s ease, width .3s, height .3s, opacity .2s;
-  opacity: .55;
-}
-.cursor.expanded        { width: 48px; height: 48px; opacity: .35; }
-.cursor-follower.expanded { width: 64px; height: 64px; opacity: .25; }
 
 /* ── LOADER ────────────────────────────────────────────────── */
 .loader {
@@ -290,6 +269,18 @@ input, select, textarea { font-family: var(--font-body); }
   transition: color var(--transition-fast), padding-left var(--transition-fast);
 }
 .mega-col a:hover { color: var(--red); padding-left: .4rem; }
+.mega-cta {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  margin: 0 1.5rem 1.5rem; padding: .9rem 1.15rem;
+  background: var(--red); color: var(--white);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.mega-cta:hover { background: var(--red-lt); transform: translateY(-1px); }
+.mega-cta-text { display: flex; flex-direction: column; line-height: 1.3; }
+.mega-cta-text strong { font-size: .9rem; font-weight: 700; }
+.mega-cta-text small { font-size: .75rem; opacity: .85; }
+.mega-cta svg { flex-shrink: 0; }
 
 .nav-actions { display: flex; align-items: center; gap: 1rem; margin-left: 1rem; }
 
@@ -1195,8 +1186,6 @@ input, select, textarea { font-family: var(--font-body); }
 }
 
 @media (max-width: 768px) {
-  body { cursor: auto; }
-  .cursor, .cursor-follower { display: none; }
   .nav-links, .btn-nav:not(.mobile-cta) { display: none; }
   .nav-toggle { display: flex; }
   .hero-content { padding: 100px 5vw 60px; }
@@ -1243,10 +1232,6 @@ input, select, textarea { font-family: var(--font-body); }
 <!-- SCROLL PROGRESS -->
 <div class="scroll-progress" id="scrollProgress"></div>
 
-<!-- CURSOR -->
-<div class="cursor" id="cursor"></div>
-<div class="cursor-follower" id="cursorFollower"></div>
-
 <!-- LOADER -->
 <div class="loader" id="loader">
   <div class="loader-inner">
@@ -1292,13 +1277,19 @@ input, select, textarea { font-family: var(--font-body); }
               <a href="#services">Workforce Consulting</a>
             </div>
           </div>
+          <a href="status.html" class="mega-cta">
+            <span class="mega-cta-text">
+              <strong>Track My Application</strong>
+              <small>Check the status of your job application</small>
+            </span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
         </div>
       </li>
       <li><a href="#industries" class="nav-link">Industries</a></li>
       <li><a href="#projects" class="nav-link">Success Stories</a></li>
       <li><a href="#events" class="nav-link">Events</a></li>
       <li><a href="careers.html" class="nav-link">Careers</a></li>
-      <li><a href="status.html" class="nav-link">Track Application</a></li>
     </ul>
 
     <div class="nav-actions">
@@ -1315,15 +1306,15 @@ input, select, textarea { font-family: var(--font-body); }
   <ul>
     <li><a href="#about">About</a></li>
     <li><a href="#services">Services</a></li>
+    <li><a href="status.html">Track My Application</a></li>
     <li><a href="#industries">Industries</a></li>
     <li><a href="#projects">Success Stories</a></li>
     <li><a href="#events">Events</a></li>
     <li><a href="careers.html">Careers</a></li>
-    <li><a href="status.html">Track Application</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
   <a href="careers.html" class="btn-primary mobile-cta">Apply Now</a>
-  <a href="status.html" class="btn-ghost mobile-cta">Track Application</a>
+  <a href="status.html" class="btn-ghost mobile-cta">Track My Application</a>
 </div>
 
 <!-- ============================= HERO ============================= -->
@@ -2246,6 +2237,7 @@ input, select, textarea { font-family: var(--font-body); }
       <div class="footer-bottom-links">
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
+        <a href="events-admin.html">Content Admin</a>
       </div>
     </div>
   </div>
@@ -2306,45 +2298,6 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
     const total = document.body.scrollHeight - window.innerHeight;
     bar.style.width = (window.scrollY / total * 100) + '%';
   }, { passive: true });
-})();
-
-// ── CUSTOM CURSOR ──────────────────────────────────────────
-(function initCursor() {
-  const cursor = qs('#cursor');
-  const follower = qs('#cursorFollower');
-  if (!cursor || !follower || window.innerWidth < 768) return;
-
-  let mouseX = 0, mouseY = 0;
-  let followerX = 0, followerY = 0;
-
-  document.addEventListener('mousemove', e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    cursor.style.left = mouseX + 'px';
-    cursor.style.top = mouseY + 'px';
-  }, { passive: true });
-
-  function updateFollower() {
-    followerX += (mouseX - followerX) * 0.12;
-    followerY += (mouseY - followerY) * 0.12;
-    follower.style.left = followerX + 'px';
-    follower.style.top = followerY + 'px';
-    requestAnimationFrame(updateFollower);
-  }
-  updateFollower();
-
-  // Expand on hover targets
-  const targets = qsa('a, button, .magnetic, .magnetic-subtle, .product-card, .service-card, .project-card');
-  targets.forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      cursor.classList.add('expanded');
-      follower.classList.add('expanded');
-    });
-    el.addEventListener('mouseleave', () => {
-      cursor.classList.remove('expanded');
-      follower.classList.remove('expanded');
-    });
-  });
 })();
 
 // ── NAVIGATION ─────────────────────────────────────────────
@@ -2848,8 +2801,8 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     if(res.error||!data||!data.length) return;   // nothing published yet → keep fallback
     grid.innerHTML=data.map(function(ev){
       var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='event.html?id='+encodeURIComponent(ev.id);
-      return '<div class="service-card">'
-        +(ev.image_url?'<a href="'+link+'"><img src="'+esc(ev.image_url)+'" alt="" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:16px;"></a>':'')
+      return '<div class="service-card" style="cursor:pointer;" onclick="location.href=\''+link+'\'">'
+        +(ev.image_url?'<img src="'+esc(ev.image_url)+'" alt="" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:16px;">':'')
         +'<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'
           +(date?'<span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">'+date+'</span>':'')
           +'<span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">'+cat+'</span>'

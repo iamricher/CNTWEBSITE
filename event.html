@@ -25,15 +25,21 @@
     .nav-links a:hover{color:var(--red)}
     .btn{display:inline-flex;align-items:center;gap:6px;padding:.6rem 1.2rem;border-radius:99px;background:var(--red);color:#fff;font-weight:600;font-size:.85rem;transition:.2s}
     .btn:hover{background:var(--red-deep)}
-    .article{padding:56px 0 80px}
-    .backlink{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--gray-600);margin-bottom:24px}
+    .article{padding:28px 0 80px}
+    .backlink{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--gray-600);margin-bottom:20px}
     .backlink:hover{color:var(--red)}
-    .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-    .pill-date{font-size:.72rem;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--red);padding:5px 12px;border-radius:7px}
-    .pill-cat{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--red)}
-    h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--charcoal);margin-bottom:20px}
-    .cover{width:100%;border-radius:16px;margin:8px 0 28px;box-shadow:0 12px 40px rgba(0,0,0,.10)}
-    .body p{font-size:1.05rem;color:#333;margin-bottom:1.1rem}
+    /* Banner hero — auto-styled; looks good with or without a photo */
+    .hero{width:100%;margin-bottom:34px}
+    .hero .banner{position:relative;width:min(1000px,100% - 40px);margin-inline:auto;min-height:clamp(240px,38vw,420px);border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#1A1A1A,#C8102E);box-shadow:0 18px 50px rgba(0,0,0,.16);display:flex;align-items:flex-end}
+    .hero .banner>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .hero .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.74),rgba(0,0,0,.12) 58%,rgba(0,0,0,.04))}
+    .hero .cap{position:relative;padding:clamp(22px,4vw,40px);width:100%}
+    .hero .cap .pills{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .hero .cap .pill-date{font-size:.72rem;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--red);padding:5px 12px;border-radius:7px}
+    .hero .cap .pill-cat{font-size:.7rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:7px;backdrop-filter:blur(4px)}
+    .hero .cap h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.6rem,4vw,2.7rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.35)}
+    .body p{font-size:1.06rem;color:#333;margin-bottom:1.15rem}
+    .body img{width:100%;border-radius:14px;margin:14px 0;box-shadow:0 10px 34px rgba(0,0,0,.10)}
     .state{padding:80px 0;text-align:center;color:var(--gray-600)}
     .footer{background:#111;color:#9CA3AF;padding:32px 0;text-align:center;font-size:.85rem}
     .footer a{color:#fff;font-weight:600}
@@ -54,6 +60,9 @@
   <main class="article">
     <div class="container">
       <a class="backlink" href="index.html#events"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All events &amp; updates</a>
+    </div>
+    <div id="event-hero"></div>
+    <div class="container">
       <div id="event-content"><div class="state">Loading…</div></div>
     </div>
   </main>
@@ -67,6 +76,7 @@
     document.getElementById('yr').textContent=new Date().getFullYear();
     var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
     var el=document.getElementById('event-content');
+    var hero=document.getElementById('event-hero');
     var id=new URLSearchParams(location.search).get('id');
     var sb=(window.getSupabase&&window.getSupabase());
     if(!id){ el.innerHTML='<div class="state">No event selected. <a href="index.html#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
@@ -75,15 +85,17 @@
       var ev=res.data;
       if(res.error||!ev){ el.innerHTML='<div class="state">This event was not found or is no longer available.<br><a href="index.html#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
       document.title=(ev.title||'Event')+' — CNT';
-      var paras=String(ev.body||ev.summary||'').split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
-      el.innerHTML=
-        '<div class="meta">'
+      // Banner hero — auto-styled, works with or without a photo
+      hero.className='hero';
+      hero.innerHTML='<div class="banner">'
+        +(ev.image_url?'<img src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'')+'">':'')
+        +'<div class="scrim"></div>'
+        +'<div class="cap"><div class="pills">'
           +(ev.event_date?'<span class="pill-date">'+esc(ev.event_date)+'</span>':'')
           +(ev.category?'<span class="pill-cat">'+esc(ev.category)+'</span>':'')
-        +'</div>'
-        +'<h1>'+esc(ev.title||'')+'</h1>'
-        +(ev.image_url?'<img class="cover" src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'')+'">':'')
-        +'<div class="body">'+(paras||'<p></p>')+'</div>';
+        +'</div><h1>'+esc(ev.title||'')+'</h1></div></div>';
+      var paras=String(ev.body||ev.summary||'').split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
+      el.innerHTML='<div class="body">'+(paras||'<p></p>')+'</div>';
     });
   })();
   </script>
