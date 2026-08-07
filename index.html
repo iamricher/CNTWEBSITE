@@ -269,18 +269,6 @@ input, select, textarea { font-family: var(--font-body); }
   transition: color var(--transition-fast), padding-left var(--transition-fast);
 }
 .mega-col a:hover { color: var(--red); padding-left: .4rem; }
-.mega-cta {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  margin: 0 1.5rem 1.5rem; padding: .9rem 1.15rem;
-  background: var(--red); color: var(--white);
-  border-radius: var(--radius-sm);
-  transition: background var(--transition-fast), transform var(--transition-fast);
-}
-.mega-cta:hover { background: var(--red-lt); transform: translateY(-1px); }
-.mega-cta-text { display: flex; flex-direction: column; line-height: 1.3; }
-.mega-cta-text strong { font-size: .9rem; font-weight: 700; }
-.mega-cta-text small { font-size: .75rem; opacity: .85; }
-.mega-cta svg { flex-shrink: 0; }
 
 .nav-actions { display: flex; align-items: center; gap: 1rem; margin-left: 1rem; }
 
@@ -1277,13 +1265,6 @@ input, select, textarea { font-family: var(--font-body); }
               <a href="#services">Workforce Consulting</a>
             </div>
           </div>
-          <a href="status.html" class="mega-cta">
-            <span class="mega-cta-text">
-              <strong>Track My Application</strong>
-              <small>Check the status of your job application</small>
-            </span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </a>
         </div>
       </li>
       <li><a href="#industries" class="nav-link">Industries</a></li>
@@ -1349,7 +1330,7 @@ input, select, textarea { font-family: var(--font-body); }
 
     <div class="hero-actions" data-reveal>
       <a href="careers.html" class="btn-primary magnetic">Apply Now</a>
-      <a href="#services" class="btn-ghost magnetic">Our Services</a>
+      <a href="status.html" class="btn-ghost magnetic">Track My Application</a>
     </div>
 
     <div class="hero-stats" data-reveal>
