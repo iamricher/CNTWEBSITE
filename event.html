@@ -11,6 +11,9 @@
   <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-config.js"></script>
+  <!-- Shared site header + footer (same as the homepage) -->
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
   <style>
     :root{--red:#C8102E;--red-deep:#A50D24;--red-pale:#FFF0F2;--charcoal:#1A1A1A;--gray-400:#9CA3AF;--gray-600:#6B7280;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -18,13 +21,6 @@
     a{text-decoration:none;color:inherit}
     img{display:block;max-width:100%;height:auto}
     .container{width:min(760px,100% - 40px);margin-inline:auto}
-    .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid #EBEBEB}
-    .nav-inner{width:min(1100px,100% - 40px);margin-inline:auto;display:flex;align-items:center;justify-content:space-between;height:68px}
-    .nav-inner img{height:38px}
-    .nav-links{display:flex;gap:22px;align-items:center;font-size:.9rem;font-weight:500}
-    .nav-links a:hover{color:var(--red)}
-    .btn{display:inline-flex;align-items:center;gap:6px;padding:.6rem 1.2rem;border-radius:99px;background:var(--red);color:#fff;font-weight:600;font-size:.85rem;transition:.2s}
-    .btn:hover{background:var(--red-deep)}
     .article{padding:28px 0 80px}
     .backlink{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--gray-600);margin-bottom:20px}
     .backlink:hover{color:var(--red)}
@@ -41,21 +37,11 @@
     .body p{font-size:1.06rem;color:#333;margin-bottom:1.15rem}
     .body img{width:100%;border-radius:14px;margin:14px 0;box-shadow:0 10px 34px rgba(0,0,0,.10)}
     .state{padding:80px 0;text-align:center;color:var(--gray-600)}
-    .footer{background:#111;color:#9CA3AF;padding:32px 0;text-align:center;font-size:.85rem}
-    .footer a{color:#fff;font-weight:600}
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="index.html"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." /></a>
-      <div class="nav-links">
-        <a href="index.html#events">Events</a>
-        <a href="careers.html">Careers</a>
-        <a href="careers.html" class="btn">View Jobs</a>
-      </div>
-    </div>
-  </nav>
+  <!-- Shared site header (injected by assets/site-chrome.js) -->
+  <div id="site-header" data-active="events"></div>
 
   <main class="article">
     <div class="container">
@@ -67,13 +53,12 @@
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="container">© <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc. · <a href="careers.html">Careers</a> · <a href="index.html">Home</a></div>
-  </footer>
+  <!-- Shared site footer (injected by assets/site-chrome.js) -->
+  <div id="site-footer"></div>
 
   <script>
   (function(){
-    document.getElementById('yr').textContent=new Date().getFullYear();
+    var yrEl=document.getElementById('yr'); if(yrEl) yrEl.textContent=new Date().getFullYear();
     var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
     var el=document.getElementById('event-content');
     var hero=document.getElementById('event-hero');

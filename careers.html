@@ -16,6 +16,10 @@
   <script src="assets/supabase-config.js"></script>
   <script src="assets/sentry-init.js"></script>
 
+  <!-- Shared site header + footer (same as the homepage) -->
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
+
   <style>
   :root{
     --red:#C8102E; --red-deep:#A50D24; --red-lt:#E5213F; --red-pale:#FFF0F2; --red-muted:#F5C6CE;
@@ -42,17 +46,6 @@
   @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
   .container{width:min(var(--max-w),100% - var(--gutter)*2);margin-inline:auto}
   .font-display{font-family:var(--font-display)}
-
-  /* NAV */
-  .nav{position:sticky;top:0;z-index:900;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--gray-100)}
-  .nav-container{width:min(var(--max-w),100% - var(--gutter)*2);margin-inline:auto;display:flex;align-items:center;justify-content:space-between;height:72px}
-  .nav-logo img{height:40px}
-  .nav-links{display:flex;gap:1.9rem;align-items:center}
-  .nav-link{font-size:.9rem;font-weight:500;color:var(--charcoal);transition:color var(--transition);position:relative}
-  .nav-link:hover,.nav-link.active{color:var(--red)}
-  .nav-link.active::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--red);border-radius:2px}
-  .btn-nav{padding:.6rem 1.3rem;border-radius:99px;background:var(--charcoal);color:#fff;font-size:.85rem;font-weight:600;transition:var(--transition)}
-  .btn-nav:hover{background:var(--red)}
 
   /* HERO */
   .hero{background:linear-gradient(135deg,var(--charcoal),#000);color:#fff;padding:clamp(48px,7vw,84px) 0;position:relative;overflow:hidden}
@@ -167,47 +160,19 @@
   .success h4{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--charcoal)}
   .success p{color:var(--text-sub);margin-top:8px;font-size:.86rem;line-height:1.55}
 
-  /* FOOTER */
-  footer{background:var(--charcoal);color:rgba(255,255,255,.75)}
-  .footer-top{padding:60px 0 36px}
-  .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px}
-  .footer-logo{height:50px;filter:brightness(0) invert(1);margin-bottom:16px}
-  .footer-brand p{font-size:.87rem;line-height:1.7;max-width:340px}
-  .footer-col h5{font-family:var(--font-display);color:#fff;font-size:.93rem;margin-bottom:13px}
-  .footer-col ul li{margin-bottom:9px}
-  .footer-col a{font-size:.85rem;transition:color var(--transition)}
-  .footer-col a:hover{color:var(--red-lt)}
-  .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding:20px 0;font-size:.8rem;color:rgba(255,255,255,.5)}
-  .footer-bottom .container{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
-  .footer-red-bar{height:4px;background:linear-gradient(90deg,var(--red-deep),var(--red-lt))}
-
   @media(max-width:900px){
     .layout{grid-template-columns:1fr}
     .sidebar{position:static;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:16px;background:#fff;border:1px solid var(--gray-100);border-radius:var(--radius-md);margin-bottom:26px}
     .detail-grid{grid-template-columns:1fr}
     .apply-card{position:static;order:-1}
-    .footer-grid{grid-template-columns:1fr;gap:28px}
   }
-  @media(max-width:600px){.nav-links{display:none}.sidebar{grid-template-columns:1fr}}
+  @media(max-width:600px){.sidebar{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <div class="nav-container">
-      <a href="index.html" class="nav-logo" aria-label="CNT Home">
-        <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo & Ads Specialists, Inc." />
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html#about" class="nav-link">About</a></li>
-        <li><a href="index.html#services" class="nav-link">Services</a></li>
-        <li><a href="index.html#industries" class="nav-link">Industries</a></li>
-        <li><a href="careers.html" class="nav-link active">Careers</a></li>
-      </ul>
-      <div class="nav-actions"><a href="index.html#contact" class="btn-nav">Contact Us</a></div>
-    </div>
-  </nav>
+  <!-- Shared site header (injected by assets/site-chrome.js) -->
+  <div id="site-header" data-active="careers"></div>
 
   <!-- ================= LIST VIEW ================= -->
   <div id="view-list">
@@ -334,37 +299,8 @@
     </main>
   </div>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-top">
-      <div class="container">
-        <div class="footer-grid">
-          <div class="footer-brand">
-            <img src="https://uploads.onecompiler.io/43d4zm644/44t7ga3md/CNT%20Promo%20&%20Ads%20Specialists,%20Inc.%202.png" alt="CNT" class="footer-logo" />
-            <p>A Million Jobs for a Million Filipinos. CNT Promo &amp; Ads Specialists, Inc. — connecting exceptional talent with leading organizations since 2009.</p>
-          </div>
-          <div class="footer-col"><h5>Company</h5><ul>
-            <li><a href="index.html#about">About Us</a></li>
-            <li><a href="index.html#projects">Success Stories</a></li>
-            <li><a href="index.html#contact">Contact</a></li>
-            <li><a href="careers.html">Careers</a></li>
-          </ul></div>
-          <div class="footer-col"><h5>For Applicants</h5><ul>
-            <li><a href="careers.html">Browse Jobs</a></li>
-            <li><a href="index.html#industries">Industries</a></li>
-            <li><a href="index.html#contact">Get in Touch</a></li>
-          </ul></div>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div class="container">
-        <p>© 2025 CNT Promo &amp; Ads Specialists, Inc. All rights reserved.</p>
-        <p>A Million Jobs for a Million Filipinos.</p>
-      </div>
-    </div>
-    <div class="footer-red-bar"></div>
-  </footer>
+  <!-- Shared site footer (injected by assets/site-chrome.js) -->
+  <div id="site-footer"></div>
 
   <script>
   'use strict';
