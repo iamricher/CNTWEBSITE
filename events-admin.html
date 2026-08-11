@@ -27,7 +27,23 @@
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{-webkit-text-size-adjust:100%}
-    body{font-family:var(--font);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+    body{
+      font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;
+      min-height:100vh;
+      background:
+        radial-gradient(1000px 460px at 100% -6%, rgba(200,16,46,.11), transparent 58%),
+        radial-gradient(820px 460px at -6% 2%, rgba(200,16,46,.07), transparent 55%),
+        linear-gradient(180deg, #FBFCFE 0%, var(--bg) 46%);
+      background-attachment:fixed;
+    }
+    /* faint diagonal brand streaks, echoing the logo's lines */
+    body::before{
+      content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:repeating-linear-gradient(-24deg, rgba(200,16,46,.05) 0 2px, transparent 2px 88px);
+      -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.9), transparent 46%);
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.9), transparent 46%);
+    }
+    .topbar,.wrap,.auth{position:relative;z-index:1}
     img{display:block;max-width:100%}
     a{color:inherit;text-decoration:none}
     ::selection{background:var(--red-pale)}
@@ -38,8 +54,7 @@
     .topbar-inner{max-width:960px;margin:0 auto;height:64px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
     .logo{display:inline-flex;align-items:center}
     .logo img{height:30px;width:auto}
-    .badge-admin{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;letter-spacing:.02em;color:var(--red-deep);background:var(--red-pale);border:1px solid var(--red-border);padding:5px 11px 5px 9px;border-radius:99px}
-    .badge-admin .material-icons-outlined{font-size:15px}
+    .topbar-tag{font-family:var(--display);font-size:.74rem;font-weight:700;letter-spacing:.02em;color:var(--faint)}
 
     /* ── Shell ── */
     .wrap{max-width:960px;margin:0 auto;padding:34px 22px 96px}
@@ -168,7 +183,7 @@
       <a class="logo" href="index.html" title="Back to website">
         <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." />
       </a>
-      <span class="badge-admin"><span class="material-icons-outlined">shield</span>Super Admin</span>
+      <span class="topbar-tag">Content Studio</span>
     </div>
   </header>
 
