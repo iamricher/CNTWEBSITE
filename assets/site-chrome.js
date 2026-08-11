@@ -163,6 +163,19 @@
     var nav = document.getElementById('nav');
     wireOverlayScroll(nav);
     wireSmoothScroll(nav);
+    countVisit();
+  }
+
+  // Count one website visit per browser session (across any public page).
+  // Fire-and-forget; failures never affect the page.
+  function countVisit() {
+    try {
+      if (sessionStorage.getItem('cnt_visited')) return;
+      var sb = window.getSupabase && window.getSupabase();
+      if (!sb) return;
+      sessionStorage.setItem('cnt_visited', '1');
+      Promise.resolve(sb.rpc('cnt_increment_visit')).catch(function () {});
+    } catch (_) {}
   }
 
   if (document.readyState === 'loading') {

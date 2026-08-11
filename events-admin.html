@@ -65,6 +65,15 @@
     .signout:hover{color:var(--ink);border-color:#D7DCE4;background:#fff}
     .signout .material-icons-outlined{font-size:16px}
 
+    /* ── Stat strip ── */
+    .stat-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px}
+    .stat{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:15px 18px}
+    .stat-ic{width:44px;height:44px;border-radius:12px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .stat-ic .material-icons-outlined{font-size:22px}
+    .stat-num{display:block;font-family:var(--display);font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+    .stat-lbl{display:block;font-size:.74rem;font-weight:600;color:var(--faint);margin-top:2px}
+    .views{color:var(--muted);font-weight:600}
+
     /* ── Segmented tabs ── */
     .tabs{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px;margin-bottom:20px;box-shadow:var(--shadow-sm)}
     .tabbtn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;border-radius:9px;padding:9px 16px;font:inherit;font-size:.85rem;font-weight:700;color:var(--muted);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s}
@@ -230,9 +239,15 @@
       <button class="signout" onclick="cntLogout()"><span class="material-icons-outlined">logout</span>Sign out</button>
     </div>
 
+    <div class="stat-strip">
+      <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">groups</span></span><div><span class="stat-num" id="stat-visits">—</span><span class="stat-lbl">Website visits</span></div></div>
+      <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">visibility</span></span><div><span class="stat-num" id="stat-views">—</span><span class="stat-lbl">Total post views</span></div></div>
+    </div>
+
     <div class="tabs">
       <button id="tab-events" class="tabbtn on" onclick="showTab('events')"><span class="material-icons-outlined">campaign</span>Events &amp; Updates</button>
       <button id="tab-stories" class="tabbtn" onclick="showTab('stories')"><span class="material-icons-outlined">workspace_premium</span>Success Stories</button>
+      <button id="tab-testimonials" class="tabbtn" onclick="showTab('testimonials')"><span class="material-icons-outlined">format_quote</span>Testimonials</button>
     </div>
 
     <div id="panel-events" class="card">
@@ -249,6 +264,14 @@
         <button class="btn" style="margin-left:auto;" onclick="stForm()"><span class="material-icons-outlined">add</span>New story</button>
       </div>
       <div id="st-list"><div class="muted">Loading…</div></div>
+    </div>
+
+    <div id="panel-testimonials" class="card" style="display:none;">
+      <div class="card-head">
+        <div><h2>Testimonials</h2><p>Client quotes shown under “Trusted by Leaders Who Hire Right” on the homepage.</p></div>
+        <button class="btn" style="margin-left:auto;" onclick="tsForm()"><span class="material-icons-outlined">add</span>New testimonial</button>
+      </div>
+      <div id="ts-list"><div class="muted">Loading…</div></div>
     </div>
   </main>
 
@@ -300,22 +323,40 @@
     </div>
   </div>
 
+  <!-- TESTIMONIAL MODAL -->
+  <div class="modal" id="ts-modal">
+    <div class="box">
+      <div class="box-head"><h3 id="ts-modal-title">New testimonial</h3><button class="x" onclick="tsClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <input type="hidden" id="ts-id">
+        <div class="field"><label>Quote *</label><textarea id="ts-quote" rows="4" placeholder="CNT delivered our entire branch expansion team in under 60 days…"></textarea></div>
+        <div class="grid2">
+          <div class="field"><label>Author</label><input id="ts-author" placeholder="Maria P."></div>
+          <div class="field"><label>Rating (1–5)</label><input id="ts-rating" type="number" min="1" max="5" value="5"></div>
+        </div>
+        <div class="field"><label>Role / company</label><input id="ts-role" placeholder="VP Human Resources, Leading Philippine Bank"></div>
+        <label class="chk"><input type="checkbox" id="ts-published" checked><span>Published<small>Visible on the website. Uncheck to save as a draft.</small></span></label>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="tsClose()">Cancel</button><button class="btn" onclick="tsSave()"><span class="material-icons-outlined">check</span>Save testimonial</button></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
   (function(){
     var sb = window.getSupabase && window.getSupabase();
-    var _ev = [], _st = [];
+    var _ev = [], _st = [], _ts = [];
     var esc = function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
     var show = function(id){ ['login-view','denied-view','manager-view'].forEach(function(v){ document.getElementById(v).style.display = v===id?'block':'none'; }); };
     var toast = function(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(function(){t.classList.remove('on');},2600); };
     var SKELETON = (function(){ var r='<div class="sk-row"><div class="sk sk-thumb"></div><div style="flex:1"><div class="sk sk-line" style="width:42%"></div><div class="sk sk-line" style="width:24%;height:9px;margin-top:9px"></div></div></div>'; return r+r+r; })();
 
     window.showTab = function(t){
-      document.getElementById('panel-events').style.display = t==='events'?'block':'none';
-      document.getElementById('panel-stories').style.display = t==='stories'?'block':'none';
-      document.getElementById('tab-events').classList.toggle('on', t==='events');
-      document.getElementById('tab-stories').classList.toggle('on', t==='stories');
+      ['events','stories','testimonials'].forEach(function(name){
+        document.getElementById('panel-'+name).style.display = name===t?'block':'none';
+        document.getElementById('tab-'+name).classList.toggle('on', name===t);
+      });
     };
 
     async function check(){
@@ -324,7 +365,7 @@
       if(!s.data.session){ show('login-view'); return; }
       var r = await sb.rpc('cnt_is_super_admin');
       if(r.error || !r.data){ show('denied-view'); return; }
-      show('manager-view'); evLoad(); stLoad();
+      show('manager-view'); evLoad(); stLoad(); tsLoad(); loadMetrics();
     }
 
     // shared image uploader → public event-images bucket
@@ -350,10 +391,13 @@
       if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
       _ev = res.data||[];
       if(!_ev.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">campaign</span></div><h3>No posts yet</h3><p>Share hiring drives, achievements and announcements with the world.</p><button class="btn" onclick="evForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Create your first post</button></div>'; return; }
+      var totalViews = 0;
       el.innerHTML=_ev.map(function(ev){
         var thumb = ev.image_url ? '<div class="thumb"><img src="'+esc(ev.image_url)+'" alt=""></div>' : '<div class="thumb"><span class="material-icons-outlined">campaign</span></div>';
         var pill = ev.published ? '<span class="pill pill-live">Live</span>' : '<span class="pill pill-draft">Draft</span>';
-        var meta = esc(ev.event_date||'No date')+(ev.category?(' · '+esc(ev.category)):'');
+        var vc = Number(ev.view_count||0); totalViews += vc;
+        var meta = esc(ev.event_date||'No date')+(ev.category?(' · '+esc(ev.category)):'')
+          +' · <span class="views">'+vc.toLocaleString()+' view'+(vc===1?'':'s')+'</span>';
         return '<div class="row">'+thumb
           +'<div class="t"><b>'+esc(ev.title||'Untitled')+'</b>'+pill+'<small>'+meta+'</small></div>'
           +'<div class="row-actions">'
@@ -362,6 +406,14 @@
           +'<button class="iconbtn del" onclick="evDelete('+ev.id+')" title="Delete"><span class="material-icons-outlined">delete_outline</span></button>'
           +'</div></div>';
       }).join('');
+      var sv=document.getElementById('stat-views'); if(sv) sv.textContent = totalViews.toLocaleString();
+    }
+    async function loadMetrics(){
+      try{
+        var r = await sb.from('site_metrics').select('count').eq('key','site_visits').maybeSingle();
+        var n = (r && r.data) ? Number(r.data.count||0) : 0;
+        var el = document.getElementById('stat-visits'); if(el) el.textContent = n.toLocaleString();
+      }catch(_){}
     }
     window.evForm = function(id){
       var ev = id ? (_ev.filter(function(x){return x.id===id;})[0]||{}) : {};
@@ -444,6 +496,59 @@
       var res = await sb.from('stories').delete().eq('id',id);
       if(res.error){ toast('Delete failed: '+res.error.message); return; }
       stLoad(); toast('Story deleted');
+    };
+
+    // ── TESTIMONIALS ──
+    function initials(name){ return String(name||'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase()||'CN'; }
+    async function tsLoad(){
+      var el=document.getElementById('ts-list'); el.innerHTML=SKELETON;
+      var res = await sb.from('testimonials').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _ts = res.data||[];
+      if(!_ts.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">format_quote</span></div><h3>No testimonials yet</h3><p>Add client quotes to build trust on your homepage.</p><button class="btn" onclick="tsForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Add your first testimonial</button></div>'; return; }
+      el.innerHTML=_ts.map(function(t){
+        var pill = t.published ? '<span class="pill pill-live">Live</span>' : '<span class="pill pill-draft">Draft</span>';
+        var stars = '★★★★★'.slice(0, Math.max(1,Math.min(5, Number(t.rating||5))));
+        var quote = String(t.quote||'').replace(/\s+/g,' ').trim();
+        if(quote.length>90) quote = quote.slice(0,90)+'…';
+        return '<div class="row"><div class="thumb" style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:.9rem;">'+esc(initials(t.author))+'</div>'
+          +'<div class="t"><b>'+esc(t.author||'Anonymous')+'</b>'+pill
+          +'<small><span class="views" style="color:#EAB308;letter-spacing:1px;">'+stars+'</span> · '+esc(quote)+'</small></div>'
+          +'<div class="row-actions">'
+          +'<button class="iconbtn" onclick="tsForm('+t.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
+          +'<button class="iconbtn del" onclick="tsDelete('+t.id+')" title="Delete"><span class="material-icons-outlined">delete_outline</span></button>'
+          +'</div></div>';
+      }).join('');
+    }
+    window.tsForm = function(id){
+      var t = id ? (_ts.filter(function(x){return x.id===id;})[0]||{}) : {};
+      document.getElementById('ts-modal-title').textContent = id?'Edit testimonial':'New testimonial';
+      document.getElementById('ts-id').value = id||'';
+      document.getElementById('ts-quote').value = t.quote||'';
+      document.getElementById('ts-author').value = t.author||'';
+      document.getElementById('ts-role').value = t.role||'';
+      document.getElementById('ts-rating').value = t.rating||5;
+      document.getElementById('ts-published').checked = id ? !!t.published : true;
+      document.getElementById('ts-modal').classList.add('on');
+    };
+    window.tsClose = function(){ document.getElementById('ts-modal').classList.remove('on'); };
+    window.tsSave = async function(){
+      var id = document.getElementById('ts-id').value;
+      var rating = parseInt(document.getElementById('ts-rating').value,10); if(!(rating>=1&&rating<=5)) rating=5;
+      var row = { quote:document.getElementById('ts-quote').value.trim(), author:document.getElementById('ts-author').value.trim()||null,
+        role:document.getElementById('ts-role').value.trim()||null, rating:rating,
+        published:document.getElementById('ts-published').checked };
+      if(!row.quote){ toast('Quote is required'); return; }
+      var res = id ? await sb.from('testimonials').update(row).eq('id',id) : await sb.from('testimonials').insert(row);
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      tsClose(); tsLoad(); toast(id?'Testimonial updated':'Testimonial published');
+    };
+    window.tsDelete = async function(id){
+      var t = _ts.filter(function(x){return x.id===id;})[0];
+      if(!confirm('Delete this testimonial'+(t&&t.author?(' from '+t.author):'')+'?')) return;
+      var res = await sb.from('testimonials').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      tsLoad(); toast('Testimonial deleted');
     };
 
     window.cntLogout = async function(){ if(sb) await sb.auth.signOut(); show('login-view'); };

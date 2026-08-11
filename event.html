@@ -70,6 +70,9 @@
       var ev=res.data;
       if(res.error||!ev){ el.innerHTML='<div class="state">This event was not found or is no longer available.<br><a href="index.html#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
       document.title=(ev.title||'Event')+' — CNT';
+      // Count a view (once per browser session per event, so a refresh
+      // doesn't inflate it). Fire-and-forget; never blocks the page.
+      try{ var vk='cnt_ev_'+id; if(!sessionStorage.getItem(vk)){ sessionStorage.setItem(vk,'1'); Promise.resolve(sb.rpc('cnt_increment_event_view',{ev_id:Number(id)})).catch(function(){}); } }catch(_){}
       // Banner hero — auto-styled, works with or without a photo
       hero.className='hero';
       hero.innerHTML='<div class="banner">'

@@ -1597,29 +1597,6 @@ input, select, textarea { font-family: var(--font-body); }
   </div>
 </section>
 
-<section class="stats-section section" id="stats" aria-label="Company Statistics">
-  <div class="container">
-    <div class="stats-grid" data-reveal>
-      <div class="stat-block">
-        <span class="stat-big" data-count="500">0</span><span class="stat-big-plus">+</span>
-        <p>Corporate Clients</p>
-      </div>
-      <div class="stat-block">
-        <span class="stat-big" data-count="15">0</span><span class="stat-big-plus">+</span>
-        <p>Years of Excellence</p>
-      </div>
-      <div class="stat-block">
-        <span class="stat-big" data-count="10000">0</span><span class="stat-big-plus">+</span>
-        <p>Successful Placements</p>
-      </div>
-      <div class="stat-block">
-        <span class="stat-big" data-count="98">0</span><span class="stat-big-plus">%</span>
-        <p>Client Satisfaction</p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ============================= TESTIMONIALS ============================= -->
 <section class="testimonials section section-gray" id="testimonials" aria-label="Client Testimonials">
   <div class="container">
@@ -2221,7 +2198,7 @@ function initHeroAnimations() {
 (function initTestimonialsSwiper() {
   if (typeof Swiper === 'undefined') return;
 
-  new Swiper('.testimonials-swiper', {
+  const mount = () => new Swiper('.testimonials-swiper', {
     slidesPerView: 1,
     spaceBetween: 32,
     loop: true,
@@ -2233,6 +2210,30 @@ function initHeroAnimations() {
       1024: { slidesPerView: 3 },
     }
   });
+
+  // Load published testimonials from the DB; fall back to the built-in slides.
+  const sb = window.getSupabase && window.getSupabase();
+  const wrap = document.querySelector('.testimonials-swiper .swiper-wrapper');
+  if (!sb || !wrap) { mount(); return; }
+  const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const initials = name => String(name||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() || 'CN';
+  sb.from('testimonials').select('*').eq('published', true)
+    .order('sort_order', { ascending: true }).order('created_at', { ascending: false })
+    .then(res => {
+      const rows = res && res.data;
+      if (rows && rows.length) {
+        wrap.innerHTML = rows.map(t => {
+          const stars = '★★★★★'.slice(0, Math.max(1, Math.min(5, Number(t.rating||5))));
+          return '<div class="swiper-slide"><div class="testimonial-card">'
+            + '<div class="testimonial-stars">' + stars + '</div>'
+            + '<blockquote>"' + esc(t.quote||'') + '"</blockquote>'
+            + '<div class="testimonial-author"><div class="author-avatar">' + esc(initials(t.author)) + '</div>'
+            + '<div><strong>' + esc(t.author||'') + '</strong><span>' + esc(t.role||'') + '</span></div></div>'
+            + '</div></div>';
+        }).join('');
+      }
+      mount();
+    }, () => mount());
 })();
 
 // ── CONTACT FORM ───────────────────────────────────────────
