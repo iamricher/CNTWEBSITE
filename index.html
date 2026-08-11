@@ -19,6 +19,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <!-- Shared site header + footer (same source used by careers.html & event.html) -->
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
   <style>
 /* ==========================================================
    CNT PROMO & ADS SPECIALISTS, INC.
@@ -186,138 +190,7 @@ input, select, textarea { font-family: var(--font-body); }
   font-size: .75rem; letter-spacing: .1em;
 }
 
-/* ── NAVIGATION ────────────────────────────────────────────── */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0;
-  z-index: 900; padding: 1.25rem 0;
-  transition: background var(--transition), box-shadow var(--transition), padding var(--transition);
-}
-.nav.scrolled {
-  background: rgba(255,255,255,.97);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 8px 32px rgba(0,0,0,.07);
-  padding: .875rem 0;
-}
-.nav-container {
-  width: min(var(--max-w), 100% - 40px);
-  margin-inline: auto;
-  display: flex; align-items: center; gap: 2rem;
-}
-.nav-logo img {
-  height: 36px; width: auto;
-  filter: brightness(0) invert(1);
-  transition: filter var(--transition);
-}
-.nav.scrolled .nav-logo img { filter: none; }
-
-.nav-links {
-  display: flex; align-items: center;
-  gap: 0; margin-left: auto;
-}
-.nav-link {
-  display: flex; align-items: center; gap: 4px;
-  padding: .5rem 1.1rem;
-  font-size: .875rem; font-weight: 500;
-  color: rgba(255,255,255,.85);
-  transition: color var(--transition-fast);
-  position: relative; white-space: nowrap;
-}
-.nav.scrolled .nav-link { color: var(--text-sub); }
-.nav-link::after {
-  content: '';
-  position: absolute; bottom: 0; left: 1.1rem; right: 1.1rem;
-  height: 2px; background: var(--red);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform var(--transition);
-}
-.nav-link:hover::after, .nav-link:focus::after { transform: scaleX(1); }
-.nav-link:hover { color: var(--white); }
-.nav.scrolled .nav-link:hover { color: var(--red); }
-
-/* Mega Menu */
-.nav-dropdown { position: relative; }
-.mega-menu {
-  position: absolute; top: calc(100% + 1rem); left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  background: var(--white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  min-width: 520px;
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transition: opacity .2s, transform .2s;
-  border: 1px solid var(--gray-100);
-}
-.nav-dropdown:hover .mega-menu {
-  opacity: 1; visibility: visible; pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
-}
-.mega-inner {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 0; padding: 1.5rem;
-}
-.mega-col { padding: 0 1rem; }
-.mega-col + .mega-col { border-left: 1px solid var(--gray-100); }
-.mega-label {
-  display: block; font-size: .7rem; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--red); margin-bottom: .75rem;
-}
-.mega-col a {
-  display: block; font-size: .875rem; color: var(--text-sub);
-  padding: .3rem 0;
-  transition: color var(--transition-fast), padding-left var(--transition-fast);
-}
-.mega-col a:hover { color: var(--red); padding-left: .4rem; }
-
-.nav-actions { display: flex; align-items: center; gap: 1rem; margin-left: 1rem; }
-
-.btn-nav {
-  display: inline-flex; align-items: center;
-  padding: .6rem 1.35rem;
-  background: var(--red); color: var(--white);
-  border-radius: var(--radius-xs);
-  font-size: .875rem; font-weight: 700;
-  letter-spacing: .02em;
-  transition: background var(--transition-fast), transform var(--transition-fast);
-  white-space: nowrap;
-}
-.btn-nav:hover { background: var(--red-lt); transform: translateY(-1px); }
-
-.nav-toggle {
-  display: none; flex-direction: column; gap: 5px; padding: 4px;
-}
-.nav-toggle span {
-  display: block; width: 22px; height: 2px;
-  background: var(--white);
-  transition: transform .3s, opacity .3s;
-}
-.nav.scrolled .nav-toggle span { background: var(--charcoal); }
-.nav-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(4.5px,4.5px); }
-.nav-toggle.active span:nth-child(2) { opacity: 0; }
-.nav-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(4.5px,-4.5px); }
-
-/* Mobile Menu */
-.mobile-menu {
-  position: fixed; inset: 0;
-  background: var(--charcoal);
-  z-index: 800;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 2rem;
-  opacity: 0; visibility: hidden; transform: translateY(-10px);
-  transition: opacity .3s, visibility .3s, transform .3s;
-}
-.mobile-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
-.mobile-menu ul { display: flex; flex-direction: column; gap: .5rem; text-align: center; }
-.mobile-menu li a {
-  display: block;
-  font-family: var(--font-display);
-  font-size: clamp(1.75rem, 6vw, 3rem); font-weight: 800;
-  color: rgba(255,255,255,.6); padding: .4rem 2rem;
-  transition: color .2s;
-}
-.mobile-menu li a:hover { color: var(--white); }
-.mobile-cta { margin-top: 1rem; }
+/* Navbar + mobile menu styles live in assets/site-chrome.css (shared chrome) */
 
 /* ── BUTTONS ───────────────────────────────────────────────── */
 .btn-primary {
@@ -1061,70 +934,7 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .form-group textarea { resize: vertical; }
 
-/* ── FOOTER ────────────────────────────────────────────────── */
-.footer { background: var(--dark); }
-.footer-top { padding: 5.5rem 0 3.5rem; }
-.footer-grid {
-  display: grid; grid-template-columns: 1.7fr 1fr 1fr 1.2fr;
-  gap: clamp(2rem, 4vw, 4rem);
-}
-.footer-logo { height: 34px; width: auto; filter: brightness(0) invert(1); opacity: .9; margin-bottom: 1.25rem; }
-.footer-brand p {
-  font-size: .9375rem; color: rgba(255,255,255,.38); line-height: 1.75;
-  margin-bottom: 1.5rem; max-width: 30ch;
-}
-
-.social-links { display: flex; gap: .75rem; }
-.social-link {
-  width: 40px; height: 40px; border: 1px solid rgba(255,255,255,.1);
-  border-radius: var(--radius-xs);
-  display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,.4);
-  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
-}
-.social-link svg { width: 16px; height: 16px; }
-.social-link:hover { border-color: var(--red); color: var(--white); background: rgba(200,16,46,.2); }
-
-.footer-col h5 {
-  font-family: var(--font-display); font-size: .78rem; font-weight: 800;
-  text-transform: uppercase; letter-spacing: .13em; color: var(--white); margin-bottom: 1.25rem;
-}
-.footer-col ul { display: flex; flex-direction: column; gap: .65rem; }
-.footer-col a {
-  font-size: .9375rem; color: rgba(255,255,255,.38);
-  transition: color var(--transition-fast), padding-left var(--transition-fast);
-}
-.footer-col a:hover { color: var(--white); padding-left: 5px; }
-
-.newsletter-form { display: flex; margin-top: .75rem; }
-.newsletter-form input {
-  flex: 1; padding: .65rem 1rem;
-  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
-  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
-  color: var(--white); font-size: .875rem; outline: none;
-  transition: border-color var(--transition-fast);
-}
-.newsletter-form input::placeholder { color: rgba(255,255,255,.25); }
-.newsletter-form input:focus { border-color: var(--red); }
-.newsletter-form button {
-  padding: .65rem 1.1rem; background: var(--red); color: var(--white);
-  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-  font-size: 1rem; transition: background var(--transition-fast);
-}
-.newsletter-form button:hover { background: var(--red-lt); }
-
-.footer-bottom { padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,.05); }
-.footer-bottom .container {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 1rem; flex-wrap: wrap;
-}
-.footer-bottom p { font-size: .875rem; color: rgba(255,255,255,.25); }
-.footer-bottom-links { display: flex; gap: 1.5rem; }
-.footer-bottom-links a { font-size: .875rem; color: rgba(255,255,255,.25); transition: color var(--transition-fast); }
-.footer-bottom-links a:hover { color: var(--white); }
-
-/* Red accent band at very bottom */
-.footer-red-bar { height: 4px; background: var(--red); }
+/* Footer styles live in assets/site-chrome.css (shared chrome) */
 
 /* ── BACK TO TOP ───────────────────────────────────────────── */
 .back-to-top {
@@ -1232,71 +1042,8 @@ input, select, textarea { font-family: var(--font-body); }
 </div>
 
 <!-- NAVIGATION -->
-<nav class="nav" id="nav" role="navigation" aria-label="Main navigation">
-  <div class="nav-container">
-    <a href="#hero" class="nav-logo" aria-label="CNT Home">
-      <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo & Ads Specialists, Inc." />
-    </a>
-
-    <ul class="nav-links" role="list">
-      <li><a href="#about" class="nav-link">About</a></li>
-      <li class="nav-dropdown">
-        <a href="#services" class="nav-link">Services
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </a>
-        <div class="mega-menu">
-          <div class="mega-inner">
-            <div class="mega-col">
-              <span class="mega-label">Staffing</span>
-              <a href="#services">Executive Search</a>
-              <a href="#services">Mass Hiring</a>
-              <a href="#services">Contractual Staffing</a>
-            </div>
-            <div class="mega-col">
-              <span class="mega-label">Corporate</span>
-              <a href="#services">HR Outsourcing</a>
-              <a href="#services">Payroll Management</a>
-              <a href="#services">Compliance Advisory</a>
-            </div>
-            <div class="mega-col">
-              <span class="mega-label">Solutions</span>
-              <a href="#services">Training & Development</a>
-              <a href="#services">Background Screening</a>
-              <a href="#services">Workforce Consulting</a>
-            </div>
-          </div>
-        </div>
-      </li>
-      <li><a href="#industries" class="nav-link">Industries</a></li>
-      <li><a href="#projects" class="nav-link">Success Stories</a></li>
-      <li><a href="#events" class="nav-link">Events</a></li>
-      <li><a href="careers.html" class="nav-link">Careers</a></li>
-    </ul>
-
-    <div class="nav-actions">
-      <a href="#contact" class="btn-nav">Contact Us</a>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </div>
-</nav>
-
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation">
-  <ul>
-    <li><a href="#about">About</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="status.html">Track My Application</a></li>
-    <li><a href="#industries">Industries</a></li>
-    <li><a href="#projects">Success Stories</a></li>
-    <li><a href="#events">Events</a></li>
-    <li><a href="careers.html">Careers</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <a href="careers.html" class="btn-primary mobile-cta">Apply Now</a>
-  <a href="status.html" class="btn-ghost mobile-cta">Track My Application</a>
-</div>
+<!-- Shared site header (injected by assets/site-chrome.js) -->
+<div id="site-header" data-active="home" data-base="" data-overlay="1"></div>
 
 <!-- ============================= HERO ============================= -->
 <section class="hero" id="hero" aria-label="Hero">
@@ -2151,79 +1898,8 @@ input, select, textarea { font-family: var(--font-body); }
 </section>
 
 <!-- ============================= FOOTER ============================= -->
-<footer class="footer" role="contentinfo">
-  <div class="footer-top">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <img src="https://uploads.onecompiler.io/43d4zm644/44t7ga3md/CNT%20Promo%20&%20Ads%20Specialists,%20Inc.%202.png" alt="CNT Promo & Ads Specialists, Inc." class="footer-logo" />
-          <p>Philippines' most trusted employment agency and corporate staffing solutions provider — connecting exceptional talent with leading organizations since 2009.</p>
-          <div class="social-links">
-            <a href="https://cntpromoandads.odoo.com/website/social/facebook" class="social-link" aria-label="Facebook">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-            </a>
-            <a href="https://www.linkedin.com/in/cnt-promo-and-ads-specialists-inc-24b7633a7/" class="social-link" aria-label="LinkedIn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-            </a>
-            <a href="#" class="social-link" aria-label="Tiktok">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <div class="footer-col">
-          <h5>Services</h5>
-          <ul>
-            <li><a href="#services">Executive Search</a></li>
-            <li><a href="#services">Mass &amp; Bulk Hiring</a></li>
-            <li><a href="#services">HR Outsourcing</a></li>
-            <li><a href="#services">Contractual Staffing</a></li>
-            <li><a href="#services">Background Screening</a></li>
-            <li><a href="#services">Training &amp; Development</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h5>Industries</h5>
-          <ul>
-            <li><a href="#industries">Banking &amp; Finance</a></li>
-            <li><a href="#industries">Healthcare</a></li>
-            <li><a href="#industries">Government</a></li>
-            <li><a href="#industries">Technology</a></li>
-            <li><a href="#industries">Retail &amp; FMCG</a></li>
-            <li><a href="#industries">Logistics</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <h5>Company</h5>
-          <ul>
-            <li><a href="#about">About Us</a></li>
-            <li><a href="#projects">Success Stories</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-          <h5 style="margin-top:1.75rem">Stay Updated</h5>
-          <div class="newsletter-form">
-            <input type="email" placeholder="Your email" aria-label="Newsletter email" />
-            <button aria-label="Subscribe">→</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <div class="container">
-      <p>© 2025 CNT Promo &amp; Ads Specialists, Inc. All rights reserved.</p>
-      <div class="footer-bottom-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="events-admin.html">Content Admin</a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-red-bar"></div>
-</footer>
+<!-- Shared site footer (injected by assets/site-chrome.js) -->
+<div id="site-footer"></div>
 
 <!-- BACK TO TOP -->
 <button class="back-to-top" id="backToTop" aria-label="Back to top">
@@ -2281,55 +1957,8 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   }, { passive: true });
 })();
 
-// ── NAVIGATION ─────────────────────────────────────────────
-(function initNav() {
-  const nav = qs('#nav');
-  const toggle = qs('#navToggle');
-  const mobileMenu = qs('#mobileMenu');
-  if (!nav) return;
-
-  // Scroll state
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 40) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
-    }
-  }, { passive: true });
-
-  // Mobile menu toggle
-  if (toggle && mobileMenu) {
-    toggle.addEventListener('click', () => {
-      const isOpen = mobileMenu.classList.toggle('open');
-      toggle.classList.toggle('active', isOpen);
-      toggle.setAttribute('aria-expanded', isOpen);
-      document.body.style.overflow = isOpen ? 'hidden' : '';
-    });
-
-    // Close on link click
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        mobileMenu.classList.remove('open');
-        toggle.classList.remove('active');
-        toggle.setAttribute('aria-expanded', 'false');
-        document.body.style.overflow = '';
-      });
-    });
-  }
-
-  // Smooth nav links
-  qsa('a[href^="#"]').forEach(link => {
-    link.addEventListener('click', e => {
-      const target = qs(link.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        const offset = nav.offsetHeight + 20;
-        const top = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
-    });
-  });
-})();
+// Navbar behavior (scroll state, mobile menu, smooth in-page scrolling) is
+// handled by assets/site-chrome.js, which injects the shared header/footer.
 
 // ── HERO CANVAS (particle grid) ─────────────────────────────
 (function initHeroCanvas() {

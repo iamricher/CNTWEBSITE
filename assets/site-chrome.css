@@ -83,6 +83,30 @@
 .mobile-menu li a{ display:block; font-family:var(--font-display); font-size:clamp(1.75rem,6vw,3rem); font-weight:800; color:rgba(255,255,255,.6); padding:.4rem 2rem; transition:color .2s; }
 .mobile-menu li a:hover{ color:var(--white); }
 .mobile-cta{ margin-top:1rem; }
+/* Mobile-menu CTAs (styled here so they render on every page) */
+.mobile-menu .btn-primary{ display:inline-flex; align-items:center; gap:.5rem; padding:.9rem 2rem; background:var(--red); color:var(--white); border-radius:var(--radius-xs); font-family:var(--font-display); font-weight:700; font-size:.9375rem; transition:background var(--transition-fast), transform var(--transition-fast); }
+.mobile-menu .btn-primary:hover{ background:var(--red-lt); transform:translateY(-2px); }
+.mobile-menu .btn-ghost{ display:inline-flex; align-items:center; gap:.5rem; padding:.9rem 2rem; border:1.5px solid rgba(255,255,255,.3); color:var(--white); border-radius:var(--radius-xs); font-family:var(--font-display); font-weight:700; font-size:.9375rem; transition:border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast); }
+.mobile-menu .btn-ghost:hover{ border-color:var(--white); background:rgba(255,255,255,.08); transform:translateY(-2px); }
+
+/* ── Overlay variant: transparent over a hero, solid once scrolled ──
+   Used by the homepage (data-overlay="1"); site-chrome.js toggles
+   .scrolled on scroll. Sub-pages keep the solid sticky nav above. */
+.nav.nav-overlay{
+  position:fixed; padding:1.25rem 0;
+  background:transparent; box-shadow:none;
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+.nav.nav-overlay.scrolled{
+  padding:.875rem 0;
+  background:rgba(255,255,255,.97);
+  -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+  box-shadow:0 1px 0 rgba(0,0,0,.06), 0 8px 32px rgba(0,0,0,.07);
+}
+.nav.nav-overlay:not(.scrolled) .nav-logo img{ filter:brightness(0) invert(1); }
+.nav.nav-overlay:not(.scrolled) .nav-link{ color:rgba(255,255,255,.85); }
+.nav.nav-overlay:not(.scrolled) .nav-link:hover{ color:var(--white); }
+.nav.nav-overlay:not(.scrolled) .nav-toggle span{ background:var(--white); }
 
 /* ── FOOTER (matches the homepage) ── */
 .footer{ background:var(--dark); }
