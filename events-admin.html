@@ -51,10 +51,18 @@
 
     /* ── Top bar ── */
     .topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-    .topbar-inner{max-width:960px;margin:0 auto;height:64px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .topbar-inner{width:100%;height:64px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
     .logo{display:inline-flex;align-items:center}
     .logo img{height:30px;width:auto}
-    .topbar-tag{font-family:var(--display);font-size:.74rem;font-weight:700;letter-spacing:.02em;color:var(--faint)}
+    .topbar-right{display:flex;align-items:center;gap:8px}
+    .top-link{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--muted);padding:8px 12px;border-radius:9px;transition:background .14s,color .14s}
+    .top-link:hover{background:var(--panel-2);color:var(--ink)}
+    .top-link .material-icons-outlined{font-size:17px}
+    .top-sep{width:1px;height:22px;background:var(--line)}
+    .top-signout{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:.82rem;font-weight:700;color:var(--red-deep);background:var(--red-pale);border:1px solid var(--red-border);border-radius:9px;padding:7px 13px;cursor:pointer;transition:background .14s}
+    .top-signout:hover{background:#FBE0E4}
+    .top-signout .material-icons-outlined{font-size:16px}
+    @media(max-width:560px){ .top-link span:not(.material-icons-outlined){display:none} .top-signout span:not(.material-icons-outlined){display:none} }
 
     /* ── Shell ── */
     .wrap{max-width:960px;margin:0 auto;padding:34px 22px 96px}
@@ -89,7 +97,7 @@
 
     /* ── Platform tiles ── */
     .sec-title{font-family:var(--display);font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
-    .platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+    .platform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
     .tile{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s,transform .15s}
     .tile:hover{border-color:#D7DCE4;box-shadow:var(--shadow);transform:translateY(-2px)}
     .tile-ic{width:44px;height:44px;border-radius:12px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -221,7 +229,11 @@
       <a class="logo" href="index.html" title="Back to website">
         <img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." />
       </a>
-      <span class="topbar-tag">Content Studio</span>
+      <div class="topbar-right" id="topbar-account" style="display:none;">
+        <a class="top-link" href="index.html" target="_blank" rel="noopener"><span class="material-icons-outlined">open_in_new</span>View website</a>
+        <span class="top-sep"></span>
+        <button class="top-signout" onclick="cntLogout()"><span class="material-icons-outlined">logout</span>Sign out</button>
+      </div>
     </div>
   </header>
 
@@ -267,10 +279,6 @@
         <div class="sidenav-item" id="nav-events" onclick="showView('events')"><span class="material-icons-outlined">campaign</span><span>Events &amp; Updates</span></div>
         <div class="sidenav-item" id="nav-stories" onclick="showView('stories')"><span class="material-icons-outlined">workspace_premium</span><span>Success Stories</span></div>
         <div class="sidenav-item" id="nav-testimonials" onclick="showView('testimonials')"><span class="material-icons-outlined">format_quote</span><span>Testimonials</span></div>
-        <div class="side-foot">
-          <a class="sidenav-item" href="index.html" target="_blank" rel="noopener"><span class="material-icons-outlined">open_in_new</span><span>View website</span></a>
-          <button class="sidenav-item signout-item" onclick="cntLogout()"><span class="material-icons-outlined">logout</span><span>Sign out</span></button>
-        </div>
       </aside>
 
       <main class="content">
@@ -413,7 +421,10 @@
     var sb = window.getSupabase && window.getSupabase();
     var _ev = [], _st = [], _ts = [];
     var esc = function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-    var show = function(id){ ['login-view','denied-view','manager-view'].forEach(function(v){ document.getElementById(v).style.display = v===id?'block':'none'; }); };
+    var show = function(id){
+      ['login-view','denied-view','manager-view'].forEach(function(v){ document.getElementById(v).style.display = v===id?'block':'none'; });
+      var acct = document.getElementById('topbar-account'); if(acct) acct.style.display = (id==='manager-view')?'flex':'none';
+    };
     var toast = function(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(function(){t.classList.remove('on');},2600); };
     var SKELETON = (function(){ var r='<div class="sk-row"><div class="sk sk-thumb"></div><div style="flex:1"><div class="sk sk-line" style="width:42%"></div><div class="sk sk-line" style="width:24%;height:9px;margin-top:9px"></div></div></div>'; return r+r+r; })();
 
