@@ -464,7 +464,7 @@
     // ── EVENTS ──
     async function evLoad(){
       var el=document.getElementById('ev-list'); el.innerHTML=SKELETON;
-      var res = await sb.from('events').select('*').order('created_at',{ascending:false});
+      var res = await sb.from('events').select('*').order('view_count',{ascending:false}).order('created_at',{ascending:false});
       if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
       _ev = res.data||[];
       (function(){ var sv=document.getElementById('stat-views'); if(sv) sv.textContent=_ev.reduce(function(a,e){return a+Number(e.view_count||0);},0).toLocaleString();
