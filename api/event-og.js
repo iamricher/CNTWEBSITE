@@ -30,12 +30,13 @@ module.exports = async (req, res) => {
     }
   } catch (_) { /* fall back to generic preview */ }
 
-  // 2) Grab the static event.html shell (no ?id → not rewritten → static file).
+  // 2) Grab the static shell (event-shell.html is served directly; /event.html
+  //    always rewrites here, so we read the shell from its own static path).
   let shell = '';
-  try { shell = await (await fetch(base + '/event.html')).text(); } catch (_) {}
+  try { shell = await (await fetch(base + '/event-shell.html')).text(); } catch (_) {}
   if (!shell) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send('<!doctype html><meta http-equiv="refresh" content="0;url=/event.html?id=' + esc(id) + '">');
+    res.status(200).send('<!doctype html><meta http-equiv="refresh" content="0;url=/event-shell.html?id=' + esc(id) + '">');
     return;
   }
 
