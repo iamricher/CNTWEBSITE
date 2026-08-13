@@ -166,6 +166,7 @@
     wireSmoothScroll(nav);
     wireNewsletter();
     countVisit();
+    logPageView();
   }
 
   // Newsletter signup in the footer → newsletter_subscribers table.
@@ -201,6 +202,22 @@
       if (!sb) return;
       sessionStorage.setItem('cnt_visited', '1');
       Promise.resolve(sb.rpc('cnt_increment_visit')).catch(function () {});
+    } catch (_) {}
+  }
+
+  // Log each page view (path + a persistent per-browser id) for analytics.
+  function logPageView() {
+    try {
+      var sb = window.getSupabase && window.getSupabase();
+      if (!sb) return;
+      var vid = localStorage.getItem('cnt_vid');
+      if (!vid) {
+        vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+          : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+        localStorage.setItem('cnt_vid', vid);
+      }
+      var path = (location.pathname || '/').replace(/\/index\.html$/, '/') || '/';
+      Promise.resolve(sb.from('page_views').insert({ path: path, visitor_id: vid })).catch(function () {});
     } catch (_) {}
   }
 

@@ -128,6 +128,20 @@
     .tile .go{color:var(--faint);font-size:17px;transition:color .15s,transform .15s}
     .tile:hover .go{color:var(--red);transform:translate(2px,-2px)}
 
+    /* ── Analytics ── */
+    .chart{display:flex;align-items:flex-end;gap:3px;height:190px;padding-top:6px}
+    .chart .bar{flex:1;min-width:0;background:linear-gradient(180deg,var(--red-lt),var(--red));border-radius:4px 4px 0 0;min-height:3px;transition:opacity .15s;cursor:default}
+    .chart .bar:hover{opacity:.8}
+    .chart .bar.zero{background:var(--line-soft)}
+    .chart-x{display:flex;justify-content:space-between;margin-top:9px;font-size:.68rem;color:var(--faint);font-weight:600}
+    .pg-row{display:flex;align-items:center;gap:14px;padding:12px 22px;border-top:1px solid var(--line-soft)}
+    .pg-row:first-child{border-top:none}
+    .pg-path{width:210px;flex-shrink:0;font-size:.85rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pg-track{flex:1;height:9px;background:var(--line-soft);border-radius:99px;overflow:hidden}
+    .pg-track span{display:block;height:100%;background:var(--red);border-radius:99px}
+    .pg-n{width:52px;text-align:right;font-size:.82rem;font-weight:700;color:var(--muted);flex-shrink:0}
+    @media(max-width:560px){ .pg-path{width:120px} }
+
     @media(max-width:820px){ .stat-strip{grid-template-columns:repeat(2,1fr)} }
     @media(max-width:760px){
       .shell{flex-direction:column}
@@ -296,6 +310,7 @@
       <aside class="side">
         <p class="nav-label">Manage</p>
         <div class="sidenav-item active" id="nav-dashboard" onclick="showView('dashboard')"><span class="material-icons-outlined">dashboard</span><span>Dashboard</span></div>
+        <div class="sidenav-item" id="nav-analytics" onclick="showView('analytics')"><span class="material-icons-outlined">insights</span><span>Analytics</span></div>
         <div class="sidenav-item" id="nav-events" onclick="showView('events')"><span class="material-icons-outlined">campaign</span><span>Events &amp; Updates</span></div>
         <div class="sidenav-item" id="nav-stories" onclick="showView('stories')"><span class="material-icons-outlined">workspace_premium</span><span>Success Stories</span></div>
         <div class="sidenav-item" id="nav-testimonials" onclick="showView('testimonials')"><span class="material-icons-outlined">format_quote</span><span>Testimonials</span></div>
@@ -340,6 +355,28 @@
               <div class="tile-t"><b>Support Inbox</b><small>Re:amaze chat &amp; messages</small></div>
               <span class="material-icons-outlined go">north_east</span>
             </a>
+          </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section id="view-analytics" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Analytics</h1><p>Website traffic over the last 30 days.</p></div>
+            <button class="btn btn-ghost" onclick="anLoad()"><span class="material-icons-outlined">refresh</span>Refresh</button>
+          </div>
+          <div class="stat-strip">
+            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">visibility</span></span><div><span class="stat-num" id="an-total">—</span><span class="stat-lbl">Page views (30d)</span></div></div>
+            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">person</span></span><div><span class="stat-num" id="an-unique">—</span><span class="stat-lbl">Unique visitors</span></div></div>
+            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">trending_up</span></span><div><span class="stat-num" id="an-avg">—</span><span class="stat-lbl">Avg views / day</span></div></div>
+            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">event_available</span></span><div><span class="stat-num" id="an-peak">—</span><span class="stat-lbl">Busiest day</span></div></div>
+          </div>
+          <div class="card" style="padding:20px 22px;margin-bottom:18px;">
+            <h2 class="sec-title" style="margin-bottom:16px;">Views over time</h2>
+            <div id="an-chart"><div class="muted">Loading…</div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h2>Top pages</h2><p>Most-visited pages in the last 30 days.</p></div></div>
+            <div id="an-pages"><div class="muted">Loading…</div></div>
           </div>
         </section>
 
@@ -473,7 +510,7 @@
     var SKELETON = (function(){ var r='<div class="sk-row"><div class="sk sk-thumb"></div><div style="flex:1"><div class="sk sk-line" style="width:42%"></div><div class="sk sk-line" style="width:24%;height:9px;margin-top:9px"></div></div></div>'; return r+r+r; })();
 
     window.showView = function(v){
-      ['dashboard','events','stories','testimonials','messages','subscribers'].forEach(function(n){
+      ['dashboard','analytics','events','stories','testimonials','messages','subscribers'].forEach(function(n){
         var view=document.getElementById('view-'+n); if(view) view.style.display = n===v?'block':'none';
         var nav=document.getElementById('nav-'+n); if(nav) nav.classList.toggle('active', n===v);
       });
@@ -486,7 +523,7 @@
       if(!s.data.session){ show('login-view'); return; }
       var r = await sb.rpc('cnt_is_super_admin');
       if(r.error || !r.data){ show('denied-view'); return; }
-      show('manager-view'); evLoad(); stLoad(); tsLoad(); msgLoad(); subLoad(); loadMetrics();
+      show('manager-view'); evLoad(); stLoad(); tsLoad(); msgLoad(); subLoad(); anLoad(); loadMetrics();
     }
 
     // shared image uploader → public event-images bucket
@@ -747,6 +784,37 @@
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       toast('Exported '+_sub.length+' subscriber'+(_sub.length===1?'':'s'));
     };
+
+    // ── ANALYTICS ──
+    async function anLoad(){
+      var chart=document.getElementById('an-chart'); var pages=document.getElementById('an-pages');
+      if(!chart) return;
+      var since=new Date(Date.now()-30*86400000).toISOString();
+      var res=await sb.from('page_views').select('path,visitor_id,created_at').gte('created_at',since).limit(10000);
+      if(res.error){ chart.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      var rows=res.data||[];
+      var total=rows.length, uniq={};
+      rows.forEach(function(r){ if(r.visitor_id) uniq[r.visitor_id]=1; });
+      var days=[], map={};
+      for(var i=29;i>=0;i--){ var k=new Date(Date.now()-i*86400000).toISOString().slice(0,10); days.push(k); map[k]=0; }
+      rows.forEach(function(r){ var k=String(r.created_at).slice(0,10); if(k in map) map[k]++; });
+      var max=1, peakDay='', peakN=-1;
+      days.forEach(function(k){ if(map[k]>max) max=map[k]; if(map[k]>peakN){peakN=map[k];peakDay=k;} });
+      var mday=function(k){ return new Date(k).toLocaleDateString(undefined,{month:'short',day:'numeric'}); };
+      document.getElementById('an-total').textContent=total.toLocaleString();
+      document.getElementById('an-unique').textContent=Object.keys(uniq).length.toLocaleString();
+      document.getElementById('an-avg').textContent=Math.round(total/30).toLocaleString();
+      document.getElementById('an-peak').textContent = peakN>0 ? mday(peakDay) : '—';
+      var bars=days.map(function(k){ var n=map[k]; var h=Math.round((n/max)*100); return '<div class="bar'+(n===0?' zero':'')+'" style="height:'+Math.max(h,n>0?5:2)+'%" title="'+mday(k)+': '+n+' view'+(n===1?'':'s')+'"></div>'; }).join('');
+      chart.innerHTML='<div class="chart">'+bars+'</div><div class="chart-x"><span>'+mday(days[0])+'</span><span>'+mday(days[15])+'</span><span>'+mday(days[29])+'</span></div>';
+      var pmap={}; rows.forEach(function(r){ var p=r.path||'/'; pmap[p]=(pmap[p]||0)+1; });
+      var arr=Object.keys(pmap).map(function(p){return {p:p,n:pmap[p]};}).sort(function(a,b){return b.n-a.n;}).slice(0,12);
+      if(!arr.length){ pages.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">insights</span></div><h3>No traffic yet</h3><p>Page views will appear here as visitors browse the site.</p></div>'; return; }
+      var pmax=arr[0].n;
+      var nice=function(p){ if(p==='/'||p==='/index.html') return 'Home'; return p.replace(/^\//,'').replace(/\.html$/,'')||'Home'; };
+      pages.innerHTML=arr.map(function(x){ return '<div class="pg-row"><span class="pg-path" title="'+esc(x.p)+'">'+esc(nice(x.p))+'</span><span class="pg-track"><span style="width:'+Math.round((x.n/pmax)*100)+'%"></span></span><span class="pg-n">'+x.n.toLocaleString()+'</span></div>'; }).join('');
+    }
+    window.anLoad = anLoad;
 
     window.cntLogout = async function(){ if(sb) await sb.auth.signOut(); show('login-view'); };
 
