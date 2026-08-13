@@ -1334,7 +1334,7 @@
         +'<td style="'+td+'font-size:12px;color:#94a3b8;">'+_fmtD(u.created_at)+'</td>'
         +'<td style="'+td+'text-align:right;white-space:nowrap;">'
           +'<button onclick="cntAdminEdit(\''+u.id+'\')" title="Edit name & role" style="width:30px;height:30px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569;cursor:pointer;margin-right:5px;vertical-align:middle;"><span class="material-icons-outlined" style="font-size:15px;vertical-align:middle;">edit</span></button>'
-          +(isSelf?'':'<button onclick="cntAdminRemove(\''+u.id+'\')" title="Remove access" style="width:30px;height:30px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;cursor:pointer;vertical-align:middle;"><span class="material-icons-outlined" style="font-size:15px;vertical-align:middle;">delete_outline</span></button>')
+          +(isSelf?'':'<button onclick="cntAdminRemove(\''+u.id+'\')" title="Remove access" style="width:30px;height:30px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;cursor:pointer;vertical-align:middle;"><span class="material-icons-outlined" style="font-size:15px;vertical-align:middle;">delete</span></button>')
         +'</td></tr>';
     }).join('');
     body.innerHTML='<div style="overflow-x:auto;border:1px solid #e8ecf1;border-radius:12px;"><table style="width:100%;border-collapse:collapse;min-width:600px;">'
@@ -2356,7 +2356,7 @@
         return '<div class="cnt-set-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;">'
           +'<span style="font-size:12.5px;color:#334155;font-weight:500;min-width:0;">'+_escN(name)
           +(used?' <span style="font-size:9px;color:#94a3b8;font-weight:600;">· '+used+' job'+(used>1?'s':'')+'</span>':'')+'</span>'
-          +'<button onclick="cntTaxRemove(\''+kind+'\',\''+String(name).replace(/'/g,"\\'")+'\')" title="Remove" style="color:#cbd5e1;cursor:pointer;line-height:0;flex:none;"><span class="material-icons-outlined" style="font-size:15px;">delete_outline</span></button>'
+          +'<button onclick="cntTaxRemove(\''+kind+'\',\''+String(name).replace(/'/g,"\\'")+'\')" title="Remove" style="color:#cbd5e1;cursor:pointer;line-height:0;flex:none;"><span class="material-icons-outlined" style="font-size:15px;">delete</span></button>'
           +'</div>';
       }).join(''):'<p style="font-size:11.5px;color:#94a3b8;padding:14px;text-align:center;">Nothing yet — add one above.</p>';
     });
@@ -3270,7 +3270,7 @@
       show('<span class="material-icons-outlined" style="font-size:16px;color:#166534;">task_alt</span><div><b>Résumé read automatically.</b> '+msg+'</div>','bg-emerald-50 text-emerald-800 border border-emerald-200');
     }catch(e){
       if(e.message==='scanned'){ show('<span class="material-icons-outlined" style="font-size:16px;">image</span>This résumé looks like a scanned image — there is no text layer to read. Please enter the details manually.','bg-amber-50 text-amber-800 border border-amber-200'); }
-      else { console.error('digitize',e); show('<span class="material-icons-outlined" style="font-size:16px;">error_outline</span>Could not digitize: '+_e(e.message||'unknown error'),'bg-red-50 text-red-700 border border-red-200'); }
+      else { console.error('digitize',e); show('<span class="material-icons-outlined" style="font-size:16px;">error</span>Could not digitize: '+_e(e.message||'unknown error'),'bg-red-50 text-red-700 border border-red-200'); }
     }
   };
 

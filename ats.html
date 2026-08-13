@@ -6,7 +6,7 @@
 <title>CNT - Applicant Tracking System</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/supabase-config.js"></script>
 <script src="assets/sentry-init.js"></script>
@@ -46,6 +46,8 @@
   .sidenav-item { display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:10px; font-size:13px; font-weight:500; color:#64748b; cursor:pointer; transition:all .15s; white-space:nowrap; }
   .sidenav-item:hover { background:#f1f5f9; color:#1e293b; }
   .sidenav-item.active { background:#7f1d1d; color:#fff; }
+  /* Modern rounded icons: alias the old class to Material Symbols Rounded */
+  .material-icons-outlined { font-family:'Material Symbols Rounded'; font-weight:normal; font-style:normal; font-size:24px; line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr; font-feature-settings:'liga'; -webkit-font-feature-settings:'liga'; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
   .sidenav-item .material-icons-outlined { font-size:18px; flex-shrink:0; }
   .stat-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:all .18s; }
   .stat-card:hover { border-color:#fca5a5; box-shadow:0 4px 16px rgba(127,29,29,.07); transform:translateY(-1px); }
@@ -574,7 +576,7 @@
             <div class="flex items-center justify-between">
               <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Postings</p>
               <div class="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
-                <span class="material-icons-outlined text-red-700" style="font-size:16px;">work_outline</span>
+                <span class="material-icons-outlined text-red-700" style="font-size:16px;">work</span>
               </div>
             </div>
             <div class="flex items-end gap-2 mt-1">
@@ -1412,7 +1414,7 @@
              box so a long history doesn't stretch the column. -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden no-print" id="recruiter-notes-panel">
           <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
-            <span class="material-icons-outlined text-red-700" style="font-size:15px;">chat_bubble_outline</span>
+            <span class="material-icons-outlined text-red-700" style="font-size:15px;">chat_bubble</span>
             <h4 class="font-bold text-slate-800 text-[13px]">Recruiter Notes</h4>
             <span id="recruiter-note-badge" class="bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
             <span class="ml-auto text-[10px] text-slate-400">Internal only — never shown to the candidate</span>

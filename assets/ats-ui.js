@@ -1304,7 +1304,7 @@ function renderJobPositions(){
               <button onclick="event.stopPropagation();var m=this.nextElementSibling;m.style.display=m.style.display==='block'?'none':'block';" class="text-slate-300 hover:text-slate-600 cursor-pointer p-0.5 leading-none"><span class="material-icons-outlined" style="font-size:17px;">more_vert</span></button>
               <div style="display:none;position:absolute;right:0;top:24px;z-index:30;background:#fff;border:1px solid #e2e8f0;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:130px;overflow:hidden;">
                 <button onclick="event.stopPropagation();this.parentElement.style.display='none';editJobPosition(${job._sid})" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-2"><span class="material-icons-outlined" style="font-size:14px;">edit</span>Edit</button>
-                <button onclick="event.stopPropagation();this.parentElement.style.display='none';deleteJobPosition(${job._sid})" class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 cursor-pointer flex items-center gap-2"><span class="material-icons-outlined" style="font-size:14px;">delete_outline</span>Remove</button>
+                <button onclick="event.stopPropagation();this.parentElement.style.display='none';deleteJobPosition(${job._sid})" class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 cursor-pointer flex items-center gap-2"><span class="material-icons-outlined" style="font-size:14px;">delete</span>Remove</button>
               </div>
             </div>`:''}
           </div>
@@ -2496,7 +2496,7 @@ function renderRecruiterComments(app){
   const list=document.getElementById('recruiter-comments-list');if(!list)return;
   const comments=app.recruiterComments||[];
   updateRecruiterBadge(app);
-  if(!comments.length){list.innerHTML=`<div class="text-center py-6 text-slate-400 text-xs"><span class="material-icons-outlined text-2xl mb-1 block">chat_bubble_outline</span>No recruiter notes yet.</div>`;return;}
+  if(!comments.length){list.innerHTML=`<div class="text-center py-6 text-slate-400 text-xs"><span class="material-icons-outlined text-2xl mb-1 block">chat_bubble</span>No recruiter notes yet.</div>`;return;}
   list.innerHTML=comments.map((c,idx)=>`
     <div class="flex gap-3 p-3 rounded-xl ${c.flagged?'bg-red-50 border border-red-100':'bg-slate-50 border border-slate-100'}">
       <div class="recruiter-note-avatar flex-shrink-0">${_escForm(String(c.author||'').split(' ').map(w=>w[0]).join('').slice(0,2))}</div>
