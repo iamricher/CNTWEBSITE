@@ -212,6 +212,20 @@
     pointer-events: none; opacity: 0; transition: opacity .2s ease;
   }
   #recruiter-notes-fade.show { opacity: 1; }
+
+  /* ── Layout polish (visual only; added last so it wins the cascade) ─────
+     Adds gentle, consistent depth to a previously flat UI and tightens the
+     shell rhythm. No structural or behavioural changes. */
+  .bg-white.rounded-2xl.border { box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.03); }
+  .stat-card { border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  .stat-card:hover { box-shadow: 0 8px 22px rgba(127,29,29,.10); }
+  .kanban-col { border-radius: 16px; }
+  /* Sticky top bar: a hair of shadow so it separates from scrolling content */
+  header.sticky.top-0 { box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  /* Sidebar: cleaner rhythm + depth on the active item */
+  #sidebar .sidenav-item { padding: 10px 14px; margin-bottom: 2px; font-weight: 600; }
+  #sidebar .sidenav-item.active { box-shadow: 0 4px 12px rgba(127,29,29,.22); }
+  .nav-label { padding: 12px 14px 4px; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen" style="display:flex;flex-direction:column;">
