@@ -36,6 +36,9 @@
     .modal-box { border-radius: 0 !important; }
     #sidebar { position:fixed !important; top:52px; left:0; z-index:60; box-shadow:0 10px 40px rgba(0,0,0,.18); }
     #sidebar-backdrop.show { display:block; position:fixed; inset:52px 0 0 0; background:rgba(15,23,42,.4); z-index:55; }
+    /* Use the dynamic viewport height so the full-screen profile isn't taller
+       than the visible area behind the mobile browser's address bar. */
+    #resume-modal .modal-box { height:100dvh !important; }
   }
   .custom-scroll::-webkit-scrollbar { height: 5px; width: 5px; }
   .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
