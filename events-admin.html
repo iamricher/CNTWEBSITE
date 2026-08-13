@@ -87,7 +87,27 @@
     .view{animation:fade .2s ease}
 
     /* ── Stat strip ── */
-    .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+    .stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px}
+    .nav-count{margin-left:auto;background:var(--red);color:#fff;font-size:.66rem;font-weight:800;min-width:20px;text-align:center;padding:1px 6px;border-radius:99px}
+    .sidenav-item.active .nav-count{background:#fff;color:var(--red)}
+    .msg-item{padding:16px 22px;border-top:1px solid var(--line-soft)}
+    .msg-item:first-child{border-top:none}
+    .msg-item.unread{background:#FFF9F0}
+    .msg-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .msg-top b{font-size:.92rem}
+    .msg-top .when{margin-left:auto;font-size:.72rem;color:var(--faint)}
+    .msg-contact{font-size:.78rem;color:var(--muted);margin:3px 0 8px}
+    .msg-contact a{color:var(--red);font-weight:600}
+    .msg-body{font-size:.88rem;color:var(--sub);line-height:1.6;white-space:pre-wrap}
+    .msg-actions{display:flex;gap:8px;margin-top:10px}
+    .chiplink{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:5px 11px;cursor:pointer;background:#fff;color:var(--muted);transition:.14s}
+    .chiplink:hover{border-color:#D7DCE4;color:var(--ink)}
+    .chiplink.del:hover{color:var(--danger);border-color:#F3C6C6;background:#FEF2F2}
+    .chiplink .material-icons-outlined{font-size:15px}
+    .sub-row{display:flex;align-items:center;gap:12px;padding:12px 22px;border-top:1px solid var(--line-soft)}
+    .sub-row:first-child{border-top:none}
+    .sub-row .em{flex:1;min-width:0;font-size:.88rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sub-row .dt{font-size:.74rem;color:var(--faint)}
     .stat{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:15px 16px}
     .stat-ic{width:42px;height:42px;border-radius:12px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .stat-ic .material-icons-outlined{font-size:21px}
@@ -279,6 +299,9 @@
         <div class="sidenav-item" id="nav-events" onclick="showView('events')"><span class="material-icons-outlined">campaign</span><span>Events &amp; Updates</span></div>
         <div class="sidenav-item" id="nav-stories" onclick="showView('stories')"><span class="material-icons-outlined">workspace_premium</span><span>Success Stories</span></div>
         <div class="sidenav-item" id="nav-testimonials" onclick="showView('testimonials')"><span class="material-icons-outlined">format_quote</span><span>Testimonials</span></div>
+        <p class="nav-label" style="margin-top:14px">Inbox</p>
+        <div class="sidenav-item" id="nav-messages" onclick="showView('messages')"><span class="material-icons-outlined">mail</span><span>Messages</span><span class="nav-count" id="nav-msg-count" style="display:none"></span></div>
+        <div class="sidenav-item" id="nav-subscribers" onclick="showView('subscribers')"><span class="material-icons-outlined">group</span><span>Subscribers</span></div>
       </aside>
 
       <main class="content">
@@ -291,6 +314,8 @@
             <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">visibility</span></span><div><span class="stat-num" id="stat-views">—</span><span class="stat-lbl">Total post views</span></div></div>
             <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">campaign</span></span><div><span class="stat-num" id="stat-posts">—</span><span class="stat-lbl">Published posts</span></div></div>
             <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">format_quote</span></span><div><span class="stat-num" id="stat-testi">—</span><span class="stat-lbl">Testimonials</span></div></div>
+            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">mail</span></span><div><span class="stat-num" id="stat-msgs">—</span><span class="stat-lbl">New messages</span></div></div>
+            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">group</span></span><div><span class="stat-num" id="stat-subs">—</span><span class="stat-lbl">Subscribers</span></div></div>
           </div>
 
           <h2 class="sec-title">Your platforms</h2>
@@ -343,6 +368,24 @@
             <button class="btn" onclick="tsForm()"><span class="material-icons-outlined">add</span>New testimonial</button>
           </div>
           <div class="card"><div id="ts-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- MESSAGES -->
+        <section id="view-messages" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Messages</h1><p>Inquiries submitted through the website contact form.</p></div>
+            <button class="btn btn-ghost" onclick="msgLoad()"><span class="material-icons-outlined">refresh</span>Refresh</button>
+          </div>
+          <div class="card"><div id="msg-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- SUBSCRIBERS -->
+        <section id="view-subscribers" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Subscribers</h1><p>People who signed up for updates in the website footer.</p></div>
+            <button class="btn btn-ghost" onclick="subExport()"><span class="material-icons-outlined">download</span>Export CSV</button>
+          </div>
+          <div class="card"><div id="sub-list"><div class="muted">Loading…</div></div></div>
         </section>
       </main>
     </div>
@@ -419,7 +462,8 @@
   <script>
   (function(){
     var sb = window.getSupabase && window.getSupabase();
-    var _ev = [], _st = [], _ts = [];
+    var _ev = [], _st = [], _ts = [], _msg = [], _sub = [];
+    var fmtDate = function(s){ try{ return new Date(s).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }catch(_){ return ''; } };
     var esc = function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
     var show = function(id){
       ['login-view','denied-view','manager-view'].forEach(function(v){ document.getElementById(v).style.display = v===id?'block':'none'; });
@@ -429,7 +473,7 @@
     var SKELETON = (function(){ var r='<div class="sk-row"><div class="sk sk-thumb"></div><div style="flex:1"><div class="sk sk-line" style="width:42%"></div><div class="sk sk-line" style="width:24%;height:9px;margin-top:9px"></div></div></div>'; return r+r+r; })();
 
     window.showView = function(v){
-      ['dashboard','events','stories','testimonials'].forEach(function(n){
+      ['dashboard','events','stories','testimonials','messages','subscribers'].forEach(function(n){
         var view=document.getElementById('view-'+n); if(view) view.style.display = n===v?'block':'none';
         var nav=document.getElementById('nav-'+n); if(nav) nav.classList.toggle('active', n===v);
       });
@@ -442,7 +486,7 @@
       if(!s.data.session){ show('login-view'); return; }
       var r = await sb.rpc('cnt_is_super_admin');
       if(r.error || !r.data){ show('denied-view'); return; }
-      show('manager-view'); evLoad(); stLoad(); tsLoad(); loadMetrics();
+      show('manager-view'); evLoad(); stLoad(); tsLoad(); msgLoad(); subLoad(); loadMetrics();
     }
 
     // shared image uploader → public event-images bucket
@@ -629,6 +673,79 @@
       var res = await sb.from('testimonials').delete().eq('id',id);
       if(res.error){ toast('Delete failed: '+res.error.message); return; }
       tsLoad(); toast('Testimonial deleted');
+    };
+
+    // ── MESSAGES ──
+    async function msgLoad(){
+      var el=document.getElementById('msg-list'); el.innerHTML=SKELETON;
+      var res = await sb.from('messages').select('*').order('created_at',{ascending:false});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _msg = res.data||[];
+      var unread = _msg.filter(function(m){return !m.handled;}).length;
+      var sm=document.getElementById('stat-msgs'); if(sm) sm.textContent=unread.toLocaleString();
+      var nb=document.getElementById('nav-msg-count'); if(nb){ nb.textContent=unread; nb.style.display=unread?'inline-block':'none'; }
+      if(!_msg.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">mail</span></div><h3>No messages yet</h3><p>Inquiries from the website contact form will appear here.</p></div>'; return; }
+      el.innerHTML=_msg.map(function(m){
+        var contact = [m.email?('<a href="mailto:'+esc(m.email)+'">'+esc(m.email)+'</a>'):'', m.company?esc(m.company):''].filter(Boolean).join(' · ');
+        return '<div class="msg-item'+(m.handled?'':' unread')+'">'
+          +'<div class="msg-top"><b>'+esc(m.name||'Anonymous')+'</b>'
+          +(m.subject?'<span class="pill pill-draft">'+esc(m.subject)+'</span>':'')
+          +(m.handled?'':'<span class="pill pill-live" style="background:#FEF3C7;color:#92400E">New</span>')
+          +'<span class="when">'+esc(fmtDate(m.created_at))+'</span></div>'
+          +(contact?'<div class="msg-contact">'+contact+'</div>':'')
+          +'<div class="msg-body">'+esc(m.message||'')+'</div>'
+          +'<div class="msg-actions">'
+          +'<button class="chiplink" onclick="msgToggle('+m.id+')"><span class="material-icons-outlined">'+(m.handled?'undo':'check')+'</span>'+(m.handled?'Mark unread':'Mark handled')+'</button>'
+          +(m.email?'<a class="chiplink" href="mailto:'+esc(m.email)+'?subject=Re: your inquiry to CNT"><span class="material-icons-outlined">reply</span>Reply</a>':'')
+          +'<button class="chiplink del" onclick="msgDelete('+m.id+')"><span class="material-icons-outlined">delete_outline</span>Delete</button>'
+          +'</div></div>';
+      }).join('');
+    }
+    window.msgLoad = msgLoad;
+    window.msgToggle = async function(id){
+      var m=_msg.filter(function(x){return x.id===id;})[0]; if(!m) return;
+      var res=await sb.from('messages').update({handled:!m.handled}).eq('id',id);
+      if(res.error){ toast('Update failed: '+res.error.message); return; }
+      msgLoad();
+    };
+    window.msgDelete = async function(id){
+      if(!confirm('Delete this message?')) return;
+      var res=await sb.from('messages').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      msgLoad(); toast('Message deleted');
+    };
+
+    // ── SUBSCRIBERS ──
+    async function subLoad(){
+      var el=document.getElementById('sub-list'); el.innerHTML=SKELETON;
+      var res = await sb.from('newsletter_subscribers').select('*').order('created_at',{ascending:false});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _sub = res.data||[];
+      var ss=document.getElementById('stat-subs'); if(ss) ss.textContent=_sub.length.toLocaleString();
+      if(!_sub.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">group</span></div><h3>No subscribers yet</h3><p>Emails from the footer “Stay Updated” box will collect here.</p></div>'; return; }
+      el.innerHTML=_sub.map(function(s){
+        return '<div class="sub-row"><span class="material-icons-outlined" style="color:var(--faint);font-size:19px;">mail_outline</span>'
+          +'<span class="em">'+esc(s.email)+'</span>'
+          +'<span class="dt">'+esc(fmtDate(s.created_at))+'</span>'
+          +'<button class="chiplink del" onclick="subDelete('+s.id+')"><span class="material-icons-outlined">delete_outline</span></button></div>';
+      }).join('');
+    }
+    window.subLoad = subLoad;
+    window.subDelete = async function(id){
+      if(!confirm('Remove this subscriber?')) return;
+      var res=await sb.from('newsletter_subscribers').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      subLoad(); toast('Subscriber removed');
+    };
+    window.subExport = function(){
+      if(!_sub.length){ toast('No subscribers to export'); return; }
+      var rows = [['email','subscribed_at']].concat(_sub.map(function(s){ return [s.email, s.created_at]; }));
+      var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+      var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'cnt-subscribers-'+new Date().toISOString().slice(0,10)+'.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast('Exported '+_sub.length+' subscriber'+(_sub.length===1?'':'s'));
     };
 
     window.cntLogout = async function(){ if(sb) await sb.auth.signOut(); show('login-view'); };

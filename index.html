@@ -2241,24 +2241,50 @@ function initHeroAnimations() {
   const form = qs('#contactForm');
   if (!form) return;
 
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
     const originalHTML = btn.innerHTML;
+    const val = id => (qs('#' + id) ? qs('#' + id).value.trim() : '');
+    const email = val('email');
+    const message = val('message');
+
+    if (!val('firstName') || !val('lastName') || !email || !message) {
+      btn.innerHTML = '<span>Please fill the required fields</span>';
+      setTimeout(() => { btn.innerHTML = originalHTML; }, 2500);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      btn.innerHTML = '<span>Enter a valid email</span>';
+      setTimeout(() => { btn.innerHTML = originalHTML; }, 2500);
+      return;
+    }
 
     btn.innerHTML = '<span>Sending...</span>';
     btn.disabled = true;
 
-    setTimeout(() => {
-      btn.innerHTML = '<span>Message Sent! ✓</span>';
-      btn.style.background = '#16a34a';
+    const done = (ok) => {
+      btn.innerHTML = ok ? '<span>Message Sent! ✓</span>' : '<span>Couldn’t send — try again</span>';
+      btn.style.background = ok ? '#16a34a' : '';
       setTimeout(() => {
         btn.innerHTML = originalHTML;
         btn.style.background = '';
         btn.disabled = false;
-        form.reset();
+        if (ok) form.reset();
       }, 3000);
-    }, 1500);
+    };
+
+    try {
+      const sb = window.getSupabase && window.getSupabase();
+      if (!sb) { done(false); return; }
+      const { error } = await sb.from('messages').insert({
+        name: (val('firstName') + ' ' + val('lastName')).trim(),
+        email, company: val('company') || null,
+        subject: val('service') || 'General Inquiry',
+        message
+      });
+      done(!error);
+    } catch (_) { done(false); }
   });
 })();
 

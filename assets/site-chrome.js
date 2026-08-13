@@ -89,7 +89,8 @@
     '      <li><a href="' + h('about') + '">About Us</a></li><li><a href="' + h('projects') + '">Success Stories</a></li>' +
     '      <li><a href="careers.html">Careers</a></li><li><a href="' + h('contact') + '">Contact</a></li></ul>' +
     '      <h5 style="margin-top:1.75rem">Stay Updated</h5>' +
-    '      <div class="newsletter-form"><input type="email" placeholder="Your email" aria-label="Newsletter email" /><button aria-label="Subscribe">&rarr;</button></div>' +
+    '      <div class="newsletter-form"><input type="email" id="nl-email" placeholder="Your email" aria-label="Newsletter email" /><button id="nl-btn" aria-label="Subscribe">&rarr;</button></div>' +
+    '      <p id="nl-msg" style="font-size:.78rem;color:rgba(255,255,255,.5);margin-top:8px;min-height:1em"></p>' +
     '    </div>' +
     '  </div></div></div>' +
     '  <div class="footer-bottom"><div class="container">' +
@@ -163,7 +164,32 @@
     var nav = document.getElementById('nav');
     wireOverlayScroll(nav);
     wireSmoothScroll(nav);
+    wireNewsletter();
     countVisit();
+  }
+
+  // Newsletter signup in the footer → newsletter_subscribers table.
+  function wireNewsletter() {
+    var input = document.getElementById('nl-email');
+    var btn = document.getElementById('nl-btn');
+    var msg = document.getElementById('nl-msg');
+    if (!input || !btn) return;
+    var say = function (t, ok) { if (msg) { msg.textContent = t; msg.style.color = ok ? '#7CE0A0' : 'rgba(255,255,255,.5)'; } };
+    var submit = function () {
+      var email = (input.value || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please enter a valid email.'); return; }
+      var sb = window.getSupabase && window.getSupabase();
+      if (!sb) { say('Unable to subscribe right now.'); return; }
+      btn.disabled = true;
+      Promise.resolve(sb.from('newsletter_subscribers').insert({ email: email })).then(function (res) {
+        btn.disabled = false;
+        if (res && res.error && !/duplicate|unique/i.test(res.error.message || '')) { say('Something went wrong. Try again.'); return; }
+        input.value = '';
+        say('Thanks! You’re subscribed. ✓', true);
+      }, function () { btn.disabled = false; say('Something went wrong. Try again.'); });
+    };
+    btn.addEventListener('click', submit);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
   }
 
   // Count one website visit per browser session (across any public page).
