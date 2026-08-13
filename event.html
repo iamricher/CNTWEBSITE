@@ -36,6 +36,10 @@
     .hero .cap h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.6rem,4vw,2.7rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.35)}
     .body p{font-size:1.06rem;color:#333;margin-bottom:1.15rem}
     .body img{width:100%;border-radius:14px;margin:14px 0;box-shadow:0 10px 34px rgba(0,0,0,.10)}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:30px}
+    .gallery a{display:block;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.10);aspect-ratio:4/3}
+    .gallery img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
+    .gallery a:hover img{transform:scale(1.04)}
     .state{padding:80px 0;text-align:center;color:var(--gray-600)}
   </style>
 </head>
@@ -83,7 +87,11 @@
           +(ev.category?'<span class="pill-cat">'+esc(ev.category)+'</span>':'')
         +'</div><h1>'+esc(ev.title||'')+'</h1></div></div>';
       var paras=String(ev.body||ev.summary||'').split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
-      el.innerHTML='<div class="body">'+(paras||'<p></p>')+'</div>';
+      var gallery='';
+      if(Array.isArray(ev.images) && ev.images.length){
+        gallery='<div class="gallery">'+ev.images.map(function(u){return '<a href="'+esc(u)+'" target="_blank" rel="noopener"><img src="'+esc(u)+'" alt="" loading="lazy"></a>';}).join('')+'</div>';
+      }
+      el.innerHTML='<div class="body">'+(paras||'<p></p>')+'</div>'+gallery;
     });
   })();
   </script>
