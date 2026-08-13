@@ -36,10 +36,20 @@
     .hero .cap h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.6rem,4vw,2.7rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.35)}
     .body p{font-size:1.06rem;color:#333;margin-bottom:1.15rem}
     .body img{width:100%;border-radius:14px;margin:14px 0;box-shadow:0 10px 34px rgba(0,0,0,.10)}
-    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:30px}
-    .gallery a{display:block;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.10);aspect-ratio:4/3}
-    .gallery img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
-    .gallery a:hover img{transform:scale(1.04)}
+    /* Newspaper-style photo spread: a dominant lead image + a dense mosaic */
+    .gallery-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--charcoal);margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--red);display:inline-block}
+    .gallery{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:96px;grid-auto-flow:dense;gap:10px}
+    .gallery a{grid-column:span 2;grid-row:span 2;overflow:hidden;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);position:relative;background:#eee}
+    .gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+    .gallery a:hover img{transform:scale(1.05)}
+    .gallery a:first-child{grid-column:span 4;grid-row:span 4}
+    .gallery a:nth-child(4n+3){grid-row:span 3}
+    .gallery a:nth-child(6n+5){grid-column:span 3}
+    @media(max-width:640px){
+      .gallery{grid-template-columns:repeat(4,1fr);grid-auto-rows:78px}
+      .gallery a:first-child{grid-column:span 4;grid-row:span 3}
+      .gallery a:nth-child(6n+5){grid-column:span 2}
+    }
     .state{padding:80px 0;text-align:center;color:var(--gray-600)}
   </style>
 </head>
@@ -89,7 +99,7 @@
       var paras=String(ev.body||ev.summary||'').split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
       var gallery='';
       if(Array.isArray(ev.images) && ev.images.length){
-        gallery='<div class="gallery">'+ev.images.map(function(u){return '<a href="'+esc(u)+'" target="_blank" rel="noopener"><img src="'+esc(u)+'" alt="" loading="lazy"></a>';}).join('')+'</div>';
+        gallery='<h3 class="gallery-title">In Photos</h3><div class="gallery">'+ev.images.map(function(u){return '<a href="'+esc(u)+'" target="_blank" rel="noopener"><img src="'+esc(u)+'" alt="" loading="lazy"></a>';}).join('')+'</div>';
       }
       el.innerHTML='<div class="body">'+(paras||'<p></p>')+'</div>'+gallery;
     });

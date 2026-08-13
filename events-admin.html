@@ -469,11 +469,9 @@
           <div class="field"><label>Category</label><input id="ev-category" list="ev-cats" placeholder="Hiring Drive"><datalist id="ev-cats"><option>Hiring Drive</option><option>Announcement</option><option>Achievement</option><option>Milestone</option><option>Job Fair</option><option>Update</option></datalist></div>
           <div class="field"><label>Date label</label><input id="ev-date" placeholder="Aug 2026"></div>
         </div>
-        <div class="field"><label>Cover image (upload or paste a URL)</label>
-          <div style="display:flex;gap:9px;align-items:center;">
-            <label class="up"><span class="material-icons-outlined">upload</span>Upload<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'ev-image','ev-preview')"></label>
-            <input id="ev-image" placeholder="https://…" style="flex:1;">
-          </div>
+        <div class="field"><label>Cover image</label>
+          <label class="up"><span class="material-icons-outlined">upload</span>Upload image<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'ev-image','ev-preview')"></label>
+          <input id="ev-image" type="hidden">
           <div id="ev-preview"></div>
         </div>
         <div class="field"><label>More photos — gallery (optional)</label>
@@ -500,11 +498,9 @@
         <input type="hidden" id="st-id">
         <div class="field"><label>Title *</label><input id="st-title" placeholder="Metro Bank: 200-Person Branch Rollout"></div>
         <div class="field"><label>Category / sector</label><input id="st-category" placeholder="Banking &amp; Finance"></div>
-        <div class="field"><label>Image (upload or paste a URL)</label>
-          <div style="display:flex;gap:9px;align-items:center;">
-            <label class="up"><span class="material-icons-outlined">upload</span>Upload<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'st-image','st-preview')"></label>
-            <input id="st-image" placeholder="https://…" style="flex:1;">
-          </div>
+        <div class="field"><label>Image</label>
+          <label class="up"><span class="material-icons-outlined">upload</span>Upload image<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'st-image','st-preview')"></label>
+          <input id="st-image" type="hidden">
           <div id="st-preview"></div>
         </div>
         <div class="field"><label>Result / description</label><textarea id="st-desc" rows="3" placeholder="Recruited and onboarded 200 branch staff across 15 new locations in 60 days"></textarea></div>
