@@ -95,7 +95,7 @@
     '  </div></div></div>' +
     '  <div class="footer-bottom"><div class="container">' +
     '    <p>&copy; ' + YEAR + ' CNT Promo &amp; Ads Specialists, Inc. All rights reserved.</p>' +
-    '    <div class="footer-bottom-links"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="events-admin.html">Content Admin</a></div>' +
+    '    <div class="footer-bottom-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="events-admin.html">Content Admin</a></div>' +
     '  </div></div>' +
     '  <div class="footer-red-bar"></div>' +
     '</footer>';
