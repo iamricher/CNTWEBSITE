@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /ats.html
+Disallow: /events-admin.html
+Disallow: /client.html
+Disallow: /event-shell.html
+Disallow: /api/
+
+Sitemap: https://cnt-website-ats.vercel.app/sitemap.xml

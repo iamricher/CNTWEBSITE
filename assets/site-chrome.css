@@ -108,6 +108,22 @@
 .nav.nav-overlay:not(.scrolled) .nav-link:hover{ color:var(--white); }
 .nav.nav-overlay:not(.scrolled) .nav-toggle span{ background:var(--white); }
 
+/* ── Floating click-to-chat (Messenger / Viber / WhatsApp / FB / Call) ── */
+.cnt-chat{ position:fixed; left:20px; bottom:20px; z-index:700; display:flex; flex-direction:column-reverse; align-items:flex-start; gap:12px; }
+.cnt-chat-fab{ width:56px; height:56px; border-radius:50%; border:none; cursor:pointer; background:var(--red); color:#fff; box-shadow:0 10px 30px rgba(200,16,46,.4); display:flex; align-items:center; justify-content:center; transition:transform .2s, background .2s; }
+.cnt-chat-fab:hover{ background:var(--red-deep); transform:translateY(-2px); }
+.cnt-chat-fab svg{ width:26px; height:26px; }
+.cnt-chat-fab .ic-close{ display:none; }
+.cnt-chat.open .cnt-chat-fab .ic-open{ display:none; }
+.cnt-chat.open .cnt-chat-fab .ic-close{ display:block; }
+.cnt-chat-menu{ display:flex; flex-direction:column; gap:10px; opacity:0; visibility:hidden; transform:translateY(10px); transition:opacity .2s, transform .2s, visibility .2s; }
+.cnt-chat.open .cnt-chat-menu{ opacity:1; visibility:visible; transform:none; }
+.cnt-chat-item{ display:inline-flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--gray-100); border-radius:99px; padding:7px 16px 7px 7px; text-decoration:none; color:var(--charcoal); font-size:.85rem; font-weight:600; box-shadow:0 6px 20px rgba(0,0,0,.13); transition:transform .15s, box-shadow .15s; white-space:nowrap; }
+.cnt-chat-item:hover{ transform:translateX(3px); box-shadow:0 10px 26px rgba(0,0,0,.18); }
+.cnt-chat-ico{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; }
+.cnt-chat-ico svg{ width:19px; height:19px; }
+@media (max-width:600px){ .cnt-chat{ left:16px; bottom:16px; } }
+
 /* ── FOOTER (matches the homepage) ── */
 .footer{ background:var(--dark); }
 .footer .footer-top{ padding:5.5rem 0 3.5rem; }

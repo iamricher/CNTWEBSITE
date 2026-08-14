@@ -25,9 +25,15 @@ function ok(name)        { checks++; console.log('  \x1b[32m✓\x1b[0m ' + name)
 function fail(name, why) { checks++; failures++; console.log('  \x1b[31m✗\x1b[0m ' + name + '\n      ' + why); }
 function read(f)         { return fs.readFileSync(path.join(ROOT, f), 'utf8'); }
 function inlineScripts(html) {
-  const re = /<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g;
+  const re = /<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g;
   const out = []; let m;
-  while ((m = re.exec(html))) out.push(m[1]);
+  while ((m = re.exec(html))) {
+    const tm = /\btype\s*=\s*["']([^"']*)["']/i.exec(m[1] || '');
+    const type = tm ? tm[1].toLowerCase().trim() : '';
+    // Only JS scripts are parsed; skip JSON-LD, importmaps, HTML templates, etc.
+    if (type && !/^(text\/javascript|application\/javascript|module)$/.test(type)) continue;
+    out.push(m[2]);
+  }
   return out;
 }
 // Local (same-origin) external scripts, e.g. the ats.html modules split out in
