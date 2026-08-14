@@ -1104,6 +1104,19 @@ input, select, textarea { font-family: var(--font-body); }
 .service-card p { font-size: .92rem; line-height: 1.6; }
 .service-link { font-size: .86rem; font-weight: 700; }
 .service-num { display: none; }
+/* For Employers / Jobseekers paths */
+.paths-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 2.5vw, 28px); }
+.path-card { border: 1px solid var(--gray-100); border-radius: 20px; padding: clamp(1.8rem, 3vw, 2.6rem); background: var(--white); transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease; }
+.path-card:hover { transform: translateY(-6px); box-shadow: 0 26px 54px rgba(16,24,40,.10); border-color: var(--red-muted); }
+.path-ic { width: 56px; height: 56px; border-radius: 15px; background: var(--red-pale); color: var(--red); display: flex; align-items: center; justify-content: center; margin-bottom: 1.4rem; transition: background .2s ease, color .2s ease; }
+.path-card:hover .path-ic { background: var(--red); color: #fff; }
+.path-ic svg { width: 28px; height: 28px; }
+.path-card h3 { font-family: 'Manrope', sans-serif; font-size: 1.4rem; font-weight: 800; letter-spacing: -.01em; color: var(--text-main); margin-bottom: .6rem; }
+.path-card p { color: var(--text-sub); font-size: .98rem; line-height: 1.65; }
+.path-link { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1.4rem; font-weight: 800; font-size: .95rem; color: var(--red); }
+.path-link span { transition: transform var(--transition-fast); }
+.path-card:hover .path-link span { transform: translateX(4px); }
+@media (max-width: 768px) { .paths-grid { grid-template-columns: 1fr; } }
 
 /* Premium depth + lift on the other card families */
 .project-card { box-shadow: 0 8px 30px rgba(16,24,40,.08); transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s; }
@@ -1788,6 +1801,30 @@ input, select, textarea { font-family: var(--font-body); }
 
     </div>
 </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOR EMPLOYERS / JOBSEEKERS ===================== -->
+<section class="paths section" aria-label="How we can help">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-eyebrow center" data-reveal>How Can We Help?</div>
+      <h2 class="section-heading" data-reveal>Two Ways We <em>Work With You</em></h2>
+    </div>
+    <div class="paths-grid" data-reveal>
+      <div class="path-card">
+        <div class="path-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg></div>
+        <h3>For Employers</h3>
+        <p>Need to hire? From a single specialist to a nationwide workforce, we source, screen, and deploy the right people — fast and fully compliant.</p>
+        <a href="#contact" class="path-link">Request staffing <span>→</span></a>
+      </div>
+      <div class="path-card">
+        <div class="path-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h3>For Jobseekers</h3>
+        <p>Looking for work? Browse open positions across leading brands and apply online in minutes — no account needed, and always 100% free.</p>
+        <a href="careers.html" class="path-link">Browse jobs <span>→</span></a>
+      </div>
     </div>
   </div>
 </section>

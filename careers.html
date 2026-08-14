@@ -145,6 +145,28 @@
   .detail-meta svg{width:16px;height:16px;color:var(--red-lt)}
   .btn-apply-top{margin-top:22px;display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;font-weight:600;font-size:.95rem;padding:13px 28px;border-radius:99px;transition:var(--transition)}
   .btn-apply-top:hover{background:var(--red-lt);box-shadow:var(--shadow-red)}
+  .d-share{display:flex;align-items:center;gap:9px;margin-top:22px;flex-wrap:wrap}
+  .d-share .sh-label{font-size:.8rem;font-weight:700;color:rgba(255,255,255,.55);margin-right:2px}
+  .d-share .sh-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);color:#fff;border:none;cursor:pointer;transition:background .18s ease,transform .18s ease}
+  .d-share .sh-btn:hover{background:var(--red);transform:translateY(-2px)}
+  .d-share .sh-btn svg{width:17px;height:17px}
+  .d-share .sh-copy.done{background:#16a34a}
+  /* Job alerts signup band */
+  .job-alerts{margin-top:44px;background:linear-gradient(135deg,var(--charcoal),#000);border-radius:var(--radius-lg);padding:clamp(24px,4vw,38px);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;overflow:hidden}
+  .job-alerts::after{content:"";position:absolute;right:-6%;top:-45%;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.3),transparent 62%)}
+  .ja-text{position:relative;z-index:2}
+  .ja-text h3{font-family:var(--font-display);font-size:clamp(1.2rem,2.4vw,1.55rem);font-weight:800;color:#fff;letter-spacing:-.01em}
+  .ja-text p{color:rgba(255,255,255,.6);font-size:.92rem;margin-top:6px;max-width:44ch}
+  .ja-form{position:relative;z-index:2;display:flex;gap:10px;flex-wrap:wrap}
+  .ja-form input{background:#fff;border:none;border-radius:99px;padding:13px 20px;font-size:.92rem;min-width:230px;font-family:inherit;color:var(--ink)}
+  .ja-form input:focus{outline:2px solid var(--red);outline-offset:2px}
+  .ja-form button{background:var(--red);color:#fff;border:none;border-radius:99px;padding:13px 26px;font-weight:700;font-size:.92rem;cursor:pointer;transition:var(--transition)}
+  .ja-form button:hover{background:var(--red-lt)}
+  .ja-form button:disabled{opacity:.6;cursor:default}
+  .ja-msg{width:100%;position:relative;z-index:2;font-size:.85rem;margin-top:2px;min-height:1em}
+  .ja-msg.ok{color:#6EE7A8}
+  .ja-msg.err{color:#FCA5A5}
+  @media(max-width:640px){.job-alerts{flex-direction:column;align-items:stretch}.ja-form{width:100%}.ja-form input{flex:1;min-width:0}}
 
   .detail-body{padding:clamp(40px,6vw,68px) 0 90px}
   .detail-grid{display:grid;grid-template-columns:1fr 320px;gap:48px;align-items:start}
@@ -294,6 +316,18 @@
             <div id="list-state"></div>
           </section>
         </div>
+
+        <div class="job-alerts">
+          <div class="ja-text">
+            <h3>Get new jobs in your inbox</h3>
+            <p>Nothing that fits today? Subscribe and we'll email you the moment new positions go live.</p>
+          </div>
+          <form class="ja-form" id="ja-form" novalidate>
+            <input type="email" id="ja-email" placeholder="you@email.com" aria-label="Email for job alerts" required />
+            <button type="submit" id="ja-btn">Notify me</button>
+          </form>
+          <p class="ja-msg" id="ja-msg" aria-live="polite"></p>
+        </div>
       </div>
     </main>
   </div>
@@ -311,6 +345,7 @@
           <span id="d-openings"></span>
         </div>
         <button class="btn-apply-top" onclick="document.getElementById('apply-anchor').scrollIntoView({behavior:'smooth'})">Apply for this position →</button>
+        <div class="d-share" id="d-share"></div>
       </div>
     </header>
 
@@ -593,6 +628,26 @@
 
   $('#q').addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); buildFilters(); renderList(); });
 
+  /* ---------- SHARE THIS JOB ---------- */
+  function renderShare(job){
+    const box=$('#d-share'); if(!box) return;
+    const url=location.origin+'/careers.html?job='+job.id;
+    const text='Job opening: '+job.role+' at '+job.client;
+    const eu=encodeURIComponent(url), et=encodeURIComponent(text);
+    box.innerHTML=
+      '<span class="sh-label">Share this job</span>'
+      +'<a class="sh-btn" href="https://www.facebook.com/sharer/sharer.php?u='+eu+'" target="_blank" rel="noopener" aria-label="Share on Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.75-1.6 1.5V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"/></svg></a>'
+      +'<a class="sh-btn" href="https://www.linkedin.com/sharing/share-offsite/?url='+eu+'" target="_blank" rel="noopener" aria-label="Share on LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.94 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM3.5 8.5h3v12h-3v-12zm5 0h2.9v1.6h.04c.4-.75 1.4-1.6 2.96-1.6 3.16 0 3.75 2 3.75 4.7v7.3h-3v-6.5c0-1.55-.03-3.55-2.2-3.55-2.2 0-2.53 1.7-2.53 3.44v6.6h-3v-12z"/></svg></a>'
+      +'<a class="sh-btn" href="https://twitter.com/intent/tweet?url='+eu+'&text='+et+'" target="_blank" rel="noopener" aria-label="Share on X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 1.2h3.7l-8 9.1L24 22.8h-7.4l-5.8-7.6-6.6 7.6H.5l8.6-9.8L0 1.2h7.6l5.2 6.9 6.1-6.9zm-1.3 19.4h2L6.5 3.3H4.4L17.6 20.6z"/></svg></a>'
+      +'<button class="sh-btn sh-copy" type="button" aria-label="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></button>';
+    const cp=box.querySelector('.sh-copy');
+    if(cp) cp.addEventListener('click',function(){
+      const done=()=>{ cp.classList.add('done'); setTimeout(()=>cp.classList.remove('done'),1600); };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,function(){}); }
+      else { const t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand('copy');done();}catch(e){} document.body.removeChild(t); }
+    });
+  }
+
   /* ---------- ROUTER ---------- */
   function gotoJob(id){ history.pushState({id},'', 'careers.html?job='+id); route(); window.scrollTo({top:0}); }
   window.addEventListener('popstate',route);
@@ -615,6 +670,7 @@
     $('#d-location').innerHTML=pinSvg+' '+esc(job.location);
     $('#d-salary').innerHTML=esc(formatSalary(job.salary_range))+' /mo';
     $('#d-openings').innerHTML=usersSvg+' '+(+job.openings||1)+' opening'+((+job.openings||1)!==1?'s':'');
+    renderShare(job);
     const info=ROLE_INFO[job.role]||{summary:'Join the CNT team and grow your career with one of the Philippines’ leading brands.',resp:['Support day-to-day operations at the assigned outlet','Deliver excellent customer service','Meet assigned targets and standards'],must:['At least high school / senior high school graduate','Willing to be assigned on-site','Reliable and hardworking']};
     const lines=(t)=>{ const a=t?String(t).split('\n').map(s=>s.trim()).filter(Boolean):[]; return a.length?a:null; };
     const about = (job.about&&job.about.trim()) ? job.about.trim() : info.summary;
@@ -760,6 +816,31 @@
   }
 
   loadJobs();
+  </script>
+
+  <!-- Job alerts subscription -->
+  <script>
+  (function(){
+    var f=document.getElementById('ja-form'); if(!f) return;
+    var msg=document.getElementById('ja-msg'), btn=document.getElementById('ja-btn'), input=document.getElementById('ja-email');
+    f.addEventListener('submit', async function(e){
+      e.preventDefault();
+      var email=(input.value||'').trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent='Please enter a valid email address.'; msg.className='ja-msg err'; return; }
+      var sb=(window.getSupabase&&window.getSupabase());
+      if(!sb){ msg.textContent='Unable to subscribe right now. Please try again later.'; msg.className='ja-msg err'; return; }
+      btn.disabled=true; btn.textContent='Subscribing…'; msg.textContent=''; msg.className='ja-msg';
+      var res=await sb.from('newsletter_subscribers').insert({ email: email });
+      btn.disabled=false; btn.textContent='Notify me';
+      if(res.error){
+        if(res.error.code==='23505' || /duplicate|unique/i.test(res.error.message||'')){
+          msg.textContent='You’re already on the list — we’ll keep you posted!'; msg.className='ja-msg ok'; f.reset();
+        } else { msg.textContent='Couldn’t subscribe. Please try again.'; msg.className='ja-msg err'; }
+        return;
+      }
+      msg.textContent='Done! We’ll email you when new jobs go live.'; msg.className='ja-msg ok'; f.reset();
+    });
+  })();
   </script>
 
 </body>
