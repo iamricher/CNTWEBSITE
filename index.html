@@ -948,7 +948,16 @@ input, select, textarea { font-family: var(--font-body); }
 .map-pill svg { width: 16px; height: 16px; color: var(--red); }
 .map-pill:hover { transform: translateY(-2px); color: var(--red); }
 
-.contact-form-wrap { background: #fff; padding: clamp(2rem, 3.2vw, 2.85rem); }
+.contact-form-wrap { background: #fff; padding: clamp(2rem, 3.2vw, 2.85rem); display: flex; flex-direction: column; justify-content: center; }
+.contact-success { text-align: center; padding: clamp(1rem, 3vw, 2rem) .5rem; animation: csFade .4s ease both; }
+.contact-success .cs-icon {
+  width: 64px; height: 64px; margin: 0 auto 1.35rem; border-radius: 50%;
+  background: #E9F9EF; color: #16a34a; display: flex; align-items: center; justify-content: center;
+}
+.contact-success .cs-icon svg { width: 30px; height: 30px; }
+.contact-success h3 { font-size: 1.5rem; font-weight: 800; letter-spacing: -.01em; color: var(--text-main); margin-bottom: .55rem; }
+.contact-success p { color: var(--text-sub); font-size: .975rem; line-height: 1.6; max-width: 40ch; margin: 0 auto; }
+@keyframes csFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .contact-form { display: flex; flex-direction: column; gap: 1.25rem; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 .form-group { display: flex; flex-direction: column; gap: .5rem; }
@@ -2308,13 +2317,26 @@ function initHeroAnimations() {
     btn.disabled = true;
 
     const done = (ok) => {
-      btn.innerHTML = ok ? '<span>Message Sent! ✓</span>' : '<span>Couldn’t send — try again</span>';
-      btn.style.background = ok ? '#16a34a' : '';
+      if (ok) {
+        // Replace the form with a friendly confirmation, like the careers page.
+        form.reset();
+        form.style.display = 'none';
+        const wrap = form.parentElement;
+        if (!wrap.querySelector('.contact-success')) {
+          const s = document.createElement('div');
+          s.className = 'contact-success';
+          s.innerHTML =
+            '<div class="cs-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>'
+            + '<h3>Inquiry sent!</h3>'
+            + '<p>Thank you for reaching out. Our team will review your message and reply to you soon.</p>';
+          wrap.appendChild(s);
+        }
+        return;
+      }
+      btn.innerHTML = '<span>Couldn’t send — try again</span>';
       setTimeout(() => {
         btn.innerHTML = originalHTML;
-        btn.style.background = '';
         btn.disabled = false;
-        if (ok) form.reset();
       }, 3000);
     };
 
