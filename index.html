@@ -1688,60 +1688,8 @@ input, select, textarea { font-family: var(--font-body); }
     </div>
 
     <div class="swiper testimonials-swiper" data-reveal>
-      <div class="swiper-wrapper">
-        <div class="swiper-slide">
-          <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <blockquote>"CNT delivered our entire branch expansion team in under 60 days. The quality of candidates — their professionalism, attitude, and skill — was beyond what we expected. They've become an indispensable extension of our HR team."</blockquote>
-            <div class="testimonial-author">
-              <div class="author-avatar">MP</div>
-              <div>
-                <strong>Maria P.</strong>
-                <span>VP Human Resources, Leading Philippine Bank</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <blockquote>"We tasked CNT with finding our Chief Technology Officer — a role we had struggled to fill for over a year. Within six weeks, they presented three exceptional candidates. We hired our top choice and haven't looked back."</blockquote>
-            <div class="testimonial-author">
-              <div class="author-avatar">RG</div>
-              <div>
-                <strong>Roberto G.</strong>
-                <span>CEO, Philippine Fintech Company</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <blockquote>"CNT manages our entire contractual workforce across three provinces. Their DOLE compliance handling alone has saved us countless hours and legal headaches. A true strategic partner, not just a vendor."</blockquote>
-            <div class="testimonial-author">
-              <div class="author-avatar">JL</div>
-              <div>
-                <strong>Jennifer L.</strong>
-                <span>Operations Director, National Logistics Company</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <blockquote>"For our hospital's rapid expansion, CNT sourced 1,200 healthcare workers with verified credentials and proper licensing — all within 90 days. That level of execution is rare in this industry. Truly exceptional."</blockquote>
-            <div class="testimonial-author">
-              <div class="author-avatar">AS</div>
-              <div>
-                <strong>Dr. Antonio S.</strong>
-                <span>Hospital Administrator, Private Healthcare Network</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Slides are populated from published testimonials in Content Studio. -->
+      <div class="swiper-wrapper"></div>
       <div class="swiper-pagination"></div>
       <div class="swiper-button-prev"></div>
       <div class="swiper-button-next"></div>
@@ -2305,29 +2253,31 @@ function initHeroAnimations() {
     }
   });
 
-  // Load published testimonials from the DB; fall back to the built-in slides.
+  // Show ONLY testimonials published in Content Studio. If there are none
+  // (or we can't load them), hide the whole section — no placeholder quotes.
   const sb = window.getSupabase && window.getSupabase();
   const wrap = document.querySelector('.testimonials-swiper .swiper-wrapper');
-  if (!sb || !wrap) { mount(); return; }
+  const section = document.getElementById('testimonials');
+  const hide = () => { if (section) section.style.display = 'none'; };
+  if (!sb || !wrap) { hide(); return; }
   const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const initials = name => String(name||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() || 'CN';
   sb.from('testimonials').select('*').eq('published', true)
     .order('sort_order', { ascending: true }).order('created_at', { ascending: false })
     .then(res => {
       const rows = res && res.data;
-      if (rows && rows.length) {
-        wrap.innerHTML = rows.map(t => {
-          const stars = '★★★★★'.slice(0, Math.max(1, Math.min(5, Number(t.rating||5))));
-          return '<div class="swiper-slide"><div class="testimonial-card">'
-            + '<div class="testimonial-stars">' + stars + '</div>'
-            + '<blockquote>"' + esc(t.quote||'') + '"</blockquote>'
-            + '<div class="testimonial-author"><div class="author-avatar">' + esc(initials(t.author)) + '</div>'
-            + '<div><strong>' + esc(t.author||'') + '</strong><span>' + esc(t.role||'') + '</span></div></div>'
-            + '</div></div>';
-        }).join('');
-      }
+      if (!rows || !rows.length) { hide(); return; }
+      wrap.innerHTML = rows.map(t => {
+        const stars = '★★★★★'.slice(0, Math.max(1, Math.min(5, Number(t.rating||5))));
+        return '<div class="swiper-slide"><div class="testimonial-card">'
+          + '<div class="testimonial-stars">' + stars + '</div>'
+          + '<blockquote>"' + esc(t.quote||'') + '"</blockquote>'
+          + '<div class="testimonial-author"><div class="author-avatar">' + esc(initials(t.author)) + '</div>'
+          + '<div><strong>' + esc(t.author||'') + '</strong><span>' + esc(t.role||'') + '</span></div></div>'
+          + '</div></div>';
+      }).join('');
       mount();
-    }, () => mount());
+    }, hide);
 })();
 
 // ── CONTACT FORM ───────────────────────────────────────────
