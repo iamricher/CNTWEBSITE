@@ -1670,21 +1670,6 @@ input, select, textarea { font-family: var(--font-body); }
   </div>
 </section>
 
-<!-- ============================= INSIGHTS TEASER ============================= -->
-<section class="section" id="insights-teaser" aria-label="Insights" style="display:none;">
-  <div class="container">
-    <div class="section-header center">
-      <div class="section-eyebrow center" data-reveal>Insights</div>
-      <h2 class="section-heading" data-reveal>Ideas Worth <em>Sharing</em></h2>
-      <p class="section-sub" data-reveal>Hiring advice, market notes and honest career guidance from the people who fill roles every day.</p>
-    </div>
-    <div class="services-grid" data-reveal id="insights-grid"></div>
-    <div style="text-align:center;margin-top:44px;">
-      <a href="insights.html" class="btn-primary">Read all insights <span>→</span></a>
-    </div>
-  </div>
-</section>
-
 <!-- ============================= TESTIMONIALS ============================= -->
 <section class="testimonials section section-gray" id="testimonials" aria-label="Client Testimonials">
   <div class="container">
@@ -2574,41 +2559,6 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
           +'</div></div></div>';
       }).join('');
     });
-  }
-  // Insights teaser — show the 3 latest published articles; hide the whole
-  // section when there's nothing to show yet.
-  var igrid=document.getElementById('insights-grid');
-  if(igrid){
-    var fmtI=function(s){ if(!s) return ''; try{ return new Date(s).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }catch(_){ return ''; } };
-    sb.from('posts').select('id,title,excerpt,cover_image,category,author,publish_at,created_at')
-      .eq('published',true).order('publish_at',{ascending:false,nullsFirst:false}).order('created_at',{ascending:false}).limit(3)
-      .then(function(res){
-        var rows=(res.data||[]).filter(function(p){ return !p.publish_at || new Date(p.publish_at)<=new Date(); });
-        if(res.error||!rows.length) return;   // nothing published → keep section hidden
-        igrid.innerHTML=rows.map(function(p){
-          var link='post.html?id='+encodeURIComponent(p.id);
-          var cover=p.cover_image?'<img src="'+esc(p.cover_image)+'" alt="" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:16px;">'
-            :'<div style="width:100%;height:170px;border-radius:12px;margin-bottom:16px;background:linear-gradient(135deg,#1A1A1A,#C8102E);"></div>';
-          return '<div class="service-card" style="cursor:pointer;" onclick="location.href=\''+link+'\'">'
-            +cover
-            +'<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">'
-              +(p.category?'<span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">'+esc(p.category)+'</span>':'')
-              +(fmtI(p.publish_at||p.created_at)?'<span style="font-size:.7rem;color:#9CA3AF;font-weight:600;">'+esc(fmtI(p.publish_at||p.created_at))+'</span>':'')
-            +'</div>'
-            +'<h3>'+esc(p.title||'')+'</h3>'
-            +'<p>'+esc(p.excerpt||'')+'</p>'
-            +'<a href="'+link+'" class="service-link">Read article <span>→</span></a>'
-          +'</div>';
-        }).join('');
-        var sec=document.getElementById('insights-teaser');
-        if(sec){
-          sec.style.display=''; sec.querySelectorAll('[data-reveal]').forEach(function(n){ n.classList.add('revealed'); });
-          // If we arrived via the "Insights" nav link (#insights-teaser), the
-          // section was still hidden during the browser's initial anchor jump —
-          // scroll to it now that it's visible.
-          if(location.hash==='#insights-teaser'){ setTimeout(function(){ var nav=document.getElementById('nav'); var off=(nav?nav.offsetHeight:0)+20; window.scrollTo({top:sec.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'}); },80); }
-        }
-      });
   }
 })();
 </script>

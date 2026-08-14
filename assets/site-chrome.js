@@ -39,7 +39,6 @@
     '      <li><a href="' + h('industries') + '" class="nav-link">Industries</a></li>' +
     '      <li><a href="' + h('projects') + '" class="nav-link">Success Stories</a></li>' +
     '      <li><a href="' + h('events') + '" class="nav-link' + (a === 'events' ? ' active' : '') + '">Events</a></li>' +
-    '      <li><a href="' + h('insights-teaser') + '" class="nav-link' + (a === 'insights' ? ' active' : '') + '">Insights</a></li>' +
     '      <li><a href="careers.html" class="nav-link' + (a === 'careers' ? ' active' : '') + '">Careers</a></li>' +
     '    </ul>' +
     '    <div class="nav-actions">' +
@@ -56,7 +55,6 @@
     '    <li><a href="' + h('industries') + '">Industries</a></li>' +
     '    <li><a href="' + h('projects') + '">Success Stories</a></li>' +
     '    <li><a href="' + h('events') + '">Events</a></li>' +
-    '    <li><a href="' + h('insights-teaser') + '">Insights</a></li>' +
     '    <li><a href="careers.html">Careers</a></li>' +
     '    <li><a href="' + h('contact') + '">Contact</a></li>' +
     '  </ul>' +
@@ -89,7 +87,6 @@
     '      <li><a href="' + h('industries') + '">Retail &amp; FMCG</a></li><li><a href="' + h('industries') + '">Logistics</a></li></ul></div>' +
     '    <div class="footer-col"><h5>Company</h5><ul>' +
     '      <li><a href="about.html">About Us</a></li><li><a href="' + h('projects') + '">Success Stories</a></li>' +
-    '      <li><a href="insights.html">Insights</a></li>' +
     '      <li><a href="careers.html">Careers</a></li><li><a href="' + h('contact') + '">Contact</a></li></ul>' +
     '      <h5 style="margin-top:1.75rem">Stay Updated</h5>' +
     '      <div class="newsletter-form"><input type="email" id="nl-email" placeholder="Your email" aria-label="Newsletter email" /><button id="nl-btn" aria-label="Subscribe">&rarr;</button></div>' +
