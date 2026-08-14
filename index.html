@@ -1098,13 +1098,13 @@ input, select, textarea { font-family: var(--font-body); }
   background: radial-gradient(125% 95% at 50% 35%, transparent 50%, rgba(0,0,0,.55) 100%);
 }
 .hero-badge {
-  background: linear-gradient(135deg, #E5213F 0%, #A50D24 100%);
-  border: 1px solid rgba(255,255,255,.18);
+  background: linear-gradient(135deg, #8E1020 0%, #45101A 52%, #1E0A0E 100%);
+  border: 1px solid rgba(255,255,255,.09);
   border-radius: 99px; padding: .55rem 1.25rem .55rem 1rem;
-  color: #fff; font-weight: 700;
-  box-shadow: 0 12px 30px rgba(200,16,46,.38);
+  color: rgba(255,255,255,.9); font-weight: 700;
+  box-shadow: 0 10px 28px rgba(0,0,0,.42);
 }
-.badge-dot { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,.75); }
+.badge-dot { background: var(--red-lt); box-shadow: 0 0 10px rgba(229,33,63,.7); }
 .hero-headline { text-shadow: 0 4px 50px rgba(0,0,0,.45); }
 .hero-headline .red-word { color: var(--red-lt); text-shadow: 0 0 44px rgba(229,33,63,.45); }
 /* Seam blend: fade the photo's left edge into the dark content side (matched to #0d0d0d) */
@@ -2383,10 +2383,10 @@ function initHeroAnimations() {
     const io = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         [...grid.children].forEach((child, i) => {
-          const delay = i * 110;
+          const delay = i * 190;
           child.style.opacity = '0';
-          child.style.transform = 'translateY(38px) scale(.97)';
-          child.style.transition = `opacity .7s ease ${delay}ms, transform .7s cubic-bezier(.16,1,.3,1) ${delay}ms`;
+          child.style.transform = 'translateY(40px) scale(.97)';
+          child.style.transition = `opacity .95s ease ${delay}ms, transform .95s cubic-bezier(.16,1,.3,1) ${delay}ms`;
           requestAnimationFrame(() => {
             child.style.opacity = '1';
             child.style.transform = 'translateY(0) scale(1)';
@@ -2394,7 +2394,7 @@ function initHeroAnimations() {
           // Clear the inline styles once done, so CSS :hover transforms take over.
           setTimeout(() => {
             child.style.transition = ''; child.style.transform = ''; child.style.opacity = '';
-          }, delay + 780);
+          }, delay + 1050);
         });
         io.disconnect();
       }
