@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/event.html", "destination": "/api/event-og" }
+    { "source": "/event.html", "destination": "/api/event-og" },
+    { "source": "/post.html", "destination": "/api/blog-og" }
   ],
   "headers": [
     {

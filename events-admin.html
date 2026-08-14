@@ -7,7 +7,7 @@
   <title>Content Studio — CNT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" />
   <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,7 +23,7 @@
       --shadow:0 1px 3px rgba(16,24,40,.05), 0 10px 26px rgba(16,24,40,.06);
       --shadow-lg:0 30px 70px rgba(16,24,40,.22);
       --font:'Inter',system-ui,-apple-system,sans-serif;
-      --display:'Plus Jakarta Sans',var(--font);
+      --display:'Fraunces',var(--font);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{-webkit-text-size-adjust:100%}
@@ -339,6 +339,7 @@
         <p class="nav-label">Manage</p>
         <div class="sidenav-item active" id="nav-dashboard" onclick="showView('dashboard')"><span class="material-icons-outlined">dashboard</span><span>Dashboard</span></div>
         <div class="sidenav-item" id="nav-events" onclick="showView('events')"><span class="material-icons-outlined">campaign</span><span>Events &amp; Updates</span></div>
+        <div class="sidenav-item" id="nav-insights" onclick="showView('insights')"><span class="material-icons-outlined">article</span><span>Insights &amp; Blog</span></div>
         <div class="sidenav-item" id="nav-stories" onclick="showView('stories')"><span class="material-icons-outlined">workspace_premium</span><span>Success Stories</span></div>
         <div class="sidenav-item" id="nav-testimonials" onclick="showView('testimonials')"><span class="material-icons-outlined">format_quote</span><span>Testimonials</span></div>
         <p class="nav-label" style="margin-top:14px">Inbox</p>
@@ -408,6 +409,15 @@
             <button class="btn" onclick="evForm()"><span class="material-icons-outlined">add</span>New post</button>
           </div>
           <div class="card"><div id="ev-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- INSIGHTS / BLOG -->
+        <section id="view-insights" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Insights &amp; Blog</h1><p>Long-form articles — hiring advice, market notes and thought leadership. Each gets its own shareable page at <code>/post.html</code>.</p></div>
+            <button class="btn" onclick="blForm()"><span class="material-icons-outlined">add</span>New article</button>
+          </div>
+          <div class="card"><div id="bl-list"><div class="muted">Loading…</div></div></div>
         </section>
 
         <!-- STORIES -->
@@ -490,6 +500,40 @@
     </div>
   </div>
 
+  <!-- INSIGHTS / BLOG MODAL -->
+  <div class="modal" id="bl-modal">
+    <div class="box">
+      <div class="box-head"><h3 id="bl-modal-title">New article</h3><button class="x" onclick="blClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <input type="hidden" id="bl-id">
+        <div class="field"><label>Title *</label><input id="bl-title" placeholder="e.g. 5 signs you're ready to switch jobs"></div>
+        <div class="grid2">
+          <div class="field"><label>Category</label><input id="bl-category" list="bl-cats" placeholder="Career Advice"><datalist id="bl-cats"><option>Career Advice</option><option>Hiring Insights</option><option>Market Notes</option><option>Company News</option><option>Guides</option><option>Employer Tips</option></datalist></div>
+          <div class="field"><label>Author</label><input id="bl-author" placeholder="CNT Recruitment Team"></div>
+        </div>
+        <div class="field"><label>Cover image</label>
+          <label class="up"><span class="material-icons-outlined">upload</span>Upload image<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'bl-image','bl-preview')"></label>
+          <input id="bl-image" type="hidden">
+          <div id="bl-preview"></div>
+        </div>
+        <div class="field"><label>Excerpt — short blurb on the card</label><textarea id="bl-excerpt" rows="2" placeholder="One or two sentences shown on the Insights list and in link previews."></textarea></div>
+        <div class="field"><label>Article body</label><textarea id="bl-body" rows="10" placeholder="Write the full article. Separate paragraphs with a blank line. Start a line with '## ' to make a subheading."></textarea>
+          <p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Tip: a blank line starts a new paragraph. A line beginning with <code>## </code> becomes a section heading.</p>
+        </div>
+        <div class="field"><label>More photos — gallery (optional)</label>
+          <label class="up"><span class="material-icons-outlined">add_photo_alternate</span>Add photos<input type="file" accept="image/*" multiple style="display:none;" onchange="blGalleryUpload(this)"></label>
+          <div id="bl-gallery" class="gallery-grid"></div>
+        </div>
+        <div class="field"><label>Schedule — publish automatically at (optional)</label>
+          <input id="bl-publish-at" type="datetime-local">
+          <p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Leave empty to publish now. Set a future time to keep the article hidden until then.</p>
+        </div>
+        <label class="chk"><input type="checkbox" id="bl-published" checked><span>Published<small>Visible on the website. Uncheck to save as a draft.</small></span></label>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="blClose()">Cancel</button><button class="btn" onclick="blSave()"><span class="material-icons-outlined">check</span>Save article</button></div>
+    </div>
+  </div>
+
   <!-- STORY MODAL -->
   <div class="modal" id="st-modal">
     <div class="box">
@@ -533,7 +577,7 @@
   <script>
   (function(){
     var sb = window.getSupabase && window.getSupabase();
-    var _ev = [], _st = [], _ts = [], _msg = [], _sub = [], _evImages = [];
+    var _ev = [], _st = [], _ts = [], _msg = [], _sub = [], _evImages = [], _bl = [], _blImages = [];
     var _actor = { email:null, role:null };
     // Append a row to the shared audit_log (staff-gated). Fire-and-forget.
     function logAudit(action, entity, ref, details){
@@ -553,7 +597,7 @@
     var SKELETON = (function(){ var r='<div class="sk-row"><div class="sk sk-thumb"></div><div style="flex:1"><div class="sk sk-line" style="width:42%"></div><div class="sk sk-line" style="width:24%;height:9px;margin-top:9px"></div></div></div>'; return r+r+r; })();
 
     window.showView = function(v){
-      ['dashboard','events','stories','testimonials','messages','subscribers','activity'].forEach(function(n){
+      ['dashboard','events','insights','stories','testimonials','messages','subscribers','activity'].forEach(function(n){
         var view=document.getElementById('view-'+n); if(view) view.style.display = n===v?'block':'none';
         var nav=document.getElementById('nav-'+n); if(nav) nav.classList.toggle('active', n===v);
       });
@@ -567,7 +611,7 @@
       var r = await sb.rpc('cnt_is_super_admin');
       if(r.error || !r.data){ show('denied-view'); return; }
       _actor.email = (s.data.session.user && s.data.session.user.email) || null; _actor.role = 'super_admin';
-      show('manager-view'); evLoad(); stLoad(); tsLoad(); msgLoad(); subLoad(); anLoad(); auLoad(); loadMetrics();
+      show('manager-view'); evLoad(); blLoad(); stLoad(); tsLoad(); msgLoad(); subLoad(); anLoad(); auLoad(); loadMetrics();
     }
 
     // shared image uploader → public event-images bucket
@@ -710,6 +754,94 @@
       evLoad(); toast('Post deleted');
     };
 
+    // ── INSIGHTS / BLOG ──
+    async function blLoad(){
+      var el=document.getElementById('bl-list'); el.innerHTML=SKELETON;
+      var res = await sb.from('posts').select('*').order('created_at',{ascending:false});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _bl = res.data||[];
+      if(!_bl.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">article</span></div><h3>No articles yet</h3><p>Publish hiring advice and market notes — they appear on your public Insights page.</p><button class="btn" onclick="blForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Write your first article</button></div>'; return; }
+      el.innerHTML=_bl.map(function(p){
+        var thumb = p.cover_image ? '<div class="thumb"><img src="'+esc(p.cover_image)+'" alt=""></div>' : '<div class="thumb"><span class="material-icons-outlined">article</span></div>';
+        var pill = !p.published ? '<span class="pill pill-draft">Draft</span>'
+          : (isScheduled(p) ? '<span class="pill" style="background:#FEF3C7;color:#92400E">Scheduled</span>' : '<span class="pill pill-live">Live</span>');
+        var vc = Number(p.view_count||0);
+        var meta = (p.category?esc(p.category)+' · ':'')+(p.author?esc(p.author)+' · ':'')
+          +'<span class="views">'+vc.toLocaleString()+' view'+(vc===1?'':'s')+'</span>'
+          +' · '+esc(fmtDate(p.publish_at||p.created_at))
+          +(isScheduled(p)?(' · goes live '+esc(fmtDate(p.publish_at))):'');
+        return '<div class="row">'+thumb
+          +'<div class="t"><b>'+esc(p.title||'Untitled')+'</b>'+pill+'<small>'+meta+'</small></div>'
+          +'<div class="row-actions">'
+          +'<a class="iconbtn view" href="post.html?id='+p.id+'" target="_blank" rel="noopener" title="View on site"><span class="material-icons-outlined">open_in_new</span></a>'
+          +'<button class="iconbtn" onclick="blForm('+p.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
+          +'<button class="iconbtn del" onclick="blDelete('+p.id+')" title="Delete"><span class="material-icons-outlined">delete</span></button>'
+          +'</div></div>';
+      }).join('');
+    }
+    window.blForm = function(id){
+      var p = id ? (_bl.filter(function(x){return x.id===id;})[0]||{}) : {};
+      document.getElementById('bl-modal-title').textContent = id?'Edit article':'New article';
+      document.getElementById('bl-id').value = id||'';
+      document.getElementById('bl-title').value = p.title||'';
+      document.getElementById('bl-category').value = p.category||'';
+      document.getElementById('bl-author').value = id ? (p.author||'') : 'CNT Recruitment Team';
+      document.getElementById('bl-image').value = p.cover_image||'';
+      document.getElementById('bl-excerpt').value = p.excerpt||'';
+      document.getElementById('bl-body').value = p.body||'';
+      document.getElementById('bl-published').checked = id ? !!p.published : true;
+      document.getElementById('bl-preview').innerHTML = p.cover_image?'<img src="'+esc(p.cover_image)+'" alt="">':'';
+      document.getElementById('bl-publish-at').value = toLocalInput(p.publish_at);
+      _blImages = Array.isArray(p.images) ? p.images.slice() : [];
+      renderBlGallery();
+      document.getElementById('bl-modal').classList.add('on');
+    };
+    window.blClose = function(){ document.getElementById('bl-modal').classList.remove('on'); };
+    window.blSave = async function(){
+      var id = document.getElementById('bl-id').value;
+      var row = { title:document.getElementById('bl-title').value.trim(), category:document.getElementById('bl-category').value.trim()||null,
+        author:document.getElementById('bl-author').value.trim()||null, cover_image:document.getElementById('bl-image').value.trim()||null,
+        excerpt:document.getElementById('bl-excerpt').value.trim()||null, body:document.getElementById('bl-body').value.trim()||null,
+        images:_blImages, publish_at:fromLocalInput(document.getElementById('bl-publish-at').value),
+        published:document.getElementById('bl-published').checked };
+      if(!row.title){ toast('Title is required'); return; }
+      var res = id ? await sb.from('posts').update(row).eq('id',id) : await sb.from('posts').insert(row);
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      logAudit(id?'update':'create','post',id||null,row.title);
+      blClose(); blLoad(); toast(id?'Article updated':(row.publish_at && new Date(row.publish_at)>new Date() ? 'Article scheduled' : 'Article published'));
+    };
+    window.blDelete = async function(id){
+      var p = _bl.filter(function(x){return x.id===id;})[0];
+      if(!confirm('Delete "'+(p?p.title:'this article')+'" from the website?')) return;
+      var res = await sb.from('posts').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      logAudit('delete','post',id,p?p.title:null);
+      blLoad(); toast('Article deleted');
+    };
+    // Blog gallery uploader (posts/ prefix in the shared bucket)
+    function renderBlGallery(){
+      var el=document.getElementById('bl-gallery'); if(!el) return;
+      el.innerHTML=_blImages.map(function(u,i){ return '<div class="gthumb"><img src="'+esc(u)+'" alt=""><button class="rm" title="Remove" onclick="blGalleryRemove('+i+')"><span class="material-icons-outlined">close</span></button></div>'; }).join('');
+    }
+    window.blGalleryRemove = function(i){ _blImages.splice(i,1); renderBlGallery(); };
+    window.blGalleryUpload = async function(input){
+      var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      if(!files.length) return;
+      toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
+      for(var i=0;i<files.length;i++){
+        var f=files[i];
+        if(!/^image\//.test(f.type) || f.size>5*1048576) continue;
+        var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
+        var path='posts/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        if(up.error){ toast('Upload failed: '+up.error.message); continue; }
+        _blImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl);
+        renderBlGallery();
+      }
+      input.value='';
+      toast('Photos added');
+    };
+
     // ── SUCCESS STORIES ──
     async function stLoad(){
       var el=document.getElementById('st-list'); el.innerHTML=SKELETON;
@@ -776,7 +908,7 @@
         var stars = '★★★★★'.slice(0, Math.max(1,Math.min(5, Number(t.rating||5))));
         var quote = String(t.quote||'').replace(/\s+/g,' ').trim();
         if(quote.length>90) quote = quote.slice(0,90)+'…';
-        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span><div class="thumb" style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:.9rem;">'+esc(initials(t.author))+'</div>'
+        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span><div class="thumb" style="font-family:\'Fraunces\',sans-serif;font-weight:800;font-size:.9rem;">'+esc(initials(t.author))+'</div>'
           +'<div class="t"><b>'+esc(t.author||'Anonymous')+'</b>'+pill
           +'<small><span class="views" style="color:#EAB308;letter-spacing:1px;">'+stars+'</span> · '+esc(quote)+'</small></div>'
           +'<div class="row-actions">'
