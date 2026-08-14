@@ -928,21 +928,20 @@ input, select, textarea { font-family: var(--font-body); }
   background: var(--gray-50); border-radius: var(--radius-lg);
   padding: 2.75rem; border: 1.5px solid var(--gray-100);
 }
-/* Office map */
-.office-map { margin-top: clamp(3rem, 6vw, 5rem); }
-.office-map-head {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.75rem;
+/* Office map — folded into the contact info column as one location card */
+.contact-map { margin-top: 2.25rem; border-radius: var(--radius-lg); overflow: hidden; border: 1.5px solid var(--gray-100); box-shadow: 0 14px 40px rgba(0,0,0,.07); background: #fff; }
+.contact-map-frame { position: relative; width: 100%; height: clamp(240px, 26vw, 320px); }
+.contact-map-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(.2) contrast(1.02); }
+.contact-map-link {
+  display: flex; align-items: center; gap: .6rem;
+  padding: 1rem 1.25rem; font-size: .9rem; font-weight: 700;
+  color: var(--text-main); border-top: 1.5px solid var(--gray-100);
+  transition: background .18s ease, color .18s ease;
 }
-.office-map-head h3 { font-size: clamp(1.3rem, 2.4vw, 1.7rem); font-weight: 800; letter-spacing: -.02em; color: var(--text-main); }
-.office-map-head p { font-size: .9375rem; color: var(--text-sub); margin-top: .4rem; max-width: 52ch; }
-.office-map-head .btn-primary { flex-shrink: 0; display: inline-flex; align-items: center; gap: .5rem; }
-.office-map-frame {
-  position: relative; width: 100%; height: clamp(320px, 42vw, 460px);
-  border-radius: var(--radius-lg); overflow: hidden;
-  border: 1.5px solid var(--gray-100); box-shadow: 0 18px 50px rgba(0,0,0,.08);
-}
-.office-map-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(.15); }
+.contact-map-link svg { width: 18px; height: 18px; color: var(--red); flex-shrink: 0; }
+.contact-map-link .arr { margin-left: auto; transition: transform .18s ease; }
+.contact-map-link:hover { background: var(--red-pale); color: var(--red); }
+.contact-map-link:hover .arr { transform: translateX(4px); }
 .contact-form { display: flex; flex-direction: column; gap: 1.25rem; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 .form-group { display: flex; flex-direction: column; gap: .5rem; }
@@ -1911,6 +1910,21 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
           </div>
         </div>
+
+        <div class="contact-map" data-reveal>
+          <div class="contact-map-frame">
+            <iframe
+              src="https://www.google.com/maps?q=LYFE%20Tower%2C%20219%20Shaw%20Blvd%2C%20Mandaluyong&z=16&output=embed"
+              title="CNT Head Office — LYFE Tower, Shaw Blvd, Mandaluyong"
+              loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen></iframe>
+          </div>
+          <a href="https://maps.app.goo.gl/NWXpibFVDjE8aSxw5" target="_blank" rel="noopener" class="contact-map-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Get Directions</span>
+            <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+        </div>
       </div>
 
       <div class="contact-form-wrap" data-reveal>
@@ -1955,28 +1969,6 @@ input, select, textarea { font-family: var(--font-body); }
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           </button>
         </form>
-      </div>
-    </div>
-
-    <!-- Office map -->
-    <div class="office-map" data-reveal>
-      <div class="office-map-head">
-        <div>
-          <div class="section-eyebrow" style="margin-bottom:.5rem;">Visit Us</div>
-          <h3>Our Head Office</h3>
-          <p>219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St., Brgy. Bagong Silang, 1550 Mandaluyong, Metro Manila</p>
-        </div>
-        <a href="https://maps.app.goo.gl/NWXpibFVDjE8aSxw5" target="_blank" rel="noopener" class="btn-primary">
-          <span>Get Directions</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M9 18l6-6-6-6"/></svg>
-        </a>
-      </div>
-      <div class="office-map-frame">
-        <iframe
-          src="https://www.google.com/maps?q=LYFE%20Tower%2C%20219%20Shaw%20Blvd%2C%20Mandaluyong&z=16&output=embed"
-          title="CNT Head Office — LYFE Tower, Shaw Blvd, Mandaluyong"
-          loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-          allowfullscreen></iframe>
       </div>
     </div>
   </div>
