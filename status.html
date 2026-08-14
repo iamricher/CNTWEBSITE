@@ -12,6 +12,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-config.js"></script>
   <script src="assets/sentry-init.js"></script>
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
   <style>
   :root{
     --red:#C8102E; --red-deep:#A50D24; --red-pale:#FFF0F2;
@@ -63,8 +65,9 @@
   </style>
 </head>
 <body>
+  <div id="site-header" data-active=""></div>
+
   <div class="wrap">
-    <div class="brand"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." /></div>
 
     <div class="card" id="lookup-card">
       <h1>Track your application</h1>
@@ -84,6 +87,8 @@
       <div class="again"><button onclick="resetStatus()">Check another application</button></div>
     </div>
   </div>
+
+  <div id="site-footer"></div>
 
   <script>
   const $=s=>document.querySelector(s);
