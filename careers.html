@@ -95,6 +95,13 @@
   .filter-item.active{background:var(--red-pale);color:var(--red-deep);font-weight:600}
   .filter-item .count{font-size:.75rem;color:var(--gray-400);background:var(--gray-50);border-radius:99px;padding:2px 8px;min-width:26px;text-align:center}
   .filter-item.active .count{background:#fff;color:var(--red)}
+  /* Modern active-filter chips (LinkedIn/Indeed style) */
+  .active-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:22px}
+  .active-filters .chip{display:inline-flex;align-items:center;gap:7px;background:var(--red-pale);color:var(--red-deep);border:1px solid #F3C6CE;font-size:.82rem;font-weight:700;padding:6px 8px 6px 13px;border-radius:99px;cursor:pointer;transition:var(--transition)}
+  .active-filters .chip:hover{background:var(--red);color:#fff;border-color:var(--red)}
+  .active-filters .chip span{font-size:1.15rem;line-height:.8;opacity:.75}
+  .active-filters .chip-clear{font-size:.82rem;font-weight:700;color:var(--gray-600);padding:6px 6px;cursor:pointer;background:none;border:none;text-decoration:underline;margin-left:2px}
+  .active-filters .chip-clear:hover{color:var(--red)}
 
   /* JOB LIST */
   .list-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:26px}
@@ -282,6 +289,7 @@
               <h2>Open Positions</h2>
               <span id="results-count"></span>
             </div>
+            <div id="active-filters" class="active-filters" style="display:none"></div>
             <div id="groups"></div>
             <div id="list-state"></div>
           </section>
@@ -504,17 +512,53 @@
 
   /* ---------- FILTERS ---------- */
   function buildFilters(){
+    // Faceted counts: each facet's numbers reflect the OTHER active filter
+    // (and the search) so the counts are accurate and dead combinations of
+    // location + position never appear.
+    const q=curFilter.q.toLowerCase();
+    const mq=j=>!q||(j.role+' '+j.client).toLowerCase().includes(q);
     const locs={}, poss={};
-    ALL_JOBS.forEach(j=>{ locs[j.location]=(locs[j.location]||0)+1; poss[j.role]=(poss[j.role]||0)+1; });
-    const locHtml=[`<button class="filter-item ${curFilter.location==='all'?'active':''}" data-type="location" data-val="all">All Locations <span class="count">${ALL_JOBS.length}</span></button>`]
-      .concat(Object.keys(locs).sort().map(l=>`<button class="filter-item ${curFilter.location===l?'active':''}" data-type="location" data-val="${esc(l)}">${esc(l)} <span class="count">${locs[l]}</span></button>`));
-    const posHtml=[`<button class="filter-item ${curFilter.position==='all'?'active':''}" data-type="position" data-val="all">All Positions <span class="count">${ALL_JOBS.length}</span></button>`]
-      .concat(Object.keys(poss).sort().map(p=>`<button class="filter-item ${curFilter.position===p?'active':''}" data-type="position" data-val="${esc(p)}">${esc(p)} <span class="count">${poss[p]}</span></button>`));
-    $('#filter-location').innerHTML=locHtml.join('');
-    $('#filter-position').innerHTML=posHtml.join('');
+    ALL_JOBS.forEach(j=>{
+      if(!mq(j)) return;
+      if(curFilter.position==='all'||j.role===curFilter.position) locs[j.location]=(locs[j.location]||0)+1;
+      if(curFilter.location==='all'||j.location===curFilter.location) poss[j.role]=(poss[j.role]||0)+1;
+    });
+    const sum=o=>Object.keys(o).reduce((a,k)=>a+o[k],0);
+    const item=(type,val,label,count,active)=>`<button class="filter-item ${active?'active':''}" data-type="${type}" data-val="${esc(val)}">${esc(label)} <span class="count">${count}</span></button>`;
+    const locKeys=Object.keys(locs).sort();
+    if(curFilter.location!=='all'&&locKeys.indexOf(curFilter.location)<0) locKeys.push(curFilter.location);
+    const posKeys=Object.keys(poss).sort();
+    if(curFilter.position!=='all'&&posKeys.indexOf(curFilter.position)<0) posKeys.push(curFilter.position);
+    $('#filter-location').innerHTML=[item('location','all','All Locations',sum(locs),curFilter.location==='all')]
+      .concat(locKeys.map(l=>item('location',l,l,locs[l]||0,curFilter.location===l))).join('');
+    $('#filter-position').innerHTML=[item('position','all','All Positions',sum(poss),curFilter.position==='all')]
+      .concat(posKeys.map(p=>item('position',p,p,poss[p]||0,curFilter.position===p))).join('');
     document.querySelectorAll('.filter-item').forEach(b=>b.addEventListener('click',()=>{
-      curFilter[b.dataset.type]=b.dataset.val; buildFilters(); renderList();
+      const cur=curFilter[b.dataset.type];
+      // Clicking the already-active option clears it back to "all" (toggle).
+      curFilter[b.dataset.type]=(cur===b.dataset.val&&b.dataset.val!=='all')?'all':b.dataset.val;
+      buildFilters(); renderList();
     }));
+  }
+
+  /* ---------- ACTIVE FILTER CHIPS ---------- */
+  function chip(type,label){ return `<button class="chip" data-remove="${type}" aria-label="Remove filter">${esc(label)}<span aria-hidden="true">×</span></button>`; }
+  function renderActiveFilters(){
+    const box=$('#active-filters'); if(!box) return;
+    const chips=[];
+    if(curFilter.location!=='all') chips.push(chip('location', curFilter.location));
+    if(curFilter.position!=='all') chips.push(chip('position', curFilter.position));
+    if(curFilter.q) chips.push(chip('q', '“'+curFilter.q+'”'));
+    if(!chips.length){ box.style.display='none'; box.innerHTML=''; return; }
+    box.style.display='flex';
+    box.innerHTML=chips.join('')+'<button class="chip-clear" data-clear="1">Clear all</button>';
+    box.querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{
+      const t=b.dataset.remove;
+      if(t==='q'){ curFilter.q=''; const qi=$('#q'); if(qi) qi.value=''; } else curFilter[t]='all';
+      buildFilters(); renderList();
+    }));
+    const clr=box.querySelector('[data-clear]');
+    if(clr) clr.addEventListener('click',()=>{ curFilter={location:'all',position:'all',q:''}; const qi=$('#q'); if(qi) qi.value=''; buildFilters(); renderList(); });
   }
 
   /* ---------- LIST ---------- */
@@ -527,6 +571,7 @@
       return mq&&ml&&mp;
     });
     $('#results-count').innerHTML=`<b>${list.length}</b> open position${list.length!==1?'s':''}`;
+    renderActiveFilters();
     if(!list.length){ $('#groups').innerHTML=''; $('#list-state').innerHTML='<div class="state">No positions match your filters. Try broadening your search.</div>'; return; }
     $('#list-state').innerHTML='';
     // flat list — client/account is hidden here, revealed only on the job detail page
@@ -546,7 +591,7 @@
     document.querySelectorAll('.job-row').forEach(r=>r.addEventListener('click',e=>{ if(e.metaKey||e.ctrlKey||e.shiftKey||e.button) return; e.preventDefault(); gotoJob(+r.dataset.id); }));
   }
 
-  $('#q').addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); renderList(); });
+  $('#q').addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); buildFilters(); renderList(); });
 
   /* ---------- ROUTER ---------- */
   function gotoJob(id){ history.pushState({id},'', 'careers.html?job='+id); route(); window.scrollTo({top:0}); }
