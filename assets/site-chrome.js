@@ -59,7 +59,7 @@
     '    <ul class="nav-links" role="list">' +
     '      <li><a href="' + h('about') + '" class="nav-link' + (a === 'about' ? ' active' : '') + '">About</a></li>' +
     '      <li class="nav-dropdown">' +
-    '        <a href="services.html" class="nav-link' + (a === 'services' ? ' active' : '') + '">Services' +
+    '        <a href="' + h('services') + '" class="nav-link' + (a === 'services' ? ' active' : '') + '">Services' +
     '          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
     '        </a>' +
     megaHTML +
@@ -78,7 +78,7 @@
     '<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation">' +
     '  <ul>' +
     '    <li><a href="' + h('about') + '">About</a></li>' +
-    '    <li><a href="services.html">Services</a></li>' +
+    '    <li><a href="' + h('services') + '">Services</a></li>' +
     '    <li><a href="status.html">Track My Application</a></li>' +
     '    <li><a href="' + h('industries') + '">Industries</a></li>' +
     '    <li><a href="' + h('projects') + '">Success Stories</a></li>' +
