@@ -22,7 +22,7 @@
     '  <div class="nav-container">' +
     '    <a href="' + (base || 'index.html') + '" class="nav-logo" aria-label="CNT Home"><img src="' + LOGO + '" alt="CNT Promo & Ads Specialists, Inc." /></a>' +
     '    <ul class="nav-links" role="list">' +
-    '      <li><a href="' + h('about') + '" class="nav-link">About</a></li>' +
+    '      <li><a href="about.html" class="nav-link' + (a === 'about' ? ' active' : '') + '">About</a></li>' +
     '      <li class="nav-dropdown">' +
     '        <a href="' + h('services') + '" class="nav-link">Services' +
     '          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
@@ -49,7 +49,7 @@
     '</nav>' +
     '<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation">' +
     '  <ul>' +
-    '    <li><a href="' + h('about') + '">About</a></li>' +
+    '    <li><a href="about.html">About</a></li>' +
     '    <li><a href="' + h('services') + '">Services</a></li>' +
     '    <li><a href="status.html">Track My Application</a></li>' +
     '    <li><a href="' + h('industries') + '">Industries</a></li>' +
@@ -86,7 +86,7 @@
     '      <li><a href="' + h('industries') + '">Government</a></li><li><a href="' + h('industries') + '">Technology</a></li>' +
     '      <li><a href="' + h('industries') + '">Retail &amp; FMCG</a></li><li><a href="' + h('industries') + '">Logistics</a></li></ul></div>' +
     '    <div class="footer-col"><h5>Company</h5><ul>' +
-    '      <li><a href="' + h('about') + '">About Us</a></li><li><a href="' + h('projects') + '">Success Stories</a></li>' +
+    '      <li><a href="about.html">About Us</a></li><li><a href="' + h('projects') + '">Success Stories</a></li>' +
     '      <li><a href="careers.html">Careers</a></li><li><a href="' + h('contact') + '">Contact</a></li></ul>' +
     '      <h5 style="margin-top:1.75rem">Stay Updated</h5>' +
     '      <div class="newsletter-form"><input type="email" id="nl-email" placeholder="Your email" aria-label="Newsletter email" /><button id="nl-btn" aria-label="Subscribe">&rarr;</button></div>' +
