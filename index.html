@@ -1053,6 +1053,40 @@ input, select, textarea { font-family: var(--font-body); }
 .faq-a { padding: 0 1.4rem 1.25rem; color: var(--text-sub); line-height: 1.7; font-size: .95rem; }
 .faq-a a { color: var(--red); font-weight: 600; }
 
+/* ══════════════════════════════════════════════════════════════
+   BOLD & PREMIUM restyle — appended last so it wins by source order.
+   Bigger headlines, separated cards with real depth, confident CTAs.
+   ══════════════════════════════════════════════════════════════ */
+.hero-headline { font-size: clamp(3.1rem, 7vw, 6rem); line-height: .98; letter-spacing: -.045em; }
+.hero-sub { font-size: clamp(1.05rem, 1.6vw, 1.25rem); max-width: 50ch; }
+.section-heading { font-size: clamp(2.35rem, 5vw, 4rem); letter-spacing: -.035em; line-height: 1.04; }
+.section-eyebrow { font-size: .78rem; letter-spacing: .2em; gap: .7rem; margin-bottom: 1.25rem; }
+.section-eyebrow::before { width: 32px; }
+.section { padding: clamp(84px, 10vw, 150px) 0; }
+
+/* Services & Events: flat divider grid → separated premium cards */
+.services-grid { gap: clamp(16px, 2vw, 24px); background: transparent; border: none; }
+.service-card {
+  border: 1px solid var(--gray-100); border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(16,24,40,.04);
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, border-color .35s, background .35s;
+}
+.service-card:hover { transform: translateY(-8px); box-shadow: 0 30px 60px rgba(16,24,40,.14); border-color: var(--red-muted); background: var(--white); }
+.service-card::after { height: 4px; border-radius: 20px 20px 0 0; }
+.service-icon { width: 60px; height: 60px; border-radius: 16px; margin-bottom: 1.75rem; }
+.service-icon svg { width: 30px; height: 30px; }
+
+/* Premium depth + lift on the other card families */
+.project-card { box-shadow: 0 8px 30px rgba(16,24,40,.08); transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s; }
+.project-card:hover { transform: translateY(-8px); box-shadow: 0 40px 80px rgba(16,24,40,.20); }
+.testimonial-card { border-radius: 20px; box-shadow: 0 2px 10px rgba(16,24,40,.05); transition: transform .3s, box-shadow .3s; }
+.testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 24px 50px rgba(16,24,40,.12); }
+
+/* Confident CTAs */
+.btn-primary { padding: 1.05rem 2.5rem; font-size: 1.02rem; border-radius: 12px; box-shadow: 0 12px 34px rgba(200,16,46,.30); }
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(200,16,46,.38); }
+.btn-outline, .btn-ghost, .btn-ghost-dark { padding: 1.05rem 2.3rem; font-size: 1.02rem; border-radius: 12px; }
+
 </style>
 </head>
 <body>
