@@ -74,6 +74,15 @@
   .hero-search button{background:var(--red);color:#fff;border-radius:99px;padding:11px 22px;font-weight:600;font-size:.9rem}
 
   /* LAYOUT */
+  /* Anti-scam trust banner */
+  .free-banner{background:#ECFDF3;border-bottom:1px solid #BBE9CC}
+  .free-banner .container{display:flex;align-items:center;gap:16px;padding:16px 20px}
+  .fb-icon{width:46px;height:46px;border-radius:13px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 16px rgba(22,163,74,.28)}
+  .fb-icon svg{width:25px;height:25px}
+  .fb-text strong{display:block;color:#0F5132;font-weight:800;font-size:1.02rem;letter-spacing:-.01em;margin-bottom:2px}
+  .fb-text span{color:#12683B;font-size:.9rem;line-height:1.55}
+  .fb-text a{color:#0F5132;font-weight:800;text-decoration:underline}
+  @media(max-width:560px){.free-banner .container{align-items:flex-start}.fb-text strong{font-size:.96rem}}
   .board{padding:clamp(40px,6vw,72px) 0 100px}
   .layout{display:grid;grid-template-columns:250px 1fr;gap:40px;align-items:start}
 
@@ -235,6 +244,19 @@
         </div>
       </div>
     </header>
+
+    <!-- Anti-scam trust banner: recruitment is always free for applicants -->
+    <div class="free-banner">
+      <div class="container">
+        <div class="fb-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="fb-text">
+          <strong>Applying to CNT is 100% free.</strong>
+          <span>We never charge jobseekers a placement fee, deposit, or payment of any kind — ever. If anyone claiming to represent CNT asks you for money, it is a scam. <a href="index.html#contact">Report it to us.</a></span>
+        </div>
+      </div>
+    </div>
 
     <main class="board" id="board">
       <div class="container">
