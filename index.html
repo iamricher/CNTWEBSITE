@@ -1309,7 +1309,10 @@ input, select, textarea { font-family: var(--font-body); }
           </div>
         </div>
 
-        <a href="#contact" class="btn-primary" data-reveal>Partner With Us</a>
+        <div class="about-cta" data-reveal style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+          <a href="about.html" class="btn-primary">Learn More About Us</a>
+          <a href="#contact" class="btn-ghost-dark">Partner With Us</a>
+        </div>
       </div>
     </div>
   </div>
@@ -2598,7 +2601,13 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
           +'</div>';
         }).join('');
         var sec=document.getElementById('insights-teaser');
-        if(sec){ sec.style.display=''; sec.querySelectorAll('[data-reveal]').forEach(function(n){ n.classList.add('revealed'); }); }
+        if(sec){
+          sec.style.display=''; sec.querySelectorAll('[data-reveal]').forEach(function(n){ n.classList.add('revealed'); });
+          // If we arrived via the "Insights" nav link (#insights-teaser), the
+          // section was still hidden during the browser's initial anchor jump —
+          // scroll to it now that it's visible.
+          if(location.hash==='#insights-teaser'){ setTimeout(function(){ var nav=document.getElementById('nav'); var off=(nav?nav.offsetHeight:0)+20; window.scrollTo({top:sec.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'}); },80); }
+        }
       });
   }
 })();

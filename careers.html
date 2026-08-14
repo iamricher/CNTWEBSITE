@@ -96,7 +96,7 @@
   .group-title{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--charcoal);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--gray-100)}
   .group-title .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
   .group-title .n{margin-left:auto;font-size:.78rem;font-weight:600;color:var(--gray-400)}
-  .job-row{display:flex;align-items:center;gap:18px;padding:18px 20px;background:#fff;border:1px solid var(--gray-100);border-radius:var(--radius-md);margin-bottom:10px;cursor:pointer;transition:var(--transition);position:relative}
+  .job-row{display:flex;align-items:center;gap:18px;padding:18px 20px;background:#fff;border:1px solid var(--gray-100);border-radius:var(--radius-md);margin-bottom:10px;cursor:pointer;transition:var(--transition);position:relative;text-decoration:none;color:inherit}
   .job-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);border-radius:3px 0 0 3px;transform:scaleY(0);transform-origin:center;transition:var(--transition)}
   .job-row:hover{border-color:var(--red-muted);box-shadow:var(--shadow-sm);transform:translateX(3px)}
   .job-row:hover::before{transform:scaleY(1)}
@@ -426,6 +426,43 @@
   const $ = (s)=>document.querySelector(s);
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function formatSalary(s){ if(!s) return 'Competitive'; const p=String(s).replace(/₱/g,'').split('-').map(x=>x.trim()).filter(Boolean); return p.length===2?'₱'+p[0]+' - ₱'+p[1]:'₱'+p.join(''); }
+
+  /* ---------- GOOGLE JOBS: JobPosting structured data ----------
+     Emits schema.org JobPosting JSON-LD so openings can surface in Google
+     Search's jobs experience. One posting per detail page (?job=id); the
+     list page emits all open jobs so they're discoverable either way. */
+  const ORG_URL='https://cnt-website-ats.vercel.app';
+  function jobPostingLD(job){
+    const info=ROLE_INFO[job.role]||{};
+    const about=(job.about&&job.about.trim())||info.summary||('Open '+job.role+' position at CNT Promo & Ads Specialists, Inc.');
+    const toArr=t=>t?String(t).split('\n').map(s=>s.trim()).filter(Boolean):[];
+    const resp=toArr(job.responsibilities).length?toArr(job.responsibilities):(info.resp||[]);
+    const must=toArr(job.must_have).length?toArr(job.must_have):(info.must||[]);
+    let desc='<p>'+esc(about)+'</p>';
+    if(resp.length) desc+='<p><b>Responsibilities</b></p><ul>'+resp.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+    if(must.length) desc+='<p><b>Qualifications</b></p><ul>'+must.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+    let posted; try{ posted=new Date(job.created_at||job.inserted_at||Date.now()).toISOString(); }catch(_){ posted=new Date().toISOString(); }
+    const through=new Date(new Date(posted).getTime()+60*864e5).toISOString();
+    const sal=String(job.salary_range||'').replace(/[₱,\s]/g,'').split('-').map(x=>parseFloat(x)).filter(n=>!isNaN(n));
+    const o={
+      "@context":"https://schema.org/","@type":"JobPosting",
+      "title":job.role,"description":desc,"datePosted":posted,"validThrough":through,
+      "employmentType":"FULL_TIME","directApply":true,
+      "identifier":{"@type":"PropertyValue","name":"CNT","value":String(job.id)},
+      "hiringOrganization":{"@type":"Organization","name":"CNT Promo & Ads Specialists, Inc.","sameAs":ORG_URL,"logo":"https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png"},
+      "jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","addressLocality":job.location||"Metro Manila","addressCountry":"PH"}},
+      "url":ORG_URL+"/careers.html?job="+job.id
+    };
+    if(sal.length){ o.baseSalary={"@type":"MonetaryAmount","currency":"PHP","value":sal.length>1?{"@type":"QuantitativeValue","minValue":sal[0],"maxValue":sal[1],"unitText":"MONTH"}:{"@type":"QuantitativeValue","value":sal[0],"unitText":"MONTH"}}; }
+    return o;
+  }
+  function syncJobSchema(){
+    document.querySelectorAll('script[data-job-ld]').forEach(s=>s.remove());
+    const add=obj=>{ const s=document.createElement('script'); s.type='application/ld+json'; s.setAttribute('data-job-ld',''); s.textContent=JSON.stringify(obj).replace(/<\/(script)/gi,'<\\/$1'); document.head.appendChild(s); };
+    const id=new URLSearchParams(location.search).get('job');
+    if(id){ const j=ALL_JOBS.find(x=>String(x.id)===String(id)); if(j){ add(jobPostingLD(j)); return; } }
+    ALL_JOBS.slice(0,80).forEach(j=>add(jobPostingLD(j)));
+  }
   const pinSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
   const cashSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
   const usersSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>';
@@ -475,16 +512,16 @@
     $('#groups').innerHTML=list.map(j=>{
       const info=ROLE_INFO[j.role];
       const snip=info?info.summary:'Join the CNT team and grow your career with a leading brand.';
-      return `<div class="job-row" data-id="${j.id}">
+      return `<a class="job-row" href="careers.html?job=${j.id}" data-id="${j.id}">
         <div class="main">
           <div class="title">${esc(j.role)}</div>
           <div class="snippet">${esc(snip)}</div>
           <div class="meta"><span>${pinSvg}${esc(j.location)}</span><span>${esc(formatSalary(j.salary_range))}</span></div>
         </div>
         <div class="go"><span class="openpill">${(+j.openings||1)} opening${(+j.openings||1)!==1?'s':''}</span><span class="arrow">→</span></div>
-      </div>`;
+      </a>`;
     }).join('');
-    document.querySelectorAll('.job-row').forEach(r=>r.addEventListener('click',()=>gotoJob(+r.dataset.id)));
+    document.querySelectorAll('.job-row').forEach(r=>r.addEventListener('click',e=>{ if(e.metaKey||e.ctrlKey||e.shiftKey||e.button) return; e.preventDefault(); gotoJob(+r.dataset.id); }));
   }
 
   $('#q').addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); renderList(); });
@@ -496,6 +533,7 @@
     const id=new URLSearchParams(location.search).get('job');
     if(id && ALL_JOBS.some(j=>String(j.id)===String(id))){ showDetail(ALL_JOBS.find(j=>String(j.id)===String(id))); }
     else { showList(); }
+    syncJobSchema();
   }
   function showList(){ $('#view-detail').style.display='none'; $('#view-list').style.display='block'; renderList(); }
 

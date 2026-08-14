@@ -22,7 +22,7 @@
     '  <div class="nav-container">' +
     '    <a href="' + (base || 'index.html') + '" class="nav-logo" aria-label="CNT Home"><img src="' + LOGO + '" alt="CNT Promo & Ads Specialists, Inc." /></a>' +
     '    <ul class="nav-links" role="list">' +
-    '      <li><a href="about.html" class="nav-link' + (a === 'about' ? ' active' : '') + '">About</a></li>' +
+    '      <li><a href="' + h('about') + '" class="nav-link' + (a === 'about' ? ' active' : '') + '">About</a></li>' +
     '      <li class="nav-dropdown">' +
     '        <a href="' + h('services') + '" class="nav-link">Services' +
     '          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
@@ -39,7 +39,7 @@
     '      <li><a href="' + h('industries') + '" class="nav-link">Industries</a></li>' +
     '      <li><a href="' + h('projects') + '" class="nav-link">Success Stories</a></li>' +
     '      <li><a href="' + h('events') + '" class="nav-link' + (a === 'events' ? ' active' : '') + '">Events</a></li>' +
-    '      <li><a href="insights.html" class="nav-link' + (a === 'insights' ? ' active' : '') + '">Insights</a></li>' +
+    '      <li><a href="' + h('insights-teaser') + '" class="nav-link' + (a === 'insights' ? ' active' : '') + '">Insights</a></li>' +
     '      <li><a href="careers.html" class="nav-link' + (a === 'careers' ? ' active' : '') + '">Careers</a></li>' +
     '    </ul>' +
     '    <div class="nav-actions">' +
@@ -50,13 +50,13 @@
     '</nav>' +
     '<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation">' +
     '  <ul>' +
-    '    <li><a href="about.html">About</a></li>' +
+    '    <li><a href="' + h('about') + '">About</a></li>' +
     '    <li><a href="' + h('services') + '">Services</a></li>' +
     '    <li><a href="status.html">Track My Application</a></li>' +
     '    <li><a href="' + h('industries') + '">Industries</a></li>' +
     '    <li><a href="' + h('projects') + '">Success Stories</a></li>' +
     '    <li><a href="' + h('events') + '">Events</a></li>' +
-    '    <li><a href="insights.html">Insights</a></li>' +
+    '    <li><a href="' + h('insights-teaser') + '">Insights</a></li>' +
     '    <li><a href="careers.html">Careers</a></li>' +
     '    <li><a href="' + h('contact') + '">Contact</a></li>' +
     '  </ul>' +
