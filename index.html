@@ -1095,6 +1095,15 @@ input, select, textarea { font-family: var(--font-body); }
 }
 .hero-headline { text-shadow: 0 4px 50px rgba(0,0,0,.45); }
 .hero-headline .red-word { color: var(--red-lt); text-shadow: 0 0 44px rgba(229,33,63,.45); }
+/* Seam blend: fade the photo's left edge into the dark content side (matched to #0d0d0d) */
+.hero-img-overlay {
+  background: linear-gradient(90deg,
+    #0d0d0d 0%,
+    rgba(13,13,13,.92) 14%,
+    rgba(18,18,18,.5) 38%,
+    rgba(18,18,18,.14) 62%,
+    transparent 80%);
+}
 
 </style>
 </head>
