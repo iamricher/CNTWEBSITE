@@ -19,29 +19,28 @@
     var h = function (hash) { return base + '#' + hash; };
     // Corporate services mega-menu: icon + name + one-line description per
     // service, grouped into three columns, plus a featured contact panel.
-    var svc = h('services');
     var ico = function (p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>'; };
     var megaCols = [
       ['Staffing', [
-        ['Executive Search', 'Leadership &amp; specialist roles', '<circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/>'],
-        ['Mass &amp; Bulk Hiring', 'High-volume, fast deployment', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>'],
-        ['Contractual Staffing', 'Flexible, project-based teams', '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>']
+        ['Executive Search', 'Leadership &amp; specialist roles', '<circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/>', 'executive-search'],
+        ['Mass &amp; Bulk Hiring', 'High-volume, fast deployment', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>', 'mass-hiring'],
+        ['Contractual Staffing', 'Flexible, project-based teams', '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>', 'contractual-staffing']
       ]],
       ['Corporate', [
-        ['HR Outsourcing', 'End-to-end people operations', '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>'],
-        ['Payroll Management', 'Accurate, compliant payroll', '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'],
-        ['Compliance Advisory', 'DOLE &amp; labor compliance', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>']
+        ['HR Outsourcing', 'End-to-end people operations', '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>', 'hr-outsourcing'],
+        ['Payroll Management', 'Accurate, compliant payroll', '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>', 'payroll'],
+        ['Compliance Advisory', 'DOLE &amp; labor compliance', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>', 'compliance']
       ]],
       ['Solutions', [
-        ['Training &amp; Development', 'Upskilling your workforce', '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'],
-        ['Background Screening', 'Verified, trustworthy hires', '<circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/><path d="M8 11h6"/>'],
-        ['Workforce Consulting', 'Strategic workforce planning', '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>']
+        ['Training &amp; Development', 'Upskilling your workforce', '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>', 'training'],
+        ['Background Screening', 'Verified, trustworthy hires', '<circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/><path d="M8 11h6"/>', 'background-screening'],
+        ['Workforce Consulting', 'Strategic workforce planning', '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>', 'consulting']
       ]]
     ];
     var megaColsHTML = megaCols.map(function (col) {
       return '<div class="mega-col"><span class="mega-label">' + col[0] + '</span>' +
         col[1].map(function (it) {
-          return '<a class="mega-item" href="' + svc + '"><span class="mega-ic">' + ico(it[2]) + '</span>' +
+          return '<a class="mega-item" href="services.html#' + it[3] + '"><span class="mega-ic">' + ico(it[2]) + '</span>' +
             '<span class="mega-tx"><b>' + it[0] + '</b><small>' + it[1] + '</small></span></a>';
         }).join('') + '</div>';
     }).join('');
@@ -60,7 +59,7 @@
     '    <ul class="nav-links" role="list">' +
     '      <li><a href="' + h('about') + '" class="nav-link' + (a === 'about' ? ' active' : '') + '">About</a></li>' +
     '      <li class="nav-dropdown">' +
-    '        <a href="' + h('services') + '" class="nav-link">Services' +
+    '        <a href="services.html" class="nav-link' + (a === 'services' ? ' active' : '') + '">Services' +
     '          <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' +
     '        </a>' +
     megaHTML +
@@ -79,7 +78,7 @@
     '<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Mobile navigation">' +
     '  <ul>' +
     '    <li><a href="' + h('about') + '">About</a></li>' +
-    '    <li><a href="' + h('services') + '">Services</a></li>' +
+    '    <li><a href="services.html">Services</a></li>' +
     '    <li><a href="status.html">Track My Application</a></li>' +
     '    <li><a href="' + h('industries') + '">Industries</a></li>' +
     '    <li><a href="' + h('projects') + '">Success Stories</a></li>' +
@@ -107,9 +106,9 @@
     '      </div>' +
     '    </div>' +
     '    <div class="footer-col"><h5>Services</h5><ul>' +
-    '      <li><a href="' + h('services') + '">Executive Search</a></li><li><a href="' + h('services') + '">Mass &amp; Bulk Hiring</a></li>' +
-    '      <li><a href="' + h('services') + '">HR Outsourcing</a></li><li><a href="' + h('services') + '">Contractual Staffing</a></li>' +
-    '      <li><a href="' + h('services') + '">Background Screening</a></li><li><a href="' + h('services') + '">Training &amp; Development</a></li></ul></div>' +
+    '      <li><a href="services.html#executive-search">Executive Search</a></li><li><a href="services.html#mass-hiring">Mass &amp; Bulk Hiring</a></li>' +
+    '      <li><a href="services.html#hr-outsourcing">HR Outsourcing</a></li><li><a href="services.html#contractual-staffing">Contractual Staffing</a></li>' +
+    '      <li><a href="services.html#background-screening">Background Screening</a></li><li><a href="services.html#training">Training &amp; Development</a></li></ul></div>' +
     '    <div class="footer-col"><h5>Industries</h5><ul>' +
     '      <li><a href="' + h('industries') + '">Banking &amp; Finance</a></li><li><a href="' + h('industries') + '">Healthcare</a></li>' +
     '      <li><a href="' + h('industries') + '">Government</a></li><li><a href="' + h('industries') + '">Technology</a></li>' +

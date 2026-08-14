@@ -16,6 +16,10 @@
   --font-display:'Manrope',sans-serif;
 }
 
+/* Links inside the injected chrome never underline, regardless of the
+   host page's own <a> defaults (fixes pages without a global a{} reset). */
+#site-header a, #site-footer a{ text-decoration:none; }
+
 /* ── NAVBAR (solid, sticky — matches the homepage scrolled state) ── */
 .nav{
   position:sticky; top:0; left:0; right:0; z-index:900;

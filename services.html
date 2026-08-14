@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="End-to-end workforce solutions from CNT: executive search, mass & bulk hiring, contractual staffing, HR outsourcing, payroll, compliance, training, background screening, and workforce consulting across the Philippines." />
+  <link rel="canonical" href="https://cnt-website-ats.vercel.app/services.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Services — CNT Promo & Ads Specialists, Inc." />
+  <meta property="og:description" content="End-to-end workforce solutions across the Philippines — staffing, HR outsourcing, payroll, compliance, training, and more." />
+  <meta property="og:image" content="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
+  <style>
+    :root{--red:#C8102E;--red-deep:#A50D24;--red-lt:#E5213F;--red-pale:#FFF0F2;--charcoal:#1A1A1A;--ink:#161616;--sub:#4A4A4A;--muted:#6B7280;--line:#ECECEC;--bg:#FBFAF8}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;line-height:1.7}
+    a{text-decoration:none;color:inherit}
+    .wrap{width:min(1140px,100% - 44px);margin-inline:auto}
+    /* Hero */
+    .svc-hero{position:relative;background:linear-gradient(160deg,#1f1f1f,#0d0d0d);color:#fff;padding:clamp(70px,11vw,130px) 0 clamp(48px,7vw,80px);overflow:hidden}
+    .svc-hero::after{content:"";position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.34),transparent 62%)}
+    .svc-hero .wrap{position:relative;z-index:2}
+    .svc-hero .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--red-lt);margin-bottom:1.1rem;display:flex;align-items:center;gap:.7rem}
+    .svc-hero .eyebrow::before{content:'';width:30px;height:2px;background:var(--red-lt)}
+    .svc-hero h1{font-family:'Manrope',sans-serif;font-size:clamp(2.4rem,6vw,4rem);font-weight:800;letter-spacing:-.03em;line-height:1.04;max-width:16ch}
+    .svc-hero h1 em{font-style:normal;color:var(--red-lt)}
+    .svc-hero p{color:rgba(255,255,255,.66);margin-top:1.3rem;font-size:clamp(1rem,2vw,1.16rem);max-width:60ch}
+    .svc-hero .stats{display:flex;gap:clamp(24px,5vw,56px);margin-top:clamp(32px,5vw,48px);flex-wrap:wrap}
+    .svc-hero .stat b{font-family:'Manrope',sans-serif;display:block;font-size:clamp(1.6rem,3vw,2.3rem);font-weight:800;letter-spacing:-.02em}
+    .svc-hero .stat span{font-size:.82rem;color:rgba(255,255,255,.55);font-weight:600}
+    /* Category sections */
+    .cat{padding:clamp(52px,8vw,88px) 0}
+    .cat + .cat{border-top:1px solid var(--line)}
+    .cat-head{margin-bottom:clamp(28px,4vw,44px)}
+    .cat-head .k{font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-bottom:.7rem}
+    .cat-head h2{font-family:'Manrope',sans-serif;font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:800;letter-spacing:-.02em;color:var(--charcoal)}
+    .cat-head p{color:var(--sub);margin-top:.6rem;max-width:60ch}
+    .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.4vw,28px)}
+    .svc-card{border:1px solid var(--line);border-radius:16px;padding:clamp(1.5rem,2.4vw,2rem);background:#fff;display:flex;flex-direction:column;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+    .svc-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(16,24,40,.10);border-color:#F3B6BF}
+    .svc-ic{width:52px;height:52px;border-radius:13px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;margin-bottom:1.3rem;transition:background .2s ease,color .2s ease}
+    .svc-card:hover .svc-ic{background:var(--red);color:#fff}
+    .svc-ic svg{width:26px;height:26px}
+    .svc-card h3{font-family:'Manrope',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:-.01em;color:var(--charcoal);margin-bottom:.55rem}
+    .svc-card > p{font-size:.92rem;color:var(--sub);line-height:1.6}
+    .svc-card ul{list-style:none;margin:1.1rem 0 0;padding:0;display:flex;flex-direction:column;gap:.55rem}
+    .svc-card li{position:relative;padding-left:1.6rem;font-size:.875rem;color:var(--ink)}
+    .svc-card li::before{content:"";position:absolute;left:0;top:.35rem;width:14px;height:14px;border-radius:50%;background:var(--red-pale);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23C8102E' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
+    .svc-card .go{margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-size:.85rem;font-weight:700;color:var(--red);display:inline-flex;align-items:center;gap:.4rem}
+    .svc-card .go svg{transition:transform .18s ease}
+    .svc-card:hover .go svg{transform:translateX(4px)}
+    /* Final CTA */
+    .svc-cta{background:linear-gradient(158deg,#6C0E1A,#2A0C12);color:#fff;padding:clamp(52px,8vw,88px) 0;text-align:center}
+    .svc-cta h2{font-family:'Manrope',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-.02em}
+    .svc-cta p{color:rgba(255,255,255,.72);margin:1rem auto 2rem;max-width:52ch}
+    .svc-cta .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .btn-w{background:#fff;color:var(--red-deep);font-weight:800;padding:14px 28px;border-radius:12px;font-size:.95rem;display:inline-flex;align-items:center;gap:.5rem;transition:transform .18s ease}
+    .btn-w:hover{transform:translateY(-2px)}
+    .btn-o{border:1.5px solid rgba(255,255,255,.4);color:#fff;font-weight:800;padding:14px 28px;border-radius:12px;font-size:.95rem;transition:background .18s ease}
+    .btn-o:hover{background:rgba(255,255,255,.1)}
+    @media(max-width:900px){.svc-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){.svc-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="site-header" data-active="services"></div>
+
+  <header class="svc-hero">
+    <div class="wrap">
+      <div class="eyebrow">Our Services</div>
+      <h1>End-to-end <em>workforce solutions</em> for the Philippines.</h1>
+      <p>From a single executive hire to a nationwide workforce of thousands — CNT handles sourcing, screening, deployment, payroll, and compliance so you can focus on running your business.</p>
+      <div class="stats">
+        <div class="stat"><b>15+</b><span>Years in manpower services</span></div>
+        <div class="stat"><b>10,000+</b><span>Workers deployed</span></div>
+        <div class="stat"><b>Nationwide</b><span>Luzon · Visayas · Mindanao</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- STAFFING -->
+  <section class="cat">
+    <div class="wrap">
+      <div class="cat-head">
+        <div class="k">Staffing Solutions</div>
+        <h2>Find the right people, fast.</h2>
+        <p>Whether you need one specialist or an entire team, our recruiters source, screen, and deploy talent that fits your role and culture.</p>
+      </div>
+      <div class="svc-grid">
+        <div class="svc-card" id="executive-search">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg></div>
+          <h3>Executive Search</h3>
+          <p>Discreet, research-driven headhunting for C-suite, director, and senior management roles you can't afford to get wrong.</p>
+          <ul><li>Confidential search &amp; market mapping</li><li>Rigorous assessment &amp; referencing</li><li>Shortlist of pre-qualified leaders</li><li>Post-placement follow-through</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="svc-card" id="mass-hiring">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+          <h3>Mass &amp; Bulk Hiring</h3>
+          <p>Large-scale recruitment campaigns managed end to end — scaling your workforce rapidly without sacrificing candidate quality.</p>
+          <ul><li>Nationwide sourcing reach</li><li>High-volume screening pipeline</li><li>Job fairs &amp; walk-in drives</li><li>Fast, predictable time-to-fill</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="svc-card" id="contractual-staffing">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+          <h3>Contractual Staffing</h3>
+          <p>Project-based, seasonal, and contractual deployment — a fully managed engagement including payroll, benefits, and labor compliance.</p>
+          <ul><li>Flexible, scalable headcount</li><li>Fully managed engagement</li><li>Payroll &amp; benefits handled</li><li>DOLE-compliant contracts</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CORPORATE -->
+  <section class="cat">
+    <div class="wrap">
+      <div class="cat-head">
+        <div class="k">Corporate Services</div>
+        <h2>Run your people operations, worry-free.</h2>
+        <p>Offload the administrative weight of HR, payroll, and compliance to a partner who does it every day — accurately and on time.</p>
+      </div>
+      <div class="svc-grid">
+        <div class="svc-card" id="hr-outsourcing">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+          <h3>HR Outsourcing</h3>
+          <p>Full-service HR function management — from recruitment and onboarding to performance management and employee relations.</p>
+          <ul><li>End-to-end people operations</li><li>Onboarding &amp; records management</li><li>Performance &amp; employee relations</li><li>Lower overhead, less admin</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="svc-card" id="payroll">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <h3>Payroll Management</h3>
+          <p>Accurate, on-time, fully compliant payroll processing for your entire workforce — down to the last government remittance.</p>
+          <ul><li>Timely salary disbursement</li><li>SSS, PhilHealth, Pag-IBIG &amp; BIR computations</li><li>Payslip generation</li><li>Government remittances filed</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="svc-card" id="compliance">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <h3>Compliance Advisory</h3>
+          <p>Practical guidance on DOLE and Philippine labor law so your operations stay protected and audit-ready.</p>
+          <ul><li>Labor law advisory</li><li>Contract &amp; policy review</li><li>DOLE compliance support</li><li>Risk mitigation</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TALENT SOLUTIONS -->
+  <section class="cat">
+    <div class="wrap">
+      <div class="cat-head">
+        <div class="k">Talent Solutions</div>
+        <h2>Strengthen and safeguard your workforce.</h2>
+        <p>Beyond hiring — we help you develop your people, verify who you bring on board, and plan your workforce for what's next.</p>
+      </div>
+      <div class="svc-grid">
+        <div class="svc-card" id="training">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+          <h3>Training &amp; Development</h3>
+          <p>Upskilling programs that raise the performance and retention of your workforce, from new-hire orientation to leadership.</p>
+          <ul><li>Onboarding &amp; orientation</li><li>Skills &amp; product training</li><li>Leadership development</li><li>Customized modules</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="svc-card" id="background-screening">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/><path d="M8 11h6"/></svg></div>
+          <h3>Background Screening</h3>
+          <p>Thorough pre-employment verification so every hire is someone you can trust from day one.</p>
+          <ul><li>Employment &amp; education checks</li><li>Character &amp; reference checks</li><li>NBI / clearance verification</li><li>Fast turnaround</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="svc-card" id="consulting">
+          <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+          <h3>Workforce Consulting</h3>
+          <p>Strategic workforce planning aligned to your business goals — so you scale with the right people at the right time.</p>
+          <ul><li>Manpower planning</li><li>Org &amp; role design</li><li>Market &amp; salary benchmarking</li><li>Scalability strategy</li></ul>
+          <a class="go" href="index.html#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="svc-cta">
+    <div class="wrap">
+      <h2>Let's build your team.</h2>
+      <p>Tell us what you need — one role or a thousand — and our team will put together a workforce plan built around your business.</p>
+      <div class="btns">
+        <a class="btn-w" href="index.html#contact">Request a Consultation <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn-o" href="careers.html">Looking for a job?</a>
+      </div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"CNT Promo & Ads Specialists, Inc.","url":"https://cnt-website-ats.vercel.app/","logo":"https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png","makesOffer":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"Executive Search"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Mass & Bulk Hiring"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Contractual Staffing"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"HR Outsourcing"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Payroll Management"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Compliance Advisory"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Training & Development"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Background Screening"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Workforce Consulting"}}]}
+  </script>
+</body>
+</html>
