@@ -2477,13 +2477,18 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
 <script src="assets/supabase-config.js"></script>
 <script>
 (function(){
-  var grid=document.getElementById('events-grid');
   var sb=(window.getSupabase&&window.getSupabase());
-  if(!grid||!sb) return;   // keep the built-in sample cards as a fallback
   var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-  sb.from('events').select('*').eq('published',true).order('created_at',{ascending:false}).limit(9).then(function(res){
+  var hideSection=function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; };
+
+  // Events & Updates — show only events published in Content Studio; hide the
+  // whole section when there are none (no placeholder cards).
+  var grid=document.getElementById('events-grid');
+  if(!grid){ /* nothing to do */ }
+  else if(!sb){ hideSection('events'); }
+  else sb.from('events').select('*').eq('published',true).order('created_at',{ascending:false}).limit(9).then(function(res){
     var data=res.data;
-    if(res.error||!data||!data.length) return;   // nothing published yet → keep fallback
+    if(res.error||!data||!data.length){ hideSection('events'); return; }
     grid.innerHTML=data.map(function(ev){
       var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='event.html?id='+encodeURIComponent(ev.id);
       return '<div class="service-card" style="cursor:pointer;" onclick="location.href=\''+link+'\'">'
@@ -2497,25 +2502,27 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
         +'<a href="'+link+'" class="service-link">Read more <span>→</span></a>'
       +'</div>';
     }).join('');
-  });
-  // Success Stories — replace the built-in mosaic with published stories from the DB
+  }, function(){ hideSection('events'); });
+
+  // Success Stories — show only stories published in Content Studio; hide the
+  // whole section when there are none.
   var sgrid=document.getElementById('stories-grid');
-  if(sgrid){
-    sb.from('stories').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false}).limit(9).then(function(res){
-      var rows=res.data;
-      if(res.error||!rows||!rows.length) return;   // keep the built-in cards as a fallback
-      sgrid.innerHTML=rows.map(function(s){
-        var img=s.image_url?'<img src="'+esc(s.image_url)+'" alt="'+esc(s.title||'')+'">':'';
-        var imgBg=s.image_url?'':'style="background:linear-gradient(135deg,#1A1A1A,#C8102E);"';
-        return '<div class="project-card"><div class="project-img" '+imgBg+'>'+img+'</div>'
-          +'<div class="project-overlay"><div class="project-info">'
-            +(s.category?'<span class="project-cat">'+esc(s.category)+'</span>':'')
-            +'<h4>'+esc(s.title||'')+'</h4>'
-            +(s.description?'<p>'+esc(s.description)+'</p>':'')
-          +'</div></div></div>';
-      }).join('');
-    });
-  }
+  if(!sgrid){ /* nothing to do */ }
+  else if(!sb){ hideSection('projects'); }
+  else sb.from('stories').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false}).limit(9).then(function(res){
+    var rows=res.data;
+    if(res.error||!rows||!rows.length){ hideSection('projects'); return; }
+    sgrid.innerHTML=rows.map(function(s){
+      var img=s.image_url?'<img src="'+esc(s.image_url)+'" alt="'+esc(s.title||'')+'">':'';
+      var imgBg=s.image_url?'':'style="background:linear-gradient(135deg,#1A1A1A,#C8102E);"';
+      return '<div class="project-card"><div class="project-img" '+imgBg+'>'+img+'</div>'
+        +'<div class="project-overlay"><div class="project-info">'
+          +(s.category?'<span class="project-cat">'+esc(s.category)+'</span>':'')
+          +'<h4>'+esc(s.title||'')+'</h4>'
+          +(s.description?'<p>'+esc(s.description)+'</p>':'')
+        +'</div></div></div>';
+    }).join('');
+  }, function(){ hideSection('projects'); });
 })();
 </script>
 
