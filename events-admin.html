@@ -7,7 +7,7 @@
   <title>Content Studio — CNT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" />
   <link rel="icon" type="image/png" href="https://uploads.onecompiler.io/43d4zm644/44r932epq/icon.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,7 +23,7 @@
       --shadow:0 1px 3px rgba(16,24,40,.05), 0 10px 26px rgba(16,24,40,.06);
       --shadow-lg:0 30px 70px rgba(16,24,40,.22);
       --font:'Inter',system-ui,-apple-system,sans-serif;
-      --display:'Fraunces',var(--font);
+      --display:'Manrope',var(--font);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{-webkit-text-size-adjust:100%}
@@ -908,7 +908,7 @@
         var stars = '★★★★★'.slice(0, Math.max(1,Math.min(5, Number(t.rating||5))));
         var quote = String(t.quote||'').replace(/\s+/g,' ').trim();
         if(quote.length>90) quote = quote.slice(0,90)+'…';
-        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span><div class="thumb" style="font-family:\'Fraunces\',sans-serif;font-weight:800;font-size:.9rem;">'+esc(initials(t.author))+'</div>'
+        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span><div class="thumb" style="font-family:\'Manrope\',sans-serif;font-weight:800;font-size:.9rem;">'+esc(initials(t.author))+'</div>'
           +'<div class="t"><b>'+esc(t.author||'Anonymous')+'</b>'+pill
           +'<small><span class="views" style="color:#EAB308;letter-spacing:1px;">'+stars+'</span> · '+esc(quote)+'</small></div>'
           +'<div class="row-actions">'
