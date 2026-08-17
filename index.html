@@ -1889,15 +1889,15 @@ input, select, textarea { font-family: var(--font-body); }
 <section class="live-band" id="live-impact" aria-label="Our impact in real time" style="display:none">
   <div class="container">
     <div class="live-head" data-reveal>
-      <div class="live-pill"><span class="live-dot"></span> Live from our recruitment system</div>
-      <h2>Our impact, in real time</h2>
-      <p>These numbers update straight from CNT's live hiring operations — not marketing estimates.</p>
+      <div class="live-pill"><span class="live-dot"></span> Hiring right now</div>
+      <h2>Live openings across the Philippines</h2>
+      <p>Current hiring activity, straight from CNT's recruitment system — updated as roles open and applications come in.</p>
     </div>
     <div class="live-grid">
       <div class="live-card" data-reveal><div class="live-num"><span data-live="openings">0</span><span class="suffix">+</span></div><div class="live-label">Open positions now</div></div>
-      <div class="live-card" data-reveal><div class="live-num"><span data-live="partners">0</span><span class="suffix">+</span></div><div class="live-label">Partner companies</div></div>
-      <div class="live-card" data-reveal><div class="live-num"><span data-live="applications">0</span><span class="suffix">+</span></div><div class="live-label">Applications received</div></div>
-      <div class="live-card" data-reveal><div class="live-num"><span data-live="placed">0</span><span class="suffix">+</span></div><div class="live-label">Candidates placed</div></div>
+      <div class="live-card" data-reveal><div class="live-num"><span data-live="companies_hiring">0</span></div><div class="live-label">Companies hiring now</div></div>
+      <div class="live-card" data-reveal><div class="live-num"><span data-live="apps_month">0</span><span class="suffix">+</span></div><div class="live-label">Applications this month</div></div>
+      <div class="live-card" data-reveal><div class="live-num"><span data-live="locations">0</span></div><div class="live-label">Locations hiring</div></div>
     </div>
     <div class="live-foot" data-reveal>
       <a href="careers.html">See open positions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -2651,8 +2651,8 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     if(!sec||!sb||!sb.rpc) return;
     sb.rpc('cnt_public_stats').then(function(res){
       var d=res&&res.data; if(res.error||!d) return;
-      var vals={ openings:(d.openings||d.open_jobs||0), partners:(d.partners||0), applications:(d.applications||0), placed:(d.placed||0) };
-      if((vals.openings+vals.partners+vals.applications+vals.placed)<=0) return;   // nothing to show yet
+      var vals={ openings:(d.openings||d.open_jobs||0), companies_hiring:(d.companies_hiring||0), apps_month:(d.apps_month||0), locations:(d.locations||0) };
+      if((vals.openings+vals.companies_hiring+vals.apps_month+vals.locations)<=0) return;   // nothing to show yet
       sec.style.display='';
       var upd=document.getElementById('live-updated');
       if(upd){ try{ upd.textContent='Last updated '+new Date().toLocaleString('en-PH',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){} }

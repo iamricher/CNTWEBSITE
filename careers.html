@@ -304,6 +304,49 @@
           <span><b>Preview mode.</b> Showing sample positions. Once Supabase is configured, live openings load here and applications save to your ATS.</span>
         </div>
 
+        <!-- Smart Job Matcher — rank openings by how well they fit the applicant -->
+        <style>
+          .jm-card{border:1px solid var(--line,#ECECEC);border-radius:18px;padding:clamp(1.3rem,2.6vw,2rem);margin-bottom:26px;background:
+            linear-gradient(#fff,#fff) padding-box,linear-gradient(120deg,#C8102E,#E5213F,#ffb3bf) border-box;border:1.5px solid transparent;box-shadow:0 16px 40px rgba(16,24,40,.06)}
+          .jm-badge{display:inline-flex;align-items:center;gap:7px;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--red,#C8102E);background:var(--red-pale,#FFF0F2);padding:5px 12px;border-radius:99px}
+          .jm-head h2{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(1.3rem,2.6vw,1.7rem);font-weight:800;letter-spacing:-.02em;margin:.75rem 0 .35rem;color:var(--charcoal,#1A1A1A)}
+          .jm-head p{color:var(--text-sub,#555);font-size:.92rem;max-width:52ch}
+          .jm-suggest{display:flex;flex-wrap:wrap;gap:7px;margin:1rem 0 .4rem}
+          .jm-chip{font-size:.78rem;font-weight:600;color:#444;background:#F4F4F5;border:1px solid var(--line,#ECECEC);border-radius:99px;padding:5px 12px;cursor:pointer;transition:all .15s ease}
+          .jm-chip:hover{background:var(--red-pale,#FFF0F2);border-color:#F3B6BF;color:var(--red,#C8102E)}
+          .jm-form{display:flex;gap:10px;margin-top:.9rem;flex-wrap:wrap}
+          .jm-form input{flex:1;min-width:200px;border:1px solid var(--line,#ECECEC);border-radius:11px;padding:13px 15px;font-size:.95rem;outline:none;transition:border-color .18s ease,box-shadow .18s ease}
+          .jm-form input:focus{border-color:var(--red,#C8102E);box-shadow:0 0 0 3px var(--red-pale,#FFF0F2)}
+          .jm-form select{border:1px solid var(--line,#ECECEC);border-radius:11px;padding:13px 15px;font-size:.95rem;background:#fff;outline:none;max-width:200px}
+          .jm-form button{background:var(--red,#C8102E);color:#fff;font-weight:700;font-size:.95rem;border-radius:11px;padding:13px 26px;border:none;cursor:pointer;transition:background .18s ease,transform .18s ease;display:inline-flex;align-items:center;gap:.5rem}
+          .jm-form button:hover{background:var(--red-lt,#E5213F);transform:translateY(-1px)}
+          .jm-results{margin-top:18px;display:grid;gap:10px}
+          .jm-empty{color:var(--text-sub,#555);font-size:.9rem;padding:6px 2px}
+          .jm-row{display:flex;align-items:center;gap:16px;border:1px solid var(--line,#ECECEC);border-radius:13px;padding:13px 16px;background:#fff;transition:border-color .18s ease,box-shadow .18s ease}
+          .jm-row:hover{border-color:#F3B6BF;box-shadow:0 10px 26px rgba(16,24,40,.08)}
+          .jm-ring{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display,'Manrope',sans-serif);font-weight:800;font-size:.9rem;color:var(--charcoal,#1A1A1A)}
+          .jm-info{flex:1;min-width:0}
+          .jm-info h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:1.02rem;font-weight:700;color:var(--charcoal,#1A1A1A);margin:0}
+          .jm-info p{font-size:.82rem;color:var(--text-sub,#555);margin:3px 0 0}
+          .jm-row .jm-view{flex:none;font-size:.85rem;font-weight:700;color:var(--red,#C8102E);background:var(--red-pale,#FFF0F2);border:none;border-radius:9px;padding:9px 15px;cursor:pointer;white-space:nowrap;transition:background .15s ease}
+          .jm-row .jm-view:hover{background:#FCDCE2}
+          @media(max-width:520px){.jm-form select{max-width:none;flex:1}.jm-row{flex-wrap:wrap}}
+        </style>
+        <div class="jm-card" id="jm-card" style="display:none">
+          <div class="jm-head">
+            <span class="jm-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.9L21 11l-6.6 2.1L12 20l-2.4-6.9L3 11l6.6-2.1z"/></svg> Smart match</span>
+            <h2>Find your perfect fit</h2>
+            <p>Tell us your skills or the kind of work you want — we'll instantly rank the openings that match you best.</p>
+          </div>
+          <div class="jm-suggest" id="jm-suggest"></div>
+          <div class="jm-form">
+            <input id="jm-skills" type="text" placeholder="e.g. sales, merchandising, customer service, driving" aria-label="Your skills" />
+            <select id="jm-loc" aria-label="Preferred location"><option value="">Any location</option></select>
+            <button id="jm-go" type="button">Match me <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
+          <div class="jm-results" id="jm-results"></div>
+        </div>
+
         <div class="layout">
           <aside class="sidebar">
             <div class="filter-group">
@@ -553,7 +596,93 @@
     } else { ALL_JOBS=SEED_JOBS.slice(); $('#config-notice').style.display='flex'; }
     $('#list-state').innerHTML='';
     buildFilters();
+    jmInit();
     route();
+  }
+
+  /* ---------- SMART JOB MATCHER ---------- */
+  // Build a lowercase keyword corpus for a job from its own fields + the
+  // role's known responsibilities/requirements, so matching sees real skills.
+  function jmCorpus(j){
+    const info=ROLE_INFO[j.role]||{};
+    return [j.role,j.client,j.location,j.description,info.summary,(info.resp||[]).join(' '),(info.must||[]).join(' ')]
+      .filter(Boolean).join(' ').toLowerCase();
+  }
+  const JM_STOP=new Set(['and','or','the','a','an','for','with','of','to','in','on','at','my','me','i','skills','skill','work','job','jobs']);
+  // Forgiving keyword test: exact substring, or a shared word-start stem so
+  // "management" also finds "manager" and "driving" finds "driver".
+  function jmHas(corpus, tok){
+    if(corpus.indexOf(tok)>=0) return true;
+    if(tok.length>=5){ try{ return new RegExp('\\b'+tok.slice(0,4).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(corpus); }catch(e){} }
+    return false;
+  }
+  function jmInit(){
+    const card=$('#jm-card'); if(!card) return;
+    if(!ALL_JOBS.length){ card.style.display='none'; return; }
+    card.style.display='';
+    // Location options
+    const locs=[...new Set(ALL_JOBS.map(j=>j.location).filter(Boolean))].sort();
+    const sel=$('#jm-loc');
+    sel.innerHTML='<option value="">Any location</option>'+locs.map(l=>'<option>'+esc(l)+'</option>').join('');
+    // Suggested skill chips: the most common role words, as quick starters
+    const sugg=[...new Set(ALL_JOBS.map(j=>j.role))].slice(0,6);
+    $('#jm-suggest').innerHTML=sugg.map(s=>'<button type="button" class="jm-chip" data-skill="'+esc(s)+'">'+esc(s)+'</button>').join('');
+    $('#jm-suggest').querySelectorAll('.jm-chip').forEach(b=>b.addEventListener('click',()=>{
+      const inp=$('#jm-skills'); const cur=inp.value.trim();
+      const add=b.dataset.skill;
+      inp.value=cur?(cur.replace(/,\s*$/,'')+', '+add):add;
+      jmMatch();
+    }));
+    if(!card._wired){
+      $('#jm-go').addEventListener('click',jmMatch);
+      $('#jm-skills').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); jmMatch(); }});
+      card._wired=true;
+    }
+  }
+  function jmMatch(){
+    const raw=($('#jm-skills').value||'').toLowerCase();
+    const loc=$('#jm-loc').value;
+    const tokens=[...new Set(raw.split(/[\s,]+/).map(t=>t.trim()).filter(t=>t.length>=2&&!JM_STOP.has(t)))];
+    const box=$('#jm-results');
+    let pool=ALL_JOBS.slice();
+    if(loc) pool=pool.filter(j=>j.location===loc);
+    if(!tokens.length){
+      if(!loc){ box.innerHTML='<div class="jm-empty">Type a skill or pick one above to see your best-fit roles.</div>'; return; }
+      // location only → show that location's roles by priority, no score
+      pool.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)));
+      box.innerHTML=pool.slice(0,6).map(j=>jmRow(j,null)).join('')||'<div class="jm-empty">No openings in that location yet.</div>';
+      jmWire(); return;
+    }
+    const scored=pool.map(j=>{
+      const corpus=jmCorpus(j);
+      const role=(j.role||'').toLowerCase();
+      let matched=0, titleHits=0;
+      tokens.forEach(t=>{ if(jmHas(corpus,t)){ matched++; if(jmHas(role,t)) titleHits++; } });
+      const pct=Math.round((matched/tokens.length)*100);
+      const score=matched*10+titleHits*6;
+      return {j,pct,score,matched};
+    }).filter(x=>x.matched>0).sort((a,b)=>b.score-a.score||(PRI_RANK[a.j.priority]??3)-(PRI_RANK[b.j.priority]??3));
+    if(!scored.length){ box.innerHTML='<div class="jm-empty">No strong matches yet — try different or broader skills, or browse all positions below.</div>'; return; }
+    box.innerHTML='<div class="jm-empty" style="font-weight:600;color:#111">'+scored.length+' role'+(scored.length!==1?'s':'')+' '+(scored.length===1?'matches':'match')+' your skills — best fit first:</div>'
+      +scored.slice(0,6).map(x=>jmRow(x.j,x.pct)).join('');
+    jmWire();
+  }
+  function jmRingColor(pct){ return pct>=75?'#15803D':pct>=45?'#B45309':'#64748B'; }
+  function jmRow(j,pct){
+    const col=pct==null?'#64748B':jmRingColor(pct);
+    const bg=pct==null?'#F1F5F9':(pct>=75?'#DCFCE7':pct>=45?'#FEF3C7':'#F1F5F9');
+    const ring=pct==null
+      ? '<div class="jm-ring" style="background:#F1F5F9"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+      : '<div class="jm-ring" style="background:'+bg+';color:'+col+'">'+pct+'%</div>';
+    const meta=[j.location,j.salary_range].filter(Boolean).map(esc).join(' · ');
+    return '<div class="jm-row">'+ring
+      +'<div class="jm-info"><h3>'+esc(j.role)+'</h3><p>'+meta+'</p></div>'
+      +'<button class="jm-view" type="button" data-job="'+esc(j.id)+'">View &amp; apply</button></div>';
+  }
+  function jmWire(){
+    $('#jm-results').querySelectorAll('.jm-view').forEach(b=>b.addEventListener('click',()=>{
+      const id=b.dataset.job; if(typeof gotoJob==='function') gotoJob(id);
+    }));
   }
 
   /* ---------- FILTERS ---------- */

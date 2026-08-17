@@ -348,16 +348,16 @@ grant execute on function public.cnt_client_log(text, text) to authenticated;
 --  storage policy were dropped — see 2026-08-17-client-monitoring.sql.)
 
 -- Public live stats for the homepage "Our Impact (Live)" band. Returns ONLY
--- aggregate counts (no rows, no PII), so it is safe to expose to anon.
+-- aggregate counts (no rows, no PII), so it is safe to expose to anon. Scoped
+-- to CURRENT activity so it complements — not contradicts — the lifetime figures.
 create or replace function public.cnt_public_stats()
 returns json language sql stable security definer set search_path=public as $$
   select json_build_object(
-    'open_jobs',    (select count(*)                 from public.jobs where status = 'open'),
-    'openings',     (select coalesce(sum(openings),0) from public.jobs where status = 'open'),
-    'partners',     (select count(distinct client)   from public.jobs),
-    'locations',    (select count(distinct location) from public.jobs where status = 'open'),
-    'applications', (select count(*)                 from public.applications),
-    'placed',       (select count(*)                 from public.applications where stage in ('hired','onboarding'))
+    'openings',         (select coalesce(sum(openings),0) from public.jobs where status = 'open'),
+    'open_jobs',        (select count(*)                 from public.jobs where status = 'open'),
+    'companies_hiring', (select count(distinct client)   from public.jobs where status = 'open'),
+    'locations',        (select count(distinct location) from public.jobs where status = 'open'),
+    'apps_month',       (select count(*) from public.applications where applied_date >= date_trunc('month', now())::date)
   )
 $$;
 revoke all on function public.cnt_public_stats() from public;
