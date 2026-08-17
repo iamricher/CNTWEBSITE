@@ -1540,6 +1540,48 @@ input, select, textarea { font-family: var(--font-body); }
   </div>
 </section>
 
+<!-- ============================= REACH MAP ============================= -->
+<style>
+  .reach{padding:clamp(52px,8vw,92px) 0;background:var(--white,#fff)}
+  .reach .container{display:grid;grid-template-columns:0.85fr 1.15fr;gap:clamp(28px,4vw,52px);align-items:center}
+  @media(max-width:880px){.reach .container{grid-template-columns:1fr}}
+  .reach-copy .k{font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--red,#C8102E);margin-bottom:.8rem}
+  .reach-copy h2{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(1.8rem,3.6vw,2.6rem);font-weight:800;letter-spacing:-.02em;line-height:1.08;color:var(--charcoal,#1A1A1A)}
+  .reach-copy p{color:var(--text-sub,#555);margin-top:1rem;font-size:clamp(.98rem,1.5vw,1.08rem);max-width:46ch}
+  .reach-legend{display:flex;gap:20px;margin-top:1.6rem;flex-wrap:wrap}
+  .reach-legend span{display:inline-flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;color:#374151}
+  .reach-legend .d{width:12px;height:12px;border-radius:50%}
+  .reach-legend .d.hq{background:#111}
+  .reach-legend .d.job{background:var(--red,#C8102E)}
+  .reach-cta{margin-top:1.9rem}
+  .reach-cta a{display:inline-flex;align-items:center;gap:.5rem;background:var(--red,#C8102E);color:#fff;font-weight:700;font-size:.95rem;padding:13px 28px;border-radius:10px;transition:background .18s ease,transform .18s ease}
+  .reach-cta a:hover{background:var(--red-lt,#E5213F);transform:translateY(-2px)}
+  .reach-mapwrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(16,24,40,.16);border:1px solid var(--gray-100,#EBEBEB)}
+  #reach-map{height:clamp(340px,46vw,480px);width:100%;background:#0d1117}
+  #reach-map .leaflet-control-attribution{font-size:9px;opacity:.6}
+  .reach-pin{filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))}
+  .reach-pulse{border-radius:50%;background:rgba(200,16,46,.9);box-shadow:0 0 0 rgba(200,16,46,.6);animation:reachPulse 2s infinite}
+  @keyframes reachPulse{0%{box-shadow:0 0 0 0 rgba(200,16,46,.5)}70%{box-shadow:0 0 0 16px rgba(200,16,46,0)}100%{box-shadow:0 0 0 0 rgba(200,16,46,0)}}
+  @media(prefers-reduced-motion:reduce){.reach-pulse{animation:none}}
+</style>
+<section class="reach section" id="reach" aria-label="Where CNT hires across the Philippines">
+  <div class="container">
+    <div class="reach-copy" data-reveal>
+      <div class="k">Nationwide reach</div>
+      <h2>Talent, wherever you are in the Philippines</h2>
+      <p>From our Metro Manila headquarters, CNT places Filipinos into roles across the country. Explore where we're hiring right now.</p>
+      <div class="reach-legend">
+        <span><span class="d hq"></span> Head office</span>
+        <span><span class="d job"></span> Where we're hiring</span>
+      </div>
+      <div class="reach-cta"><a href="careers.html">Find a job near you <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    </div>
+    <div class="reach-mapwrap" data-reveal>
+      <div id="reach-map" role="img" aria-label="Map of the Philippines showing CNT's head office and current hiring locations"></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============================= PROCESS ============================= -->
 <section class="process section section-dark" id="process" aria-label="Our Process">
   <div class="container">
@@ -2670,6 +2712,81 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
         io.observe(sec);
       } else animate();
     }, function(){ /* leave hidden on error */ });
+  })();
+
+  // Nationwide reach map — lazy-loads Leaflet only when scrolled into view, then
+  // pins the HQ + the real locations we're currently hiring in (from the jobs
+  // table). Honest by construction: pins come from live data, not a claim.
+  (function(){
+    var mapEl=document.getElementById('reach-map'); if(!mapEl) return;
+    // Approx coordinates for common PH hiring locations (matched by name).
+    var CITY={
+      'mandaluyong':[14.5774,121.0359],'makati':[14.5547,121.0244],'taguig':[14.5176,121.0509],
+      'quezon city':[14.6760,121.0437],'manila':[14.5995,120.9842],'pasig':[14.5764,121.0851],
+      'pasay':[14.5378,120.9896],'paranaque':[14.4793,121.0198],'parañaque':[14.4793,121.0198],
+      'muntinlupa':[14.4081,121.0415],'las pinas':[14.4499,120.9827],'las piñas':[14.4499,120.9827],
+      'caloocan':[14.6577,120.9842],'marikina':[14.6507,121.1029],'valenzuela':[14.7011,120.9830],
+      'mandaue':[10.3236,123.9223],'cebu':[10.3157,123.8854],'cebu city':[10.3157,123.8854],
+      'lapu-lapu':[10.3103,123.9494],'davao':[7.1907,125.4553],'davao city':[7.1907,125.4553],
+      'cagayan de oro':[8.4542,124.6319],'iloilo':[10.7202,122.5621],'iloilo city':[10.7202,122.5621],
+      'bacolod':[10.6407,122.9689],'general santos':[6.1164,125.1716],'zamboanga':[6.9214,122.0790],
+      'baguio':[16.4023,120.5960],'angeles':[15.1450,120.5887],'san fernando':[15.0286,120.6898],
+      'calamba':[14.2117,121.1653],'santa rosa':[14.3122,121.1114],'sta rosa':[14.3122,121.1114],
+      'batangas':[13.7565,121.0583],'lipa':[13.9411,121.1622],'bacoor':[14.4590,120.9490],
+      'imus':[14.4297,120.9367],'dasmarinas':[14.3294,120.9367],'dasmariñas':[14.3294,120.9367],
+      'antipolo':[14.5878,121.1759],'cavite':[14.4791,120.8970],'laguna':[14.2691,121.4113],
+      'bulacan':[14.7969,120.8799],'pampanga':[15.0794,120.6200],'rizal':[14.6037,121.3084]
+    };
+    var HQ=[14.5774,121.0359];
+    function loadCss(href){ var l=document.createElement('link'); l.rel='stylesheet'; l.href=href; document.head.appendChild(l); }
+    function loadJs(src){ return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+    function geocode(loc){ if(!loc) return null; var s=String(loc).toLowerCase(); var keys=Object.keys(CITY); for(var i=0;i<keys.length;i++){ if(s.indexOf(keys[i])>=0) return CITY[keys[i]]; } return null; }
+    function initMap(locations){
+      var L=window.L; if(!L) return;
+      var map=L.map(mapEl,{ scrollWheelZoom:false, attributionControl:true, zoomControl:true }).setView([12.6,122.5],5);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+        attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:12
+      }).addTo(map);
+      var bounds=[];
+      // HQ marker
+      var hqIcon=L.divIcon({ className:'', html:'<div class="reach-pin" style="width:16px;height:16px;border-radius:50%;background:#111;border:3px solid #fff;"></div>', iconSize:[16,16], iconAnchor:[8,8] });
+      L.marker(HQ,{icon:hqIcon}).addTo(map).bindPopup('<b>CNT Head Office</b><br>219 LYFE Tower, Shaw Blvd., Mandaluyong');
+      bounds.push(HQ);
+      // Hiring markers from real job locations
+      var seen={};
+      locations.forEach(function(item){
+        var pt=geocode(item.loc); if(!pt) return;
+        var key=pt[0]+','+pt[1]; if(seen[key]){ seen[key].n+=item.n; return; } seen[key]={n:item.n,pt:pt,label:item.loc};
+      });
+      Object.keys(seen).forEach(function(k){
+        var o=seen[k];
+        var ic=L.divIcon({ className:'', html:'<div class="reach-pulse" style="width:14px;height:14px;border:2px solid #fff;"></div>', iconSize:[14,14], iconAnchor:[7,7] });
+        L.marker(o.pt,{icon:ic}).addTo(map).bindPopup('<b>'+esc(o.label)+'</b><br>'+o.n+' open position'+(o.n!==1?'s':''));
+        bounds.push(o.pt);
+      });
+      // Only tighten the view when we actually hire in 2+ distinct places; with
+      // sparse data keep the whole-country view so the map reads as "nationwide".
+      if(Object.keys(seen).length>=2){ try{ map.fitBounds(bounds,{padding:[45,45],maxZoom:7}); }catch(e){} }
+      setTimeout(function(){ map.invalidateSize(); },200);
+    }
+    function boot(){
+      loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+      loadJs('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js').then(function(){
+        // Pull distinct open-job locations with counts (jobs are publicly readable).
+        if(sb){
+          sb.from('jobs').select('location').eq('status','open').then(function(res){
+            var rows=(res&&res.data)||[]; var agg={};
+            rows.forEach(function(r){ if(r.location){ agg[r.location]=(agg[r.location]||0)+1; } });
+            var locations=Object.keys(agg).map(function(l){ return {loc:l,n:agg[l]}; });
+            initMap(locations);
+          }, function(){ initMap([]); });
+        } else initMap([]);
+      }).catch(function(){ mapEl.innerHTML='<div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">Map unavailable.</div>'; });
+    }
+    if('IntersectionObserver' in window){
+      var io=new IntersectionObserver(function(en){ en.forEach(function(x){ if(x.isIntersecting){ boot(); io.disconnect(); } }); },{ rootMargin:'200px' });
+      io.observe(mapEl);
+    } else boot();
   })();
 
   // Events & Updates — show only events published in Content Studio; hide the
