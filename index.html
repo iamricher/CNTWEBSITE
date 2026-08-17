@@ -1903,51 +1903,6 @@ input, select, textarea { font-family: var(--font-body); }
   </div>
 </section>
 
-<!-- ===================== LIVE IMPACT ===================== -->
-<style>
-  .live-band{padding:clamp(52px,8vw,90px) 0;background:linear-gradient(160deg,#1f1f1f,#0d0d0d);color:#fff;position:relative;overflow:hidden}
-  .live-band::after{content:"";position:absolute;right:-6%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.28),transparent 62%);pointer-events:none}
-  .live-band .container{position:relative;z-index:2}
-  .live-head{text-align:center;max-width:60ch;margin:0 auto clamp(30px,4vw,46px)}
-  .live-pill{display:inline-flex;align-items:center;gap:8px;font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:rgba(200,16,46,.16);border:1px solid rgba(200,16,46,.4);padding:6px 14px;border-radius:99px;margin-bottom:1.1rem}
-  .live-dot{width:8px;height:8px;border-radius:99px;background:#ff3b53;box-shadow:0 0 0 0 rgba(255,59,83,.7);animation:livePulse 1.8s infinite}
-  @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(255,59,83,.6)}70%{box-shadow:0 0 0 9px rgba(255,59,83,0)}100%{box-shadow:0 0 0 0 rgba(255,59,83,0)}}
-  @media(prefers-reduced-motion:reduce){.live-dot{animation:none}}
-  .live-head h2{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:800;letter-spacing:-.02em}
-  .live-head p{color:rgba(255,255,255,.62);margin-top:.7rem;font-size:clamp(.95rem,1.6vw,1.05rem)}
-  .live-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,1.8vw,22px)}
-  @media(max-width:860px){.live-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:460px){.live-grid{grid-template-columns:1fr}}
-  .live-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:clamp(1.4rem,2.4vw,1.9rem);text-align:center;transition:transform .25s ease,border-color .25s ease,background .25s ease}
-  .live-card:hover{transform:translateY(-5px);border-color:rgba(200,16,46,.5);background:rgba(255,255,255,.07)}
-  .live-num{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(2.1rem,4.4vw,3rem);font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff}
-  .live-num .suffix{color:var(--red-lt,#E5213F)}
-  .live-label{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.6);margin-top:.6rem;letter-spacing:.02em}
-  .live-foot{text-align:center;margin-top:clamp(26px,4vw,40px)}
-  .live-foot a{display:inline-flex;align-items:center;gap:.5rem;background:var(--red,#C8102E);color:#fff;font-weight:700;font-size:.95rem;padding:14px 30px;border-radius:10px;transition:background .18s ease,transform .18s ease}
-  .live-foot a:hover{background:var(--red-lt,#E5213F);transform:translateY(-2px)}
-  .live-foot .upd{display:block;font-size:.74rem;color:rgba(255,255,255,.4);margin-top:14px}
-</style>
-<section class="live-band" id="live-impact" aria-label="Our impact in real time" style="display:none">
-  <div class="container">
-    <div class="live-head" data-reveal>
-      <div class="live-pill"><span class="live-dot"></span> Hiring right now</div>
-      <h2>Live openings across the Philippines</h2>
-      <p>Current hiring activity, straight from CNT's recruitment system — updated as roles open and applications come in.</p>
-    </div>
-    <div class="live-grid">
-      <div class="live-card" data-reveal><div class="live-num"><span data-live="openings">0</span><span class="suffix">+</span></div><div class="live-label">Open positions now</div></div>
-      <div class="live-card" data-reveal><div class="live-num"><span data-live="companies_hiring">0</span></div><div class="live-label">Companies hiring now</div></div>
-      <div class="live-card" data-reveal><div class="live-num"><span data-live="apps_month">0</span><span class="suffix">+</span></div><div class="live-label">Applications this month</div></div>
-      <div class="live-card" data-reveal><div class="live-num"><span data-live="locations">0</span></div><div class="live-label">Locations hiring</div></div>
-    </div>
-    <div class="live-foot" data-reveal>
-      <a href="careers.html">See open positions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <span class="upd" id="live-updated"></span>
-    </div>
-  </div>
-</section>
-
 <!-- ===================== FOR EMPLOYERS / JOBSEEKERS ===================== -->
 <section class="paths section" aria-label="How we can help">
   <div class="container">
@@ -2685,35 +2640,6 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
   var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
   var hideSection=function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; };
 
-  // Live impact — real aggregate counts from the recruitment system (safe RPC:
-  // counts only, no PII). Stays hidden unless real data comes back, so we never
-  // show a misleading "live" claim with nothing behind it.
-  (function(){
-    var sec=document.getElementById('live-impact');
-    if(!sec||!sb||!sb.rpc) return;
-    sb.rpc('cnt_public_stats').then(function(res){
-      var d=res&&res.data; if(res.error||!d) return;
-      var vals={ openings:(d.openings||d.open_jobs||0), companies_hiring:(d.companies_hiring||0), apps_month:(d.apps_month||0), locations:(d.locations||0) };
-      if((vals.openings+vals.companies_hiring+vals.apps_month+vals.locations)<=0) return;   // nothing to show yet
-      sec.style.display='';
-      var upd=document.getElementById('live-updated');
-      if(upd){ try{ upd.textContent='Last updated '+new Date().toLocaleString('en-PH',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){} }
-      var animate=function(){
-        Object.keys(vals).forEach(function(k){
-          var el=sec.querySelector('[data-live="'+k+'"]'); if(!el) return;
-          var target=vals[k], start=null, dur=1200;
-          var step=function(ts){ if(!start)start=ts; var p=Math.min((ts-start)/dur,1); var e=1-Math.pow(1-p,3);
-            el.textContent=Math.round(e*target).toLocaleString('en-PH'); if(p<1) requestAnimationFrame(step); };
-          requestAnimationFrame(step);
-        });
-      };
-      if('IntersectionObserver' in window){
-        var io=new IntersectionObserver(function(en){ en.forEach(function(x){ if(x.isIntersecting){ animate(); io.disconnect(); } }); }, { threshold:.3 });
-        io.observe(sec);
-      } else animate();
-    }, function(){ /* leave hidden on error */ });
-  })();
-
   // Nationwide reach map — lazy-loads Leaflet only when scrolled into view, then
   // pins the HQ + the real locations we're currently hiring in (from the jobs
   // table). Honest by construction: pins come from live data, not a claim.
@@ -2770,8 +2696,8 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
       setTimeout(function(){ map.invalidateSize(); },200);
     }
     function boot(){
-      loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
-      loadJs('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js').then(function(){
+      loadCss('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css');
+      loadJs('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js').then(function(){
         // Pull distinct open-job locations with counts (jobs are publicly readable).
         if(sb){
           sb.from('jobs').select('location').eq('status','open').then(function(res){
