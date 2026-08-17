@@ -41,23 +41,43 @@ const BOX = (html, green) =>
   ';border-radius:6px;padding:14px 18px;font-size:13.5px;color:' + (green ? '#12683B' : '#8A1020') + ';line-height:1.6;">' + html + '</td></tr></table>';
 
 const SHELL = (eyebrow, heading, bodyHtml) =>
-  '<!doctype html><html><body style="margin:0;padding:0;background:#f4f4f5;">' +
-  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:28px 12px;font-family:Arial,Helvetica,sans-serif;"><tr><td align="center">' +
-  '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);">' +
+  '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+  '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+  '<meta name="color-scheme" content="light">' +
+  '<style>' +
+  'body{margin:0;padding:0;background:#f4f4f5;}' +
+  'img{border:0;line-height:100%;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}' +
+  'a{text-decoration:none;}' +
+  '@media only screen and (max-width:620px){' +
+  '.card{border-radius:0!important;}' +
+  '.pad{padding-left:22px!important;padding-right:22px!important;}' +
+  '.pad-y{padding-top:26px!important;padding-bottom:26px!important;}' +
+  '.h1{font-size:20px!important;}' +
+  '.btn-a{display:block!important;text-align:center!important;}' +
+  '.outer{padding:0!important;}' +
+  '}</style></head>' +
+  '<body>' +
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="outer" style="background:#f4f4f5;padding:26px 10px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,Helvetica,sans-serif;"><tr><td align="center">' +
+  '<table role="presentation" width="600" cellpadding="0" cellspacing="0" class="card" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 6px 28px rgba(16,24,40,.10);">' +
   // dark header with the CNT logo + red accent line (payroll-style)
-  '<tr><td style="background:#171717;border-bottom:3px solid #C8102E;padding:24px 32px;">' +
-  '<img src="' + BRAND_LOGO + '" alt="CNT Promo &amp; Ads Specialists, Inc." height="34" style="height:34px;width:auto;display:block;border:0;outline:none;text-decoration:none;">' +
-  '<div style="color:#9a9a9a;font-size:11px;letter-spacing:.06em;margin-top:10px;">EMPLOYMENT &amp; MANPOWER SERVICES</div></td></tr>' +
+  '<tr><td class="pad" style="background:#161616;border-bottom:3px solid #C8102E;padding:26px 34px;">' +
+  '<img src="' + BRAND_LOGO + '" alt="CNT Promo &amp; Ads Specialists, Inc." height="32" style="height:32px;width:auto;display:block;">' +
+  '<div style="color:#8f8f8f;font-size:11px;letter-spacing:.1em;margin-top:11px;">EMPLOYMENT &amp; MANPOWER SERVICES</div></td></tr>' +
   // body
-  '<tr><td style="padding:32px;color:#333333;font-size:15px;line-height:1.65;">' +
-  '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:5px 12px;border-radius:6px;">' + esc(eyebrow) + '</span>' +
-  '<h1 style="font-size:22px;font-weight:700;color:#1a1a1a;margin:16px 0 14px;">' + heading + '</h1>' +
+  '<tr><td class="pad pad-y" style="padding:34px;color:#3a3a3a;font-size:15px;line-height:1.65;">' +
+  '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:6px;">' + esc(eyebrow) + '</span>' +
+  '<h1 class="h1" style="font-size:23px;font-weight:800;color:#171717;letter-spacing:-.01em;margin:16px 0 14px;">' + heading + '</h1>' +
   bodyHtml + '</td></tr>' +
   // footer
-  '<tr><td style="background:#fafafa;border-top:1px solid #eeeeee;padding:20px 32px;font-size:12px;color:#999999;line-height:1.6;">' +
-  'CNT Promo &amp; Ads Specialists, Inc. &middot; 219 LYFE Tower, Shaw Blvd., Mandaluyong City<br>' +
-  'This is an automated message &mdash; please do not reply to this email.</td></tr>' +
-  '</table></td></tr></table></body></html>';
+  '<tr><td class="pad" style="background:#fafafa;border-top:1px solid #ededed;padding:26px 34px;text-align:center;">' +
+  '<div style="font-size:12px;color:#8a8a8a;line-height:1.7;">This is an automated message from <b style="color:#555;">CNT Promo &amp; Ads Specialists, Inc.</b><br>Please do not reply to this email.</div>' +
+  '<div style="margin-top:14px;font-size:11.5px;color:#aeaeae;line-height:1.7;">219 LYFE Tower, Shaw Blvd., Mandaluyong City<br>' +
+  '<a href="mailto:hrdadmin@cntpromoads.com" style="color:#C8102E;">hrdadmin@cntpromoads.com</a> &nbsp;&middot;&nbsp; <a href="' + SITE + '" style="color:#C8102E;">Visit our website</a></div>' +
+  '<div style="margin-top:16px;padding-top:15px;border-top:1px solid #ededed;font-size:11px;color:#bdbdbd;">&copy; ' + new Date().getFullYear() + ' CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</div>' +
+  '</td></tr>' +
+  '</table>' +
+  '<div style="font-size:11px;color:#b8b8b8;margin-top:16px;">Sent by CNT Promo &amp; Ads Specialists, Inc.</div>' +
+  '</td></tr></table></body></html>';
 
 function template(type, data) {
   var name = esc((data.name || 'there').split(' ')[0] || 'there');
