@@ -866,8 +866,9 @@
         if(ins.error) throw ins.error;
       }
       localStorage.setItem('cnt_last_apply', String(Date.now()));
-      // The confirmation email is sent server-side by the cnt_application_confirm
-      // trigger (anon can't read the row back here — RLS is staff-only select).
+      // Send the applicant a confirmation email (fire-and-forget; no-op until
+      // Resend is configured server-side via RESEND_API_KEY).
+      fetch('/api/send-auto-reply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'application',to:email,name:name,role:activeJob&&activeJob.role})}).catch(function(){});
       showSuccess(name);
     }catch(err){
       console.error(err);

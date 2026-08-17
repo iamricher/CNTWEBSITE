@@ -2379,12 +2379,15 @@ function initHeroAnimations() {
     try {
       const sb = window.getSupabase && window.getSupabase();
       if (!sb) { done(false); return; }
+      const fullName = (val('firstName') + ' ' + val('lastName')).trim();
       const { error } = await sb.from('messages').insert({
-        name: (val('firstName') + ' ' + val('lastName')).trim(),
+        name: fullName,
         email, company: val('company') || null,
         subject: val('service') || 'General Inquiry',
         message
       });
+      // Fire-and-forget confirmation email (no-op until Resend is configured).
+      if (!error) { fetch('/api/send-auto-reply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'contact', to: email, name: fullName }) }).catch(function () {}); }
       done(!error);
     } catch (_) { done(false); }
   });
