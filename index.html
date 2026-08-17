@@ -1737,7 +1737,7 @@ input, select, textarea { font-family: var(--font-body); }
 
         <div class="client-logo">
             <img src="https://uploads.onecompiler.io/43d4zm644/44t7ga3md/UJ.png"
-                 alt="University of the Philippines"
+                 alt="Uncle John's"
                  loading="lazy">
         </div>
 
@@ -1774,7 +1774,7 @@ input, select, textarea { font-family: var(--font-body); }
 
         <div class="client-logo">
             <img src="https://uploads.onecompiler.io/43d4zm644/44t7ga3md/UJ.png"
-                 alt="University of the Philippines"
+                 alt="Uncle John's"
                  loading="lazy">
         </div>
 
@@ -1804,6 +1804,59 @@ input, select, textarea { font-family: var(--font-body); }
 
     </div>
 </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TRUST / CREDENTIALS ===================== -->
+<style>
+  .trust-band{padding:clamp(46px,7vw,76px) 0;background:#fff;border-top:1px solid var(--gray-100,#EBEBEB)}
+  .trust-band .t-head{text-align:center;max-width:60ch;margin:0 auto clamp(28px,4vw,44px)}
+  .trust-band .t-head h2{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(1.6rem,3.2vw,2.3rem);font-weight:800;letter-spacing:-.02em;color:var(--charcoal,#1A1A1A)}
+  .trust-band .t-head p{color:var(--text-sub,#555);margin-top:.7rem;font-size:clamp(.95rem,1.6vw,1.05rem)}
+  .trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,1.8vw,22px)}
+  @media(max-width:860px){.trust-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.trust-grid{grid-template-columns:1fr}}
+  .trust-card{border:1px solid var(--gray-100,#EBEBEB);border-radius:16px;padding:clamp(1.3rem,2.2vw,1.7rem);background:#fff;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .trust-card:hover{transform:translateY(-5px);box-shadow:0 20px 44px rgba(16,24,40,.09);border-color:#F3B6BF}
+  .trust-ic{width:50px;height:50px;border-radius:13px;background:var(--red-pale,#FFF0F2);color:var(--red,#C8102E);display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem;transition:background .2s ease,color .2s ease}
+  .trust-card:hover .trust-ic{background:var(--red,#C8102E);color:#fff}
+  .trust-ic svg{width:25px;height:25px}
+  .trust-card h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:1.08rem;font-weight:800;letter-spacing:-.01em;color:var(--charcoal,#1A1A1A);margin-bottom:.4rem}
+  .trust-card p{font-size:.88rem;color:var(--text-sub,#555);line-height:1.6}
+  .trust-card .t-tag{display:inline-block;margin-top:.7rem;font-size:.72rem;font-weight:700;letter-spacing:.03em;color:var(--red,#C8102E);background:var(--red-pale,#FFF0F2);padding:3px 10px;border-radius:99px}
+</style>
+<section class="trust-band" aria-label="Why you can trust CNT">
+  <div class="container">
+    <div class="t-head" data-reveal>
+      <h2>Recruitment you can trust</h2>
+      <p>A registered Philippine staffing partner — transparent, compliant, and always free for jobseekers.</p>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card" data-reveal>
+        <div class="trust-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>DOLE-Compliant Agency</h3>
+        <p>A duly registered Philippine corporation operating in compliance with Department of Labor and Employment regulations.</p>
+        <span class="t-tag">Licensed &amp; Registered</span>
+      </div>
+      <div class="trust-card" data-reveal>
+        <div class="trust-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9.5a2.5 2.5 0 0 0-2.5-2h-1a2.5 2.5 0 0 0 0 5h1a2.5 2.5 0 0 1 0 5h-1A2.5 2.5 0 0 1 9 15"/><path d="M12 6v2m0 8v2"/></svg></div>
+        <h3>100% Free for Jobseekers</h3>
+        <p>We never charge applicants — no placement fees, no processing fees, ever. If anyone asks you for money in our name, it's a scam.</p>
+        <span class="t-tag">No fees, ever</span>
+      </div>
+      <div class="trust-card" data-reveal>
+        <div class="trust-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg></div>
+        <h3>Trusted Since 2009</h3>
+        <p>Over 15 years connecting exceptional Filipino talent with leading local and multinational organizations.</p>
+        <span class="t-tag">15+ years</span>
+      </div>
+      <div class="trust-card" data-reveal>
+        <div class="trust-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h3>Your Data, Protected</h3>
+        <p>We handle your personal information under the Data Privacy Act of 2012 (RA 10173) — used only for your application.</p>
+        <span class="t-tag">RA 10173 compliant</span>
+      </div>
     </div>
   </div>
 </section>
