@@ -205,6 +205,10 @@
         localStorage.setItem('cnt_vid', vid);
       }
       var path = (location.pathname || '/').replace(/\/index\.html$/, '/') || '/';
+      // Keep the ?id= on event/post pages so each one can be measured
+      // individually in Content Studio's per-post analytics.
+      var id = new URLSearchParams(location.search).get('id');
+      if (id && /(event|post)\.html$/.test(location.pathname)) path += '?id=' + id;
       Promise.resolve(sb.from('page_views').insert({ path: path, visitor_id: vid })).catch(function () {});
     } catch (_) {}
   }

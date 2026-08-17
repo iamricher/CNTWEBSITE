@@ -212,6 +212,25 @@
     .iconbtn.view:hover{color:var(--red);border-color:var(--red-border)}
     .iconbtn.del:hover{color:var(--danger);border-color:#F3C6C6;background:#FEF2F2}
     .iconbtn .material-icons-outlined{font-size:19px}
+    .iconbtn.stats:hover{color:#1D4ED8;border-color:#BFD3F5;background:#EFF4FE}
+    /* Per-post views bar shown in list rows */
+    .viewbar{height:5px;border-radius:99px;background:var(--line-soft);overflow:hidden;margin-top:8px;max-width:230px}
+    .viewbar>span{display:block;height:100%;background:linear-gradient(90deg,#A50D24,#E5213F);border-radius:99px}
+    /* Per-post analytics modal */
+    .anm-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+    .anm-kpi{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:12px;padding:15px 12px;text-align:center}
+    .anm-kpi b{display:block;font-family:var(--display);font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);line-height:1}
+    .anm-kpi span{display:block;font-size:.71rem;color:var(--faint);margin-top:6px;font-weight:600}
+    .anm-share-wrap{margin-bottom:18px}
+    .anm-share-lbl{font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:7px;display:flex;justify-content:space-between}
+    .anm-share-lbl b{color:var(--red)}
+    .anm-share-track{height:9px;border-radius:99px;background:var(--line-soft);overflow:hidden}
+    .anm-share-track>span{display:block;height:100%;background:linear-gradient(90deg,#A50D24,#E5213F);border-radius:99px;transition:width .5s ease}
+    .anm-trend .lbl{font-size:.72rem;color:var(--faint);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 9px}
+    .anm-spark{display:flex;align-items:flex-end;gap:3px;height:72px;padding:12px 12px 10px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:12px}
+    .anm-spark .b{flex:1;background:var(--red-pale);border-radius:3px 3px 0 0;min-height:3px}
+    .anm-spark .b.hot{background:var(--red)}
+    @media(max-width:560px){.anm-kpis{grid-template-columns:repeat(2,1fr)}}
 
     /* ── Status pills ── */
     .pill{display:inline-flex;align-items:center;gap:5px;font-size:.63rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:99px;margin-left:9px;vertical-align:1px}
@@ -528,12 +547,34 @@
     </div>
   </div>
 
+  <!-- PER-POST ANALYTICS MODAL -->
+  <div class="modal" id="an-modal">
+    <div class="box">
+      <div class="box-head"><h3 id="anm-title">Post analytics</h3><button class="x" onclick="anStatsClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <div class="anm-kpis">
+          <div class="anm-kpi"><b id="anm-views">—</b><span>Total views</span></div>
+          <div class="anm-kpi"><b id="anm-avg">—</b><span>Avg / day</span></div>
+          <div class="anm-kpi"><b id="anm-days">—</b><span>Days live</span></div>
+          <div class="anm-kpi"><b id="anm-rank">—</b><span>Rank by views</span></div>
+        </div>
+        <div class="anm-share-wrap">
+          <div class="anm-share-lbl">Share of all post views <b id="anm-share-pct">—</b></div>
+          <div class="anm-share-track"><span id="anm-share-bar" style="width:0%"></span></div>
+        </div>
+        <div id="anm-trend"></div>
+      </div>
+      <div class="box-foot"><a class="btn btn-ghost" id="anm-view" href="#" target="_blank" rel="noopener"><span class="material-icons-outlined">open_in_new</span>View on site</a><button class="btn" onclick="anStatsClose()"><span class="material-icons-outlined">check</span>Done</button></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
   (function(){
     var sb = window.getSupabase && window.getSupabase();
     var _ev = [], _st = [], _ts = [], _msg = [], _sub = [], _evImages = [];
+    var _pvSeries = null, _pvDays = null; // per-path 30-day view series for post analytics
     var _actor = { email:null, role:null };
     // Append a row to the shared audit_log (staff-gated). Fire-and-forget.
     function logAudit(action, entity, ref, details){
@@ -643,6 +684,7 @@
         var sp=document.getElementById('stat-posts'); if(sp) sp.textContent=_ev.filter(function(e){return e.published;}).length.toLocaleString(); })();
       if(!_ev.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">campaign</span></div><h3>No posts yet</h3><p>Share hiring drives, achievements and announcements with the world.</p><button class="btn" onclick="evForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Create your first post</button></div>'; return; }
       var totalViews = 0;
+      var maxV = Math.max.apply(null, _ev.map(function(e){return Number(e.view_count||0);}).concat([1]));
       el.innerHTML=_ev.map(function(ev){
         var thumb = ev.image_url ? '<div class="thumb"><img src="'+esc(ev.image_url)+'" alt=""></div>' : '<div class="thumb"><span class="material-icons-outlined">campaign</span></div>';
         var pill = !ev.published ? '<span class="pill pill-draft">Draft</span>'
@@ -653,9 +695,12 @@
           +' · <span class="views">'+vc.toLocaleString()+' view'+(vc===1?'':'s')+'</span>'
           +(gcount?(' · '+gcount+' photo'+(gcount===1?'':'s')):'')
           +(isScheduled(ev)?(' · goes live '+esc(fmtDate(ev.publish_at))):'');
+        var pct = Math.round((vc/maxV)*100);
         return '<div class="row">'+thumb
-          +'<div class="t"><b>'+esc(ev.title||'Untitled')+'</b>'+pill+'<small>'+meta+'</small></div>'
+          +'<div class="t"><b>'+esc(ev.title||'Untitled')+'</b>'+pill+'<small>'+meta+'</small>'
+            +'<div class="viewbar" title="'+vc.toLocaleString()+' views"><span style="width:'+Math.max(pct,vc>0?4:0)+'%"></span></div></div>'
           +'<div class="row-actions">'
+          +'<button class="iconbtn stats" onclick="evStats('+ev.id+')" title="Analytics"><span class="material-icons-outlined">bar_chart</span></button>'
           +'<a class="iconbtn view" href="event.html?id='+ev.id+'" target="_blank" rel="noopener" title="View on site"><span class="material-icons-outlined">open_in_new</span></a>'
           +'<button class="iconbtn" onclick="evForm('+ev.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
           +'<button class="iconbtn del" onclick="evDelete('+ev.id+')" title="Delete"><span class="material-icons-outlined">delete</span></button>'
@@ -663,6 +708,40 @@
       }).join('');
       var sv=document.getElementById('stat-views'); if(sv) sv.textContent = totalViews.toLocaleString();
     }
+
+    // Per-post analytics — computed from view_count + publish date, enriched
+    // with a 30-day trend when page-view history exists for the post's URL.
+    window.evStats = function(id){
+      var ev=_ev.filter(function(x){return x.id===id;})[0]; if(!ev) return;
+      var vc=Number(ev.view_count||0);
+      var start=ev.publish_at||ev.created_at;
+      var daysLive=1; try{ daysLive=Math.max(1,Math.floor((Date.now()-new Date(start).getTime())/86400000)); }catch(_){}
+      var totalAll=_ev.reduce(function(a,e){return a+Number(e.view_count||0);},0)||1;
+      var ranked=_ev.slice().sort(function(a,b){return Number(b.view_count||0)-Number(a.view_count||0);});
+      var rank=ranked.map(function(e){return e.id;}).indexOf(id)+1;
+      var sharePct=Math.round((vc/totalAll)*100);
+      document.getElementById('anm-title').textContent=ev.title||'Post analytics';
+      document.getElementById('anm-views').textContent=vc.toLocaleString();
+      document.getElementById('anm-avg').textContent=(vc/daysLive).toFixed(vc/daysLive<10?1:0);
+      document.getElementById('anm-days').textContent=daysLive.toLocaleString();
+      document.getElementById('anm-rank').textContent='#'+rank+' / '+_ev.length;
+      document.getElementById('anm-share-pct').textContent=sharePct+'%';
+      document.getElementById('anm-share-bar').style.width=Math.max(sharePct,vc>0?3:0)+'%';
+      document.getElementById('anm-view').href='event.html?id='+id;
+      // 30-day trend from page_views (available once anLoad has run)
+      var trend=document.getElementById('anm-trend');
+      var series=_pvSeries && _pvSeries['/event.html?id='+id];
+      if(series && _pvDays){
+        var smax=Math.max.apply(null,series.concat([1]));
+        var recent=series.reduce(function(a,b){return a+b;},0);
+        var bars=series.map(function(n,i){ var h=Math.round((n/smax)*100); return '<div class="b'+(n>=smax&&n>0?' hot':'')+'" style="height:'+Math.max(h,n>0?6:3)+'%" title="'+_pvDays[i].slice(5)+': '+n+'"></div>'; }).join('');
+        trend.innerHTML='<p class="lbl">Views in the last 30 days · '+recent.toLocaleString()+' total</p><div class="anm-spark">'+bars+'</div>';
+      } else {
+        trend.innerHTML='<p class="lbl">30-day trend</p><div class="anm-spark" style="align-items:center;justify-content:center;color:var(--faint);font-size:.82rem;">Daily trend will build up as visitors open this post.</div>';
+      }
+      document.getElementById('an-modal').classList.add('on');
+    };
+    window.anStatsClose = function(){ document.getElementById('an-modal').classList.remove('on'); };
     async function loadMetrics(){
       try{
         var r = await sb.from('site_metrics').select('count').eq('key','site_visits').maybeSingle();
@@ -910,6 +989,9 @@
       var days=[], map={};
       for(var i=29;i>=0;i--){ var k=new Date(Date.now()-i*86400000).toISOString().slice(0,10); days.push(k); map[k]=0; }
       rows.forEach(function(r){ var k=String(r.created_at).slice(0,10); if(k in map) map[k]++; });
+      // Per-path daily series, so each post can show its own 30-day trend.
+      _pvDays=days; _pvSeries={};
+      rows.forEach(function(r){ var p=r.path||'/'; var di=days.indexOf(String(r.created_at).slice(0,10)); if(di<0) return; if(!_pvSeries[p]) _pvSeries[p]=days.map(function(){return 0;}); _pvSeries[p][di]++; });
       var max=1, peakDay='', peakN=-1;
       days.forEach(function(k){ if(map[k]>max) max=map[k]; if(map[k]>peakN){peakN=map[k];peakDay=k;} });
       var mday=function(k){ return new Date(k).toLocaleDateString(undefined,{month:'short',day:'numeric'}); };
