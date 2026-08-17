@@ -1771,7 +1771,44 @@
     pool:      { s:'You’re in our talent pool — {role}', b:'Dear {name},\n\nThank you for your interest in the {role} position ({account}). While we are not moving forward for this specific role right now, we were impressed with your profile and have added you to our talent pool. We will reach out when a suitable opening comes up.\n\nWarm regards,\nCNT Recruitment Team' },
     rejected:  { s:'Update on your application — {role}', b:'Dear {name},\n\nThank you for your interest in the {role} position ({account}) and for the time you invested in the process. After careful consideration we will not be moving forward at this time. We wish you all the best and encourage you to apply for future openings.\n\nWarm regards,\nCNT Recruitment Team' }
   };
-  function _fillTpl(t, app){ return t.replace(/\{name\}/g,app.name||'').replace(/\{role\}/g,app.role||'the role').replace(/\{account\}/g,app.account||'CNT').replace(/\{location\}/g,app.location||''); }
+  function _fillTpl(t, app){
+    const d=app.interviewDate||'', tm=app.interviewTime||'';
+    const niceD=(d && typeof fmtMonth==='function' && typeof fmtDay==='function')?(fmtMonth(d)+' '+fmtDay(d)):d;
+    const niceT=(tm && typeof fmtTime==='function')?fmtTime(tm):tm;
+    const venue=app.interviewVenue||'';
+    return t.replace(/\{name\}/g,app.name||'').replace(/\{role\}/g,app.role||'the role').replace(/\{account\}/g,app.account||'CNT').replace(/\{location\}/g,app.location||'')
+      .replace(/\{idate\}/g,niceD).replace(/\{itime\}/g,niceT).replace(/\{itype\}/g,app.interviewType||'Interview').replace(/\{iround\}/g,app.interviewRound||'').replace(/\{ivenue\}/g,venue).replace(/\{ilink\}/g,venue); }
+
+  // Interview-scheduled email — sent automatically when a date + time are set.
+  // {ivenue} carries the venue OR the video link the recruiter entered.
+  const INTERVIEW_EMAIL = {
+    s: 'Interview scheduled — {role}',
+    b: 'Dear {name},\n\nGood news! Your interview for the {role} position ({account}) has been scheduled. Please see the details below:\n\nDate: {idate}\nTime: {itime}\nType: {itype}\n{ivenueLine}\n\nKindly be ready 5–10 minutes early. If the details above include a video link, simply click it at the scheduled time to join. Should you need to reschedule, please contact us at hrdadmin@cntpromoads.com.\n\nWe look forward to meeting you!\n\nWarm regards,\nCNT Recruitment Team'
+  };
+  const _interviewEmailSent = new Set();
+  async function _maybeInterviewEmail(app, patch){
+    if(!sb || !app || !app.email) return;
+    const scheduled = (patch && patch.interview_date && patch.interview_time) || (app.interviewDate && app.interviewTime);
+    if(!scheduled) return;
+    const key = String(app._sid||app.id)+':'+(app.interviewDate||'')+':'+(app.interviewTime||'');
+    if(_interviewEmailSent.has(key)) return;
+    _interviewEmailSent.add(key);
+    const venue=(app.interviewVenue||'').trim();
+    const isLink=/^https?:\/\//i.test(venue);
+    const venueLine = venue ? ((isLink?'Video link: ':'Venue: ')+venue) : 'Venue: to be confirmed';
+    const subject = _fillTpl(INTERVIEW_EMAIL.s, app);
+    const text = _fillTpl(INTERVIEW_EMAIL.b, app).replace(/\{ivenueLine\}/g, venueLine);
+    try{
+      const { data, error } = await sb.functions.invoke('send-email',{ body:{ to:app.email, subject, text, kind:'interview', applicant_ref:String(app._sid||app.id) } });
+      if(error || (data&&data.error)) throw new Error((data&&data.error)||(error&&error.message)||'send failed');
+      cntLogActivity(app,'email','Interview details sent to '+app.email+(isLink?' (with video link)':''));
+      if(window.showToast) showToast('Interview details emailed to '+app.email,'success');
+    }catch(e){
+      _interviewEmailSent.delete(key);
+      cntLogActivity(app,'email','Interview email not sent (email not configured?)');
+    }
+  }
+  window._maybeInterviewEmail = _maybeInterviewEmail;
 
   // Opt-in, default-off stage-entry email automation. Fires from executeStageChange
   // ONLY when the entered stage has auto_email enabled (Settings → Pipeline Stages).
@@ -2051,6 +2088,8 @@
         sb.from('applications').update(p).eq('id',app._sid).then(({error})=>{ if(error) console.error('persist interview',error); });
       } else if(error) console.error('persist interview',error);
     });
+    // Automatically email the applicant their interview details (+ video link).
+    if(typeof _maybeInterviewEmail==='function') _maybeInterviewEmail(app, patch);
   };
 
   // Publish / unpublish a job to the website (status open<->closed)
