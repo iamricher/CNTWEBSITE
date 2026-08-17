@@ -110,11 +110,19 @@
     .sub-row:first-child{border-top:none}
     .sub-row .em{flex:1;min-width:0;font-size:.88rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .sub-row .dt{font-size:.74rem;color:var(--faint)}
-    .stat{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:15px 16px}
+    .stat{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 17px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+    .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#D7DCE4}
     .stat-ic{width:42px;height:42px;border-radius:12px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .stat-ic .material-icons-outlined{font-size:21px}
-    .stat-num{display:block;font-family:var(--display);font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.05}
-    .stat-lbl{display:block;font-size:.72rem;font-weight:600;color:var(--faint);margin-top:2px}
+    /* colour-coded metric chips */
+    .stat-ic.c-blue{background:#EAF1FE;color:#2563EB}
+    .stat-ic.c-violet{background:#EFEBFE;color:#6D28D9}
+    .stat-ic.c-green{background:#E7F6EC;color:#15803D}
+    .stat-ic.c-amber{background:#FDF0E1;color:#B45309}
+    .stat-ic.c-teal{background:#E0F5F1;color:#0D9488}
+    .stat-ic.c-pink{background:#FDEAF1;color:#BE185D}
+    .stat-num{display:block;font-family:var(--display);font-size:1.55rem;font-weight:800;letter-spacing:-.025em;line-height:1.05}
+    .stat-lbl{display:block;font-size:.72rem;font-weight:600;color:var(--faint);margin-top:3px}
     .views{color:var(--muted);font-weight:600}
 
     /* ── Platform tiles ── */
@@ -376,14 +384,14 @@
           </div>
 
           <div class="stat-strip">
-            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">groups</span></span><div><span class="stat-num" id="stat-visits">—</span><span class="stat-lbl">Website visits</span></div></div>
-            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">person</span></span><div><span class="stat-num" id="an-unique">—</span><span class="stat-lbl">Unique visitors</span></div></div>
-            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">insights</span></span><div><span class="stat-num" id="an-total">—</span><span class="stat-lbl">Page views (30d)</span></div></div>
+            <div class="stat"><span class="stat-ic c-blue"><span class="material-icons-outlined">groups</span></span><div><span class="stat-num" id="stat-visits">—</span><span class="stat-lbl">Website visits</span></div></div>
+            <div class="stat"><span class="stat-ic c-violet"><span class="material-icons-outlined">person</span></span><div><span class="stat-num" id="an-unique">—</span><span class="stat-lbl">Unique visitors</span></div></div>
+            <div class="stat"><span class="stat-ic c-teal"><span class="material-icons-outlined">insights</span></span><div><span class="stat-num" id="an-total">—</span><span class="stat-lbl">Page views (30d)</span></div></div>
             <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">visibility</span></span><div><span class="stat-num" id="stat-views">—</span><span class="stat-lbl">Total post views</span></div></div>
-            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">campaign</span></span><div><span class="stat-num" id="stat-posts">—</span><span class="stat-lbl">Published posts</span></div></div>
-            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">format_quote</span></span><div><span class="stat-num" id="stat-testi">—</span><span class="stat-lbl">Testimonials</span></div></div>
-            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">mail</span></span><div><span class="stat-num" id="stat-msgs">—</span><span class="stat-lbl">New messages</span></div></div>
-            <div class="stat"><span class="stat-ic"><span class="material-icons-outlined">group</span></span><div><span class="stat-num" id="stat-subs">—</span><span class="stat-lbl">Subscribers</span></div></div>
+            <div class="stat"><span class="stat-ic c-green"><span class="material-icons-outlined">campaign</span></span><div><span class="stat-num" id="stat-posts">—</span><span class="stat-lbl">Published posts</span></div></div>
+            <div class="stat"><span class="stat-ic c-amber"><span class="material-icons-outlined">format_quote</span></span><div><span class="stat-num" id="stat-testi">—</span><span class="stat-lbl">Testimonials</span></div></div>
+            <div class="stat"><span class="stat-ic c-pink"><span class="material-icons-outlined">mail</span></span><div><span class="stat-num" id="stat-msgs">—</span><span class="stat-lbl">New messages</span></div></div>
+            <div class="stat"><span class="stat-ic c-blue"><span class="material-icons-outlined">group</span></span><div><span class="stat-num" id="stat-subs">—</span><span class="stat-lbl">Subscribers</span></div></div>
           </div>
 
           <div class="card" style="margin-bottom:18px;">
