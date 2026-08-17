@@ -26,6 +26,8 @@ function readBody(req) {
 }
 
 const SITE = 'https://cnt-website-ats.vercel.app';
+// White CNT logo (reads on the dark header); &amp; keeps the URL valid in HTML.
+const BRAND_LOGO = 'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/CNT%20Promo%20&amp;%20Ads%20Specialists,%20Inc.%202.png';
 
 // Bulletproof-ish red button (table cell → works in most email clients).
 const BTN = (href, label) =>
@@ -42,10 +44,10 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   '<!doctype html><html><body style="margin:0;padding:0;background:#f4f4f5;">' +
   '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:28px 12px;font-family:Arial,Helvetica,sans-serif;"><tr><td align="center">' +
   '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);">' +
-  // dark header + red accent line (mirrors the payroll system emails)
+  // dark header with the CNT logo + red accent line (payroll-style)
   '<tr><td style="background:#171717;border-bottom:3px solid #C8102E;padding:24px 32px;">' +
-  '<div style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:-.01em;">CNT Promo &amp; Ads Specialists, Inc.</div>' +
-  '<div style="color:#9a9a9a;font-size:12px;margin-top:3px;">Employment &amp; Manpower Services</div></td></tr>' +
+  '<img src="' + BRAND_LOGO + '" alt="CNT Promo &amp; Ads Specialists, Inc." height="34" style="height:34px;width:auto;display:block;border:0;outline:none;text-decoration:none;">' +
+  '<div style="color:#9a9a9a;font-size:11px;letter-spacing:.06em;margin-top:10px;">EMPLOYMENT &amp; MANPOWER SERVICES</div></td></tr>' +
   // body
   '<tr><td style="padding:32px;color:#333333;font-size:15px;line-height:1.65;">' +
   '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:5px 12px;border-radius:6px;">' + esc(eyebrow) + '</span>' +
