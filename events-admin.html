@@ -421,9 +421,15 @@
             <div class="card-head"><div><h2>Views over time</h2><p>Last 30 days · avg <b id="an-avg">—</b>/day · busiest <b id="an-peak">—</b></p></div></div>
             <div style="padding:18px 22px 22px;"><div id="an-chart"><div class="muted">Loading…</div></div></div>
           </div>
-          <div class="card" style="margin-bottom:26px;">
-            <div class="card-head"><div><h2>Top pages</h2><p>Most-visited pages in the last 30 days.</p></div></div>
-            <div id="an-pages"><div class="muted">Loading…</div></div>
+          <div class="grid2" style="margin-bottom:26px;">
+            <div class="card">
+              <div class="card-head"><div><h2>Top pages</h2><p>Most-visited pages, last 30 days.</p></div></div>
+              <div id="an-pages"><div class="muted">Loading…</div></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div><h2>Traffic sources</h2><p>Where visitors came from, last 30 days.</p></div></div>
+              <div id="an-sources"><div class="muted">Loading…</div></div>
+            </div>
           </div>
 
           <h2 class="sec-title">Your platforms</h2>
@@ -482,7 +488,10 @@
         <section id="view-messages" class="view" style="display:none;">
           <div class="page-head">
             <div><h1>Messages</h1><p>Inquiries submitted through the website contact form.</p></div>
-            <button class="btn btn-ghost" onclick="msgLoad()"><span class="material-icons-outlined">refresh</span>Refresh</button>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost" onclick="msgExport()"><span class="material-icons-outlined">download</span>Export CSV</button>
+              <button class="btn btn-ghost" onclick="msgLoad()"><span class="material-icons-outlined">refresh</span>Refresh</button>
+            </div>
           </div>
           <div class="card"><div id="msg-list"><div class="muted">Loading…</div></div></div>
         </section>
@@ -996,6 +1005,17 @@
       logAudit('delete','subscriber',id,s?s.email:null);
       subLoad(); toast('Subscriber removed');
     };
+    window.msgExport = function(){
+      if(!_msg.length){ toast('No messages to export'); return; }
+      var head=['received_at','name','email','company','subject','message'];
+      var rows=[head].concat(_msg.map(function(m){ return [m.created_at, m.name, m.email, m.company, m.subject, m.message]; }));
+      var csv=rows.map(function(r){ return r.map(function(c){ return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+      var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+      a.download='cnt-messages-'+new Date().toISOString().slice(0,10)+'.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast('Exported '+_msg.length+' message'+(_msg.length===1?'':'s'));
+    };
     window.subExport = function(){
       if(!_sub.length){ toast('No subscribers to export'); return; }
       var rows = [['email','subscribed_at']].concat(_sub.map(function(s){ return [s.email, s.created_at]; }));
@@ -1012,7 +1032,8 @@
       var chart=document.getElementById('an-chart'); var pages=document.getElementById('an-pages');
       if(!chart) return;
       var since=new Date(Date.now()-30*86400000).toISOString();
-      var res=await sb.from('page_views').select('path,visitor_id,created_at').gte('created_at',since).limit(10000);
+      var res=await sb.from('page_views').select('path,visitor_id,created_at,referrer').gte('created_at',since).limit(10000);
+      if(res.error){ res=await sb.from('page_views').select('path,visitor_id,created_at').gte('created_at',since).limit(10000); } // referrer column optional
       if(res.error){ chart.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
       var rows=res.data||[];
       var total=rows.length, uniq={};
@@ -1038,6 +1059,29 @@
       var pmax=arr[0].n;
       var nice=function(p){ if(p==='/'||p==='/index.html') return 'Home'; return p.replace(/^\//,'').replace(/\.html$/,'')||'Home'; };
       pages.innerHTML=arr.map(function(x){ return '<div class="pg-row"><span class="pg-path" title="'+esc(x.p)+'">'+esc(nice(x.p))+'</span><span class="pg-track"><span style="width:'+Math.round((x.n/pmax)*100)+'%"></span></span><span class="pg-n">'+x.n.toLocaleString()+'</span></div>'; }).join('');
+      // Traffic sources — group the referrer host into friendly channels.
+      var srcEl=document.getElementById('an-sources');
+      if(srcEl){
+        var smap={}; rows.forEach(function(r){ var l=srcLabel(r.referrer); smap[l]=(smap[l]||0)+1; });
+        var sarr=Object.keys(smap).map(function(k){return {k:k,n:smap[k]};}).sort(function(a,b){return b.n-a.n;}).slice(0,10);
+        if(!sarr.length){ srcEl.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">travel_explore</span></div><h3>No sources yet</h3><p>Referrers appear here as visitors arrive from search, social, and links.</p></div>'; }
+        else { var srmax=sarr[0].n; srcEl.innerHTML=sarr.map(function(x){ return '<div class="pg-row"><span class="pg-path">'+esc(x.k)+'</span><span class="pg-track"><span style="width:'+Math.round((x.n/srmax)*100)+'%"></span></span><span class="pg-n">'+x.n.toLocaleString()+'</span></div>'; }).join(''); }
+      }
+    }
+    function srcLabel(h){
+      if(!h) return 'Direct / typed';
+      h=String(h).toLowerCase();
+      if(/facebook|fbcdn|messenger|\bfb\b/.test(h)) return 'Facebook';
+      if(/instagram/.test(h)) return 'Instagram';
+      if(/google\./.test(h)) return 'Google';
+      if(/linkedin|lnkd/.test(h)) return 'LinkedIn';
+      if(/tiktok/.test(h)) return 'TikTok';
+      if(/t\.co|twitter|x\.com/.test(h)) return 'X / Twitter';
+      if(/bing\./.test(h)) return 'Bing';
+      if(/yahoo/.test(h)) return 'Yahoo';
+      if(/jobstreet/.test(h)) return 'JobStreet';
+      if(/indeed/.test(h)) return 'Indeed';
+      return h;
     }
     window.anLoad = anLoad;
 

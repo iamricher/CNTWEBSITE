@@ -153,8 +153,25 @@
     wireOverlayScroll(nav);
     wireSmoothScroll(nav);
     wireNewsletter();
-    countVisit();
-    logPageView();
+    // Respect a prior "Decline" choice: skip first-party analytics entirely.
+    if (cookieConsent() !== 'declined') { countVisit(); logPageView(); }
+    cookieBanner();
+  }
+
+  function cookieConsent() { try { return localStorage.getItem('cnt_cookie_consent'); } catch (_) { return null; } }
+  function cookieBanner() {
+    if (cookieConsent()) return;               // already accepted or declined
+    var b = document.createElement('div');
+    b.className = 'cookie-banner';
+    b.setAttribute('role', 'dialog');
+    b.setAttribute('aria-label', 'Cookie notice');
+    b.innerHTML = '<p>We use first-party cookies and analytics to understand how the site is used and to improve your experience. See our <a href="privacy.html">Privacy Policy</a>.</p>' +
+      '<div class="cookie-actions"><button class="ck-decline" type="button">Decline</button><button class="ck-accept" type="button">Accept</button></div>';
+    document.body.appendChild(b);
+    requestAnimationFrame(function () { b.classList.add('show'); });
+    var close = function (val) { try { localStorage.setItem('cnt_cookie_consent', val); } catch (_) {} b.classList.remove('show'); setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 300); };
+    b.querySelector('.ck-accept').addEventListener('click', function () { close('accepted'); });
+    b.querySelector('.ck-decline').addEventListener('click', function () { close('declined'); });
   }
 
   // Newsletter signup in the footer → newsletter_subscribers table.
@@ -209,7 +226,13 @@
       // individually in Content Studio's per-post analytics.
       var id = new URLSearchParams(location.search).get('id');
       if (id && /(event|post)\.html$/.test(location.pathname)) path += '?id=' + id;
-      Promise.resolve(sb.from('page_views').insert({ path: path, visitor_id: vid })).catch(function () {});
+      // External referrer host (traffic source), null for direct/internal visits.
+      var ref = null;
+      try { if (document.referrer) { var rh = new URL(document.referrer).hostname.replace(/^www\./, ''); if (rh && rh !== location.hostname.replace(/^www\./, '')) ref = rh; } } catch (_) {}
+      Promise.resolve(sb.from('page_views').insert({ path: path, visitor_id: vid, referrer: ref })).then(function (res) {
+        // If the referrer column isn't present yet, still log the view without it.
+        if (res && res.error) sb.from('page_views').insert({ path: path, visitor_id: vid }).then(function () {}, function () {});
+      }, function () {});
     } catch (_) {}
   }
 
