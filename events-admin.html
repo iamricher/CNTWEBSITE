@@ -310,6 +310,29 @@
       .page-head h1{font-size:1.45rem}
       .grid2{grid-template-columns:1fr}
     }
+
+    /* ============ MODERNIZATION PASS ============ */
+    /* 1) Views-over-time chart — rounder bars, lively hover */
+    .chart{gap:4px}
+    .chart .bar{border-radius:5px 5px 2px 2px;transition:filter .15s ease,transform .15s ease;transform-origin:bottom}
+    .chart .bar:hover{filter:brightness(1.12) saturate(1.08);transform:scaleY(1.03)}
+    /* 2) List rows + cards — softer depth, smoother hover */
+    .card{box-shadow:0 1px 2px rgba(16,24,40,.04), 0 14px 32px rgba(16,24,40,.05)}
+    .row{transition:background .14s ease,box-shadow .14s ease}
+    .row:hover{background:var(--panel-2);box-shadow:inset 3px 0 0 var(--red)}
+    .pg-row{transition:background .12s ease;border-radius:0}
+    .pg-row:hover{background:var(--panel-2)}
+    .pg-track span{background:linear-gradient(90deg,var(--red-lt),var(--red))}
+    /* 3) Sidebar — gradient active state + section spacing */
+    .sidenav-item{transition:background .16s ease,color .16s ease,box-shadow .16s ease,transform .1s ease}
+    .sidenav-item:active{transform:scale(.98)}
+    .sidenav-item.active{background:linear-gradient(135deg,#D6122F,#A50D24);box-shadow:0 6px 16px rgba(200,16,46,.32)}
+    .side .nav-label{margin-top:14px}
+    .side .nav-label:first-of-type{margin-top:0}
+    /* 4) Empty states — softer, more inviting */
+    .empty{padding:64px 24px}
+    .empty .ic{width:62px;height:62px;border-radius:18px;box-shadow:0 10px 24px rgba(200,16,46,.16)}
+    .empty .ic .material-icons-outlined{font-size:30px}
   </style>
 </head>
 <body>
