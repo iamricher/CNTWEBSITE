@@ -808,9 +808,23 @@
   function gotoJob(id){ history.pushState({id},'', 'careers.html?job='+id); route(); window.scrollTo({top:0}); }
   window.addEventListener('popstate',route);
   function route(){
-    const id=new URLSearchParams(location.search).get('job');
+    const params=new URLSearchParams(location.search);
+    const id=params.get('job');
     if(id && ALL_JOBS.some(j=>String(j.id)===String(id))){ showDetail(ALL_JOBS.find(j=>String(j.id)===String(id))); }
-    else { showList(); }
+    else {
+      // ?loc=<location> pre-filters the board to that location (used by the
+      // homepage reach map). Match to a real job location so the filter sticks.
+      const loc=params.get('loc');
+      if(loc){
+        const lc=loc.toLowerCase();
+        const hit=ALL_JOBS.find(j=>String(j.location||'').toLowerCase()===lc)
+               || ALL_JOBS.find(j=>String(j.location||'').toLowerCase().indexOf(lc)>=0);
+        curFilter.location=hit?hit.location:'all';
+        buildFilters();
+      }
+      showList();
+      if(loc){ const b=document.getElementById('board'); if(b) b.scrollIntoView({behavior:'smooth'}); }
+    }
     syncJobSchema();
   }
   function showList(){ $('#view-detail').style.display='none'; $('#view-list').style.display='block'; renderList(); }
