@@ -347,6 +347,22 @@ grant execute on function public.cnt_client_log(text, text) to authenticated;
 --  exposes resume_url, so cnt_client_can_read_cv and the "resumes read client"
 --  storage policy were dropped — see 2026-08-17-client-monitoring.sql.)
 
+-- Public live stats for the homepage "Our Impact (Live)" band. Returns ONLY
+-- aggregate counts (no rows, no PII), so it is safe to expose to anon.
+create or replace function public.cnt_public_stats()
+returns json language sql stable security definer set search_path=public as $$
+  select json_build_object(
+    'open_jobs',    (select count(*)                 from public.jobs where status = 'open'),
+    'openings',     (select coalesce(sum(openings),0) from public.jobs where status = 'open'),
+    'partners',     (select count(distinct client)   from public.jobs),
+    'locations',    (select count(distinct location) from public.jobs where status = 'open'),
+    'applications', (select count(*)                 from public.applications),
+    'placed',       (select count(*)                 from public.applications where stage in ('hired','onboarding'))
+  )
+$$;
+revoke all on function public.cnt_public_stats() from public;
+grant execute on function public.cnt_public_stats() to anon, authenticated;
+
 -- Public candidate self-service status lookup. Two-factor (email + phone, both
 -- on file) so it can't be used to enumerate emails, and it returns ONLY status
 -- fields — never name, CV, notes or anyone else's data. SECURITY DEFINER so it
