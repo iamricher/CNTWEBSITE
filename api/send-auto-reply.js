@@ -25,40 +25,61 @@ function readBody(req) {
   });
 }
 
-const SHELL = (title, bodyHtml) =>
-  '<!doctype html><html><body style="margin:0;background:#f5f5f5;padding:24px 0;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;">' +
-  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">' +
-  '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.08);">' +
-  '<tr><td style="background:linear-gradient(135deg,#1a1a1a,#000);padding:26px 32px;">' +
-  '<span style="color:#fff;font-size:19px;font-weight:800;letter-spacing:-.02em;">CNT Promo &amp; Ads Specialists, Inc.</span>' +
-  '<div style="color:#E5213F;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:4px;">' + esc(title) + '</div></td></tr>' +
-  '<tr><td style="padding:32px;font-size:15px;line-height:1.65;color:#333;">' + bodyHtml + '</td></tr>' +
-  '<tr><td style="padding:20px 32px;background:#fafafa;border-top:1px solid #eee;font-size:12px;color:#8a8a8a;line-height:1.6;">' +
-  'CNT Promo &amp; Ads Specialists, Inc. · 219 LYFE Tower, Shaw Blvd., Mandaluyong City<br>' +
-  'This is an automated message — please do not reply directly to this email.</td></tr>' +
+const SITE = 'https://cnt-website-ats.vercel.app';
+
+// Bulletproof-ish red button (table cell → works in most email clients).
+const BTN = (href, label) =>
+  '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:10px 0 4px;"><tr>' +
+  '<td style="background:#C8102E;border-radius:8px;"><a href="' + href + '" style="display:inline-block;padding:13px 30px;color:#ffffff;font-weight:700;font-size:14px;text-decoration:none;">' + label + '</a></td></tr></table>';
+
+// Info / callout box with a coloured left border (red default, green when safe).
+const BOX = (html, green) =>
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0;"><tr>' +
+  '<td style="background:' + (green ? '#ECFDF3' : '#FDECEF') + ';border-left:4px solid ' + (green ? '#16A34A' : '#C8102E') +
+  ';border-radius:6px;padding:14px 18px;font-size:13.5px;color:' + (green ? '#12683B' : '#8A1020') + ';line-height:1.6;">' + html + '</td></tr></table>';
+
+const SHELL = (eyebrow, heading, bodyHtml) =>
+  '<!doctype html><html><body style="margin:0;padding:0;background:#f4f4f5;">' +
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:28px 12px;font-family:Arial,Helvetica,sans-serif;"><tr><td align="center">' +
+  '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);">' +
+  // dark header + red accent line (mirrors the payroll system emails)
+  '<tr><td style="background:#171717;border-bottom:3px solid #C8102E;padding:24px 32px;">' +
+  '<div style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:-.01em;">CNT Promo &amp; Ads Specialists, Inc.</div>' +
+  '<div style="color:#9a9a9a;font-size:12px;margin-top:3px;">Employment &amp; Manpower Services</div></td></tr>' +
+  // body
+  '<tr><td style="padding:32px;color:#333333;font-size:15px;line-height:1.65;">' +
+  '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:5px 12px;border-radius:6px;">' + esc(eyebrow) + '</span>' +
+  '<h1 style="font-size:22px;font-weight:700;color:#1a1a1a;margin:16px 0 14px;">' + heading + '</h1>' +
+  bodyHtml + '</td></tr>' +
+  // footer
+  '<tr><td style="background:#fafafa;border-top:1px solid #eeeeee;padding:20px 32px;font-size:12px;color:#999999;line-height:1.6;">' +
+  'CNT Promo &amp; Ads Specialists, Inc. &middot; 219 LYFE Tower, Shaw Blvd., Mandaluyong City<br>' +
+  'This is an automated message &mdash; please do not reply to this email.</td></tr>' +
   '</table></td></tr></table></body></html>';
 
 function template(type, data) {
-  var name = esc(data.name || 'there').split(' ')[0] || 'there';
+  var name = esc((data.name || 'there').split(' ')[0] || 'there');
   if (type === 'application') {
     var role = esc(data.role || 'the role you applied for');
     return {
-      subject: 'We received your application — CNT Promo & Ads Specialists, Inc.',
-      html: SHELL('Application Received',
-        '<p>Hi ' + name + ',</p>' +
-        '<p>Thank you for applying for <b>' + role + '</b>. We’ve successfully received your application, and our recruitment team will review it shortly.</p>' +
-        '<p>If your profile matches the role, we’ll reach out using the contact details you provided. In the meantime, feel free to explore other openings on our website.</p>' +
-        '<p style="background:#ECFDF3;border:1px solid #A6E7C3;border-radius:10px;padding:12px 16px;color:#12683B;font-size:14px;"><b>A friendly reminder:</b> applying to CNT is always <b>100% free</b>. We never ask jobseekers for payment. If anyone claiming to be from CNT asks you for money, it is a scam.</p>' +
-        '<p>Best regards,<br><b>The CNT Recruitment Team</b></p>')
+      subject: 'CNT Promo & Ads | Application Received',
+      html: SHELL('Application Received', 'Application received!',
+        '<p style="margin:0 0 14px;">Hi ' + name + ',</p>' +
+        '<p style="margin:0 0 14px;">Thank you for applying for <b>' + role + '</b>. We&rsquo;ve successfully received your application, and our recruitment team will review it shortly.</p>' +
+        '<p style="margin:0 0 4px;">You can check the status of your application anytime using the button below:</p>' +
+        BTN(SITE + '/status.html', 'Track my application') +
+        BOX('<b>Friendly reminder:</b> applying to CNT is always <b>100% free</b>. We never ask jobseekers for payment. If anyone claiming to be from CNT asks you for money, it is a scam.', true) +
+        '<p style="margin:18px 0 0;">Thanks,<br><b>The CNT Recruitment Team</b></p>')
     };
   }
   return {
-    subject: 'Thanks for reaching out — CNT Promo & Ads Specialists, Inc.',
-    html: SHELL('Inquiry Received',
-      '<p>Hi ' + name + ',</p>' +
-      '<p>Thank you for contacting CNT Promo &amp; Ads Specialists, Inc. We’ve received your message and a member of our team will get back to you as soon as possible — usually within one business day.</p>' +
-      '<p>If your concern is urgent, you may also reach us at <b>8293-5269</b> or <a href="mailto:hrdadmin@cntpromoads.com" style="color:#C8102E;">hrdadmin@cntpromoads.com</a>.</p>' +
-      '<p>Best regards,<br><b>CNT Promo &amp; Ads Specialists, Inc.</b></p>')
+    subject: 'CNT Promo & Ads | We received your message',
+    html: SHELL('Inquiry Received', 'We&rsquo;ve got your message',
+      '<p style="margin:0 0 14px;">Hi ' + name + ',</p>' +
+      '<p style="margin:0 0 14px;">Thank you for contacting CNT Promo &amp; Ads Specialists, Inc. We&rsquo;ve received your message and a member of our team will get back to you as soon as possible &mdash; usually within one business day.</p>' +
+      BTN(SITE + '/services.html', 'Explore our services') +
+      BOX('Need something urgent? Reach us at <b>8293-5269</b> or <a href="mailto:hrdadmin@cntpromoads.com" style="color:#C8102E;text-decoration:none;">hrdadmin@cntpromoads.com</a>.') +
+      '<p style="margin:18px 0 0;">Best regards,<br><b>CNT Promo &amp; Ads Specialists, Inc.</b></p>')
   };
 }
 
