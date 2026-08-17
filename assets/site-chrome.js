@@ -44,6 +44,7 @@
     '    <li><a href="' + h('projects') + '">Success Stories</a></li>' +
     '    <li><a href="' + h('events') + '">Events</a></li>' +
     '    <li><a href="careers.html">Careers</a></li>' +
+    '    <li><a href="faq.html">FAQ</a></li>' +
     '    <li><a href="' + h('contact') + '">Contact</a></li>' +
     '  </ul>' +
     '  <a href="careers.html" class="btn-primary mobile-cta">Apply Now</a>' +
@@ -75,7 +76,7 @@
     '      <li><a href="' + h('industries') + '">Retail &amp; FMCG</a></li><li><a href="' + h('industries') + '">Logistics</a></li></ul></div>' +
     '    <div class="footer-col"><h5>Company</h5><ul>' +
     '      <li><a href="about.html">About Us</a></li><li><a href="' + h('projects') + '">Success Stories</a></li>' +
-    '      <li><a href="careers.html">Careers</a></li><li><a href="' + h('contact') + '">Contact</a></li></ul>' +
+    '      <li><a href="careers.html">Careers</a></li><li><a href="faq.html">FAQ</a></li><li><a href="' + h('contact') + '">Contact</a></li></ul>' +
     '      <h5 style="margin-top:1.75rem">Stay Updated</h5>' +
     '      <div class="newsletter-form"><input type="email" id="nl-email" placeholder="Your email" aria-label="Newsletter email" /><button id="nl-btn" aria-label="Subscribe">&rarr;</button></div>' +
     '      <p id="nl-msg" style="font-size:.78rem;color:rgba(255,255,255,.5);margin-top:8px;min-height:1em"></p>' +
