@@ -98,8 +98,8 @@ let clientHtml; try { clientHtml = read('client.html'); } catch { clientHtml = n
 if (clientHtml) {
   const CLIENT_IDS = [
     'client-login', 'client-app', 'client-email', 'client-password', 'client-login-btn',
-    'client-msg', 'client-account-name', 'tab-candidates', 'tab-vacancies',
-    'client-candidate-list', 'client-vacancy-list', 'cv-position', 'cv-location', 'cv-submit',
+    'client-msg', 'client-account-name', 'tab-dashboard', 'tab-candidates',
+    'client-candidate-list',
   ];
   const cm = CLIENT_IDS.filter(id => !clientHtml.includes('id="' + id + '"'));
   cm.length ? fail('client.html required ids present', 'missing: ' + cm.join(', '))

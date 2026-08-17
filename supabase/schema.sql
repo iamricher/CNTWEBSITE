@@ -282,64 +282,49 @@ $$;
 -- the ONLY read path and its WHERE clause is the security boundary: caller's
 -- own account only, endorsed/decided only. Per the client's decision it returns
 -- the full candidate profile (name, contact, CV path) so the client can review
--- the actual applicant before approving. It deliberately does NOT return the
--- internal recruiter notes (activity/recruiterComments live only in the ATS).
--- resume_url is the storage path; the "resumes client read" storage policy
--- lets the client fetch a signed URL for exactly the CVs endorsed to them.
--- drop first: the return signature evolved (anonymised → full profile), and
--- Postgres won't let CREATE OR REPLACE change a function's return type.
+-- MONITORING-ONLY: returns an ANONYMISED view of every applicant tied to the
+-- caller's account, plus where each one is in the pipeline. It deliberately
+-- selects NO direct identifiers (name, email, phone, linkedin, referred_by,
+-- resume_url, cover_note, proposed_salary) — the fixed column list here is the
+-- guarantee that PII can never leak, even via raw network inspection. Clients
+-- no longer endorse/approve/reject, so there is no status filter: they monitor
+-- the whole pipeline for their vacancies.
+-- drop first: the return signature changed, and Postgres won't let CREATE OR
+-- REPLACE change a function's return type.
 drop function if exists public.cnt_client_candidates();
 create or replace function public.cnt_client_candidates()
 returns table (
-  id bigint, name text, email text, phone text, linkedin text, referred_by text,
-  role text, location text, source text, applied_date date,
-  tags text, degree text, medium text, work_experience text, education text,
-  languages text, certifications text, seminars text, awards text, char_references text,
-  cover_note text, proposed_salary text, availability date, resume_url text,
-  priority int, client_status text, endorsed_at timestamptz,
-  decided_at timestamptz, client_reason text
+  id bigint, role text, location text, applied_date date,
+  tags text, degree text, medium text, priority int,
+  stage text, stage_label text, stage_seq int, is_hired boolean
 ) language sql stable security definer set search_path=public as $$
-  select a.id, a.name, a.email, a.phone, a.linkedin, a.referred_by,
-         a.role, a.location, a.source, a.applied_date,
-         a.tags, a.degree, a.medium, a.work_experience, a.education,
-         a.languages, a.certifications, a.seminars, a.awards, a.char_references,
-         a.cover_note, a.proposed_salary, a.availability, a.resume_url,
-         a.priority, a.client_status, a.endorsed_at, a.decided_at, a.client_reason
+  select a.id, a.role, a.location, a.applied_date,
+         a.tags, a.degree, a.medium, a.priority,
+         a.stage,
+         coalesce(s.name, initcap(replace(a.stage,'_',' ')), 'Applied') as stage_label,
+         coalesce(s.sequence, 0) as stage_seq,
+         coalesce(s.is_hired, false) as is_hired
   from public.applications a
+  left join public.stages s on s.key = a.stage
   where public.cnt_client_account() is not null
     and a.client = public.cnt_client_account()
-    and a.client_status in ('endorsed','approved','rejected')
 $$;
 revoke all on function public.cnt_client_candidates() from public, anon;
 grant execute on function public.cnt_client_candidates() to authenticated;
 
--- A client records their decision on an endorsed candidate. The only write a
--- client can make to applications. Gated: must be the caller's own account,
--- and only from 'endorsed' → 'approved'/'rejected'.
-create or replace function public.cnt_client_decide(app_id bigint, decision text, reason text default null)
-returns text language plpgsql security definer set search_path=public as $$
-declare acct text; cur text;
-begin
-  acct := public.cnt_client_account();
-  if acct is null then raise exception 'Not a client account'; end if;
-  if decision not in ('approved','rejected') then raise exception 'Invalid decision'; end if;
-  select client_status into cur from public.applications
-    where id=app_id and client=acct for update;
-  if cur is null then raise exception 'Candidate not found for your account'; end if;
-  if cur <> 'endorsed' then raise exception 'Candidate is not awaiting your decision'; end if;
-  update public.applications
-    set client_status=decision, decided_at=now(),
-        client_reason=case when decision='rejected' then reason else null end
-    where id=app_id and client=acct;
-  -- RA 10173 accountability: record who decided what, in the tamper-evident log
-  insert into public.audit_log(actor_email, actor_role, action, entity, entity_ref, details)
-  values ((select email from public.profiles where id=auth.uid()), 'client',
-          'client_'||decision, 'applicant', app_id::text, acct||coalesce(' — '||reason,''));
-  return decision;
-end;
+-- Pipeline stages for the portal's tracker (non-sensitive taxonomy). Lets a
+-- client see the full ordered pipeline and where each candidate sits.
+drop function if exists public.cnt_client_stages();
+create or replace function public.cnt_client_stages()
+returns table ( key text, name text, sequence int, is_hired boolean )
+language sql stable security definer set search_path=public as $$
+  select s.key, s.name, coalesce(s.sequence,0) as sequence, coalesce(s.is_hired,false) as is_hired
+  from public.stages s
+  where coalesce(s.folded,false) = false
+  order by s.sequence
 $$;
-revoke all on function public.cnt_client_decide(bigint, text, text) from public, anon;
-grant execute on function public.cnt_client_decide(bigint, text, text) to authenticated;
+revoke all on function public.cnt_client_stages() from public, anon;
+grant execute on function public.cnt_client_stages() to authenticated;
 
 -- RA 10173 accountability: a client logs its own access events (privacy
 -- acknowledgment, viewing a candidate's data). Only clients may log, and only
@@ -358,20 +343,9 @@ $$;
 revoke all on function public.cnt_client_log(text, text) from public, anon;
 grant execute on function public.cnt_client_log(text, text) to authenticated;
 
--- Does the caller (a client) own the candidate whose CV is at this path? Used by
--- the "resumes read client" storage policy. SECURITY DEFINER so its read of
--- applications bypasses that table's RLS (which otherwise blocks clients).
-create or replace function public.cnt_client_can_read_cv(p_path text)
-returns boolean language sql stable security definer set search_path=public as $$
-  select exists(
-    select 1 from public.applications a
-    where a.resume_url = p_path
-      and a.client = public.cnt_client_account()
-      and a.client_status in ('endorsed','approved','rejected')
-  );
-$$;
-revoke all on function public.cnt_client_can_read_cv(text) from public, anon;
-grant execute on function public.cnt_client_can_read_cv(text) to authenticated;
+-- (Client CV access removed: the monitoring portal is anonymised and never
+--  exposes resume_url, so cnt_client_can_read_cv and the "resumes read client"
+--  storage policy were dropped — see 2026-08-17-client-monitoring.sql.)
 
 -- Public candidate self-service status lookup. Two-factor (email + phone, both
 -- on file) so it can't be used to enumerate emails, and it returns ONLY status
@@ -564,10 +538,9 @@ create policy "profiles read self" on public.profiles for select to authenticate
 -- they cannot update or delete — staff own the lifecycle.
 create policy "hr staff all"      on public.hiring_requests for all    to authenticated
   using (public.cnt_is_staff()) with check (public.cnt_is_staff());
-create policy "hr client read"    on public.hiring_requests for select to authenticated
-  using (account is not null and account = public.cnt_client_account());
-create policy "hr client insert"  on public.hiring_requests for insert to authenticated
-  with check (account = public.cnt_client_account() and status = 'Pending' and client_submitted = true);
+-- (Client vacancy filing removed — the portal is monitoring-only now, so the
+--  "hr client read"/"hr client insert" policies were dropped. See
+--  2026-08-17-client-monitoring.sql. Staff own hiring_requests entirely.)
 
 -- Only the Account Officer (or owner) may approve an MRF (Pending → Open) or
 -- change its assigned recruiter. RLS lets any staff UPDATE, so this trigger
@@ -619,15 +592,8 @@ create policy "resumes upload public" on storage.objects
   for insert to anon, authenticated with check (bucket_id='resumes');
 create policy "resumes read staff" on storage.objects
   for select to authenticated using (bucket_id='resumes' and public.cnt_is_staff());
--- A client may fetch a signed URL for exactly the CVs of candidates endorsed
--- to their account. The ownership check MUST run in a SECURITY DEFINER function:
--- an inline subquery on applications would itself be blocked by applications'
--- RLS (clients have no direct read there), so the check would always be false
--- and no CV would ever load. The definer function bypasses that.
-create policy "resumes read client" on storage.objects
-  for select to authenticated using (
-    bucket_id='resumes' and public.cnt_client_can_read_cv(storage.objects.name)
-  );
+-- (No client CV access — the monitoring portal is anonymised. The former
+--  "resumes read client" policy was dropped; see 2026-08-17-client-monitoring.sql.)
 -- managers may delete CVs — required for the RA 10173 retention purge / erasure
 create policy "resumes delete mgr" on storage.objects
   for delete to authenticated using (bucket_id='resumes' and public.cnt_is_manager());

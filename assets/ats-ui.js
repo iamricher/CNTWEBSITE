@@ -583,7 +583,7 @@ function _sidebarScorecard(app){
   if(!vals.length && !sc.recommendation && !sc.verdict) return '';
   const ov=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):null;
   const vd=(typeof SCORE_VERDICTS!=='undefined')?SCORE_VERDICTS.find(v=>v[0]===sc.verdict):null;   // [key,label,textCol,bgCol]
-  const recMap={endorse:'Endorse to client',proceed:'Proceed to next stage',hold:'Keep in talent pool',refuse:'Refuse'};
+  const recMap={endorse:'Recommend for hire',proceed:'Proceed to next stage',hold:'Keep in talent pool',refuse:'Refuse'};
   const rec=recMap[sc.recommendation];
   return '<div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">'
     +'<div class="flex items-center gap-1.5 mb-2"><span class="material-icons-outlined text-slate-600" style="font-size:15px;">grading</span><span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Evaluation</span>'

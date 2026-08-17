@@ -1,14 +1,19 @@
 #!/usr/bin/env node
 /**
- * CNT ATS — client portal guardrails.
+ * CNT ATS — client portal guardrails (monitoring-only).
  *
- * By product decision, a client sees the full profile + CV of candidates
- * endorsed to THEM. So the invariant is no longer "no PII" — it is isolation:
- * a client must only ever reach candidates (and CVs) for their own account, in
- * the endorsed/decided states. The security boundary is the gating on the two
- * RPCs and the storage policy — this test fails if any of that gating is lost
- * (SECURITY DEFINER, account scoping, endorsed-only), if a client gets a direct
- * applications policy, or if the CV storage policy stops being scoped.
+ * Product decision (2026-08-17): the client portal is READ-ONLY monitoring.
+ * Clients no longer endorse/approve/reject candidates and no longer file
+ * vacancies. A client sees an ANONYMISED view of every applicant for their
+ * account plus where each one is in the pipeline. So the invariants are:
+ *   - the read path is SECURITY DEFINER, scoped to the caller's account, and
+ *     selects NO direct identifiers (name/email/phone/CV) — anonymity is the
+ *     crux and must be covered by a test;
+ *   - the client write path (cnt_client_decide), the client CV access
+ *     (cnt_client_can_read_cv + "resumes read client"), and client vacancy
+ *     filing ("hr client insert"/"hr client read") are all GONE;
+ *   - clients still have no direct policy on applications;
+ *   - notifications remain RPC-only.
  *
  * Usage: node scripts/test-client-portal.js
  */
@@ -21,7 +26,7 @@ const fail = (n, w) => { checks++; failures++; console.log('  \x1b[31m✗\x1b[0m
 
 const sql = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
 
-// ── 1. The read path must be gated to the caller's own account ─
+// ── 1. Read path: gated + anonymised + carries the stage ───────
 console.log('\nClient read path (cnt_client_candidates)');
 const m = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_client_candidates[\s\S]*?\$\$;/i);
 if (!m) {
@@ -30,71 +35,51 @@ if (!m) {
   ok('cnt_client_candidates present');
   const body = m[0];
   /security\s+definer/i.test(body)     ? ok('runs SECURITY DEFINER')                 : fail('SECURITY DEFINER', 'missing');
-  /client_status\s+in\s*\(\s*'endorsed'/i.test(body) ? ok('filters to endorsed/approved/rejected') : fail('status filter', 'missing');
   /a\.client\s*=\s*public\.cnt_client_account\(\)/i.test(body) ? ok('scoped to the caller\'s client account') : fail('account scoping', 'missing');
   /public\.cnt_client_account\(\)\s+is\s+not\s+null/i.test(body) ? ok('returns nothing when caller is not a client') : fail('null-account guard', 'missing');
+  // Anonymity: the SELECT must not expose any direct identifier or the CV path.
+  const PII = [/\ba\.name\b/i, /\ba\.email\b/i, /\ba\.phone\b/i, /\ba\.linkedin\b/i, /\ba\.referred_by\b/i, /\ba\.resume_url\b/i, /\ba\.cover_note\b/i, /\ba\.proposed_salary\b/i];
+  const leaked = PII.filter(re => re.test(body)).map(re => String(re));
+  leaked.length === 0 ? ok('anonymised — selects no name/email/phone/CV/PII') : fail('anonymity', 'leaks: ' + leaked.join(', '));
+  // Must NOT re-introduce the old endorsed-only decision filter.
+  /client_status\s+in\s*\(/i.test(body) ? fail('no endorsement filter', 'still filters by client_status') : ok('no endorsement/decision filter (monitors whole pipeline)');
+  // Carries where the candidate is.
+  /stage_label/i.test(body) ? ok('returns the pipeline stage label') : fail('stage exposed', 'missing stage_label');
 }
 
-// ── 2. The decision RPC must be gated ──────────────────────────
-console.log('\nClient decision path (cnt_client_decide)');
-const d = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_client_decide[\s\S]*?\$\$;/i);
-if (!d) {
-  fail('cnt_client_decide present', 'function not found');
+// ── 2. Stage list RPC for the tracker ──────────────────────────
+console.log('\nClient stage list (cnt_client_stages)');
+const st = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_client_stages[\s\S]*?\$\$;/i);
+if (!st) {
+  fail('cnt_client_stages present', 'function not found');
 } else {
-  ok('cnt_client_decide present');
-  const body = d[0];
-  /security\s+definer/i.test(body)                 ? ok('runs SECURITY DEFINER')                  : fail('SECURITY DEFINER', 'missing');
-  /cur\s*<>\s*'endorsed'/i.test(body)              ? ok('only decides from endorsed')             : fail('endorsed-only transition', 'missing');
-  /decision\s+not\s+in\s*\(\s*'approved'\s*,\s*'rejected'\s*\)/i.test(body) ? ok('rejects invalid decisions') : fail('decision whitelist', 'missing');
-  /client\s*=\s*acct/i.test(body)                  ? ok('scoped to the caller\'s account')        : fail('account scoping', 'missing');
+  ok('cnt_client_stages present');
+  /security\s+definer/i.test(st[0]) ? ok('runs SECURITY DEFINER') : fail('SECURITY DEFINER', 'missing');
 }
 
-// ── 3. Client cannot read applications directly ────────────────
+// ── 3. Retired client write + CV + vacancy paths are GONE ──────
+console.log('\nRetired client paths are removed');
+/create\s+or\s+replace\s+function\s+public\.cnt_client_decide/i.test(sql)
+  ? fail('cnt_client_decide removed', 'still defined in schema.sql') : ok('cnt_client_decide is gone (clients decide nothing)');
+/create\s+or\s+replace\s+function\s+public\.cnt_client_can_read_cv/i.test(sql)
+  ? fail('cnt_client_can_read_cv removed', 'still defined') : ok('cnt_client_can_read_cv is gone (no client CV access)');
+/create policy\s+"resumes read client"/i.test(sql)
+  ? fail('resumes read client policy removed', 'still defined') : ok('no client CV storage policy');
+/create policy[^;]*hr client insert/i.test(sql)
+  ? fail('hr client insert removed', 'still defined') : ok('no client vacancy-insert policy');
+/create policy[^;]*hr client read/i.test(sql)
+  ? fail('hr client read removed', 'still defined') : ok('no client hiring_requests read policy');
+
+// ── 4. Client cannot read applications directly ────────────────
 console.log('\nNo direct client access to applications');
-// The only applications policies should reference cnt_is_staff/cnt_is_manager or
-// the public insert — never cnt_client_account. Clients go through the RPC only.
 const appsPolicies = sql.match(/create policy[^;]*on public\.applications[^;]*;/gi) || [];
 const clientOnApps = appsPolicies.filter(p => /cnt_client_account/i.test(p));
 clientOnApps.length === 0
   ? ok('no applications policy grants clients direct access')
   : fail('no client policy on applications', 'found: ' + clientOnApps.join(' | '));
 
-// ── 4. hiring_requests client insert is constrained ────────────
-console.log('\nClient vacancy insert is constrained');
-const hrInsert = (sql.match(/create policy[^;]*hr client insert[^;]*;/i) || [])[0] || '';
-/client_submitted\s*=\s*true/i.test(hrInsert) && /status\s*=\s*'Pending'/i.test(hrInsert) && /account\s*=\s*public\.cnt_client_account\(\)/i.test(hrInsert)
-  ? ok('client insert forced to own account, Pending, client_submitted')
-  : fail('constrained client insert', 'policy: ' + (hrInsert || 'not found'));
-
-// ── 5. CV storage access is scoped to endorsed + own account ───
-console.log('\nClient CV access is scoped');
-const cvPolicy = (sql.match(/create policy\s+"resumes read client"[\s\S]*?;/i) || [])[0] || '';
-if (!cvPolicy) {
-  fail('resumes read client policy present', 'not found');
-} else {
-  ok('resumes read client policy present');
-  // The policy delegates the ownership check to a SECURITY DEFINER function
-  // (an inline subquery would be blocked by applications' own RLS).
-  /public\.cnt_client_can_read_cv\(\s*storage\.objects\.name\s*\)/i.test(cvPolicy)
-    ? ok('CV read delegated to cnt_client_can_read_cv on the object path')
-    : fail('CV read via definer function', 'policy: ' + cvPolicy);
-}
-const cvFn = sql.match(/create\s+or\s+replace\s+function\s+public\.cnt_client_can_read_cv[\s\S]*?\$\$;/i);
-if (!cvFn) {
-  fail('cnt_client_can_read_cv present', 'function not found');
-} else {
-  ok('cnt_client_can_read_cv present');
-  const b = cvFn[0];
-  /security\s+definer/i.test(b)                              ? ok('CV check runs SECURITY DEFINER (bypasses applications RLS)') : fail('SECURITY DEFINER', 'missing');
-  /a\.client\s*=\s*public\.cnt_client_account\(\)/i.test(b)  ? ok('CV check scoped to the caller\'s account')                  : fail('CV account scoping', 'missing');
-  /client_status\s+in\s*\(\s*'endorsed'/i.test(b)           ? ok('CV check limited to endorsed/decided')                      : fail('CV status scoping', 'missing');
-  /a\.resume_url\s*=\s*p_path/i.test(b)                      ? ok('CV check matched by exact object path')                     : fail('CV path match', 'missing');
-}
-
-// ── 6. Notifications are reachable only through gated RPCs ─────
+// ── 5. Notifications are reachable only through gated RPCs ─────
 console.log('\nNotifications isolation (roadmap #7)');
-// The table must have RLS on with NO policies, so direct reads are impossible;
-// everything flows through the SECURITY DEFINER RPCs that scope by audience.
 /create table if not exists public\.notifications/i.test(sql)
   ? ok('notifications table present') : fail('notifications table present', 'not found');
 /alter table public\.notifications enable row level security/i.test(sql)

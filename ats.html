@@ -1304,7 +1304,7 @@
                 <span class="material-icons-outlined" style="font-size:13px;">restart_alt</span> Reopen
               </button>
               <button id="endorse-btn" onclick="cntOpenEndorsement()" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
-                <span class="material-icons-outlined" style="font-size:13px;">verified_user</span> Endorsement<span id="endorse-btn-chip"></span>
+                <span class="material-icons-outlined" style="font-size:13px;">visibility</span> Client view<span id="endorse-btn-chip"></span>
               </button>
               <button id="deploy-btn" onclick="cntOpenDeployment()" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
                 <span class="material-icons-outlined" style="font-size:13px;">timeline</span> Deployment<span id="deploy-btn-chip"></span>
@@ -1510,7 +1510,7 @@
             <span class="ml-auto text-xs font-semibold text-white/90" id="score-overall">Not rated</span>
           </div>
           <div class="p-6">
-            <p class="text-xs text-slate-500 mb-4">Rate the candidate on each criterion (1–5), give a recommendation, and add notes. This backs the Endorse / Proceed / Refuse decision.</p>
+            <p class="text-xs text-slate-500 mb-4">Rate the candidate on each criterion (1–5), give a recommendation, and add notes. This backs the Proceed / Refuse decision.</p>
             <div id="score-criteria" class="space-y-2.5"></div>
             <div class="mt-5">
               <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Overall recommendation</label>
@@ -1520,7 +1520,7 @@
               <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Next action</label>
               <select id="score-recommendation" class="w-full md:w-72 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-red-800">
                 <option value="">Undecided</option>
-                <option value="endorse">Endorse to client</option>
+                <option value="endorse">Recommend for hire</option>
                 <option value="proceed">Proceed to next stage</option>
                 <option value="hold">Keep in talent pool</option>
                 <option value="refuse">Refuse</option>

@@ -697,49 +697,36 @@
     renderAll(); if(currentViewedApplicantId===app.id) cntProfileExtras(app);
   }
   function renderEndorsement(app){
-    // Lives in the Endorsement dialog now, not inline on the profile. When the
-    // dialog is closed there is nothing to draw — the action-row chip carries
-    // the status instead (see cntSyncPanelChips).
+    // Monitoring-only now: clients no longer endorse/approve/reject — their
+    // portal is a read-only, anonymised view of where each of their candidates
+    // is in the pipeline. This panel shows the client's visibility and keeps the
+    // recruiter's pipeline controls (advance / refuse). The action-row chip
+    // reflects the current stage (see cntSyncPanelChips).
     cntSyncPanelChips(app);
     const panel=document.getElementById('cnt-endorse-panel');
     if(!panel) return;
     if(!app){ panel.innerHTML=''; return; }
-    const st=app.client_status||'none';
+    const acct=app.account||app.client||'the client';
     const canStage=_atInterviewOrLater(app);
-    const canEndorse=canStage && ['super_admin','recruiter','recruitment_supervisor','account_officer'].includes(currentRole);
-    // Staff endorse only. The approve/reject decision is the client's, made in
-    // the client portal — staff no longer record it on their behalf. Once
-    // endorsed, this panel just shows we're waiting on the client, then their
-    // outcome; a client rejection can be re-endorsed.
+    const canAct=['super_admin','recruiter','recruitment_supervisor','account_officer'].includes(currentRole);
     let actions='';
-    if(canEndorse){
-      const btn=(bg,label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:#fff;background:'+bg+';border:none;">'+label+'</button>';
+    if(canAct && app.stage!=='rejected'){
       const outBtn=(color,border,label,fn)=>'<button class="cnt-endo-btn" data-fn="'+fn+'" style="font-size:12px;font-weight:600;padding:6px 13px;border-radius:8px;cursor:pointer;color:'+color+';background:#fff;border:1px solid '+border+';">'+label+'</button>';
-      // After the interview it's a decision: endorse to client, proceed to the
-      // next level, or refuse.
-      if(st==='none' && app.stage!=='rejected'){
-        actions+=btn('#7f1d1d','Endorse to client','endorse');
-        if(_nextStageKey(app.stage)) actions+=outBtn('#1d4ed8','#bfdbfe','Proceed to next level','proceed');
-        actions+=outBtn('#b91c1c','#fecaca','Refuse','refuse');
-      }
-      else if(st==='rejected') actions+=btn('#7f1d1d','Re-endorse to client','endorse');
+      if(_nextStageKey(app.stage)) actions+=outBtn('#1d4ed8','#bfdbfe','Proceed to next level','proceed');
+      actions+=outBtn('#b91c1c','#fecaca','Refuse','refuse');
     }
-    const decisionHint=(canEndorse && st==='none' && app.stage!=='rejected')
-      ? '<div style="font-size:11.5px;color:#64748b;margin-top:10px;">After the interview, decide: <b style="color:#7f1d1d;">endorse</b> to the client'+(_nextStageKey(app.stage)?', <b style="color:#1d4ed8;">proceed</b> to the next level':'')+', or <b style="color:#b91c1c;">refuse</b>.</div>' : '';
-    const note = st==='endorsed'
-      ? '<div style="font-size:11.5px;color:#64748b;margin-top:10px;display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #f1f5f9;padding:8px 10px;border-radius:8px;"><span class="material-icons-outlined" style="font-size:14px;color:#cbd5e1;">hourglass_empty</span>Awaiting the client’s decision in their portal.</div>'
-      : (st==='approved' ? '<div style="font-size:11.5px;color:#166534;margin-top:8px;">The client approved this candidate.</div>' : '');
+    const stageName=(typeof getStageName==='function'?getStageName(app.stage):app.stage)||'Applied';
     panel.innerHTML='<div>'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">'
-      +'<span style="font-size:12px;color:#64748b;font-weight:600;">Current status</span>'
-      +_endorseBadge(st)+'</div>'
-      +((app.client_reason&&st==='rejected')?'<div style="font-size:12px;color:#b91c1c;margin-top:9px;background:#fef2f2;padding:8px 10px;border-radius:8px;">Client’s reason: '+_escN(app.client_reason)+'</div>':'')
-      +note+decisionHint
-      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!canStage?_lockNote('Unlocks after the candidate has been interviewed — then you can decide whether to refuse or endorse them.'):''))
+      +'<span style="font-size:12px;color:#64748b;font-weight:600;">Current stage</span>'
+      +'<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;color:#1d4ed8;background:#dbeafe;white-space:nowrap;">'+_escN(stageName)+'</span></div>'
+      +'<div style="font-size:11.5px;color:#64748b;margin-top:10px;display:flex;align-items:flex-start;gap:6px;background:#f8fafc;border:1px solid #f1f5f9;padding:9px 11px;border-radius:8px;">'
+        +'<span class="material-icons-outlined" style="font-size:14px;color:#94a3b8;margin-top:1px;">visibility</span>'
+        +'<span>Visible to <b style="color:#334155;">'+_escN(acct)+'</b> in their monitoring portal (anonymised — no name, contact, or CV). They can see this candidate’s pipeline stage only.</span></div>'
+      +(actions?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+actions+'</div>':(!canStage?_lockNote('Pipeline controls unlock after the candidate has been interviewed.'):''))
       +'</div>';
     panel.querySelectorAll('.cnt-endo-btn').forEach(b=>b.addEventListener('click',()=>{
-      if(b.dataset.fn==='endorse') setClientStatus(app,'endorsed');
-      else if(b.dataset.fn==='proceed') _proceedNextLevel(app);
+      if(b.dataset.fn==='proceed') _proceedNextLevel(app);
       else if(b.dataset.fn==='refuse'){ document.getElementById('cnt-panel-dialog')?.remove(); if(window.cntOpenRefuse) cntOpenRefuse(app.id); }
     }));
   }
@@ -773,8 +760,10 @@
     const panel=document.getElementById('cnt-workflow-panel');
     if(!panel) return;
     if(!app){ panel.innerHTML=''; return; }
-    // Deployment steps open once the client has approved the endorsed candidate.
-    const approved=(app.client_status==='approved');
+    // Deployment steps open once the candidate reaches the Job Offer / Hired
+    // stage. (Clients no longer approve candidates — the portal is monitoring-
+    // only — so the gate is the pipeline stage, driven by staff.)
+    const approved=_atOfferStage(app);
     const canDo=approved && ['super_admin','recruiter','recruitment_supervisor'].includes(currentRole);
     const rows=_MILESTONES.map(m=>{
       const done=!!app[m.f];
@@ -786,7 +775,7 @@
     }).join('');
     panel.innerHTML='<div>'
       +rows
-      +(!approved?_lockNote('Unlocks once the client approves this endorsed candidate.'):'')
+      +(!approved?_lockNote('Unlocks once the candidate reaches the Job Offer / Hired stage.'):'')
       +(canDo?'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;"><button class="cnt-print-dep" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>Deployment Notice</button><button class="cnt-print-nh" style="font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;color:#7f1d1d;background:#fff;border:1px solid #e2e8f0;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">print</span>New Hire Report</button></div>':'')
       +'</div>';
     panel.querySelectorAll('.cnt-ms-btn').forEach(b=>b.addEventListener('click',()=>setMilestone(app,b.dataset.f)));
@@ -822,8 +811,10 @@
     const ec=document.getElementById('endorse-btn-chip');
     const dc=document.getElementById('deploy-btn-chip');
     if(ec){
-      const st=app&&app.client_status||'none';
-      const dot={none:'#cbd5e1',endorsed:'#d97706',approved:'#16a34a',rejected:'#dc2626'}[st]||'#cbd5e1';
+      // Reflects whether the candidate is being monitored by the client (i.e.
+      // is in the active pipeline) vs. closed/rejected.
+      const closed=app&&app.stage==='rejected';
+      const dot=closed?'#dc2626':(_atOfferStage(app)?'#16a34a':'#1d4ed8');
       ec.innerHTML='<span style="display:inline-block;width:7px;height:7px;border-radius:99px;background:'+dot+';margin-left:4px;"></span>';
     }
     if(dc){
@@ -851,7 +842,7 @@
   }
   window.cntOpenEndorsement=function(){
     const app=findApplicant(currentViewedApplicantId); if(!app) return;
-    _cntPanelDialog('Client Endorsement','verified_user','cnt-endorse-panel');
+    _cntPanelDialog('Client Monitoring','visibility','cnt-endorse-panel');
     renderEndorsement(app);
   };
   window.cntOpenDeployment=function(){
@@ -880,8 +871,8 @@
     const fillRate=totalMRF?Math.round(filled/totalMRF*100):0;
     const overdue=hr.filter(r=>r.deadline && new Date(r.deadline)<today && r.status!=='Filled');
     const active=apps.filter(a=>a.stage!=='pool'&&a.stage!=='rejected').length;
-    const approved=apps.filter(a=>a.client_status==='approved').length, rejected=apps.filter(a=>a.client_status==='rejected').length, endorsed=apps.filter(a=>a.client_status==='endorsed').length;
-    const apprRate=(approved+rejected)?Math.round(approved/(approved+rejected)*100):0;
+    const hiredKeys=PIPELINE_STAGES.filter(s=>s.is_hired).map(s=>s.key);
+    const hired=apps.filter(a=>hiredKeys.includes(a.stage)).length;
     const deployed=apps.filter(a=>a.deployed_at).length;
     let ttfSum=0, ttfN=0;
     apps.forEach(a=>{ if(a.deployed_at && a.appliedDate){ const d=(new Date(a.deployed_at)-new Date(a.appliedDate))/86400000; if(d>=0){ ttfSum+=d; ttfN++; } } });
@@ -889,8 +880,8 @@
     let html='<div style="display:flex;gap:12px;flex-wrap:wrap;">'
       +_kpiCard('Open MRFs', openMRF, filled+' filled', '#7f1d1d')
       +_kpiCard('Fill rate', fillRate+'%', totalMRF+' total', '#16a34a')
-      +_kpiCard('Active pipeline', active, endorsed+' endorsed', '#0f172a')
-      +_kpiCard('Client approval', apprRate+'%', approved+' ✓ · '+rejected+' ✗', '#4338ca')
+      +_kpiCard('Active pipeline', active, 'in process', '#0f172a')
+      +_kpiCard('Hired', hired, 'reached offer', '#4338ca')
       +_kpiCard('Deployed', deployed, 'this cycle', '#0f766e')
       +_kpiCard('Avg time-to-fill', avgTTF?avgTTF+'d':'—', 'applied → deployed', '#b45309')
       +'</div>';
@@ -958,10 +949,9 @@
   }
   function printNewHirePacket(app){
     if(!app) return;
-    const dec = app.client_status==='approved' ? ('Approved'+(app.decided_at?' · '+_fmtDate(app.decided_at):'')) : (app.client_status||'—');
     const body='<h1>New Hire Report</h1>'
       +'<div class="sec">Employee Details</div><table class="kv">'+_kv('Name', app.name)+_kv('Position', app.role)+_kv('Client Account', app.account)+_kv('Location', app.location)+_kv('Contact No.', app.phone)+_kv('Email', app.email)+_kv('Source', app.source)+'</table>'
-      +'<div class="sec">Recruitment Timeline</div><table class="kv">'+_kv('Date Applied', app.appliedDate)+_kv('Endorsed to Client', app.endorsed_at?_fmtDate(app.endorsed_at):'—')+_kv('Client Decision', dec)+_kv('Contract Signed', app.contract_signed_at?_fmtDate(app.contract_signed_at):'—')+_kv('Orientation', app.oriented_at?_fmtDate(app.oriented_at):'—')+_kv('Deployed', app.deployed_at?_fmtDate(app.deployed_at):'—')+'</table>'
+      +'<div class="sec">Recruitment Timeline</div><table class="kv">'+_kv('Date Applied', app.appliedDate)+_kv('Job Offer / Hired', _atOfferStage(app)?(typeof getStageName==='function'?getStageName(app.stage):app.stage):'—')+_kv('Contract Signed', app.contract_signed_at?_fmtDate(app.contract_signed_at):'—')+_kv('Orientation', app.oriented_at?_fmtDate(app.oriented_at):'—')+_kv('Deployed', app.deployed_at?_fmtDate(app.deployed_at):'—')+'</table>'
       +'<p>Complete 201-file documents attached and submitted to the Account Officer.</p>'
       +'<div class="sign"><div><div class="line">Prepared by (Recruiter)</div></div><div><div class="line">Received by (Account Officer)</div></div></div>';
     _printWindow('New Hire Report — '+app.name, body);
@@ -979,7 +969,7 @@
   }
   function exportApplicantsCSV(){
     const apps=(typeof getAllApplicants==='function')?getAllApplicants():[];
-    const rows=apps.map(a=>({ Name:a.name, Position:a.role, Client:a.account, Location:a.location, Stage:(typeof getStageName==='function'?getStageName(a.stage):a.stage), Source:a.source, Applied:a.appliedDate, ClientStatus:a.client_status, Endorsed:a.endorsed_at?_fmtDate(a.endorsed_at):'', Contract:a.contract_signed_at?_fmtDate(a.contract_signed_at):'', Deployed:a.deployed_at?_fmtDate(a.deployed_at):'', Phone:a.phone, Email:a.email }));
+    const rows=apps.map(a=>({ Name:a.name, Position:a.role, Client:a.account, Location:a.location, Stage:(typeof getStageName==='function'?getStageName(a.stage):a.stage), Source:a.source, Applied:a.appliedDate, Contract:a.contract_signed_at?_fmtDate(a.contract_signed_at):'', Deployed:a.deployed_at?_fmtDate(a.deployed_at):'', Phone:a.phone, Email:a.email }));
     _downloadCSV(rows, 'cnt-applicants-'+new Date().toISOString().slice(0,10)+'.csv'); logAudit('export','applicants',null, rows.length+' rows');
   }
   function exportMRFsCSV(){

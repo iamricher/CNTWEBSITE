@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Client Portal — CNT Promo &amp; Ads Specialists, Inc.</title>
-  <meta name="description" content="CNT client portal — file vacancies and review endorsed candidates." />
+  <meta name="description" content="CNT client portal — monitor the status of candidates for your vacancies." />
   <meta name="robots" content="noindex" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -128,9 +128,11 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media(max-width:640px){.grid2{grid-template-columns:1fr}}
   .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px}
-  .b-pending{color:var(--amber);background:var(--amber-bg)}
-  .b-open{color:var(--green);background:var(--green-bg)}
-  .b-filled{color:var(--slate);background:var(--slate-bg)}
+  /* stage badge palette (by position in the pipeline) */
+  .b-stage{color:var(--slate);background:var(--slate-bg)}
+  .b-active{color:#1D4ED8;background:#DBEAFE}
+  .b-hired{color:var(--green);background:var(--green-bg)}
+  .b-closed{color:#B91C1C;background:#FEE2E2}
   .skill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#FCE7F3;color:#9D174D;margin:0 3px 3px 0}
   .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
   .row:last-child{border-bottom:none}
@@ -139,34 +141,47 @@
   .kv{font-size:12.5px;color:var(--sub);margin-top:2px}
   .sec-t{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94A3B8;margin:10px 0 4px}
   .prose{font-size:12.5px;color:#334155;line-height:1.55;white-space:pre-line}
-  .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
   .stars{color:#F59E0B;font-size:13px}
   .stars .off{color:#E2E8F0}
   .empty{text-align:center;color:#94A3B8;font-size:13px;padding:26px}
   .toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shadow);z-index:50;opacity:0;transform:translateY(8px);transition:.25s}
   .toast.show{opacity:1;transform:none}
+  /* mono candidate avatar */
+  .cref{width:34px;height:34px;border-radius:9px;background:#F1F5F9;color:#475569;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none;font-family:var(--font-display)}
 
-  /* Candidate profile modal — full-screen, like the staff ATS */
-  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:0}
-  .modal-box{background:#fff;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  /* pipeline overview (dashboard) */
+  .pipe-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f1f5f9}
+  .pipe-row:last-child{border-bottom:none}
+  .pipe-dot{width:10px;height:10px;border-radius:99px;flex:none;background:#CBD5E1}
+  .pipe-name{font-size:12.5px;font-weight:600;color:#334155;flex:1;min-width:0}
+  .pipe-bar{height:7px;border-radius:99px;background:#EEF2F7;flex:2;min-width:80px;overflow:hidden}
+  .pipe-bar span{display:block;height:100%;border-radius:99px;background:var(--red)}
+  .pipe-n{font-size:12px;font-weight:800;color:#0f172a;min-width:22px;text-align:right}
+
+  /* Candidate profile modal — read-only monitoring */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+  .modal-box{background:#fff;width:100%;max-width:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border-radius:16px}
   .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);background:#fff}
-  .modal-body{flex:1;overflow:hidden;min-height:0}
+  .modal-body{flex:1;overflow-y:auto;min-height:0;padding:18px 22px}
   .modal-foot{padding:12px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;background:#fff}
-  /* Confidentiality banner (RA 10173) */
   .confid{display:flex;align-items:center;gap:8px;background:#FEF3C7;border-bottom:1px solid #FDE68A;color:#92400E;font-size:11.5px;font-weight:600;padding:8px 22px}
   .confid .mi{font-size:15px}
-  .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);height:100%}
-  .pane-left{overflow-y:auto;padding:18px 20px;border-right:1px solid var(--line)}
-  .pane-right{display:flex;flex-direction:column;min-height:0;padding:14px 16px;background:#f8fafc}
-  @media(max-width:760px){.split{grid-template-columns:1fr;overflow-y:auto}.pane-left{border-right:none;border-bottom:1px solid var(--line)}.pane-right{height:70vh}}
   .prow{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12.5px}
-  .prow .pk{color:#94A3B8;font-weight:600;min-width:110px;flex:none}
+  .prow .pk{color:#94A3B8;font-weight:600;min-width:120px;flex:none}
   .prow .pv{color:#111}
-  /* #cand-cv must be a flex column with height, or the CV iframe (flex:1) has
-     nothing to flex against and collapses to ~150px. This is what fills it. */
-  #cand-cv{flex:1;display:flex;flex-direction:column;min-height:0}
-  .cv-bar{display:flex;gap:8px;margin-bottom:8px;flex:none}
-  .cv-frame{flex:1;width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;min-height:0}
+  /* horizontal pipeline tracker */
+  .track{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding:6px 0 2px}
+  .tstep{flex:1;min-width:64px;text-align:center;position:relative}
+  .tstep::before{content:"";position:absolute;top:9px;left:-50%;width:100%;height:2px;background:#E2E8F0;z-index:0}
+  .tstep:first-child::before{display:none}
+  .tstep .dot{position:relative;z-index:1;width:20px;height:20px;border-radius:99px;margin:0 auto;background:#fff;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center}
+  .tstep .dot .mi{font-size:12px;color:#fff}
+  .tstep.done .dot{background:var(--green);border-color:var(--green)}
+  .tstep.cur .dot{background:var(--red);border-color:var(--red)}
+  .tstep.cur .dot::after{content:"";position:absolute;inset:-5px;border-radius:99px;border:2px solid var(--red-pale)}
+  .tstep .tl{display:block;font-size:10px;font-weight:600;color:#64748b;margin-top:6px;line-height:1.25;padding:0 3px}
+  .tstep.cur .tl{color:var(--red);font-weight:800}
+  .tstep.done .tl{color:#334155}
   </style>
 </head>
 <body>
@@ -177,13 +192,13 @@
       <div class="brand"><img src="https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png" alt="CNT Promo &amp; Ads Specialists, Inc." style="height:34px;width:auto;object-fit:contain" /></div>
       <p style="font-weight:700;font-family:var(--font-display);font-size:13px;color:var(--sub);margin:10px 0 0">Client Portal</p>
       <h1>Sign in</h1>
-      <p class="lead">File vacancies and review candidates endorsed to your company.</p>
+      <p class="lead">Track the status of candidates for your vacancies with CNT.</p>
       <div class="field"><label for="client-email">Email</label><input id="client-email" type="email" autocomplete="username" required placeholder="you@company.com" /></div>
       <div class="field"><label for="client-password">Password</label><input id="client-password" type="password" autocomplete="current-password" required placeholder="••••••••" /></div>
       <button id="client-login-btn" type="submit" class="btn btn-primary btn-block">Sign in</button>
       <p id="client-msg" class="msg"></p>
       <p class="muted" style="margin-top:14px;font-size:11.5px">Access is set up by CNT. If you can't sign in, contact your CNT account officer.</p>
-      <p class="muted" style="margin-top:8px;font-size:10.5px;line-height:1.5">Candidate data in this portal is personal information processed under the <b>Data Privacy Act of 2012 (RA 10173)</b> and is confidential — for your recruitment evaluation only.</p>
+      <p class="muted" style="margin-top:8px;font-size:10.5px;line-height:1.5">Candidate information in this portal is anonymised and shown for monitoring only, under the <b>Data Privacy Act of 2012 (RA 10173)</b>.</p>
     </form>
   </div>
 
@@ -194,9 +209,7 @@
       <p class="nav-label">Navigation</p>
       <nav class="sb-nav">
         <button id="tab-btn-dashboard" class="nav-item active" onclick="showClientTab('dashboard')"><span class="mi">dashboard</span>Dashboard</button>
-        <button id="tab-btn-candidates" class="nav-item" onclick="showClientTab('candidates')"><span class="mi">how_to_reg</span>Endorsed Candidates<span id="cand-count" class="badge b-pending count hidden">0</span></button>
-        <button id="tab-btn-vacancies" class="nav-item" onclick="showClientTab('vacancies')"><span class="mi">post_add</span>My Vacancies</button>
-        <button id="tab-btn-history" class="nav-item" onclick="showClientTab('history')"><span class="mi">history</span>History</button>
+        <button id="tab-btn-candidates" class="nav-item" onclick="showClientTab('candidates')"><span class="mi">groups</span>Candidates<span id="cand-count" class="badge b-active count hidden">0</span></button>
       </nav>
       <div class="sb-foot">
         <div class="sb-client" id="sb-client"><span class="nm" id="client-account-name">—</span></div>
@@ -217,70 +230,33 @@
       <section id="tab-dashboard">
         <div class="dash-hero" id="dash-hero"></div>
         <div class="stat-grid" id="dash-stats"></div>
-        <div class="panel">
-          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">priority_high</span><h2>Needs your attention</h2><span class="muted" style="margin-left:auto">Candidates awaiting your decision</span></div>
-          <div class="panel-b"><div id="dash-attention"><div class="empty">Loading…</div></div></div>
+        <div class="grid2">
+          <div class="panel">
+            <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">insights</span><h2>Pipeline overview</h2><span class="muted" style="margin-left:auto">Where your candidates are</span></div>
+            <div class="panel-b"><div id="dash-pipeline"><div class="empty">Loading…</div></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">schedule</span><h2>Recently updated</h2><span class="muted" style="margin-left:auto">Latest candidates</span></div>
+            <div class="panel-b"><div id="dash-recent"><div class="empty">Loading…</div></div></div>
+          </div>
         </div>
       </section>
 
-      <!-- Endorsed Candidates -->
+      <!-- Candidates (monitoring) -->
       <section id="tab-candidates" class="hidden">
         <div class="panel">
           <div class="panel-h">
-            <span class="mi" style="font-size:17px;color:var(--red)">how_to_reg</span>
-            <h2>Candidates endorsed to you</h2>
-            <span class="muted" style="margin-left:auto">Approve or decline the people CNT has put forward. Contact details follow once you approve.</span>
+            <span class="mi" style="font-size:17px;color:var(--red)">groups</span>
+            <h2>Candidates for your vacancies</h2>
+            <span class="muted" style="margin-left:auto">Anonymised · monitor where each candidate is in the process</span>
           </div>
           <div class="panel-b"><div id="client-candidate-list"><div class="empty">Loading…</div></div></div>
-        </div>
-      </section>
-
-      <!-- My Vacancies -->
-      <section id="tab-vacancies" class="hidden">
-        <div class="panel">
-          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">post_add</span><h2>File a new vacancy</h2></div>
-          <div class="panel-b">
-            <form onsubmit="fileClientVacancy(event)">
-              <div class="grid2">
-                <div class="field"><label for="cv-position">Position</label>
-                  <select id="cv-position" required onchange="cvOtherToggle('position')"><option value="">Select a position…</option></select>
-                  <input id="cv-position-other" class="hidden" placeholder="Enter the position" autocomplete="off" style="margin-top:8px" /></div>
-                <div class="field"><label for="cv-location">Location</label>
-                  <select id="cv-location" required onchange="cvOtherToggle('location')"><option value="">Select a location…</option></select>
-                  <input id="cv-location-other" class="hidden" placeholder="Enter the location" autocomplete="off" style="margin-top:8px" /></div>
-                <div class="field"><label for="cv-count">Headcount needed</label><input id="cv-count" type="number" min="1" value="1" /></div>
-                <div class="field"><label for="cv-type">Request type</label><select id="cv-type"><option>New Headcount</option><option>Replacement</option><option>Seasonal / Project-based</option><option>Staff Augmentation</option></select></div>
-                <div class="field"><label for="cv-priority">Priority</label><select id="cv-priority"><option>Normal</option><option>High</option><option>Urgent</option></select></div>
-                <div class="field"><label for="cv-date">Target start date</label><input id="cv-date" type="date" /></div>
-                <div class="field" style="grid-column:1/-1"><label for="cv-notes">Notes / requirements</label><textarea id="cv-notes" rows="2" placeholder="Shift, special requirements, headcount context…"></textarea></div>
-              </div>
-              <button id="cv-submit" type="submit" class="btn btn-primary"><span class="mi" style="font-size:15px">send</span> Submit vacancy</button>
-              <p id="cv-msg" class="msg"></p>
-            </form>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">work_outline</span><h2>Your vacancies</h2><span class="muted" style="margin-left:auto">Open &amp; pending requests · filled ones move to History</span></div>
-          <div class="panel-b"><div id="client-vacancy-list"><div class="empty">Loading…</div></div></div>
-        </div>
-      </section>
-
-      <!-- History -->
-      <section id="tab-history" class="hidden">
-        <div class="panel">
-          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">how_to_reg</span><h2>Decided candidates</h2><span class="muted" style="margin-left:auto">Candidates you have approved or declined</span></div>
-          <div class="panel-b"><div id="history-candidate-list"><div class="empty">Loading…</div></div></div>
-        </div>
-        <div class="panel">
-          <div class="panel-h"><span class="mi" style="font-size:17px;color:var(--red)">history</span><h2>Completed vacancies</h2><span class="muted" style="margin-left:auto">Vacancies CNT has filled</span></div>
-          <div class="panel-b"><div id="history-vacancy-list"><div class="empty">Loading…</div></div></div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- Candidate profile modal -->
+  <!-- Candidate profile modal — read-only monitoring -->
   <div id="cand-modal" class="hidden modal-overlay">
     <div class="modal-box">
       <div class="modal-head">
@@ -290,18 +266,18 @@
         </div>
         <button class="btn btn-ghost" onclick="closeCandModal()"><span class="mi" style="font-size:18px">close</span></button>
       </div>
-      <div class="confid"><span class="mi">lock</span>Confidential — personal data shared by CNT under RA 10173 to evaluate this application only. Do not copy, retain, or share.</div>
+      <div class="confid"><span class="mi">lock</span>Anonymised candidate information — for monitoring your vacancies under RA 10173. Contact CNT for next steps.</div>
       <div id="cand-modal-body" class="modal-body"></div>
-      <div class="modal-foot"><div id="cand-modal-actions" class="actions" style="margin:0"></div></div>
+      <div class="modal-foot"><button class="btn btn-ghost" onclick="closeCandModal()">Close</button></div>
     </div>
   </div>
 
-  <!-- Data privacy acknowledgment (RA 10173) — gates all candidate PII -->
-  <div id="confid-gate" class="hidden modal-overlay" style="z-index:70;padding:16px;background:rgba(15,23,42,.6)">
+  <!-- Data privacy acknowledgment (RA 10173) — once per session -->
+  <div id="confid-gate" class="hidden modal-overlay" style="z-index:70;background:rgba(15,23,42,.6)">
     <div style="background:#fff;border-radius:14px;box-shadow:var(--shadow);max-width:460px;width:100%;padding:26px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="mi" style="font-size:24px;color:var(--red)">privacy_tip</span><h2 style="font-family:var(--font-display);font-size:17px;font-weight:800">Data privacy acknowledgment</h2></div>
-      <p style="font-size:13px;color:var(--sub);line-height:1.6">The candidate information in this portal is <b>personal data</b> shared with you by CNT Promo &amp; Ads Specialists, Inc. under the <b>Data Privacy Act of 2012 (RA 10173)</b>, solely so you can evaluate candidates for the roles you are hiring.</p>
-      <p style="font-size:13px;color:var(--sub);line-height:1.6;margin-top:10px">By continuing you agree to keep it confidential, use it only for this recruitment, not disclose or retain it beyond what is necessary, and delete it when your evaluation is complete. Your access is logged.</p>
+      <p style="font-size:13px;color:var(--sub);line-height:1.6">The candidate information in this portal is shown to you by CNT Promo &amp; Ads Specialists, Inc. under the <b>Data Privacy Act of 2012 (RA 10173)</b>, solely so you can monitor recruitment for the roles you are hiring. It is anonymised and does not include names or contact details.</p>
+      <p style="font-size:13px;color:var(--sub);line-height:1.6;margin-top:10px">By continuing you agree to keep it confidential and use it only for this recruitment. Your access is logged.</p>
       <button class="btn btn-primary btn-block" style="margin-top:18px" onclick="acceptConfid()">I understand and agree</button>
     </div>
   </div>
@@ -321,6 +297,8 @@
   function uniformSkill(s){ return String(s||'').trim().split(/\s+/).map(w=>w.split(/([\-\/])/).map(p=>(!p||p==='-'||p==='/')?p:(ACR[p.toLowerCase()]||p.charAt(0).toUpperCase()+p.slice(1).toLowerCase())).join('')).join(' '); }
   function skillChips(tags){ const seen=new Set(),out=[]; String(tags||'').split(',').map(uniformSkill).forEach(v=>{if(!v)return;const k=v.toLowerCase();if(!seen.has(k)){seen.add(k);out.push(v);}}); return out.map(s=>'<span class="skill">'+esc(s)+'</span>').join(''); }
   function stars(n){ n=Math.max(0,Math.min(3,parseInt(n,10)||0)); let h=''; for(let i=1;i<=3;i++) h+='<span class="'+(i<=n?'':'off')+'">★</span>'; return '<span class="stars">'+h+'</span>'; }
+  // Anonymous, stable candidate reference (never the real name).
+  function candRef(id){ return 'C-'+String(id).padStart(4,'0'); }
 
   // ── Auth ────────────────────────────────────────────────
   async function _gateProfile(user){
@@ -350,14 +328,14 @@
     $('#client-login').classList.add('hidden');
     $('#client-app').classList.remove('hidden');
     showClientTab('dashboard');
-    // RA 10173: no candidate personal data loads until the client acknowledges
-    // the confidentiality terms (once per browser session).
+    // RA 10173: no candidate data loads until the client acknowledges the
+    // confidentiality terms (once per browser session).
     if(sessionStorage.getItem('cnt_confid_ok')==='1') _loadClientData();
     else $('#confid-gate').classList.remove('hidden');
   }
   function _loadClientData(){
-    loadClientCandidates(); loadClientVacancies(); cvLoadTaxonomy();
-    // Poll notifications so a fresh endorsement surfaces without a reload.
+    loadClientStages().then(loadClientCandidates);
+    // Poll notifications so pipeline changes surface without a reload.
     if(!window._notifPoll) window._notifPoll=setInterval(renderNotifications, 60000);
   }
   // Best-effort access logging for accountability (RA 10173). Never blocks the
@@ -397,47 +375,82 @@
     if(data && data.session){ const prof=await _gateProfile(data.session.user); if(_isClient(prof)){ _enterApp(prof); return; } await sb.auth.signOut(); }
   }
 
-  const TAB_TITLES = { dashboard:'Dashboard', candidates:'Endorsed Candidates', vacancies:'My Vacancies', history:'History' };
+  const TAB_TITLES = { dashboard:'Dashboard', candidates:'Candidates' };
   function showClientTab(tab){
-    ['dashboard','candidates','vacancies','history'].forEach(t=>{
+    ['dashboard','candidates'].forEach(t=>{
       $('#tab-'+t).classList.toggle('hidden', t!==tab);
       $('#tab-btn-'+t).classList.toggle('active', t===tab);
     });
     const pt=$('#page-title'); if(pt) pt.textContent = TAB_TITLES[tab]||'Client Portal';
   }
 
-  // ── Dashboard + notifications (derived from loaded data) ────
-  let _vacs = [];
+  // ── Pipeline stages (for the tracker + labels) ──────────────
+  let _stages = [];   // [{key,name,sequence,is_hired}] ordered
+  async function loadClientStages(){
+    if(!sb){ _stages=[]; return; }
+    try{
+      const { data, error } = await sb.rpc('cnt_client_stages');
+      _stages = (!error && Array.isArray(data)) ? data : [];
+    }catch(e){ _stages=[]; }
+  }
+  function stageClass(c){
+    if(!c) return 'b-stage';
+    if(c.stage==='rejected' || /reject|declin|withdraw/i.test(c.stage_label||'')) return 'b-closed';
+    if(c.is_hired) return 'b-hired';
+    return 'b-active';
+  }
+
+  // ── Dashboard (derived from loaded candidates) ──────────────
   function refreshDerived(){ renderDashboard(); renderNotifications(); }
   function _statCard(n,l,icon,color,bg){
     return '<div class="stat"><div class="top"><div class="ic" style="background:'+bg+'"><span class="mi" style="color:'+color+'">'+icon+'</span></div></div>'
       +'<div class="n" style="color:'+color+'">'+n+'</div><div class="l">'+l+'</div></div>';
   }
+  function _isClosed(c){ return c.stage==='rejected' || /reject|declin|withdraw/i.test(c.stage_label||''); }
   function renderDashboard(){
     const acct=window.cntClientAccount||'';
     const logo=CLIENT_LOGOS[(acct||'').toUpperCase()];
     const hero=$('#dash-hero');
     if(hero) hero.innerHTML =
         (logo?'<img class="logo" src="'+esc(logo)+'" alt="'+esc(acct)+'" onerror="this.outerHTML=\'<div class=&quot;mono&quot;>'+esc((acct||'?').slice(0,2).toUpperCase())+'</div>\'">':'<div class="mono">'+esc((acct||'?').slice(0,2).toUpperCase())+'</div>')
-      + '<div><div class="hello">Welcome, '+esc(acct)+'</div><div class="sub">Your recruitment overview with CNT Promo &amp; Ads Specialists, Inc. · '+new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+'</div></div>';
-    const pending=_cands.filter(c=>c.client_status==='endorsed'),
-          approved=_cands.filter(c=>c.client_status==='approved'),
-          declined=_cands.filter(c=>c.client_status==='rejected'),
-          open=_vacs.filter(v=>v.status!=='Filled'),
-          filled=_vacs.filter(v=>v.status==='Filled');
+      + '<div><div class="hello">Welcome, '+esc(acct)+'</div><div class="sub">Your recruitment monitoring with CNT Promo &amp; Ads Specialists, Inc. · '+new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+'</div></div>';
+    const total=_cands.length,
+          hired=_cands.filter(c=>c.is_hired).length,
+          closed=_cands.filter(_isClosed).length,
+          inProc=total-hired-closed;
     const s=$('#dash-stats'); if(s) s.innerHTML=
-        _statCard(pending.length,'Awaiting your decision','how_to_reg','#B45309','#FEF3C7')
-      + _statCard(approved.length,'Approved','task_alt','#15803D','#DCFCE7')
-      + _statCard(declined.length,'Declined','do_not_disturb_on','#475569','#F1F5F9')
-      + _statCard(open.length,'Open vacancies','work_outline','#0e7490','#CFFAFE')
-      + _statCard(filled.length,'Filled vacancies','verified','#7C3AED','#F3E8FF');
-    const a=$('#dash-attention'); if(a) a.innerHTML = pending.length
-      ? pending.map(candRow).join('')
-      : '<div class="empty">Nothing needs your decision right now.</div>';
+        _statCard(total,'Total candidates','groups','#0f172a','#F1F5F9')
+      + _statCard(inProc,'In process','timelapse','#1D4ED8','#DBEAFE')
+      + _statCard(hired,'Hired / deployed','verified','#15803D','#DCFCE7')
+      + _statCard(closed,'Closed','do_not_disturb_on','#B91C1C','#FEE2E2');
+    renderPipeline();
+    renderRecent();
   }
-  // Persistent, server-backed notifications (roadmap #7). Each event is a row
-  // in public.notifications, read via cnt_notifications; read/unread state and
-  // history survive reloads instead of being recomputed from current data.
+  function renderPipeline(){
+    const el=$('#dash-pipeline'); if(!el) return;
+    // Count candidates per active pipeline stage (hired/closed shown via stats).
+    const stages=_stages.length?_stages:[];
+    if(!stages.length){ el.innerHTML='<div class="empty">Pipeline appears here once candidates are in process.</div>'; return; }
+    const counts={}; let max=1;
+    _cands.forEach(c=>{ if(_isClosed(c))return; counts[c.stage]=(counts[c.stage]||0)+1; });
+    stages.forEach(s=>{ if((counts[s.key]||0)>max) max=counts[s.key]; });
+    const rows=stages.map(s=>{
+      const n=counts[s.key]||0;
+      const col=s.is_hired?'var(--green)':'var(--red)';
+      return '<div class="pipe-row"><span class="pipe-dot" style="background:'+(n?col:'#CBD5E1')+'"></span>'
+        +'<span class="pipe-name">'+esc(s.name)+'</span>'
+        +'<span class="pipe-bar"><span style="width:'+Math.round((n/max)*100)+'%;background:'+col+'"></span></span>'
+        +'<span class="pipe-n">'+n+'</span></div>';
+    }).join('');
+    el.innerHTML = rows || '<div class="empty">No candidates in process.</div>';
+  }
+  function renderRecent(){
+    const el=$('#dash-recent'); if(!el) return;
+    const recent=[..._cands].sort((a,b)=>String(b.applied_date||'').localeCompare(String(a.applied_date||''))).slice(0,6);
+    el.innerHTML = recent.length ? recent.map(candRow).join('') : '<div class="empty">No candidates yet.</div>';
+  }
+
+  // ── Server-backed notifications (shared across ATS + portal) ──
   let _notifs=[];
   const NOTIF_ICON={endorsed:{i:'how_to_reg',c:'#B45309'}, approved:{i:'check_circle',c:'#15803D'},
     rejected:{i:'cancel',c:'#B91C1C'}, filled:{i:'work',c:'#15803D'}, request:{i:'assignment',c:'#475569'}};
@@ -467,8 +480,7 @@
     const n=_notifs.find(x=>x.id===id);
     $('#bell-menu').classList.add('hidden');
     if(n && !n.read_at && sb){ try{ await sb.rpc('cnt_notifications_read',{ p_id:id }); }catch(e){} }
-    if(n){ if(n.ref_type==='applicant' && n.ref_id){ showClientTab('candidates'); openCandidate(parseInt(n.ref_id,10)); }
-           else { showClientTab('history'); } }
+    if(n && n.ref_type==='applicant' && n.ref_id){ showClientTab('candidates'); openCandidate(parseInt(n.ref_id,10)); }
     renderNotifications();
   };
   window.markAllNotifs=async function(e){
@@ -479,181 +491,66 @@
   window.toggleBell=function(e){ e.stopPropagation(); $('#bell-menu').classList.toggle('hidden'); };
   document.addEventListener('click',e=>{ const b=$('#bell-menu'); if(b && !b.classList.contains('hidden') && !e.target.closest('.bell')) b.classList.add('hidden'); });
 
-  // ── My Vacancies ────────────────────────────────────────
-  function statusBadge(s){ const c=s==='Open'?'b-open':s==='Filled'?'b-filled':'b-pending'; return '<span class="badge '+c+'">'+esc(s||'Pending')+'</span>'; }
-  function vacancyRow(v){
-    const when = v.created_at ? new Date(v.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : '';
-    return '<div class="row"><div><div style="font-weight:600;font-size:13.5px">'+esc(v.role||'—')+' · '+esc(v.location||'—')+'</div>'
-      +'<div class="kv">'+esc(v.count||1)+' needed · '+esc(v.type||'—')+' · '+esc(v.priority||'Normal')+(when?(' · filed '+when):'')+'</div></div>'
-      +'<div>'+statusBadge(v.status)+'</div></div>';
-  }
-  // Position/location dropdowns, fed from CNT's taxonomy (via a definer RPC —
-  // clients can't read the taxonomy table directly) plus any values they've
-  // filed before. "Other (specify)" reveals a free-text field for anything new.
-  let _cvTax={positions:[],locations:[]};
-  async function cvLoadTaxonomy(){
-    if(!sb) return;
-    try{
-      const { data, error } = await sb.rpc('cnt_taxonomy_options');
-      if(error || !Array.isArray(data)) return;
-      _cvTax.positions=[...new Set(data.filter(r=>r.kind==='position').map(r=>r.name).filter(Boolean))];
-      _cvTax.locations=[...new Set(data.filter(r=>r.kind==='location').map(r=>r.name).filter(Boolean))];
-      cvRenderOptions();
-    }catch(e){ /* leave whatever options are present */ }
-  }
-  function cvRenderOptions(){
-    const pastPos=[...new Set((_vacs||[]).map(v=>v.role).filter(Boolean))];
-    const pastLoc=[...new Set((_vacs||[]).map(v=>v.location).filter(Boolean))];
-    const positions=[...new Set([..._cvTax.positions,...pastPos])].sort((a,b)=>a.localeCompare(b));
-    const locations=[...new Set([..._cvTax.locations,...pastLoc])].sort((a,b)=>a.localeCompare(b));
-    const fill=(id,vals,ph)=>{ const s=$('#'+id); if(!s) return; const cur=s.value;
-      s.innerHTML='<option value="">'+ph+'</option>'
-        +vals.map(v=>'<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>').join('')
-        +'<option value="__other">Other (specify)…</option>'; };
-    fill('cv-position',positions,'Select a position…');
-    fill('cv-location',locations,'Select a location…');
-  }
-  window.cvOtherToggle=function(kind){
-    const sel=$('#cv-'+kind), other=$('#cv-'+kind+'-other'); if(!sel||!other) return;
-    const on=sel.value==='__other';
-    other.classList.toggle('hidden',!on);
-    if(on){ other.focus(); } else { other.value=''; }
-  };
-  function cvVal(kind){
-    const sel=$('#cv-'+kind); if(!sel) return '';
-    if(sel.value==='__other'){ return (($('#cv-'+kind+'-other')||{}).value||'').trim(); }
-    return (sel.value||'').trim();
-  }
-
-  async function loadClientVacancies(){
-    const el=$('#client-vacancy-list'); el.innerHTML='<div class="empty">Loading…</div>';
-    const { data, error } = await sb.from('hiring_requests')
-      .select('req_id,role,location,count,type,priority,status,created_at').order('created_at',{ascending:false});
-    if(error){ el.innerHTML='<div class="empty">Could not load your vacancies.</div>'; return; }
-    const rows=data||[]; _vacs=rows;
-    cvRenderOptions();   // refresh the dropdowns (taxonomy + any past filings)
-    // Active (Pending/Open) stay here; Filled ones move to History.
-    const active=rows.filter(r=>r.status!=='Filled'), filled=rows.filter(r=>r.status==='Filled');
-    el.innerHTML = active.length ? active.map(vacancyRow).join('') : '<div class="empty">No open vacancies — file your first above.</div>';
-    const hist=$('#history-vacancy-list');
-    if(hist) hist.innerHTML = filled.length ? filled.map(vacancyRow).join('') : '<div class="empty">No filled vacancies yet.</div>';
-    refreshDerived();
-  }
-  async function fileClientVacancy(e){
-    e.preventDefault();
-    const msg=$('#cv-msg'); msg.className='msg'; msg.textContent='';
-    const role=cvVal('position'), location=cvVal('location');
-    if(!role || !location){ msg.className='msg err'; msg.textContent='Please choose a position and location.'; return; }
-    const btn=$('#cv-submit'); btn.disabled=true;
-    const rec={ req_id:'CLT-'+Date.now(), account:window.cntClientAccount, role, location,
-      count:parseInt($('#cv-count').value)||1, type:$('#cv-type').value, priority:$('#cv-priority').value,
-      status:'Pending', date:new Date().toISOString().slice(0,10), deadline:$('#cv-date').value||null,
-      requestor:window.cntClientAccount, notes:$('#cv-notes').value.trim()||null, client_submitted:true };
-    const { error } = await sb.from('hiring_requests').insert(rec);
-    btn.disabled=false;
-    if(error){ msg.className='msg err'; msg.textContent='Could not submit — please try again.'; return; }
-    e.target.reset(); $('#cv-count').value='1';
-    cvOtherToggle('position'); cvOtherToggle('location'); cvRenderOptions();
-    toast('Vacancy submitted to CNT'); loadClientVacancies();
-  }
-
-  // ── Endorsed Candidates: list + full candidate profile ──────
+  // ── Candidates (monitoring): list + read-only profile ───────
   let _cands = [];   // last-loaded candidates, so the detail view can look one up
-  function candStatusBadge(s){ return s==='approved'?'<span class="badge b-open">Approved</span>':s==='rejected'?'<span class="badge b-filled">Declined</span>':'<span class="badge b-pending">Awaiting you</span>'; }
+  function stageBadge(c){ return '<span class="badge '+stageClass(c)+'">'+esc(c.stage_label||'Applied')+'</span>'; }
   function candRow(c){
     return '<div class="row" style="cursor:pointer" onclick="openCandidate('+c.id+')">'
-      +'<div><div style="font-weight:600;font-size:13.5px">'+esc(c.name||'Candidate')+'</div>'
-      +'<div class="kv">'+esc(c.role||'—')+' · '+esc(c.location||'—')+' · evaluation '+stars(c.priority)+'</div></div>'
-      +'<div style="display:flex;align-items:center;gap:10px">'+candStatusBadge(c.client_status)
+      +'<div style="display:flex;align-items:center;gap:11px;min-width:0">'
+        +'<div class="cref">'+esc(candRef(c.id).replace(/^C-/,''))+'</div>'
+        +'<div style="min-width:0"><div style="font-weight:700;font-size:13.5px">'+esc(c.role||'—')+'</div>'
+        +'<div class="kv">'+esc(candRef(c.id))+' · '+esc(c.location||'—')+' · eval '+stars(c.priority)+'</div></div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:10px">'+stageBadge(c)
       +'<span class="mi" style="font-size:18px;color:#94A3B8">chevron_right</span></div></div>';
   }
   async function loadClientCandidates(){
-    const el=$('#client-candidate-list'); el.innerHTML='<div class="empty">Loading…</div>';
+    const el=$('#client-candidate-list'); if(el) el.innerHTML='<div class="empty">Loading…</div>';
     const { data, error } = await sb.rpc('cnt_client_candidates');
-    if(error){ el.innerHTML='<div class="empty">Could not load candidates.</div>'; return; }
-    _cands = data||[];
-    const pending=_cands.filter(c=>c.client_status==='endorsed'), decided=_cands.filter(c=>c.client_status!=='endorsed');
-    const badge=$('#cand-count'); badge.textContent=pending.length; badge.classList.toggle('hidden',!pending.length);
-    el.innerHTML = pending.length ? pending.map(candRow).join('') : '<div class="empty">No candidates awaiting your decision right now.</div>';
-    // Decided candidates live in the History tab.
-    const hist=$('#history-candidate-list');
-    if(hist) hist.innerHTML = decided.length ? decided.map(candRow).join('') : '<div class="empty">No decided candidates yet.</div>';
+    if(error){ if(el) el.innerHTML='<div class="empty">Could not load candidates.</div>'; return; }
+    _cands = (data||[]).slice().sort((a,b)=>(b.stage_seq||0)-(a.stage_seq||0));
+    const active=_cands.filter(c=>!_isClosed(c) && !c.is_hired);
+    const badge=$('#cand-count'); if(badge){ badge.textContent=active.length; badge.classList.toggle('hidden',!active.length); }
+    if(el) el.innerHTML = _cands.length ? _cands.map(candRow).join('') : '<div class="empty">No candidates for your vacancies yet.</div>';
     refreshDerived();
   }
 
-  // Full candidate profile + the actual CV, shown in a modal.
   function _kvRow(label,val){ return val && String(val).trim() ? '<div class="prow"><span class="pk">'+label+'</span><span class="pv">'+esc(val)+'</span></div>' : ''; }
-  function _section(t,v){ return v && String(v).trim() ? '<p class="sec-t">'+t+'</p><div class="prose">'+esc(v)+'</div>' : ''; }
+  // Horizontal tracker highlighting the candidate's current stage.
+  function trackerHtml(c){
+    const stages=_stages.length?_stages:[];
+    if(_isClosed(c)) return '<div class="badge b-closed" style="margin-top:6px">'+esc(c.stage_label||'Closed')+'</div>';
+    if(!stages.length) return '';
+    const curSeq = (typeof c.stage_seq==='number') ? c.stage_seq
+                 : (stages.find(s=>s.key===c.stage)||{}).sequence;
+    const curIdx = stages.findIndex(s=>s.key===c.stage);
+    return '<div class="track">'+stages.map((s,i)=>{
+      const done = curIdx>=0 ? i<curIdx : (s.sequence<curSeq);
+      const cur  = curIdx>=0 ? i===curIdx : (s.sequence===curSeq);
+      const cls = cur?'cur':(done?'done':'');
+      const dot = done?'<span class="mi">check</span>':(cur?'<span class="mi">radio_button_unchecked</span>':'');
+      return '<div class="tstep '+cls+'"><div class="dot">'+dot+'</div><span class="tl">'+esc(s.name)+'</span></div>';
+    }).join('')+'</div>';
+  }
   async function openCandidate(id){
     const c=_cands.find(x=>String(x.id)===String(id)); if(!c) return;
     clientAudit('view_candidate', id);   // RA 10173 accountability
-    const decided = c.client_status!=='endorsed';
+    $('#cand-modal-title').textContent=candRef(c.id);
+    $('#cand-modal-sub').innerHTML=esc(c.role||'—')+' · '+esc(c.location||'—')+' · eval '+stars(c.priority)+' '+stageBadge(c);
     const body=$('#cand-modal-body');
-    $('#cand-modal-title').textContent=c.name||'Candidate';
-    $('#cand-modal-sub').innerHTML=esc(c.role||'—')+' · '+esc(c.location||'—')+' · evaluation '+stars(c.priority)+' '+candStatusBadge(c.client_status);
-    const contact=[c.email,c.phone,c.linkedin].filter(Boolean).map(esc).join(' · ');
     body.innerHTML =
-      '<div class="split">'
-      +'<div class="pane-left">'
-        +(contact?('<div class="prow"><span class="pk">Contact</span><span class="pv">'+contact+'</span></div>'):'')
-        +_kvRow('Applied for', c.role)+_kvRow('Location', c.location)
-        +_kvRow('Highest degree', c.degree)+_kvRow('Source', c.source)
-        +_kvRow('Referred by', c.referred_by)+_kvRow('Proposed salary', c.proposed_salary)
-        +(c.tags?('<p class="sec-t">Expected skills</p><div>'+skillChips(c.tags)+'</div>'):'')
-        +_section('Work experience', c.work_experience)+_section('Education', c.education)
-        +_section('Certifications & licenses', c.certifications)+_section('Seminars & trainings', c.seminars)
-        +_section('Awards', c.awards)+_section('Languages', c.languages)
-        +_section('Cover note', c.cover_note)
-        +(decided && c.client_status==='rejected' && c.client_reason ? ('<p class="sec-t">Your reason for declining</p><div class="prose">'+esc(c.client_reason)+'</div>') : '')
-      +'</div>'
-      +'<div class="pane-right"><p class="sec-t">Résumé / CV</p><div id="cand-cv"><div class="empty">Loading CV…</div></div></div>'
-      +'</div>';
-    // actions
-    $('#cand-modal-actions').innerHTML = decided
-      ? '<span class="muted">You '+(c.client_status==='approved'?'approved':'declined')+' this candidate.</span>'
-      : '<button class="btn btn-ghost" onclick="clientDecide('+c.id+',\'rejected\')"><span class="mi" style="font-size:15px">close</span> Decline</button>'
-        +'<button class="btn btn-primary" onclick="clientDecide('+c.id+',\'approved\')"><span class="mi" style="font-size:15px">check</span> Approve</button>';
+        '<p class="sec-t">Current status</p>'+trackerHtml(c)
+      + '<div style="margin-top:14px">'
+        + _kvRow('Applied for', c.role)+_kvRow('Location', c.location)
+        + _kvRow('Highest degree', c.degree)
+        + _kvRow('Date applied', c.applied_date ? new Date(c.applied_date).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : '')
+        + _kvRow('CNT evaluation', ['—','Fair','Good','Excellent'][Math.max(0,Math.min(3,parseInt(c.priority,10)||0))])
+      + '</div>'
+      + (c.tags?('<p class="sec-t">Skills</p><div>'+skillChips(c.tags)+'</div>'):'')
+      + '<p class="muted" style="margin-top:16px;font-size:11.5px">This is an anonymised monitoring view. For full profiles or to move a candidate forward, contact your CNT account officer.</p>';
     $('#cand-modal').classList.remove('hidden');
-    renderCV(c.resume_url);
   }
-  function closeCandModal(){ $('#cand-modal').classList.add('hidden'); const cv=$('#cand-cv'); if(cv) cv.innerHTML=''; }
-
-  async function renderCV(path){
-    const mount=$('#cand-cv'); if(!mount) return;
-    if(!path){ mount.innerHTML='<div class="empty">No résumé on file for this candidate.</div>'; return; }
-    const { data, error } = await sb.storage.from('resumes').createSignedUrl(path, 3600);
-    if(error || !data){ mount.innerHTML='<div class="empty">Résumé is unavailable.</div>'; return; }
-    const url=data.signedUrl;
-    const bar='<div class="cv-bar"><a href="'+url+'" target="_blank" rel="noopener" class="btn btn-ghost"><span class="mi" style="font-size:15px">open_in_new</span> Open</a>'
-      +'<a href="'+url+'" download class="btn btn-ghost"><span class="mi" style="font-size:15px">download</span> Download</a></div>';
-    if(/\.pdf(\?|$)/i.test(path)){
-      mount.innerHTML=bar+'<iframe src="'+url+'#toolbar=1&view=FitH" class="cv-frame" title="Résumé"></iframe>';
-    } else if(/\.docx(\?|$)/i.test(path)){
-      mount.innerHTML=bar+'<div id="cv-docx" class="empty">Converting document…</div>';
-      try{
-        if(!window.mammoth){ await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);}); }
-        const buf=await (await fetch(url)).arrayBuffer();
-        const html=((await window.mammoth.convertToHtml({arrayBuffer:buf})).value||'').trim();
-        if(!html) throw new Error('empty');
-        // Untrusted applicant HTML → sandboxed iframe (no scripts, no same-origin)
-        const ifr=document.createElement('iframe'); ifr.setAttribute('sandbox',''); ifr.className='cv-frame'; ifr.title='Résumé';
-        ifr.srcdoc='<!doctype html><meta charset="utf-8"><style>body{font-family:system-ui,Segoe UI,Roboto,sans-serif;font-size:13px;line-height:1.6;color:#111;padding:22px 26px;margin:0}h1,h2,h3{margin:12px 0 6px}table{border-collapse:collapse}td,th{border:1px solid #e2e8f0;padding:4px 8px}img{max-width:100%}</style>'+html;
-        const box=$('#cv-docx'); box.replaceWith(ifr);
-      }catch(e){ const box=$('#cv-docx'); if(box) box.innerHTML='<div class="empty">This document can’t preview inline — use Open / Download above.</div>'; }
-    } else {
-      mount.innerHTML=bar+'<div class="empty">This file can’t preview inline — use Open / Download above.</div>';
-    }
-  }
-
-  async function clientDecide(id, decision){
-    let reason=null;
-    if(decision==='rejected'){ reason=prompt('Reason for declining (optional):'); if(reason===null) return; }
-    else if(!confirm('Approve this candidate and proceed with CNT?')) return;
-    const { error } = await sb.rpc('cnt_client_decide', { app_id:id, decision, reason });
-    if(error){ toast('This candidate is no longer awaiting your decision.'); closeCandModal(); loadClientCandidates(); return; }
-    toast(decision==='approved'?'Candidate approved':'Candidate declined');
-    closeCandModal(); loadClientCandidates();
-  }
+  function closeCandModal(){ $('#cand-modal').classList.add('hidden'); }
 
   _restore();
   </script>
