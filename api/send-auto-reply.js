@@ -45,9 +45,12 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   '<meta name="viewport" content="width=device-width,initial-scale=1">' +
   '<meta name="color-scheme" content="light">' +
   '<style>' +
+  "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');" +
   'body{margin:0;padding:0;background:#f4f4f5;}' +
   'img{border:0;line-height:100%;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}' +
   'a{text-decoration:none;}' +
+  'body,table,td,p,h1,div,span,a{font-family:\'Inter\',-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;}' +
+  'h1{font-family:\'Manrope\',\'Inter\',-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;}' +
   '@media only screen and (max-width:620px){' +
   '.card{border-radius:0!important;}' +
   '.pad{padding-left:22px!important;padding-right:22px!important;}' +
@@ -57,7 +60,7 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   '.outer{padding:0!important;}' +
   '}</style></head>' +
   '<body>' +
-  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="outer" style="background:#f4f4f5;padding:26px 10px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,Helvetica,sans-serif;"><tr><td align="center">' +
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="outer" style="background:#f4f4f5;padding:26px 10px;font-family:\'Inter\',-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;"><tr><td align="center">' +
   '<table role="presentation" width="600" cellpadding="0" cellspacing="0" class="card" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 6px 28px rgba(16,24,40,.10);">' +
   // dark header with the CNT logo + red accent line (payroll-style)
   '<tr><td class="pad" style="background:#161616;border-bottom:3px solid #C8102E;padding:26px 34px;">' +
@@ -66,7 +69,7 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   // body
   '<tr><td class="pad pad-y" style="padding:34px;color:#3a3a3a;font-size:15px;line-height:1.65;">' +
   '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:6px;">' + esc(eyebrow) + '</span>' +
-  '<h1 class="h1" style="font-size:23px;font-weight:800;color:#171717;letter-spacing:-.01em;margin:16px 0 14px;">' + heading + '</h1>' +
+  '<h1 class="h1" style="font-family:\'Manrope\',\'Inter\',-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:23px;font-weight:800;color:#171717;letter-spacing:-.01em;margin:16px 0 14px;">' + heading + '</h1>' +
   bodyHtml + '</td></tr>' +
   // footer
   '<tr><td class="pad" style="background:#fafafa;border-top:1px solid #ededed;padding:26px 34px;text-align:center;">' +
