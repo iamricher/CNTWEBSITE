@@ -185,14 +185,21 @@
   .d-share .sh-btn svg{width:17px;height:17px}
   .d-share .sh-copy.done{background:#16a34a}
   /* Similar jobs */
-  .similar{width:min(920px,100% - 40px);margin:0 auto;padding:0 0 80px}
-  .similar h3{font-family:var(--font-display);font-size:1.3rem;font-weight:800;letter-spacing:-.01em;color:var(--charcoal);margin-bottom:16px}
-  .similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  .sim-card{display:block;border:1px solid var(--gray-100);border-radius:16px;padding:20px;background:#fff;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;cursor:pointer}
-  .sim-card:hover{transform:translateY(-5px);box-shadow:0 22px 46px rgba(16,24,40,.10);border-color:var(--red-muted)}
-  .sim-card .r{font-family:var(--font-display);font-weight:800;font-size:1.02rem;color:var(--charcoal);letter-spacing:.01em;text-transform:uppercase;line-height:1.2}
-  .sim-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-  .sim-card .jr-chip{font-size:.75rem}
+  .similar{width:min(1040px,100% - 40px);margin:0 auto;padding:8px 0 84px}
+  .similar h3{font-family:var(--font-display);font-size:1.45rem;font-weight:800;letter-spacing:-.01em;color:var(--charcoal);margin-bottom:5px}
+  .similar .sim-sub{font-size:.94rem;color:var(--gray-600);margin:0 0 22px}
+  .similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .sim-card{display:flex;flex-direction:column;border:1px solid var(--gray-100);border-radius:14px;padding:22px;background:#fff;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;cursor:pointer;text-decoration:none;color:inherit}
+  .sim-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(16,24,40,.10);border-color:var(--red)}
+  .sim-card .r{font-family:var(--font-display);font-weight:800;font-size:1.06rem;color:#1D2733;letter-spacing:0;line-height:1.25}
+  .sim-card:hover .r{color:var(--red)}
+  .sim-cat{font-size:.83rem;color:var(--gray-600);margin-top:5px}
+  .sim-sal{font-size:.9rem;font-weight:800;color:#1D2733;margin-top:12px}
+  .sim-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+  .sim-tags .jr-tag{font-size:.72rem;padding:4px 9px}
+  .sim-foot{margin-top:auto;padding-top:18px;display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:800;color:var(--red)}
+  .sim-foot svg{width:14px;height:14px;transition:transform .18s ease}
+  .sim-card:hover .sim-foot svg{transform:translateX(4px)}
   @media(max-width:820px){.similar-grid{grid-template-columns:1fr 1fr}}
   @media(max-width:560px){.similar-grid{grid-template-columns:1fr}}
   /* Job alerts signup band */
@@ -855,7 +862,7 @@
     else if(mode==='az') list.sort((a,b)=>a.role.localeCompare(b.role));
     else list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
     // Pagination (Indeed-style) — keep the scroll short by showing a page at a time
-    const PER_PAGE=8;
+    const PER_PAGE=10;
     const totalPages=Math.max(1,Math.ceil(list.length/PER_PAGE));
     const page=Math.min(Math.max(1,window._page||1),totalPages); window._page=page;
     const pageList=list.slice((page-1)*PER_PAGE, page*PER_PAGE);
@@ -1031,14 +1038,18 @@
     sim=sim.slice(0,3);
     if(!sim.length){ box.style.display='none'; box.innerHTML=''; return; }
     box.style.display='';
-    box.innerHTML='<h3>Similar openings</h3><div class="similar-grid">'+sim.map(j=>
-      `<a class="sim-card" href="careers.html?job=${j.id}" data-id="${j.id}">
+    const briefcase='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
+    const arrow='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    box.innerHTML='<h3>Similar openings</h3><p class="sim-sub">Other roles you might be a great fit for.</p><div class="similar-grid">'+sim.map(j=>{
+      const sal=formatSalary(j.salary_range);
+      const etype=(j.employment_type&&String(j.employment_type).trim())||'Full-time';
+      return `<a class="sim-card" href="careers.html?job=${j.id}" data-id="${j.id}">
         <div class="r">${esc(j.role)}</div>
-        <div class="sim-chips">
-          <span class="jr-chip">${pinSvg}${esc(j.location)}</span>
-          <span class="jr-chip">${esc(formatSalary(j.salary_range))}</span>
-        </div>
-      </a>`).join('')+'</div>';
+        <div class="sim-cat">${esc(jobCategory(j.role))}${j.location?' &middot; '+esc(j.location):''}</div>
+        ${sal&&sal!=='&mdash;'&&sal!=='—'?`<div class="sim-sal">${sal}<span style="font-weight:600;color:var(--gray-600)"> /mo</span></div>`:''}
+        <div class="sim-tags"><span class="jr-tag">${briefcase}${esc(etype)}</span></div>
+        <span class="sim-foot">View role ${arrow}</span>
+      </a>`;}).join('')+'</div>';
     box.querySelectorAll('.sim-card').forEach(c=>c.addEventListener('click',e=>{ if(e.metaKey||e.ctrlKey||e.shiftKey||e.button) return; e.preventDefault(); gotoJob(+c.dataset.id); }));
   }
 
