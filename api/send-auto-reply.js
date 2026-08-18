@@ -70,7 +70,7 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   // dark header with a big centred CNT logo + red accent line (payroll-style, modernised)
   '<tr><td class="pad head" align="center" style="background:#141414;background-image:linear-gradient(180deg,#1c1c1c 0%,#111111 100%);border-bottom:4px solid #C8102E;padding:38px 34px;text-align:center;">' +
   '<img src="' + BRAND_LOGO + '" alt="CNT Promo &amp; Ads Specialists, Inc." height="52" class="logo" style="height:52px;width:auto;display:inline-block;">' +
-  '<div style="color:#9a9a9a;font-size:11px;font-weight:600;letter-spacing:.22em;margin-top:16px;text-transform:uppercase;">Employment &amp; Manpower Services</div></td></tr>' +
+  '<div style="color:#cfcfcf;font-size:12px;font-weight:700;letter-spacing:.12em;margin-top:15px;text-transform:uppercase;">A Million Jobs for a Million Filipinos.</div></td></tr>' +
   // body
   '<tr><td class="pad pad-y" style="padding:40px;color:#3f3f46;font-size:15px;line-height:1.7;">' +
   '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;padding:6px 13px;border-radius:100px;">' + esc(eyebrow) + '</span>' +
@@ -78,9 +78,8 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   bodyHtml + '</td></tr>' +
   // footer
   '<tr><td class="pad" style="background:#fafafa;border-top:1px solid #ededed;padding:30px 34px;text-align:center;">' +
-  '<img src="' + BRAND_LOGO + '" alt="CNT" height="22" style="height:22px;width:auto;display:inline-block;opacity:.35;filter:grayscale(100%);margin-bottom:14px;">' +
   '<div style="font-size:12px;color:#8a8a8a;line-height:1.7;">This is an automated message from <b style="color:#555;">CNT Promo &amp; Ads Specialists, Inc.</b><br>Please do not reply to this email.</div>' +
-  '<div style="margin-top:14px;font-size:11.5px;color:#aeaeae;line-height:1.7;">219 LYFE Tower, Shaw Blvd., Mandaluyong City<br>' +
+  '<div style="margin-top:14px;font-size:11.5px;color:#aeaeae;line-height:1.7;">219 Lyfe Tower, Shaw Blvd. corner E. Jacinto St., Barangay Bagong Silan, Mandaluyong City<br>' +
   '<a href="mailto:hrdadmin@cntpromoads.com" style="color:#C8102E;">hrdadmin@cntpromoads.com</a> &nbsp;&middot;&nbsp; <a href="' + SITE + '" style="color:#C8102E;">Visit our website</a></div>' +
   '<div style="margin-top:18px;padding-top:16px;border-top:1px solid #ededed;font-size:11px;color:#bdbdbd;">&copy; ' + new Date().getFullYear() + ' CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</div>' +
   '</td></tr>' +
