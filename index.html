@@ -1581,6 +1581,44 @@ input, select, textarea { font-family: var(--font-body); }
   </div>
 </section>
 
+<!-- ============================= LATEST OPENINGS ============================= -->
+<style>
+  #latest-jobs .lj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px}
+  #latest-jobs .lj-card{display:flex;flex-direction:column;background:var(--white,#fff);border:1px solid #E7EAF0;border-radius:14px;padding:24px;text-decoration:none;color:inherit;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+  #latest-jobs .lj-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(16,24,40,.10);border-color:var(--red)}
+  #latest-jobs .lj-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:20px}
+  #latest-jobs .lj-new{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--red);padding:3px 8px;border-radius:5px}
+  #latest-jobs .lj-time{font-size:.78rem;color:#6B7280}
+  #latest-jobs .lj-role{font-family:var(--font-display);font-weight:800;font-size:1.14rem;color:#1D2733;line-height:1.25;letter-spacing:0}
+  #latest-jobs .lj-card:hover .lj-role{color:var(--red)}
+  #latest-jobs .lj-cat{font-size:.84rem;color:#6B7280;margin-top:5px}
+  #latest-jobs .lj-sal{font-size:.95rem;font-weight:800;color:#1D2733;margin-top:12px}
+  #latest-jobs .lj-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  #latest-jobs .lj-tag{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;color:#3D4757;background:#EEF1F5;border-radius:6px;padding:4px 10px}
+  #latest-jobs .lj-tag svg{width:12px;height:12px;color:#6B7280}
+  #latest-jobs .lj-foot{margin-top:auto;padding-top:16px;display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:800;color:var(--red)}
+  #latest-jobs .lj-foot svg{width:14px;height:14px;transition:transform .18s ease}
+  #latest-jobs .lj-card:hover .lj-foot svg{transform:translateX(4px)}
+  #latest-jobs .lj-more{text-align:center;margin-top:36px}
+  #latest-jobs .lj-skel{background:#EEF1F5;border-radius:14px;height:210px;animation:ljpulse 1.2s ease-in-out infinite}
+  @keyframes ljpulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @media(max-width:900px){#latest-jobs .lj-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:600px){#latest-jobs .lj-grid{grid-template-columns:1fr}}
+</style>
+<section class="section section-gray" id="latest-jobs" aria-label="Latest job openings" style="display:none">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-eyebrow center" data-reveal>Now Hiring</div>
+      <h2 class="section-heading" data-reveal>Latest <em>Openings</em></h2>
+      <p class="section-sub" data-reveal>Fresh roles across our clients. Apply directly in minutes — no fees, ever.</p>
+    </div>
+    <div class="lj-grid" id="lj-grid" data-reveal>
+      <div class="lj-skel"></div><div class="lj-skel"></div><div class="lj-skel"></div>
+    </div>
+    <div class="lj-more"><a class="btn-outline" href="careers.html">View all open positions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </div>
+</section>
+
 <!-- ============================= PROCESS ============================= -->
 <section class="process section section-dark" id="process" aria-label="Our Process">
   <div class="container">
@@ -2747,6 +2785,50 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
       +'</div>';
     }).join('');
   }, function(){ hideSection('events'); });
+
+  // Latest Openings — pull the newest open jobs from the same table careers.html
+  // uses, and show them as cards linking straight to the role. Hidden if none.
+  (function(){
+    var ljGrid=document.getElementById('lj-grid'), ljSec=document.getElementById('latest-jobs');
+    if(!ljGrid||!ljSec) return;
+    if(!sb){ ljSec.style.display='none'; return; }
+    function ljSalary(v){
+      var nums=String(v||'').match(/\d+/g); if(!nums||!nums.length) return '';
+      var f=nums.map(function(n){ return '₱'+Number(n).toLocaleString('en-US'); });
+      return (f.length>1?f[0]+' – '+f[1]:f[0]);
+    }
+    function ljWhen(iso){
+      if(!iso) return ''; var d=(Date.now()-new Date(iso).getTime())/1000; if(isNaN(d)) return '';
+      if(d<3600) return Math.max(1,Math.floor(d/60))+' minutes ago';
+      if(d<86400) return Math.floor(d/3600)+' hours ago';
+      if(d<2592000) return Math.floor(d/86400)+' days ago';
+      return new Date(iso).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+    }
+    var brief='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
+    var arrow='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    sb.from('jobs').select('*').eq('status','open').order('created_at',{ascending:false}).limit(6).then(function(res){
+      var rows=res.data;
+      if(res.error||!rows||!rows.length){ ljSec.style.display='none'; return; }
+      ljGrid.innerHTML=rows.map(function(j){
+        var cat=esc(j.department||j.industry||'Open role');
+        var loc=j.location?' &middot; '+esc(j.location):'';
+        var sal=ljSalary(j.salary_range);
+        var etype=esc((j.employment_type&&String(j.employment_type).trim())||'Full-time');
+        var when=ljWhen(j.created_at);
+        var isNew=j.created_at && (Date.now()-new Date(j.created_at).getTime())<14*86400000;
+        var href='careers.html?job='+encodeURIComponent(j.id);
+        return '<a class="lj-card" href="'+href+'">'
+          +'<div class="lj-top">'+(isNew?'<span class="lj-new">New</span>':'')+(when?'<span class="lj-time">'+esc(when)+'</span>':'')+'</div>'
+          +'<div class="lj-role">'+esc(j.role||'')+'</div>'
+          +'<div class="lj-cat">'+cat+loc+'</div>'
+          +(sal?'<div class="lj-sal">'+sal+'<span style="font-weight:600;color:#6B7280"> a month</span></div>':'')
+          +'<div class="lj-tags"><span class="lj-tag">'+brief+etype+'</span></div>'
+          +'<span class="lj-foot">View role '+arrow+'</span>'
+        +'</a>';
+      }).join('');
+      ljSec.style.display='';
+    }, function(){ ljSec.style.display='none'; });
+  })();
 
   // Success Stories — show only stories published in Content Studio; hide the
   // whole section when there are none.
