@@ -889,7 +889,8 @@
       location:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
       salary:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
       users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
-      grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>'
+      grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+      setup:'<path d="M3 21h18M6 21V7l6-4 6 4v14"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/>'
     }[icon]||'';
     return '<div class="dp-fact"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+ic+'</svg></div><div><div class="k">'+k+'</div><div class="v">'+v+'</div></div></div>';
   }
@@ -911,6 +912,7 @@
         +'<button class="dp-copy" type="button" data-copy="'+job.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy link</span></button></div></div>'
       +'<div class="dp-facts">'
         +_dpFact('location','Location',esc(job.location||'—'))
+        +_dpFact('setup','Arrangement',esc(job.arrangement||job.work_setup||'On-site'))
         +_dpFact('salary','Salary',esc(formatSalary(job.salary_range))+' /mo')
         +_dpFact('users','Openings',openings+' position'+(openings!==1?'s':''))
         +_dpFact('grid','Category',esc(jobCategory(job.role)))
