@@ -141,6 +141,24 @@
   .jr-foot{font-size:.78rem;color:var(--gray-400);margin-top:10px}
   .arrow{color:var(--red);font-size:1.1rem}
 
+  /* Indeed-style pagination */
+  .pager{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:26px 0 4px}
+  .pager:empty{display:none}
+  .pg{min-width:40px;height:40px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--gray-100);background:#fff;border-radius:9px;font-size:.92rem;font-weight:700;color:#1D2733;cursor:pointer;font-family:inherit;transition:border-color .15s ease,background .15s ease}
+  .pg:hover{border-color:#C9CED6;background:#FAFAFB}
+  .pg.active{background:#1D2733;border-color:#1D2733;color:#fff;cursor:default}
+  .pg.nav svg{width:16px;height:16px}
+  .pg[disabled]{opacity:.4;cursor:not-allowed}
+  .pg-gap{padding:0 4px;color:var(--gray-400)}
+  /* People also searched */
+  .also-searched:empty{display:none}
+  .also-searched{margin:34px 0 6px}
+  .also-searched h3{font-family:var(--font-display);font-size:1.15rem;font-weight:800;color:var(--charcoal);margin:0 0 14px}
+  .as-chips{display:flex;flex-wrap:wrap;gap:10px}
+  .as-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gray-100);background:#fff;border-radius:10px;padding:10px 15px;font-size:.9rem;font-weight:600;color:#1D2733;cursor:pointer;font-family:inherit;transition:border-color .15s ease,background .15s ease}
+  .as-chip:hover{border-color:#C9CED6;background:#FAFAFB}
+  .as-chip svg{width:15px;height:15px;color:var(--gray-600)}
+
   .state{text-align:center;padding:70px 20px;color:var(--gray-600)}
   .spinner{width:38px;height:38px;border:3px solid var(--gray-100);border-top-color:var(--red);border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -431,6 +449,8 @@
             <div id="active-filters" class="active-filters" style="display:none"></div>
             <div id="groups"></div>
             <div id="list-state"></div>
+            <nav id="pager" class="pager" aria-label="Job list pages"></nav>
+            <div id="also-searched" class="also-searched"></div>
           </div>
           <aside class="detail-col">
             <div id="detail-panel" class="detail-panel">
@@ -826,7 +846,7 @@
     });
     $('#results-count').innerHTML=`<b>${list.length}</b> open position${list.length!==1?'s':''}`;
     renderActiveFilters();
-    if(!list.length){ $('#groups').innerHTML=''; $('#list-state').innerHTML='<div class="state">No positions match your filters. Try broadening your search.</div>'; return; }
+    if(!list.length){ $('#groups').innerHTML=''; $('#pager').innerHTML=''; $('#list-state').innerHTML='<div class="state">No positions match your filters. Try broadening your search.</div>'; renderAlsoSearched(); return; }
     $('#list-state').innerHTML='';
     // flat list — client/account is hidden here, revealed only on the job detail page
     const mode=window._jobSort||'latest';
@@ -834,7 +854,12 @@
     else if(mode==='latest') list.sort((a,b)=>(new Date(b.created_at||0)-new Date(a.created_at||0)) || ((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)));
     else if(mode==='az') list.sort((a,b)=>a.role.localeCompare(b.role));
     else list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
-    $('#groups').innerHTML=list.map(j=>{
+    // Pagination (Indeed-style) — keep the scroll short by showing a page at a time
+    const PER_PAGE=8;
+    const totalPages=Math.max(1,Math.ceil(list.length/PER_PAGE));
+    const page=Math.min(Math.max(1,window._page||1),totalPages); window._page=page;
+    const pageList=list.slice((page-1)*PER_PAGE, page*PER_PAGE);
+    $('#groups').innerHTML=pageList.map(j=>{
       const openings=(+j.openings||1);
       const when=relTime(j.created_at);
       const isNew=jobIsNew(j.created_at);
@@ -865,18 +890,63 @@
       if(window.innerWidth>=900) selectPanel(id); else gotoJob(id);
     }));
     // Desktop two-panel: keep a role open on the right (persist the selection,
-    // otherwise default to the first result).
-    if(window.innerWidth>=900 && list.length){
-      const keep=window._panelJob && list.find(j=>j.id===window._panelJob);
-      selectPanel((keep||list[0]).id);
+    // otherwise default to the first result on this page).
+    if(window.innerWidth>=900 && pageList.length){
+      const keep=window._panelJob && pageList.find(j=>j.id===window._panelJob);
+      selectPanel((keep||pageList[0]).id);
     }
+    renderPager(page,totalPages);
+    renderAlsoSearched();
   }
 
-  { const qEl=$('#q'); if(qEl) qEl.addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); renderList(); }); }
-  { const sEl=$('#job-sort'); if(sEl) sEl.addEventListener('change',e=>{ window._jobSort=e.target.value; renderList(); }); }
+  /* ---------- PAGINATION ---------- */
+  function gotoPage(p){
+    window._page=p; window._panelJob=null; renderList();
+    const lh=document.querySelector('.list-head'); if(lh) lh.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function renderPager(page,total){
+    const el=$('#pager'); if(!el) return;
+    if(total<=1){ el.innerHTML=''; return; }
+    const chevron=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">'+(d==='prev'?'<path d="M15 18l-6-6 6-6"/>':'<path d="M9 18l6-6-6-6"/>')+'</svg>';
+    // page numbers — show all when few; window with ellipses when many
+    const nums=[];
+    if(total<=7){ for(let n=1;n<=total;n++) nums.push(n); }
+    else {
+      const lo=Math.max(2,page-1), hi=Math.min(total-1,page+1);
+      nums.push(1);
+      if(lo>2) nums.push('gap');
+      for(let n=lo;n<=hi;n++) nums.push(n);
+      if(hi<total-1) nums.push('gap');
+      nums.push(total);
+    }
+    let html='<button class="pg nav" type="button" data-pg="'+(page-1)+'"'+(page<=1?' disabled':'')+' aria-label="Previous page">'+chevron('prev')+'</button>';
+    html+=nums.map(n=> n==='gap' ? '<span class="pg-gap">…</span>'
+      : '<button class="pg'+(n===page?' active':'')+'" type="button" data-pg="'+n+'"'+(n===page?' aria-current="page"':'')+'>'+n+'</button>').join('');
+    html+='<button class="pg nav" type="button" data-pg="'+(page+1)+'"'+(page>=total?' disabled':'')+' aria-label="Next page">'+chevron('next')+'</button>';
+    el.innerHTML=html;
+    el.querySelectorAll('.pg[data-pg]').forEach(b=>{ if(!b.disabled) b.addEventListener('click',()=>gotoPage(+b.dataset.pg)); });
+  }
+
+  /* ---------- PEOPLE ALSO SEARCHED ---------- */
+  const ALSO_SEARCHED=['Merchandiser','Sales Promoter','Warehouse','Driver','Cashier','Customer Service','Marketing','Fresh graduate'];
+  function renderAlsoSearched(){
+    const el=$('#also-searched'); if(!el) return;
+    if(el.dataset.done){ return; } el.dataset.done='1';
+    const mag='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>';
+    el.innerHTML='<h3>People also searched:</h3><div class="as-chips">'
+      +ALSO_SEARCHED.map(t=>'<button class="as-chip" type="button" data-term="'+esc(t)+'">'+mag+esc(t)+'</button>').join('')+'</div>';
+    el.querySelectorAll('.as-chip').forEach(b=>b.addEventListener('click',()=>{
+      const term=b.dataset.term; const qEl=$('#q'); if(qEl) qEl.value=term;
+      curFilter.q=term; window._page=1; window._panelJob=null; renderList();
+      const lh=document.querySelector('.list-head'); if(lh) lh.scrollIntoView({behavior:'smooth',block:'start'});
+    }));
+  }
+
+  { const qEl=$('#q'); if(qEl) qEl.addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); window._page=1; renderList(); }); }
+  { const sEl=$('#job-sort'); if(sEl) sEl.addEventListener('change',e=>{ window._jobSort=e.target.value; window._page=1; renderList(); }); }
   // Top search bar: location dropdown filters automatically; the button just
   // focuses the list (search already applies live as you type).
-  { const lf=$('#loc-filter'); if(lf) lf.addEventListener('change',e=>{ curFilter.location=e.target.value||'all'; renderList(); }); }
+  { const lf=$('#loc-filter'); if(lf) lf.addEventListener('change',e=>{ curFilter.location=e.target.value||'all'; window._page=1; renderList(); }); }
   { const gb=$('#js-go'); if(gb) gb.addEventListener('click',()=>{ renderList(); const g=document.getElementById('groups'); if(g&&window.innerWidth<900) g.scrollIntoView({behavior:'smooth'}); }); }
 
   // PH phone fields: the input holds the national number (9XX XXX XXXX); on
