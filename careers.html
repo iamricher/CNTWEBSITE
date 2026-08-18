@@ -559,7 +559,20 @@
 
   const $ = (s)=>document.querySelector(s);
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function formatSalary(s){ if(!s) return 'Competitive'; const p=String(s).replace(/₱/g,'').split('-').map(x=>x.trim()).filter(Boolean); return p.length===2?'₱'+p[0]+' - ₱'+p[1]:'₱'+p.join(''); }
+  // Normalise a salary_range value for display: pull the digits, add proper
+  // thousands separators, and support single amounts or a "min - max" range.
+  // Non-numeric text (Competitive / Negotiable / DOE …) is shown as-is.
+  function formatSalary(s){
+    if(!s) return 'Competitive';
+    const raw=String(s).trim();
+    if(!/\d/.test(raw)) return raw;
+    const parts=raw.replace(/₱|php/gi,'').replace(/\bto\b/gi,'-')
+      .split(/\s*[-–—]\s*/).map(x=>x.replace(/[^\d]/g,'')).filter(Boolean);
+    const fmt=n=>'₱'+Number(n).toLocaleString('en-PH');
+    if(parts.length>=2) return fmt(parts[0])+' – '+fmt(parts[1]);
+    if(parts.length===1) return fmt(parts[0]);
+    return raw;
+  }
 
   /* ---------- GOOGLE JOBS: JobPosting structured data ----------
      Emits schema.org JobPosting JSON-LD so openings can surface in Google
