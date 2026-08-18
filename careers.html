@@ -1254,9 +1254,10 @@
         if(ins.error) throw ins.error;
       }
       localStorage.setItem('cnt_last_apply', String(Date.now()));
-      // Send the applicant a confirmation email (fire-and-forget; no-op until
-      // Resend is configured server-side via RESEND_API_KEY).
-      fetch('/api/send-auto-reply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'application',to:email,name:name,role:activeJob&&activeJob.role})}).catch(function(){});
+      // The applicant confirmation email is sent server-side by the
+      // `applicant-confirm` Edge Function (triggered by the DB insert webhook) —
+      // it's recipient-locked and single-shot, so we do NOT also send one from
+      // here (that used to produce a duplicate confirmation email).
       showSuccess(name);
     }catch(err){
       console.error(err);
