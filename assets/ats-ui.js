@@ -1806,7 +1806,16 @@ function fmtTime(t){if(!t)return'TBD';const[h,m]=t.split(':');const hr=parseInt(
 // ── Global candidate search (header) ────────────────────────────
 // Searches every candidate across all client accounts, regardless of the
 // current view/filter, and jumps straight to their profile.
+// Debounced candidate search: hide instantly when the query is too short,
+// but wait for a typing pause before running the full applicant scan.
+let _cntSearchT;
 function cntGlobalSearch(q){
+  const box=document.getElementById('global-search-results');
+  clearTimeout(_cntSearchT);
+  if((q||'').trim().length<2){ if(box){ box.classList.add('hidden'); box.innerHTML=''; } return; }
+  _cntSearchT=setTimeout(function(){ _cntGlobalSearchNow(q); },160);
+}
+function _cntGlobalSearchNow(q){
   q=(q||'').trim().toLowerCase();
   const box=document.getElementById('global-search-results'); if(!box) return;
   if(q.length<2){ box.classList.add('hidden'); box.innerHTML=''; return; }
@@ -1842,7 +1851,10 @@ function cntOpenSearchResult(id){
 function cntCloseSearch(){ const box=document.getElementById('global-search-results'); if(box) box.classList.add('hidden'); }
 function cntGlobalSearchKey(e){
   if(e.key==='Escape'){ cntCloseSearch(); e.target.value=''; e.target.blur(); }
-  else if(e.key==='Enter'){ const first=document.querySelector('#global-search-results button'); if(first) first.dispatchEvent(new MouseEvent('mousedown')); }
+  else if(e.key==='Enter'){
+    clearTimeout(_cntSearchT); _cntGlobalSearchNow(e.target.value); // flush any pending debounce
+    const first=document.querySelector('#global-search-results button'); if(first) first.dispatchEvent(new MouseEvent('mousedown'));
+  }
 }
 // Press "/" anywhere (outside a field) to jump to search.
 document.addEventListener('keydown',function(e){
