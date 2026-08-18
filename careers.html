@@ -121,20 +121,24 @@
   .group-title .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
   .group-title .n{margin-left:auto;font-size:.78rem;font-weight:600;color:var(--gray-400)}
   /* KMC-style flat job list: hairline dividers, NEW badge + posted time, chips */
-  #groups{border-top:1px solid var(--gray-100)}
-  .job-row{display:flex;align-items:center;gap:16px;padding:22px 6px;background:transparent;border:none;border-bottom:1px solid var(--gray-100);border-radius:0;margin:0;cursor:pointer;transition:background .18s ease;text-decoration:none;color:inherit}
-  .job-row:hover{background:#FAFAFB}
-  .job-row .main{flex:1;min-width:0}
-  .jr-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  /* Indeed-style job cards: bordered box, snippet, bold salary, tags */
+  #groups{display:flex;flex-direction:column;gap:12px}
+  .job-row{display:block;padding:18px 20px;background:#fff;border:1px solid var(--gray-100);border-radius:12px;margin:0;cursor:pointer;transition:border-color .16s ease,box-shadow .16s ease;text-decoration:none;color:inherit}
+  .job-row:hover{border-color:#C9CED6;box-shadow:0 4px 14px rgba(16,24,40,.06)}
+  .job-row .main{min-width:0}
+  .jr-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
   .jr-new{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--red);padding:3px 8px;border-radius:5px}
-  .jr-time{font-size:.8rem;color:var(--gray-600)}
-  .job-row .title{font-family:var(--font-display);font-size:1.12rem;font-weight:800;color:var(--charcoal);letter-spacing:.01em;text-transform:uppercase;line-height:1.2}
-  .jr-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
-  .jr-chip{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:600;color:#475569;background:#F1F5F9;border-radius:99px;padding:5px 12px}
-  .jr-chip svg{width:13px;height:13px;color:var(--red)}
-  .jr-chip.urgent{background:#FEF2F2;color:var(--red-deep)}
-  .jr-arrow{flex:none;color:#CBD5E1;font-size:1.3rem;line-height:1;transition:color .18s ease,transform .18s ease}
-  .job-row:hover .jr-arrow{color:var(--red);transform:translateX(4px)}
+  .jr-time{font-size:.78rem;color:var(--gray-600)}
+  .job-row .title{font-family:var(--font-display);font-size:1.16rem;font-weight:800;color:#1D2733;letter-spacing:0;line-height:1.25}
+  .job-row:hover .title{color:var(--red);text-decoration:underline;text-underline-offset:2px}
+  .jr-company{font-size:.86rem;color:var(--gray-600);margin-top:3px}
+  .jr-salary{font-size:.92rem;font-weight:800;color:#1D2733;margin-top:9px}
+  .jr-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .jr-tag{display:inline-flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;color:#3D4757;background:#EEF1F5;border-radius:6px;padding:4px 10px}
+  .jr-tag svg{width:12px;height:12px;color:var(--gray-600)}
+  .jr-tag.urgent{background:#FEF2F2;color:var(--red-deep)}
+  .jr-snippet{font-size:.86rem;color:#4B5563;line-height:1.55;margin-top:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .jr-foot{font-size:.78rem;color:var(--gray-400);margin-top:10px}
   .arrow{color:var(--red);font-size:1.1rem}
 
   .state{text-align:center;padding:70px 20px;color:var(--gray-600)}
@@ -263,7 +267,7 @@
   .hero-search{max-width:560px;box-shadow:0 20px 50px rgba(0,0,0,.4);padding:7px 7px 7px 22px}
   .hero-search button{padding:12px 26px;font-size:.95rem}
 
-  .job-row{padding:24px 8px}
+  .job-row{padding:20px}
   .job-row .title{font-size:1.22rem}
   .arrow{font-size:1.3rem}
 
@@ -365,8 +369,8 @@
           .dp-empty svg{width:50px;height:50px;color:#D9DCE1}
           .dp-empty p{font-size:.95rem;max-width:24ch}
           .job-row{position:relative}
-          .job-row.active{background:var(--red-pale)}
-          .job-row.active::after{content:"";position:absolute;left:-6px;top:8px;bottom:8px;width:3px;background:var(--red);border-radius:99px}
+          .job-row.active{background:#fff;border-color:var(--red);box-shadow:0 0 0 1px var(--red),0 6px 18px rgba(200,16,46,.10)}
+          .job-row.active .title{color:var(--red)}
           .dp-head{padding:26px 28px 20px;border-bottom:1px solid var(--gray-100)}
           .dp-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
           .dp-title{font-family:var(--font-display);font-size:clamp(1.4rem,2.6vw,1.9rem);font-weight:800;color:var(--charcoal);line-height:1.15;letter-spacing:-.01em}
@@ -835,19 +839,24 @@
       const when=relTime(j.created_at);
       const isNew=jobIsNew(j.created_at);
       const urgent=String(j.priority||'').toLowerCase()==='urgent';
+      const etype=(j.employment_type&&String(j.employment_type).trim())||'Full-time';
+      const sal=formatSalary(j.salary_range);
+      const info=ROLE_INFO[j.role]||{};
+      const snipSrc=(j.about&&j.about.trim())||(j.responsibilities&&j.responsibilities.trim())||info.summary||'';
+      const snippet=snipSrc.replace(/\s*[\r\n]+\s*/g,' · ').trim();
       return `<a class="job-row" href="careers.html?job=${j.id}" data-id="${j.id}">
         <div class="main">
           <div class="jr-top">${isNew?'<span class="jr-new">New</span>':''}${when?`<span class="jr-time">${when}</span>`:''}</div>
           <div class="title">${esc(j.role)}</div>
-          <div class="jr-cat">${esc(jobCategory(j.role))}</div>
-          <div class="jr-chips">
-            <span class="jr-chip">${pinSvg}${esc(j.location)}</span>
-            <span class="jr-chip">${esc(formatSalary(j.salary_range))}</span>
-            <span class="jr-chip">${openings} opening${openings!==1?'s':''}</span>
-            ${urgent?'<span class="jr-chip urgent">Urgent hiring</span>':''}
+          <div class="jr-company">${esc(jobCategory(j.role))}${j.location?' &middot; '+esc(j.location):''}</div>
+          ${sal&&sal!=='&mdash;'&&sal!=='—'?`<div class="jr-salary">${sal}<span style="font-weight:600;color:var(--gray-600)"> a month</span></div>`:''}
+          <div class="jr-tags">
+            <span class="jr-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>${esc(etype)}</span>
+            <span class="jr-tag">${openings} opening${openings!==1?'s':''}</span>
+            ${urgent?'<span class="jr-tag urgent">Urgently hiring</span>':''}
           </div>
+          ${snippet?`<div class="jr-snippet">${esc(snippet)}</div>`:''}
         </div>
-        <span class="jr-arrow">&rarr;</span>
       </a>`;
     }).join('');
     document.querySelectorAll('.job-row').forEach(r=>r.addEventListener('click',e=>{
@@ -893,7 +902,8 @@
       salary:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
       users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
       grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
-      setup:'<path d="M3 21h18M6 21V7l6-4 6 4v14"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/>'
+      setup:'<path d="M3 21h18M6 21V7l6-4 6 4v14"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/>',
+      briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'
     }[icon]||'';
     return '<div class="dp-fact"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+ic+'</svg></div><div><div class="k">'+k+'</div><div class="v">'+v+'</div></div></div>';
   }
@@ -915,6 +925,7 @@
         +'<button class="dp-copy" type="button" data-copy="'+job.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy link</span></button></div></div>'
       +'<div class="dp-facts">'
         +_dpFact('location','Location',esc(job.location||'—'))
+        +_dpFact('briefcase','Job type',esc((job.employment_type&&String(job.employment_type).trim())||'Full-time'))
         +_dpFact('setup','Arrangement',esc(job.arrangement||job.work_setup||'On-site'))
         +_dpFact('salary','Salary',esc(formatSalary(job.salary_range))+' /mo')
         +_dpFact('users','Openings',openings+' position'+(openings!==1?'s':''))
