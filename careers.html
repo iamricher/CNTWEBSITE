@@ -210,6 +210,10 @@
   .field label .req{color:var(--red)}
   .field input,.field select,.field textarea{width:100%;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:11px 13px;font-size:.88rem;outline:none;transition:border-color var(--transition);background:#fff}
   .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red)}
+  .phone-wrap{display:flex;align-items:stretch}
+  .phone-cc{display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid var(--gray-200);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);background:#F7F7F8;font-size:.88rem;font-weight:600;color:var(--charcoal);white-space:nowrap;flex:none}
+  .phone-cc .fl{font-size:1.05rem;line-height:1}
+  .phone-wrap input{border-radius:0 var(--radius-sm) var(--radius-sm) 0!important}
   .field textarea{resize:vertical;min-height:70px}
   .filebox{border:1.5px dashed var(--gray-200);border-radius:var(--radius-sm);padding:14px;text-align:center;cursor:pointer;transition:var(--transition);font-size:.82rem;color:var(--gray-600)}
   .filebox:hover{border-color:var(--red);background:var(--red-pale)}
@@ -473,7 +477,8 @@
             <div class="inner" id="apply-inner">
               <form id="apply-form" novalidate>
                 <div class="field"><label>Full name <span class="req">*</span></label><input name="name" type="text" required placeholder="Juan Dela Cruz" /></div>
-                <div class="field"><label>Mobile number <span class="req">*</span></label><input name="phone" type="tel" required placeholder="+63 9XX XXX XXXX" /></div>
+                <div class="field"><label>Mobile number <span class="req">*</span></label>
+                  <div class="phone-wrap"><span class="phone-cc"><span class="fl">🇵🇭</span> +63</span><input name="phone" type="tel" required placeholder="9XX XXX XXXX" inputmode="tel" data-phone /></div></div>
                 <div class="field"><label>Email address <span class="req">*</span></label><input name="email" type="email" required placeholder="you@email.com" /></div>
                 <div class="field"><label>Years of experience</label>
                   <select name="experience"><option value="">Select…</option><option>No experience</option><option>Less than 1 year</option><option>1–2 years</option><option>3–5 years</option><option>5+ years</option></select>
@@ -872,6 +877,22 @@
   // focuses the list (search already applies live as you type).
   { const lf=$('#loc-filter'); if(lf) lf.addEventListener('change',e=>{ curFilter.location=e.target.value||'all'; renderList(); }); }
   { const gb=$('#js-go'); if(gb) gb.addEventListener('click',()=>{ renderList(); const g=document.getElementById('groups'); if(g&&window.innerWidth<900) g.scrollIntoView({behavior:'smooth'}); }); }
+
+  // PH phone fields: the input holds the national number (9XX XXX XXXX); on
+  // submit we store it as +63XXXXXXXXXX so every record is consistently formatted.
+  (function(){
+    document.querySelectorAll('input[data-phone]').forEach(function(inp){
+      inp.addEventListener('input',function(){
+        var d=inp.value.replace(/\D/g,'').replace(/^0+/,'').replace(/^63/,'');
+        inp.value=d.slice(0,10);
+      });
+      var form=inp.closest('form');
+      if(form) form.addEventListener('submit',function(){
+        var d=inp.value.replace(/\D/g,'').replace(/^0+/,'').replace(/^63/,'').slice(0,10);
+        if(d) inp.value='+63'+d;
+      }, true);
+    });
+  })();
 
   /* ---------- DETAIL PANEL (right column, KMC-style) ---------- */
   function _dpFact(icon,k,v){
