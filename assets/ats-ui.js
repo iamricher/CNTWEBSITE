@@ -1940,7 +1940,8 @@ function openEditModal(id){
   else { document.getElementById('app-account').value=app.account;
          document.getElementById('app-location').value=app.location;
          document.getElementById('app-role').value=app.role; }
-  document.getElementById('app-phone').value=app.phone;
+  // Show just the national number in the +63 field (strip any country code / 0).
+  document.getElementById('app-phone').value=String(app.phone||'').replace(/\D/g,'').replace(/^63/,'').replace(/^0+/,'').slice(-10);
   document.getElementById('app-email').value=app.email||'';
   document.getElementById('app-source').value=app.source||'JobStreet';
   document.getElementById('app-salary').value=app.salary||'';

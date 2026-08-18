@@ -35,6 +35,10 @@
   label{display:block;font-size:12px;font-weight:600;color:var(--sub);margin:0 0 5px}
   .field{margin-bottom:14px}
   input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:var(--body)}
+  .phone-wrap{display:flex;align-items:stretch}
+  .phone-cc{display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid var(--line);border-right:none;border-radius:10px 0 0 10px;background:#F7F7F8;font-size:14px;font-weight:600;color:var(--ink,#111);white-space:nowrap;flex:none}
+  .phone-cc .fl{font-size:16px;line-height:1}
+  .phone-wrap input{border-radius:0 10px 10px 0}
   input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-pale)}
   a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:6px}
   @media (prefers-reduced-motion: reduce){*,*::before,*::after{transition-duration:.001ms!important}}
@@ -114,7 +118,7 @@
           <p class="lead">Enter the email and mobile number you applied with.</p>
           <form onsubmit="checkStatus(event)">
             <div class="field"><label for="s-email">Email</label><input id="s-email" type="email" autocomplete="email" required placeholder="you@email.com" /></div>
-            <div class="field"><label for="s-phone">Mobile number</label><input id="s-phone" type="tel" autocomplete="tel" required placeholder="09xx xxx xxxx" /></div>
+            <div class="field"><label for="s-phone">Mobile number</label><div class="phone-wrap"><span class="phone-cc"><span class="fl">🇵🇭</span> +63</span><input id="s-phone" type="tel" autocomplete="tel" required placeholder="9xx xxx xxxx" inputmode="tel" data-phone /></div></div>
             <button id="s-btn" type="submit" class="btn"><span class="mi" style="font-size:17px">search</span> Check status</button>
             <p id="s-msg" class="msg"></p>
           </form>
@@ -135,6 +139,16 @@
   <script>
   const $=s=>document.querySelector(s);
   const sb=window.getSupabase?window.getSupabase():null;
+
+  // PH phone field: hold the national number, normalise to +63XXXXXXXXXX on
+  // submit (the status lookup matches on the last 10 digits either way).
+  (function(){
+    document.querySelectorAll('input[data-phone]').forEach(function(inp){
+      inp.addEventListener('input',function(){ inp.value=inp.value.replace(/\D/g,'').replace(/^0+/,'').replace(/^63/,'').slice(0,10); });
+      var form=inp.closest('form');
+      if(form) form.addEventListener('submit',function(){ var d=inp.value.replace(/\D/g,'').replace(/^0+/,'').replace(/^63/,'').slice(0,10); if(d) inp.value='+63'+d; }, true);
+    });
+  })();
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // Candidate-facing pipeline. Maps the internal stage to a friendly step and

@@ -378,7 +378,9 @@ language sql stable security definer set search_path=public as $$
   where a.purged_at is null
     and lower(a.email) = lower(btrim(p_email))
     and length(regexp_replace(coalesce(a.phone,''),'[^0-9]','','g')) >= 7
-    and regexp_replace(coalesce(a.phone,''),'[^0-9]','','g') = regexp_replace(coalesce(p_phone,''),'[^0-9]','','g')
+    -- Match on the last 10 digits (national number) so +63 / leading-0 /
+    -- spacing differences all resolve to the same number.
+    and right(regexp_replace(coalesce(a.phone,''),'[^0-9]','','g'),10) = right(regexp_replace(coalesce(p_phone,''),'[^0-9]','','g'),10)
   order by a.created_at desc;
 $$;
 revoke all on function public.cnt_application_status(text, text) from public;

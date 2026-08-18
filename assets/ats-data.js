@@ -344,7 +344,7 @@
         account: document.getElementById('app-account').value,
         location: document.getElementById('app-location').value,
         role: document.getElementById('app-role').value,
-        phone: document.getElementById('app-phone').value,
+        phone: (function(v){ v=String(v||'').replace(/\D/g,'').replace(/^0+/,'').replace(/^63/,'').slice(0,10); return v?'+63'+v:''; })(document.getElementById('app-phone').value),
         email: document.getElementById('app-email').value,
         source: document.getElementById('app-source').value,
         salary: document.getElementById('app-salary').value,
