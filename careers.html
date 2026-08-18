@@ -110,6 +110,12 @@
   .list-head h2{font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--charcoal)}
   .list-head span{font-size:.9rem;color:var(--gray-600)}
   .list-head b{color:var(--red)}
+  .lh-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .job-sort{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;color:var(--gray-600)}
+  .job-sort span{font-weight:600}
+  .job-sort select{border:1px solid var(--gray-100);border-radius:9px;padding:7px 11px;font-size:.85rem;font-weight:600;color:var(--charcoal);background:#fff;cursor:pointer;outline:none;transition:border-color .18s ease}
+  .job-sort select:focus{border-color:var(--red)}
+  .jr-cat{font-size:.82rem;font-weight:600;color:var(--red);margin-top:3px;letter-spacing:.01em}
   .group{margin-bottom:34px}
   .group-title{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--charcoal);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--gray-100)}
   .group-title .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
@@ -362,7 +368,16 @@
           <section>
             <div class="list-head">
               <h2>Open Positions</h2>
-              <span id="results-count"></span>
+              <div class="lh-right">
+                <span id="results-count"></span>
+                <label class="job-sort"><span>Sort</span>
+                  <select id="job-sort" aria-label="Sort openings">
+                    <option value="latest">Latest</option>
+                    <option value="priority">Priority</option>
+                    <option value="az">A–Z</option>
+                  </select>
+                </label>
+              </div>
             </div>
             <div id="active-filters" class="active-filters" style="display:none"></div>
             <div id="groups"></div>
@@ -740,6 +755,20 @@
     try{ return 'Posted '+d.toLocaleDateString('en-PH',{month:'short',day:'numeric'}); }catch(e){ return ''; }
   }
   function jobIsNew(iso){ if(!iso) return false; const s=(Date.now()-new Date(iso).getTime())/1000; return s>=0 && s<7*86400; }
+  // Department/category line (KMC-style), derived from the role since CNT jobs
+  // carry no explicit department field.
+  const JOB_CATS=[
+    [/\b(it|developer|programmer|software|network|system|tech|data|qa)\b/i,'Information Technology'],
+    [/\b(sales|promoter|merchandis|brand|marketing|promo|account executive)\b/i,'Sales & Marketing'],
+    [/\b(supervisor|manager|head|lead|officer|coordinator)\b/i,'Management & Supervision'],
+    [/\b(driver|warehouse|logistic|delivery|rider|forklift|picker)\b/i,'Logistics & Operations'],
+    [/\b(admin|hr|human resource|accounting|finance|payroll|clerk|encoder|receptionist)\b/i,'Administration'],
+    [/\b(cashier|crew|staff|service|attendant|barista|waiter|steward)\b/i,'Customer Service'],
+    [/\b(engineer|technician|electric|mechanic|maintenance|welder)\b/i,'Engineering & Technical'],
+    [/\b(security|guard)\b/i,'Safety & Security'],
+    [/\b(nurse|caregiver|medical|health|pharmac)\b/i,'Healthcare']
+  ];
+  function jobCategory(role){ const r=String(role||''); for(const [re,cat] of JOB_CATS){ if(re.test(r)) return cat; } return 'General'; }
   function renderList(){
     const q=curFilter.q.toLowerCase();
     let list=ALL_JOBS.filter(j=>{
@@ -753,7 +782,10 @@
     if(!list.length){ $('#groups').innerHTML=''; $('#list-state').innerHTML='<div class="state">No positions match your filters. Try broadening your search.</div>'; return; }
     $('#list-state').innerHTML='';
     // flat list — client/account is hidden here, revealed only on the job detail page
-    list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
+    const mode=window._jobSort||'latest';
+    if(mode==='latest') list.sort((a,b)=>(new Date(b.created_at||0)-new Date(a.created_at||0)) || ((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)));
+    else if(mode==='az') list.sort((a,b)=>a.role.localeCompare(b.role));
+    else list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
     $('#groups').innerHTML=list.map(j=>{
       const openings=(+j.openings||1);
       const when=relTime(j.created_at);
@@ -763,6 +795,7 @@
         <div class="main">
           <div class="jr-top">${isNew?'<span class="jr-new">New</span>':''}${when?`<span class="jr-time">${when}</span>`:''}</div>
           <div class="title">${esc(j.role)}</div>
+          <div class="jr-cat">${esc(jobCategory(j.role))}</div>
           <div class="jr-chips">
             <span class="jr-chip">${pinSvg}${esc(j.location)}</span>
             <span class="jr-chip">${esc(formatSalary(j.salary_range))}</span>
@@ -777,6 +810,7 @@
   }
 
   { const qEl=$('#q'); if(qEl) qEl.addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); buildFilters(); renderList(); }); }
+  { const sEl=$('#job-sort'); if(sEl) sEl.addEventListener('change',e=>{ window._jobSort=e.target.value; renderList(); }); }
 
   /* ---------- SIMILAR JOBS ---------- */
   function renderSimilar(job){
