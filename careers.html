@@ -162,8 +162,9 @@
   .similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   .sim-card{display:block;border:1px solid var(--gray-100);border-radius:16px;padding:20px;background:#fff;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;cursor:pointer}
   .sim-card:hover{transform:translateY(-5px);box-shadow:0 22px 46px rgba(16,24,40,.10);border-color:var(--red-muted)}
-  .sim-card .r{font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--charcoal);letter-spacing:-.01em}
-  .sim-card .m{font-size:.82rem;color:var(--gray-600);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .sim-card .r{font-family:var(--font-display);font-weight:800;font-size:1.02rem;color:var(--charcoal);letter-spacing:.01em;text-transform:uppercase;line-height:1.2}
+  .sim-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .sim-card .jr-chip{font-size:.75rem}
   @media(max-width:820px){.similar-grid{grid-template-columns:1fr 1fr}}
   @media(max-width:560px){.similar-grid{grid-template-columns:1fr}}
   /* Job alerts signup band */
@@ -338,7 +339,6 @@
             <h2>Find your perfect fit</h2>
             <p>Tell us your skills or the kind of work you want — we'll instantly rank the openings that match you best.</p>
           </div>
-          <div class="jm-suggest" id="jm-suggest"></div>
           <div class="jm-form">
             <input id="jm-skills" type="text" placeholder="e.g. sales, merchandising, customer service, driving" aria-label="Your skills" />
             <select id="jm-loc" aria-label="Preferred location"><option value="">Any location</option></select>
@@ -624,15 +624,6 @@
     const locs=[...new Set(ALL_JOBS.map(j=>j.location).filter(Boolean))].sort();
     const sel=$('#jm-loc');
     sel.innerHTML='<option value="">Any location</option>'+locs.map(l=>'<option>'+esc(l)+'</option>').join('');
-    // Suggested skill chips: the most common role words, as quick starters
-    const sugg=[...new Set(ALL_JOBS.map(j=>j.role))].slice(0,6);
-    $('#jm-suggest').innerHTML=sugg.map(s=>'<button type="button" class="jm-chip" data-skill="'+esc(s)+'">'+esc(s)+'</button>').join('');
-    $('#jm-suggest').querySelectorAll('.jm-chip').forEach(b=>b.addEventListener('click',()=>{
-      const inp=$('#jm-skills'); const cur=inp.value.trim();
-      const add=b.dataset.skill;
-      inp.value=cur?(cur.replace(/,\s*$/,'')+', '+add):add;
-      jmMatch();
-    }));
     if(!card._wired){
       $('#jm-go').addEventListener('click',jmMatch);
       $('#jm-skills').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); jmMatch(); }});
@@ -799,7 +790,10 @@
     box.innerHTML='<h3>Similar openings</h3><div class="similar-grid">'+sim.map(j=>
       `<a class="sim-card" href="careers.html?job=${j.id}" data-id="${j.id}">
         <div class="r">${esc(j.role)}</div>
-        <div class="m"><span>${pinSvg}${esc(j.location)}</span><span>${esc(formatSalary(j.salary_range))}</span></div>
+        <div class="sim-chips">
+          <span class="jr-chip">${pinSvg}${esc(j.location)}</span>
+          <span class="jr-chip">${esc(formatSalary(j.salary_range))}</span>
+        </div>
       </a>`).join('')+'</div>';
     box.querySelectorAll('.sim-card').forEach(c=>c.addEventListener('click',e=>{ if(e.metaKey||e.ctrlKey||e.shiftKey||e.button) return; e.preventDefault(); gotoJob(+c.dataset.id); }));
   }
