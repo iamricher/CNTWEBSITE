@@ -10,7 +10,7 @@
 // ============================================================
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mtaknpmvvldmnsizvtuy.supabase.co';
 const ANON = process.env.SUPABASE_ANON_KEY || 'sb_publishable_GYmTJWeUriWXjFkO9j2J7w_cwJNV0Au';
-const FALLBACK_IMG = 'https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png';
+const FALLBACK_IMG = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo.png';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 

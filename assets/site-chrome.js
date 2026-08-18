@@ -9,8 +9,8 @@
 (function () {
   'use strict';
 
-  var LOGO = 'https://uploads.onecompiler.io/43d4zm644/44q9vbk23/cnt_front.png';
-  var FOOTER_LOGO = 'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/CNT%20Promo%20&%20Ads%20Specialists,%20Inc.%202.png';
+  var LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo.png';
+  var FOOTER_LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
   var YEAR = new Date().getFullYear();
 
   function navHTML(active, base, overlay) {

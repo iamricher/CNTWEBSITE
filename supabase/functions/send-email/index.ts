@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
 
   // Plain text -> branded HTML (matches the website's transactional emails).
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const LOGO = 'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/CNT%20Promo%20&amp;%20Ads%20Specialists,%20Inc.%202.png';
+  const LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
   const SITE = 'https://cnt-website-ats.vercel.app';
   const YEAR = new Date().getFullYear();
   const linkify = (s: string) => s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#C8102E;font-weight:600;">$1</a>');

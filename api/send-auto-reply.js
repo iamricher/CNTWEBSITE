@@ -27,7 +27,7 @@ function readBody(req) {
 
 const SITE = 'https://cnt-website-ats.vercel.app';
 // White CNT logo (reads on the dark header); &amp; keeps the URL valid in HTML.
-const BRAND_LOGO = 'https://uploads.onecompiler.io/43d4zm644/44t7ga3md/CNT%20Promo%20&amp;%20Ads%20Specialists,%20Inc.%202.png';
+const BRAND_LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
 
 // Bulletproof-ish red button (table cell → works in most email clients).
 const BTN = (href, label) =>
