@@ -114,18 +114,21 @@
   .group-title{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--charcoal);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--gray-100)}
   .group-title .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
   .group-title .n{margin-left:auto;font-size:.78rem;font-weight:600;color:var(--gray-400)}
-  .job-row{display:flex;align-items:center;gap:18px;padding:18px 20px;background:#fff;border:1px solid var(--gray-100);border-radius:var(--radius-md);margin-bottom:10px;cursor:pointer;transition:var(--transition);position:relative;text-decoration:none;color:inherit}
-  .job-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);border-radius:3px 0 0 3px;transform:scaleY(0);transform-origin:center;transition:var(--transition)}
-  .job-row:hover{border-color:var(--red-muted);box-shadow:var(--shadow-sm);transform:translateX(3px)}
-  .job-row:hover::before{transform:scaleY(1)}
+  /* KMC-style flat job list: hairline dividers, NEW badge + posted time, chips */
+  #groups{border-top:1px solid var(--gray-100)}
+  .job-row{display:flex;align-items:center;gap:16px;padding:22px 6px;background:transparent;border:none;border-bottom:1px solid var(--gray-100);border-radius:0;margin:0;cursor:pointer;transition:background .18s ease;text-decoration:none;color:inherit}
+  .job-row:hover{background:#FAFAFB}
   .job-row .main{flex:1;min-width:0}
-  .job-row .title{font-family:var(--font-display);font-size:1.08rem;font-weight:700;color:var(--charcoal)}
-  .job-row .snippet{font-size:.85rem;color:var(--text-sub);margin-top:4px;line-height:1.5;display:-webkit-box;display:box;line-clamp:1;-webkit-line-clamp:1;box-orient:vertical;-webkit-box-orient:vertical;overflow:hidden}
-  .job-row .meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:9px;font-size:.8rem;color:var(--gray-600)}
-  .job-row .meta span{display:inline-flex;align-items:center;gap:5px}
-  .job-row .meta svg{width:14px;height:14px;color:var(--red)}
-  .job-row .go{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
-  .openpill{font-size:.72rem;font-weight:700;color:var(--red-deep);background:var(--red-pale);border-radius:99px;padding:5px 11px;white-space:nowrap}
+  .jr-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .jr-new{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--red);padding:3px 8px;border-radius:5px}
+  .jr-time{font-size:.8rem;color:var(--gray-600)}
+  .job-row .title{font-family:var(--font-display);font-size:1.12rem;font-weight:800;color:var(--charcoal);letter-spacing:.01em;text-transform:uppercase;line-height:1.2}
+  .jr-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .jr-chip{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:600;color:#475569;background:#F1F5F9;border-radius:99px;padding:5px 12px}
+  .jr-chip svg{width:13px;height:13px;color:var(--red)}
+  .jr-chip.urgent{background:#FEF2F2;color:var(--red-deep)}
+  .jr-arrow{flex:none;color:#CBD5E1;font-size:1.3rem;line-height:1;transition:color .18s ease,transform .18s ease}
+  .job-row:hover .jr-arrow{color:var(--red);transform:translateX(4px)}
   .arrow{color:var(--red);font-size:1.1rem}
 
   .state{text-align:center;padding:70px 20px;color:var(--gray-600)}
@@ -249,10 +252,8 @@
   .hero-search{max-width:560px;box-shadow:0 20px 50px rgba(0,0,0,.4);padding:7px 7px 7px 22px}
   .hero-search button{padding:12px 26px;font-size:.95rem}
 
-  .job-row{border-radius:16px;box-shadow:0 2px 8px rgba(16,24,40,.05);padding:20px 22px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s}
-  .job-row:hover{transform:translateY(-5px);box-shadow:0 26px 54px rgba(16,24,40,.14);border-color:var(--red-muted)}
-  .job-row .title{font-size:1.16rem;font-weight:800;letter-spacing:-.01em}
-  .openpill{font-weight:800}
+  .job-row{padding:24px 8px}
+  .job-row .title{font-size:1.22rem}
   .arrow{font-size:1.3rem}
 
   .list-head h2{font-size:clamp(1.5rem,3vw,2rem);letter-spacing:-.02em}
@@ -736,6 +737,18 @@
   }
 
   /* ---------- LIST ---------- */
+  // Relative "posted" time + a NEW badge for recent openings (KMC-style).
+  function relTime(iso){
+    if(!iso) return '';
+    const d=new Date(iso), s=(Date.now()-d.getTime())/1000;
+    if(isNaN(s)) return '';
+    if(s<60) return 'Just now';
+    if(s<3600) return Math.floor(s/60)+' minute'+(Math.floor(s/60)!==1?'s':'')+' ago';
+    if(s<86400) return Math.floor(s/3600)+' hour'+(Math.floor(s/3600)!==1?'s':'')+' ago';
+    if(s<604800) return Math.floor(s/86400)+' day'+(Math.floor(s/86400)!==1?'s':'')+' ago';
+    try{ return 'Posted '+d.toLocaleDateString('en-PH',{month:'short',day:'numeric'}); }catch(e){ return ''; }
+  }
+  function jobIsNew(iso){ if(!iso) return false; const s=(Date.now()-new Date(iso).getTime())/1000; return s>=0 && s<7*86400; }
   function renderList(){
     const q=curFilter.q.toLowerCase();
     let list=ALL_JOBS.filter(j=>{
@@ -751,15 +764,22 @@
     // flat list — client/account is hidden here, revealed only on the job detail page
     list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
     $('#groups').innerHTML=list.map(j=>{
-      const info=ROLE_INFO[j.role];
-      const snip=info?info.summary:'Join the CNT team and grow your career with a leading brand.';
+      const openings=(+j.openings||1);
+      const when=relTime(j.created_at);
+      const isNew=jobIsNew(j.created_at);
+      const urgent=String(j.priority||'').toLowerCase()==='urgent';
       return `<a class="job-row" href="careers.html?job=${j.id}" data-id="${j.id}">
         <div class="main">
+          <div class="jr-top">${isNew?'<span class="jr-new">New</span>':''}${when?`<span class="jr-time">${when}</span>`:''}</div>
           <div class="title">${esc(j.role)}</div>
-          <div class="snippet">${esc(snip)}</div>
-          <div class="meta"><span>${pinSvg}${esc(j.location)}</span><span>${esc(formatSalary(j.salary_range))}</span></div>
+          <div class="jr-chips">
+            <span class="jr-chip">${pinSvg}${esc(j.location)}</span>
+            <span class="jr-chip">${esc(formatSalary(j.salary_range))}</span>
+            <span class="jr-chip">${openings} opening${openings!==1?'s':''}</span>
+            ${urgent?'<span class="jr-chip urgent">Urgent hiring</span>':''}
+          </div>
         </div>
-        <div class="go"><span class="openpill">${(+j.openings||1)} opening${(+j.openings||1)!==1?'s':''}</span><span class="arrow">→</span></div>
+        <span class="jr-arrow">&rarr;</span>
       </a>`;
     }).join('');
     document.querySelectorAll('.job-row').forEach(r=>r.addEventListener('click',e=>{ if(e.metaKey||e.ctrlKey||e.shiftKey||e.button) return; e.preventDefault(); gotoJob(+r.dataset.id); }));
