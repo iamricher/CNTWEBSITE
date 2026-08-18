@@ -1556,11 +1556,6 @@ input, select, textarea { font-family: var(--font-body); }
   .reach-cta{margin-top:1.9rem}
   .reach-cta a{display:inline-flex;align-items:center;gap:.5rem;background:var(--red,#C8102E);color:#fff;font-weight:700;font-size:.95rem;padding:13px 28px;border-radius:10px;transition:background .18s ease,transform .18s ease}
   .reach-cta a:hover{background:var(--red-lt,#E5213F);transform:translateY(-2px)}
-  .reach-locs{margin-top:1.7rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .reach-locs-t{width:100%;font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#94A3B8;margin-bottom:4px}
-  .reach-loc{display:inline-flex;align-items:center;gap:7px;font-size:.85rem;font-weight:600;color:#374151;background:#F4F4F5;border:1px solid var(--gray-100,#EBEBEB);border-radius:99px;padding:6px 8px 6px 13px;transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease}
-  .reach-loc:hover{background:var(--red-pale,#FFF0F2);border-color:#F3B6BF;color:var(--red,#C8102E);transform:translateY(-1px)}
-  .reach-loc span{background:var(--red,#C8102E);color:#fff;font-size:.68rem;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
   .reach-mapwrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(16,24,40,.16);border:1px solid var(--gray-100,#EBEBEB)}
   #reach-map{height:clamp(340px,46vw,480px);width:100%;background:#0d1117}
   #reach-map .leaflet-control-attribution{font-size:9px;opacity:.6}
@@ -1580,7 +1575,6 @@ input, select, textarea { font-family: var(--font-body); }
         <span><span class="d job"></span> Where we're hiring</span>
       </div>
       <div class="reach-cta"><a href="careers.html">Find a job near you <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-      <div class="reach-locs" id="reach-locs"></div>
     </div>
     <div class="reach-mapwrap" data-reveal>
       <div id="reach-map" role="img" aria-label="Map of the Philippines showing CNT's head office and current hiring locations"></div>
@@ -2707,16 +2701,6 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
           .on('click',function(){ window.location.href=href; });
         bounds.push(o.pt);
       });
-      // "Show all tagged locations": a clickable chip list beside the map, each
-      // jumping to the careers board pre-filtered to that location.
-      var locBox=document.getElementById('reach-locs');
-      if(locBox){
-        var keys=Object.keys(seen);
-        locBox.innerHTML = keys.length
-          ? '<div class="reach-locs-t">We’re hiring in</div>'+keys.map(function(k){ var o=seen[k];
-              return '<a class="reach-loc" href="careers.html?loc='+encodeURIComponent(o.label)+'">'+esc(o.label)+' <span>'+o.n+'</span></a>'; }).join('')
-          : '';
-      }
       // Only tighten the view when we actually hire in 2+ distinct places; with
       // sparse data keep the whole-country view so the map reads as "nationwide".
       if(Object.keys(seen).length>=2){ try{ map.fitBounds(bounds,{padding:[45,45],maxZoom:7}); }catch(e){} }
