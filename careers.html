@@ -356,8 +356,11 @@
           @media(max-width:640px){.jobsearch{flex-wrap:wrap;border-radius:20px;padding:8px}.js-field{flex:1 1 100%;padding:8px 12px}.js-sep{display:none}.js-go{width:100%;border-radius:12px;height:42px}}
           .board-split{display:grid;grid-template-columns:minmax(320px,0.95fr) 1.25fr;gap:26px;align-items:start}
           .list-col{min-width:0}
-          .detail-col{align-self:start}
-          .detail-panel{background:#fff;border:1px solid var(--gray-100);border-radius:18px;box-shadow:0 10px 40px rgba(16,24,40,.08)}
+          .detail-col{align-self:start;position:sticky;top:88px}
+          .detail-panel{background:#fff;border:1px solid var(--gray-100);border-radius:18px;box-shadow:0 10px 40px rgba(16,24,40,.08);max-height:calc(100vh - 108px);overflow-y:auto;overscroll-behavior:contain}
+          .detail-panel::-webkit-scrollbar{width:10px}
+          .detail-panel::-webkit-scrollbar-thumb{background:var(--gray-100);border-radius:99px;border:3px solid #fff}
+          .detail-panel::-webkit-scrollbar-thumb:hover{background:var(--gray-400)}
           .dp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:440px;color:var(--gray-400);text-align:center;padding:40px}
           .dp-empty svg{width:50px;height:50px;color:#D9DCE1}
           .dp-empty p{font-size:.95rem;max-width:24ch}
@@ -933,17 +936,10 @@
     const job=ALL_JOBS.find(j=>String(j.id)===String(id)); if(!job) return;
     window._panelJob=job.id; renderPanel(job);
     document.querySelectorAll('.job-row').forEach(r=>r.classList.toggle('active', +r.dataset.id===job.id));
-    syncPanelHeight();
+    // KMC-style: the detail panel is pinned to the viewport (sticky) and scrolls
+    // its own content, so a freshly selected role always opens from the top.
+    const dp=document.getElementById('detail-panel'); if(dp) dp.scrollTop=0;
   }
-  // Keep the detail panel the SAME size no matter how long/short a role's content
-  // is: match it to the list column height and scroll internally when it overflows.
-  function syncPanelHeight(){
-    const lc=document.querySelector('.list-col'), dp=document.getElementById('detail-panel');
-    if(!lc||!dp) return;
-    if(window.innerWidth>=900){ dp.style.height=lc.offsetHeight+'px'; dp.style.overflowY='auto'; }
-    else { dp.style.height=''; dp.style.overflowY=''; }
-  }
-  { let _rt; window.addEventListener('resize',()=>{ clearTimeout(_rt); _rt=setTimeout(syncPanelHeight,150); }); }
 
   /* ---------- SIMILAR JOBS ---------- */
   function renderSimilar(job){
