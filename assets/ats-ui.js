@@ -2646,18 +2646,35 @@ function cntProfIntToggle(){
   if(input) input.placeholder = online?'Paste or generate a video link' : (kind==='Phone Call'?'Number to call (optional)':'Office address');
   cntProfIntSync();
 }
+// Once an online interview link has been generated it is locked: only a Super
+// Admin may edit or regenerate it. A physical venue (plain text, not a URL)
+// stays freely editable — the lock only applies to real meeting links.
+function _isSuperAdmin(){ return (window.cntRole||'')==='super_admin'; }
+function _intvHasLink(app){ return !!(app && _isMeetUrl(String(app.interviewVenue||''))); }
+function _intvLinkLocked(app){ return _intvHasLink(app) && !_isSuperAdmin(); }
 function cntProfIntSync(){
+  const app=(typeof findApplicant==='function')?findApplicant(currentViewedApplicantId):null;
   const gen=document.getElementById('prof-int-gen');
-  const venue=(document.getElementById('prof-int-venue')||{}).value||'';
-  const past=_profIntPast(), hasLink=_isMeetUrl(venue);
-  if(gen){ const lock=hasLink&&!past; gen.disabled=lock; gen.style.opacity=lock?'0.5':''; gen.style.cursor=lock?'not-allowed':'pointer';
-    gen.title=lock?'A meeting link is set — regenerate after the scheduled time passes':'Create an instant online meeting room'; }
+  const input=document.getElementById('prof-int-venue');
+  const past=_profIntPast();
+  const locked=_intvLinkLocked(app);
+  // Lock the link field itself + the Generate button for everyone but a Super Admin.
+  if(input){ input.readOnly=locked; input.style.background=locked?'#f8fafc':''; input.style.cursor=locked?'not-allowed':'';
+    input.title=locked?'This interview link is locked — only a Super Admin can change it':''; }
+  if(gen){ gen.disabled=locked; gen.style.opacity=locked?'0.5':''; gen.style.cursor=locked?'not-allowed':'pointer';
+    gen.title=locked?'Locked — only a Super Admin can change the interview link':'Create an instant online meeting room'; }
   const warn=document.getElementById('prof-int-warning');
-  if(warn){ if(past){ warn.classList.remove('hidden'); warn.innerHTML='<span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">warning</span>The scheduled time has passed and this interview is still open. If the candidate didn’t attend, regenerate the link or reschedule, then move them forward or refuse.'; } else warn.classList.add('hidden'); }
+  if(warn){
+    if(locked){ warn.classList.remove('hidden'); warn.style.background='#eef2ff'; warn.style.color='#3730a3'; warn.style.border='1px solid #c7d2fe';
+      warn.innerHTML='<span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">lock</span>The interview link has been generated and is locked. Only a Super Admin can edit or regenerate it.'; }
+    else if(past){ warn.classList.remove('hidden'); warn.style.background='#fef3c7'; warn.style.color='#92400e'; warn.style.border='1px solid #fde68a';
+      warn.innerHTML='<span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">warning</span>The scheduled time has passed and this interview is still open. If the candidate didn’t attend, regenerate the link or reschedule, then move them forward or refuse.'; }
+    else warn.classList.add('hidden');
+  }
 }
 function cntProfIntGen(){
-  const venue=(document.getElementById('prof-int-venue')||{}).value||'';
-  if(_isMeetUrl(venue) && !_profIntPast()){ if(window.showToast) showToast('A meeting link is already set. You can regenerate it after the scheduled time passes.','info'); return; }
+  const app=(typeof findApplicant==='function')?findApplicant(currentViewedApplicantId):null;
+  if(_intvLinkLocked(app)){ if(window.showToast) showToast('This interview link is locked. Only a Super Admin can change it.','info'); return; }
   const id=String(currentViewedApplicantId||'').replace(/[^\w]/g,'');
   const rand=Math.random().toString(36).slice(2,8);
   document.getElementById('prof-int-venue').value='https://meet.jit.si/CNT-Interview-'+(id||'x')+'-'+rand;
@@ -2685,7 +2702,10 @@ function cntProfInterviewSave(){
   const round=(document.getElementById('prof-int-round')||{}).value||'Initial Interview';
   const type=(document.getElementById('prof-int-kind')||{}).value||'Phone Call';
   const interviewer=(document.getElementById('prof-int-interviewer')||{}).value||'';
-  const venue=(document.getElementById('prof-int-venue')||{}).value||'';
+  let venue=(document.getElementById('prof-int-venue')||{}).value||'';
+  // A locked meeting link can only be changed by a Super Admin — preserve the
+  // saved link for everyone else, even if the field was tampered with.
+  if(_intvLinkLocked(app)) venue=app.interviewVenue||'';
   if(!date || !time){ if(window.showToast) showToast('Set an interview date and time first.','info'); return; }
   updateApplicant(id,{interviewDate:date,interviewTime:time,interviewType:type,interviewRound:round,interviewInterviewer:interviewer,interviewVenue:venue});
   const fresh=findApplicant(id);
