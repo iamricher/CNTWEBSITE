@@ -379,11 +379,11 @@
           .dp-fact .ic svg{width:19px;height:19px}
           .dp-fact .k{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400)}
           .dp-fact .v{font-size:.92rem;font-weight:700;color:var(--charcoal);margin-top:2px}
-          .dp-body{padding:8px 28px 24px}
-          .dp-body h4{font-family:var(--font-display);font-size:.95rem;font-weight:800;color:var(--charcoal);margin:20px 0 8px}
-          .dp-body p{font-size:.9rem;color:var(--text-sub);line-height:1.7}
-          .dp-body ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
-          .dp-body li{position:relative;padding-left:1.5rem;font-size:.88rem;color:var(--ink,#161616);line-height:1.55}
+          .dp-body{padding:10px 30px 26px}
+          .dp-body h4{font-family:var(--font-display);font-size:1.05rem;font-weight:800;color:var(--charcoal);margin:24px 0 10px}
+          .dp-body p{font-size:1rem;color:var(--text-sub);line-height:1.75}
+          .dp-body ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+          .dp-body li{position:relative;padding-left:1.6rem;font-size:.96rem;color:var(--ink,#161616);line-height:1.6}
           .dp-body li::before{content:"";position:absolute;left:0;top:.35rem;width:14px;height:14px;border-radius:50%;background:var(--red-pale);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23C8102E' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
           .dp-foot{padding:18px 28px 26px;border-top:1px solid var(--gray-100);position:sticky;bottom:0;background:#fff}
           .dp-foot .dp-apply{width:100%;padding:14px}
@@ -811,11 +811,16 @@
   ];
   function jobCategory(role){ const r=String(role||''); for(const [re,cat] of JOB_CATS){ if(re.test(r)) return cat; } return 'General'; }
   function renderList(){
-    const q=curFilter.q.toLowerCase();
+    // Smart search: match the query against each job's full corpus (role, client,
+    // description, and the role's known responsibilities/skills) with forgiving
+    // stem matching, and rank results by relevance — not just a title substring.
+    const q=curFilter.q.toLowerCase().trim();
+    const qTokens=q ? [...new Set(q.split(/[\s,]+/).map(t=>t.trim()).filter(t=>t.length>=2&&!JM_STOP.has(t)))] : [];
+    const smartScore=j=>{ const c=jmCorpus(j), r=(j.role||'').toLowerCase(); let s=0; qTokens.forEach(t=>{ if(jmHas(c,t)){ s+=10; if(jmHas(r,t)) s+=8; } }); return s; };
     let list=ALL_JOBS.filter(j=>{
-      const mq=!q||(j.role+' '+j.client).toLowerCase().includes(q);
       const ml=curFilter.location==='all'||j.location===curFilter.location;
       const mp=curFilter.position==='all'||j.role===curFilter.position;
+      const mq=!qTokens.length || smartScore(j)>0;
       return mq&&ml&&mp;
     });
     $('#results-count').innerHTML=`<b>${list.length}</b> open position${list.length!==1?'s':''}`;
@@ -824,7 +829,8 @@
     $('#list-state').innerHTML='';
     // flat list — client/account is hidden here, revealed only on the job detail page
     const mode=window._jobSort||'latest';
-    if(mode==='latest') list.sort((a,b)=>(new Date(b.created_at||0)-new Date(a.created_at||0)) || ((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)));
+    if(qTokens.length) list.sort((a,b)=>smartScore(b)-smartScore(a) || (new Date(b.created_at||0)-new Date(a.created_at||0)));
+    else if(mode==='latest') list.sort((a,b)=>(new Date(b.created_at||0)-new Date(a.created_at||0)) || ((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)));
     else if(mode==='az') list.sort((a,b)=>a.role.localeCompare(b.role));
     else list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
     $('#groups').innerHTML=list.map(j=>{
