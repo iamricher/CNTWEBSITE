@@ -150,6 +150,14 @@
   .pg.nav svg{width:16px;height:16px}
   .pg[disabled]{opacity:.4;cursor:not-allowed}
   .pg-gap{padding:0 4px;color:var(--gray-400)}
+  /* Loading skeleton */
+  .job-skel{border:1px solid var(--gray-100);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+  .job-skel .l{height:12px;background:#EEF1F5;border-radius:6px;animation:jskel 1.2s ease-in-out infinite}
+  .job-skel .l.t{width:56%;height:17px}
+  .job-skel .l.c{width:38%;margin-top:12px;height:11px}
+  .job-skel .l.s{width:30%;margin-top:14px;height:13px}
+  .job-skel .l.m{width:80%;margin-top:16px;height:11px}
+  @keyframes jskel{0%,100%{opacity:.5}50%{opacity:1}}
   /* People also searched */
   .also-searched:empty{display:none}
   .also-searched{margin:34px 0 6px}
@@ -690,7 +698,8 @@
 
   /* ---------- LOAD ---------- */
   async function loadJobs(){
-    $('#list-state').innerHTML='<div class="state"><div class="spinner"></div>Loading open positions…</div>';
+    const groups=$('#groups');
+    if(groups) groups.innerHTML=Array.from({length:5}).map(()=>'<div class="job-skel"><div class="l t"></div><div class="l c"></div><div class="l s"></div><div class="l m"></div></div>').join('');
     if(sb){
       const { data, error } = await sb.from('jobs').select('*').eq('status','open');
       if(error){ console.error(error); ALL_JOBS=SEED_JOBS.slice(); }
@@ -949,12 +958,26 @@
     }));
   }
 
-  { const qEl=$('#q'); if(qEl) qEl.addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); window._page=1; renderList(); }); }
+  // Small debounce so live search waits until typing pauses instead of
+  // re-rendering on every keystroke.
+  function debounce(fn,ms){ let t; return function(){ const a=arguments,c=this; clearTimeout(t); t=setTimeout(function(){ fn.apply(c,a); },ms); }; }
+  // Keep the list view's URL shareable (?q=&loc=) without pushing a history
+  // entry per keystroke — only while viewing the list (not a ?job= detail).
+  function syncUrl(){
+    if(new URLSearchParams(location.search).get('job')) return;
+    const p=new URLSearchParams();
+    if(curFilter.q) p.set('q',curFilter.q);
+    if(curFilter.location&&curFilter.location!=='all') p.set('loc',curFilter.location);
+    const qs=p.toString();
+    try{ history.replaceState(history.state,'', 'careers.html'+(qs?'?'+qs:'')); }catch(e){}
+  }
+  { const qEl=$('#q'); if(qEl){ const run=debounce(function(){ window._page=1; renderList(); syncUrl(); },220);
+      qEl.addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); run(); }); } }
   { const sEl=$('#job-sort'); if(sEl) sEl.addEventListener('change',e=>{ window._jobSort=e.target.value; window._page=1; renderList(); }); }
   // Top search bar: location dropdown filters automatically; the button just
   // focuses the list (search already applies live as you type).
-  { const lf=$('#loc-filter'); if(lf) lf.addEventListener('change',e=>{ curFilter.location=e.target.value||'all'; window._page=1; renderList(); }); }
-  { const gb=$('#js-go'); if(gb) gb.addEventListener('click',()=>{ renderList(); const g=document.getElementById('groups'); if(g&&window.innerWidth<900) g.scrollIntoView({behavior:'smooth'}); }); }
+  { const lf=$('#loc-filter'); if(lf) lf.addEventListener('change',e=>{ curFilter.location=e.target.value||'all'; window._page=1; renderList(); syncUrl(); }); }
+  { const gb=$('#js-go'); if(gb) gb.addEventListener('click',()=>{ window._page=1; renderList(); syncUrl(); const g=document.getElementById('groups'); if(g&&window.innerWidth<900) g.scrollIntoView({behavior:'smooth'}); }); }
 
   // PH phone fields: the input holds the national number (9XX XXX XXXX); on
   // submit we store it as +63XXXXXXXXXX so every record is consistently formatted.
@@ -1090,6 +1113,9 @@
         curFilter.location=hit?hit.location:'all';
         buildFilters();
       }
+      // ?q=<keywords> restores a shared/bookmarked search into the box.
+      const qparam=params.get('q');
+      if(qparam!=null){ curFilter.q=qparam.trim(); const qi=$('#q'); if(qi) qi.value=curFilter.q; }
       showList();
       if(loc){ const b=document.getElementById('board'); if(b) b.scrollIntoView({behavior:'smooth'}); }
     }
