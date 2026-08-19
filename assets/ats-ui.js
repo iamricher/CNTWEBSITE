@@ -334,6 +334,26 @@ function _uniformSkills(str){
   });
   return out;
 }
+// Stage-aware action bar. The primary CTA is stage-driven and mutually
+// exclusive: Schedule Interview during screening/interview, Generate Offer at
+// the offer/onboarding stages. Schedule Interview + Send Form drop into the More
+// menu once the candidate is past the interview phase, so e.g. a candidate at
+// Job Offer never shows a stray "Schedule Interview" button.
+function cntSyncActionBar(app){
+  if(!app) return;
+  const tog=(id,show)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('hidden', !show); };
+  const isHired = (typeof stageIsHired==='function') ? stageIsHired(app.stage) : (app.stage==='hired'||app.stage==='onboarding');
+  const interviewPhase = (app.stage==='new' || app.stage==='interview');
+  tog('offer-letter-btn', isHired);
+  tog('offer-summary-box', isHired);
+  if(isHired && window.cntRenderOfferBox) window.cntRenderOfferBox(app);
+  tog('prof-schedule-btn', interviewPhase);
+  tog('prof-sendform-btn', interviewPhase);
+  tog('more-schedule', !interviewPhase);
+  tog('more-sendform', !interviewPhase);
+}
+window.cntSyncActionBar = cntSyncActionBar;
+
 function cntRenderApplicantForm(app){
   if(!app) return;
   // Populate a field, and hide its whole row when there's no value — a candidate
@@ -2475,12 +2495,7 @@ function triggerResumeModal(id){
   const sb=document.getElementById('resume-stage-badge');
   sb.textContent=getStageName(app.stage);
   sb.className='badge border '+getStageBadge(app.stage);
-  const offerBtn=document.getElementById('offer-letter-btn');
-  const offerBox=document.getElementById('offer-summary-box');
-  if(stageIsHired(app.stage)){
-    offerBtn.classList.remove('hidden');offerBox.classList.remove('hidden');
-    if(window.cntRenderOfferBox) cntRenderOfferBox(app);
-  }else{offerBtn.classList.add('hidden');offerBox.classList.add('hidden');}
+  cntSyncActionBar(app);
   renderAIScore(app);
   renderStrictResume(app);
   document.getElementById('checklist-name').textContent=app.name;
@@ -2632,11 +2647,7 @@ function updateApplicantStageFromModal(newStage){
     const sb=document.getElementById('resume-stage-badge');
     if(sb){ sb.textContent=getStageName(newStage); sb.className='badge border '+getStageBadge(newStage); }
     const freshApp=findApplicant(currentViewedApplicantId);
-    const st=PIPELINE_STAGES.find(s=>s.key===newStage);
-    const isHired = st?st.is_hired:(newStage==='hired'||newStage==='onboarding');
-    const offerBtn=document.getElementById('offer-letter-btn');
-    const offerBox=document.getElementById('offer-summary-box');
-    if(offerBtn&&offerBox){ if(isHired){ offerBtn.classList.remove('hidden');offerBox.classList.remove('hidden'); if(window.cntRenderOfferBox) cntRenderOfferBox(freshApp); } else { offerBtn.classList.add('hidden');offerBox.classList.add('hidden'); } }
+    if(freshApp && window.cntSyncActionBar) cntSyncActionBar(freshApp);
     if(freshApp){ if(window.cntRenderApplicantForm) cntRenderApplicantForm(freshApp); if(window.cntProfileExtras) cntProfileExtras(freshApp); if(window.cntRefreshProfilePanels) cntRefreshProfilePanels(freshApp); }
   };
   // Interview scheduling is inline in the profile — move the stage and focus the
