@@ -636,7 +636,7 @@
   const sb = window.getSupabase();
   let ALL_JOBS = [];
   let activeJob = null;
-  let curFilter = { location:'all', position:'all', q:'' };
+  let curFilter = { location:'all', position:'all', category:'all', q:'' };
   const PRI_RANK = { urgent:0, high:1, normal:2 };
 
   const $ = (s)=>document.querySelector(s);
@@ -716,7 +716,7 @@
   // role's known responsibilities/requirements, so matching sees real skills.
   function jmCorpus(j){
     const info=ROLE_INFO[j.role]||{};
-    return [j.role,j.client,j.location,j.description,info.summary,(info.resp||[]).join(' '),(info.must||[]).join(' ')]
+    return [j.role,j.client,j.location,j.description,jobCategory(j.role),info.summary,(info.resp||[]).join(' '),(info.must||[]).join(' ')]
       .filter(Boolean).join(' ').toLowerCase();
   }
   const JM_STOP=new Set(['and','or','the','a','an','for','with','of','to','in','on','at','my','me','i','skills','skill','work','job','jobs']);
@@ -805,6 +805,7 @@
   function renderActiveFilters(){
     const box=$('#active-filters'); if(!box) return;
     const chips=[];
+    if(curFilter.category!=='all') chips.push(chip('category', curFilter.category));
     if(curFilter.location!=='all') chips.push(chip('location', curFilter.location));
     if(curFilter.position!=='all') chips.push(chip('position', curFilter.position));
     if(curFilter.q) chips.push(chip('q', '“'+curFilter.q+'”'));
@@ -817,7 +818,7 @@
       buildFilters(); renderList();
     }));
     const clr=box.querySelector('[data-clear]');
-    if(clr) clr.addEventListener('click',()=>{ curFilter={location:'all',position:'all',q:''}; const qi=$('#q'); if(qi) qi.value=''; buildFilters(); renderList(); });
+    if(clr) clr.addEventListener('click',()=>{ curFilter={location:'all',position:'all',category:'all',q:''}; const qi=$('#q'); if(qi) qi.value=''; buildFilters(); renderList(); });
   }
 
   /* ---------- LIST ---------- */
@@ -857,8 +858,9 @@
     let list=ALL_JOBS.filter(j=>{
       const ml=curFilter.location==='all'||j.location===curFilter.location;
       const mp=curFilter.position==='all'||j.role===curFilter.position;
+      const mc=curFilter.category==='all'||jobCategory(j.role)===curFilter.category;
       const mq=!qTokens.length || smartScore(j)>0;
-      return mq&&ml&&mp;
+      return mq&&ml&&mp&&mc;
     });
     $('#results-count').innerHTML=`<b>${list.length}</b> open position${list.length!==1?'s':''}`;
     renderActiveFilters();
@@ -945,17 +947,30 @@
     el.querySelectorAll('.pg[data-pg]').forEach(b=>{ if(!b.disabled) b.addEventListener('click',()=>gotoPage(+b.dataset.pg)); });
   }
 
-  /* ---------- PEOPLE ALSO SEARCHED ---------- */
-  const ALSO_SEARCHED=['Merchandiser','Sales Promoter','Warehouse','Driver','Cashier','Customer Service','Marketing','Fresh graduate'];
+  /* ---------- BROWSE OPENINGS (data-driven chips) ---------- */
+  // Chips are derived from the LIVE open jobs — the most common job categories
+  // plus the most common locations — so every chip reflects a real opening and
+  // updates by itself as postings change (no hard-coded list to maintain).
+  // Clicking a category searches it; clicking a location filters to it.
   function renderAlsoSearched(){
     const el=$('#also-searched'); if(!el) return;
-    if(el.dataset.done){ return; } el.dataset.done='1';
+    if(el.dataset.done) return;
+    const catCount={}, locCount={};
+    ALL_JOBS.forEach(j=>{ const c=jobCategory(j.role); if(c) catCount[c]=(catCount[c]||0)+1; if(j.location) locCount[j.location]=(locCount[j.location]||0)+1; });
+    const topCats=Object.keys(catCount).sort((a,b)=>catCount[b]-catCount[a]).slice(0,5);
+    const topLocs=Object.keys(locCount).sort((a,b)=>locCount[b]-locCount[a]).slice(0,4);
+    if(!topCats.length && !topLocs.length){ el.innerHTML=''; return; }
+    el.dataset.done='1';
     const mag='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>';
-    el.innerHTML='<h3>People also searched:</h3><div class="as-chips">'
-      +ALSO_SEARCHED.map(t=>'<button class="as-chip" type="button" data-term="'+esc(t)+'">'+mag+esc(t)+'</button>').join('')+'</div>';
+    const pin='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const catChips=topCats.map(c=>'<button class="as-chip" type="button" data-cat="'+esc(c)+'">'+mag+esc(c)+'</button>').join('');
+    const locChips=topLocs.map(l=>'<button class="as-chip" type="button" data-loc="'+esc(l)+'">'+pin+esc(l)+'</button>').join('');
+    el.innerHTML='<h3>Browse openings</h3><div class="as-chips">'+catChips+locChips+'</div>';
     el.querySelectorAll('.as-chip').forEach(b=>b.addEventListener('click',()=>{
-      const term=b.dataset.term; const qEl=$('#q'); if(qEl) qEl.value=term;
-      curFilter.q=term; window._page=1; window._panelJob=null; renderList();
+      const qEl=$('#q'), lf=$('#loc-filter');
+      if(b.dataset.loc!=null){ curFilter.location=b.dataset.loc; if(lf) lf.value=b.dataset.loc; curFilter.category='all'; if(qEl) qEl.value=''; curFilter.q=''; }
+      else { curFilter.category=b.dataset.cat||'all'; curFilter.location='all'; if(lf) lf.value=''; if(qEl) qEl.value=''; curFilter.q=''; }
+      window._page=1; window._panelJob=null; renderList(); if(typeof syncUrl==='function') syncUrl();
       const lh=document.querySelector('.list-head'); if(lh) lh.scrollIntoView({behavior:'smooth',block:'start'});
     }));
   }
@@ -1017,13 +1032,12 @@
     const resp=toLines(job.responsibilities)||info.resp;
     const must=toLines(job.must_have)||info.must;
     const openings=(+job.openings||1);
-    const ref='CNT-'+String(job.id).padStart(4,'0');
     const posted=job.created_at?('Posted '+new Date(job.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})):'';
     panel.innerHTML=
       '<div class="dp-head"><div class="dp-topline"><div style="min-width:0">'
         +'<div class="dp-title">'+esc(job.role)+'</div><div class="dp-cat">'+esc(jobCategory(job.role))+'</div></div>'
         +'<button class="dp-apply" type="button" data-apply="'+job.id+'">Apply Now</button></div>'
-      +'<div class="dp-sub"><span class="dp-id">'+ref+'</span>'+(posted?'<span>'+esc(posted)+'</span>':'')
+      +'<div class="dp-sub">'+(posted?'<span>'+esc(posted)+'</span>':'')
         +'<button class="dp-copy" type="button" data-copy="'+job.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy link</span></button></div></div>'
       +'<div class="dp-facts">'
         +_dpFact('location','Location',esc(job.location||'—'))
@@ -1057,9 +1071,12 @@
   /* ---------- SIMILAR JOBS ---------- */
   function renderSimilar(job){
     const box=document.getElementById('d-similar'); if(!box) return;
-    let sim=ALL_JOBS.filter(j=>j.id!==job.id && (j.role===job.role || j.location===job.location));
-    // Prefer same role, then same location; cap at 3.
-    sim.sort((a,b)=>((b.role===job.role)-(a.role===job.role)) || ((b.location===job.location)-(a.location===job.location)));
+    // Related to THIS job only — same role, or the same job category. Location is
+    // deliberately NOT used, so an unrelated role in the same city never shows up.
+    const cat=jobCategory(job.role);
+    let sim=ALL_JOBS.filter(j=>j.id!==job.id && (j.role===job.role || jobCategory(j.role)===cat));
+    // Exact same role first, then other roles in the same category; cap at 3.
+    sim.sort((a,b)=>((b.role===job.role)-(a.role===job.role)));
     sim=sim.slice(0,3);
     if(!sim.length){ box.style.display='none'; box.innerHTML=''; return; }
     box.style.display='';
