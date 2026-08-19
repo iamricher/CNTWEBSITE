@@ -70,7 +70,8 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   // refined dark header: centred logo, thin red accent line, cool-gray tagline
   '<tr><td class="pad head" align="center" style="background:#141418;background-image:linear-gradient(180deg,#1e1e24 0%,#121216 100%);border-bottom:3px solid #C8102E;padding:40px 34px;text-align:center;">' +
   '<img src="' + BRAND_LOGO + '" alt="CNT Promo &amp; Ads Specialists, Inc." height="50" class="logo" style="height:50px;width:auto;display:inline-block;">' +
-  '<div style="color:#b7bbc4;font-size:11px;font-weight:600;letter-spacing:.16em;margin-top:16px;text-transform:uppercase;">A Million Jobs for a Million Filipinos.</div></td></tr>' +
+  '<div style="color:#b7bbc4;font-size:11px;font-weight:600;letter-spacing:.16em;margin-top:16px;text-transform:uppercase;">A Million Jobs for a Million Filipinos.</div>' +
+  '<div style="color:#e5213f;font-size:11px;font-weight:800;letter-spacing:.14em;margin-top:8px;">#TatakCNT</div></td></tr>' +
   // body — eyebrow label, tight display heading, airy body copy
   '<tr><td class="pad pad-y" style="padding:42px 44px;color:#3a3c44;font-size:15.5px;line-height:1.75;letter-spacing:.002em;">' +
   '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:100px;">' + esc(eyebrow) + '</span>' +
