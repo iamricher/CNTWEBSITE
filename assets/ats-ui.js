@@ -331,7 +331,6 @@ function cntRenderApplicantForm(app){
     } }
   set('resume-medium-val',      app.medium);
   set('resume-availability-val',app.availability);
-  set('resume-referred-val',    app.referred_by);
   set('resume-appliedjob-val',  app.role);
   set('resume-department-val',  app.account);
   set('resume-expected-val',    app.salary);
