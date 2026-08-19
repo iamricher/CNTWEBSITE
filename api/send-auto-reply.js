@@ -80,7 +80,7 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   // footer
   '<tr><td class="pad" style="background:#fafbfc;border-top:1px solid #eef0f2;padding:32px 34px;text-align:center;">' +
   '<div style="font-size:12px;color:#8a8d94;line-height:1.75;">This is an automated message from <b style="color:#4b4d54;">CNT Promo &amp; Ads Specialists, Inc.</b><br>Please do not reply to this email.</div>' +
-  '<div style="margin-top:14px;font-size:11.5px;color:#a9acb3;line-height:1.75;letter-spacing:.01em;">219 Lyfe Tower, Shaw Blvd. corner E. Jacinto St., Barangay Bagong Silan, Mandaluyong City<br>' +
+  '<div style="margin-top:14px;font-size:11.5px;color:#a9acb3;line-height:1.75;letter-spacing:.01em;">219 Lyfe Tower, Shaw Blvd. corner E. Jacinto St., Barangay Bagong Silang, Mandaluyong City<br>' +
   '<a href="mailto:hrdadmin@cntpromoads.com" style="color:#C8102E;">hrdadmin@cntpromoads.com</a> &nbsp;&middot;&nbsp; <a href="' + SITE + '" style="color:#C8102E;">Visit our website</a></div>' +
   '<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eef0f2;font-size:11px;color:#bcbfc6;letter-spacing:.01em;">&copy; ' + new Date().getFullYear() + ' CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</div>' +
   '</td></tr>' +
