@@ -61,10 +61,10 @@
   .kanban-card .kmenu { opacity:0; transition:opacity .15s; }
   .kanban-card:hover .kmenu { opacity:1; }
   /* Odoo-style applicant form */
-  .cnt-frow { display:flex; align-items:flex-start; gap:10px; padding:3.5px 0; font-size:12.5px; min-width:0; }
-  .cnt-frow-l { color:#64748b; font-weight:600; width:104px; flex:none; }
+  .cnt-frow { display:flex; align-items:flex-start; gap:14px; padding:6px 0; font-size:13px; line-height:1.5; min-width:0; }
+  .cnt-frow-l { color:#64748b; font-weight:600; width:116px; flex:none; }
   .cnt-frow-v { color:#0f172a; min-width:0; flex:1; word-break:break-word; }
-  .cnt-sec-title { font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#94a3b8; margin:0 0 6px; }
+  .cnt-sec-title { font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#94a3b8; margin:0 0 10px; }
   .cnt-step { display:flex; align-items:center; flex-wrap:wrap; font-size:10.5px; font-weight:700; }
   .cnt-step .s { padding:4px 9px; color:#94a3b8; white-space:nowrap; cursor:pointer; border-radius:6px; transition:.12s; }
   .cnt-step .s:hover { background:#f1f5f9; color:#475569; }
@@ -100,11 +100,11 @@
       max-height:none !important; overflow:visible !important; }
     .no-print { display:none !important; }
   }
-  .tab-btn { padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; color:#64748b; }
+  .tab-btn { padding:7px 15px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; transition:background .15s,color .15s; color:#64748b; white-space:nowrap; }
   .tab-btn.active { background:#7f1d1d; color:#fff; }
   /* "viewing" = you're looking at an earlier stage's pane, but the candidate
      isn't there. Outline/ring instead of the solid current-stage highlight. */
-  .tab-btn.viewing { color:#7f1d1d; background:#7f1d1d0d; box-shadow:inset 0 0 0 1.5px #7f1d1d; }
+  .tab-btn.viewing { color:#7f1d1d; background:#7f1d1d12; }
   .tab-btn:not(.active):hover { background:#f1f5f9; }
   /* ── Odoo-style Job Position editor ── */
   .cnt-jrow { display:grid; grid-template-columns:132px 1fr; align-items:center; gap:10px; }
