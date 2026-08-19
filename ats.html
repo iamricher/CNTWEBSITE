@@ -1259,8 +1259,8 @@
          while the parent's fixed height keeps the modal from resizing -->
     <div class="flex-1 overflow-y-auto custom-scroll bg-slate-100 print-area flex" style="min-height:0;">
 
-      <!-- Candidate summary sidebar (Odoo-style) — always visible, filled by cntRenderProfileSidebar() -->
-      <aside id="profile-sidebar" class="w-64 flex-none border-r border-slate-200 bg-white p-5 hidden md:block no-print"></aside>
+      <!-- Left summary sidebar removed — it duplicated the header, the Contact
+           fields, and the Interview tab. The main column now uses the full width. -->
 
       <!-- Main column: stage panes stack via flex order -->
       <div class="flex-1 min-w-0 flex flex-col">
