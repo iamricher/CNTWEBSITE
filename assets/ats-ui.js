@@ -282,6 +282,15 @@ function stageIsHired(key){
 
 // ── Odoo-style applicant form: fill the label/value fields + stage stepper ──
 function _escForm(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// Applicants often type their name in all-lower or ALL-CAPS. Title-case those
+// for display, but leave a deliberately-cased name ("dela Cruz", "McDonald")
+// alone — so we only touch names with no mixed case.
+function _niceName(s){
+  const str=String(s==null?'':s).trim();
+  if(!str) return str;
+  if(/[a-z]/.test(str) && /[A-Z]/.test(str)) return str;   // already mixed-case → respect it
+  return str.toLowerCase().replace(/\b[a-z]/g, c=>c.toUpperCase());
+}
 // Known acronyms that keep their exact casing instead of being Title Cased,
 // so "tesda"/"TESDA" → "TESDA" and "ms office" → "MS Office". Add to this list
 // as new ones come up. Matched case-insensitively; the value is the canonical
@@ -289,7 +298,10 @@ function _escForm(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&
 // caps like "SHIFT" is indistinguishable from an acronym — so it's a list.)
 const _SKILL_ACRONYMS = (function(){
   const list = ['TESDA','PRC','CSR','BPO','FMCG','POS','SKU','KPI','OJT','HR','IT',
-    'MS','NBI','SSS','TIN','DTI','LTO','PWD','NC','ID','CV','OSHA','QA','MC','II','III','IV'];
+    'MS','NBI','SSS','TIN','DTI','LTO','PWD','NC','ID','CV','OSHA','QA','MC','II','III','IV',
+    // common IT / technical acronyms (so "(gpo)" → "(GPO)", "sso" → "SSO", etc.)
+    'GPO','SSO','DNS','DHCP','VPN','VLAN','LAN','WLAN','TCP','UDP','IP','SQL','API','NAS',
+    'RAID','RMM','ITSM','SLA','RDP','ERP','CRM','VoIP','SaaS','PDF','OS','AD','DS'];
   const m = {};
   list.forEach(a => m[a.toLowerCase()] = a);
   return m;
@@ -300,10 +312,12 @@ const _SKILL_ACRONYMS = (function(){
 // are cased too ("on-site" → "On-Site").
 function _uniformSkill(s){
   return String(s||'').trim().split(/\s+/).map(word=>
-    word.split(/([\-\/])/).map(part=>{
-      if(!part || part==='-' || part==='/') return part;
+    // split on -, /, and parentheses so acronyms inside "(gpo)" get cased too
+    word.split(/([\-\/()])/).map(part=>{
+      if(!part || /^[\-\/()]$/.test(part)) return part;
       const ac=_SKILL_ACRONYMS[part.toLowerCase()];
       if(ac) return ac;
+      if(/^\d+$/.test(part)) return part;   // leave version numbers as typed
       return part.charAt(0).toUpperCase()+part.slice(1).toLowerCase();
     }).join('')
   ).join(' ');
@@ -313,7 +327,9 @@ function _uniformSkill(s){
 function _uniformSkills(str){
   const seen=new Set(), out=[];
   String(str||'').split(',').map(x=>_uniformSkill(x)).forEach(v=>{
-    if(!v) return; const k=v.toLowerCase();
+    if(!v) return;
+    if(/^[\d.\/\-\s]+$/.test(v)) return;   // drop bare years/numbers left by parsing (e.g. "2025")
+    const k=v.toLowerCase();
     if(!seen.has(k)){ seen.add(k); out.push(v); }
   });
   return out;
@@ -326,7 +342,7 @@ function cntRenderApplicantForm(app){
     const empty=(v==null||String(v).trim()===''); el.textContent=empty?'—':v;
     const row=el.closest('.cnt-frow'); if(row) row.style.display=empty?'none':''; };
   const title=document.getElementById('resume-title');
-  if(title) title.textContent=(app.name||'—')+(app.role?(' – '+app.role):'');
+  if(title) title.textContent=(_niceName(app.name)||'—')+(app.role?(' – '+app.role):'');
   set('resume-interviewer-val', app.interviewInterviewer);
   set('resume-recruiter-val',   app.recruiter);
   set('resume-degree-val',      app.degree);
@@ -2446,7 +2462,7 @@ function triggerResumeModal(id){
   switchProfileTab('profile');
   const initials=app.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
   document.getElementById('resume-avatar').textContent=initials;
-  document.getElementById('resume-name-display').textContent=app.name;
+  document.getElementById('resume-name-display').textContent=_niceName(app.name);
   document.getElementById('resume-role-display').textContent=app.role;
   document.getElementById('resume-location-display').textContent=app.location;
   document.getElementById('resume-phone-display').textContent=app.phone;

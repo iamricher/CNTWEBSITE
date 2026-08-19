@@ -2778,7 +2778,7 @@
     try{ changes=_skillChanges(await _allSkillRows()); }
     catch(e){ if(window.showToast) showToast('Lookup failed: '+(e.message||e),'error'); return; }
     if(!changes.length){ if(window.showToast) showToast('Skills already uniform','info'); if(el){ el.className='text-[11px] mt-2.5 text-slate-400'; el.textContent='Everything is already uniform.'; } return; }
-    if(!confirm('Normalise Expected Skills on '+changes.length+' record'+(changes.length!==1?'s':'')+'?\n\nThis only changes casing and merges case-only duplicates — no skill is added or removed.')) return;
+    if(!confirm('Normalise Skills on '+changes.length+' record'+(changes.length!==1?'s':'')+'?\n\nThis only changes casing and merges case-only duplicates — no skill is added or removed.')) return;
     let ok=0, failed=0;
     for(const c of changes){
       const { error }=await sb.from('applications').update({ tags:c.to }).eq('id',c.id);
@@ -3341,7 +3341,9 @@
       put('seminars','seminars',f.seminars);
       put('awards','awards',f.awards);
       put('char_references','char_references',f.char_references);
-      if(f.skills && !(app.tags||'').trim()){ const tg=_uniformSkills(f.skills.split(/[;•|/]/).join(',')).filter(s=>s.length>1&&s.length<24).slice(0,6).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
+      // Split skills on separators only — NOT "/", which lives inside real skill
+      // names ("TCP/IP", "Windows Server 2019/2025", "AD/DS"). Allow longer names.
+      if(f.skills && !(app.tags||'').trim()){ const tg=_uniformSkills(f.skills.split(/[;•|]/).join(',')).filter(s=>s.length>1&&s.length<40).slice(0,8).join(', '); if(tg){ patch.tags=tg; db.tags=tg; filled.push('tags'); } }
       Object.assign(app,patch);
       if(Object.keys(db).length){ updateApplicant(app.id,patch); _persistApp(app,db); }
       // An automatic pass that found nothing is not worth a log entry — it would
