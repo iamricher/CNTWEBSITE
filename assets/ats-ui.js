@@ -314,7 +314,11 @@ function _uniformSkills(str){
 }
 function cntRenderApplicantForm(app){
   if(!app) return;
-  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=(v==null||v==='')?'—':v; };
+  // Populate a field, and hide its whole row when there's no value — a candidate
+  // profile with a wall of "—" placeholders is what made this screen feel busy.
+  const set=(id,v)=>{ const el=document.getElementById(id); if(!el) return;
+    const empty=(v==null||String(v).trim()===''); el.textContent=empty?'—':v;
+    const row=el.closest('.cnt-frow'); if(row) row.style.display=empty?'none':''; };
   const title=document.getElementById('resume-title');
   if(title) title.textContent=(app.name||'—')+(app.role?(' – '+app.role):'');
   set('resume-interviewer-val', app.interviewInterviewer);
@@ -336,10 +340,20 @@ function cntRenderApplicantForm(app){
   set('resume-expected-val',    app.salary);
   set('resume-proposed-val',    app.proposed_salary);
   const li=document.getElementById('resume-linkedin-val');
-  if(li) li.innerHTML = app.linkedin ? '<a href="'+_escForm(app.linkedin)+'" target="_blank" rel="noopener" class="text-sky-700 hover:underline">'+_escForm(app.linkedin)+'</a>' : '—';
+  if(li){ const has=!!(app.linkedin&&String(app.linkedin).trim());
+    li.innerHTML = has ? '<a href="'+_escForm(app.linkedin)+'" target="_blank" rel="noopener" class="text-sky-700 hover:underline">'+_escForm(app.linkedin)+'</a>' : '—';
+    const row=li.closest('.cnt-frow'); if(row) row.style.display=has?'':'none'; }
   const tg=document.getElementById('resume-tags-val');
   if(tg){ const t=_uniformSkills(app.tags);
-    tg.innerHTML = t.length ? t.map(x=>'<span class="badge" style="background:#fce7f3;color:#9d174d;margin-right:3px;">'+_escForm(x)+'</span>').join('') : '—'; }
+    tg.innerHTML = t.length ? t.map(x=>'<span class="badge" style="background:#fce7f3;color:#9d174d;margin-right:3px;">'+_escForm(x)+'</span>').join('') : '—';
+    const row=tg.closest('.cnt-frow'); if(row) row.style.display=t.length?'':'none'; }
+  // Hide any titled field group whose rows all ended up empty (e.g. Assignment
+  // when there's no recruiter/interviewer yet), so no empty section headers show.
+  document.querySelectorAll('#tab-profile .mt-4.pt-3.border-t').forEach(sec=>{
+    const rows=[...sec.querySelectorAll('.cnt-frow')];
+    if(!rows.length) return;                       // not a plain field group (e.g. résumé details)
+    sec.style.display = rows.some(r=>r.style.display!=='none') ? '' : 'none';
+  });
   // Résumé detail blocks — only shown when there's something to show
   const block=(wrapId,valId,val)=>{
     const w=document.getElementById(wrapId), v=document.getElementById(valId);
