@@ -454,10 +454,8 @@
                 <span id="results-count"></span>
                 <label class="job-sort"><span>Sort</span>
                   <select id="job-sort" aria-label="Sort openings">
-                    <option value="oldest">Oldest first</option>
                     <option value="latest">Latest</option>
-                    <option value="priority">Priority</option>
-                    <option value="az">A–Z</option>
+                    <option value="oldest">Oldest first</option>
                   </select>
                 </label>
               </div>
@@ -868,7 +866,7 @@
     if(!list.length){ $('#groups').innerHTML=''; $('#pager').innerHTML=''; $('#list-state').innerHTML='<div class="state">No positions match your filters. Try broadening your search.</div>'; renderAlsoSearched(); return; }
     $('#list-state').innerHTML='';
     // flat list — client/account is hidden here, revealed only on the job detail page
-    const mode=window._jobSort||'oldest';
+    const mode=window._jobSort||'latest';
     if(qTokens.length) list.sort((a,b)=>smartScore(b)-smartScore(a) || (new Date(b.created_at||0)-new Date(a.created_at||0)) || ((+b.id||0)-(+a.id||0)));
     // Default = oldest → latest (ascending by date). Ties break by id, NOT
     // priority, so priority never reorders the list.
