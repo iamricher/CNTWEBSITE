@@ -866,8 +866,10 @@
     $('#list-state').innerHTML='';
     // flat list — client/account is hidden here, revealed only on the job detail page
     const mode=window._jobSort||'latest';
-    if(qTokens.length) list.sort((a,b)=>smartScore(b)-smartScore(a) || (new Date(b.created_at||0)-new Date(a.created_at||0)));
-    else if(mode==='latest') list.sort((a,b)=>(new Date(b.created_at||0)-new Date(a.created_at||0)) || ((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)));
+    if(qTokens.length) list.sort((a,b)=>smartScore(b)-smartScore(a) || (new Date(b.created_at||0)-new Date(a.created_at||0)) || ((+b.id||0)-(+a.id||0)));
+    // Latest = strictly newest → oldest. Ties (e.g. jobs added in the same batch,
+    // same created_at) break by id, NOT priority, so priority never reorders the list.
+    else if(mode==='latest') list.sort((a,b)=>(new Date(b.created_at||0)-new Date(a.created_at||0)) || ((+b.id||0)-(+a.id||0)));
     else if(mode==='az') list.sort((a,b)=>a.role.localeCompare(b.role));
     else list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
     // Pagination (Indeed-style) — keep the scroll short by showing a page at a time
