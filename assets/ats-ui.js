@@ -43,7 +43,7 @@ const accountData = {
     {id:'h1',name:'Alice Santos',role:'Brand Ambassador',account:'HAIER',location:'Cavite',stage:'onboarding',phone:'+63 905 444 8888',email:'alice@email.com',source:'Walk-in',salary:'₱17,000',notes:'Requirements being collected. Start date July 1.',appliedDate:'2026-05-10'},
     {id:'h2',name:'Ben Torres',role:'Sales Promoter',account:'HAIER',location:'Manila',stage:'new',phone:'+63 918 222 1111',email:'ben@email.com',source:'JobStreet',salary:'₱15,500',notes:'',appliedDate:'2026-06-09'},
     {id:'h3',name:'Clara Reyes',role:'Merchandiser',account:'HAIER',location:'Batangas',stage:'qualified',phone:'+63 920 777 6666',email:'clara@email.com',source:'OLX',salary:'₱16,500',notes:'1st interview passed.',interviewDate:'2026-06-22',interviewTime:'11:00',interviewType:'Video Call (Zoom/Google Meet)',appliedDate:'2026-05-28'},
-    {id:'h4',name:'Roy Mendez',role:'Area Supervisor',account:'HAIER',location:'Pangasinan',stage:'bgcheck',phone:'+63 916 555 2222',email:'roy@email.com',source:'Kalibrr',salary:'₱28,000',notes:'BGC in progress. Clearances submitted.',appliedDate:'2026-05-05'},
+    {id:'h4',name:'Roy Mendez',role:'Area Supervisor',account:'HAIER',location:'Pangasinan',stage:'hired',phone:'+63 916 555 2222',email:'roy@email.com',source:'Kalibrr',salary:'₱28,000',notes:'Offer stage. Clearances submitted.',appliedDate:'2026-05-05'},
   ],
   'HISENSE': [
     {id:'hi1',name:'Paolo Cruz',role:'Product Demonstrator',account:'HISENSE',location:'Manila',stage:'new',phone:'+63 917 100 2200',email:'paolo@email.com',source:'Facebook',salary:'₱16,000',notes:'',appliedDate:'2026-06-08'},
@@ -231,7 +231,6 @@ const PIPELINE_STAGES = [
   {key:'new',       label:'Initial Screening',short:'Screening',color:'#ef4444'},
   {key:'interview', label:'Interview',        short:'Interview',color:'#8b5cf6'},
   {key:'exam',      label:'Pre-Emp Exam',     short:'Exam',     color:'#06b6d4'},
-  {key:'bgcheck',   label:'Background Check', short:'BGC',      color:'#6366f1'},
   {key:'hired',     label:'Job Offer',        short:'Offer',    color:'#10b981', is_hired:true},
   {key:'onboarding',label:'Onboarding',       short:'Onboard',  color:'#059669', is_hired:true},
 ];
@@ -245,10 +244,14 @@ const INTERVIEW_ROUNDS = ['Initial Interview','Second Interview','Client Intervi
 // Settings flows everywhere without touching code.
 const STAGE_SPECIALS = { pool:'Talent Pool', rejected:'Not Qualified' };
 const STAGE_LEGACY   = { phone:'Interview', qualified:'Interview', scheduled:'Interview' };
+// Stages retired from the pipeline still appear on old records — map each onto a
+// live stage so nothing renders as a dead value (Background Check → Job Offer).
+const STAGE_RETIRED  = { bgcheck:'hired' };
 
 function getStageName(s){
   const st=PIPELINE_STAGES.find(x=>x.key===s);
   if(st) return st.label;
+  if(STAGE_RETIRED[s]){ const t=PIPELINE_STAGES.find(x=>x.key===STAGE_RETIRED[s]); if(t) return t.label; }
   return STAGE_SPECIALS[s] || STAGE_LEGACY[s] || s;
 }
 // Badge colours are emitted as real CSS classes (see applyStageStyles) so every
@@ -269,6 +272,7 @@ function applyStageStyles(){
 // Normalise any legacy stage value to a live one
 function normStage(s){
   if(PIPELINE_STAGES.some(x=>x.key===s)) return s;
+  if(STAGE_RETIRED[s]) return STAGE_RETIRED[s];
   if(STAGE_LEGACY[s]) return 'interview';
   return s;
 }
@@ -343,12 +347,12 @@ function _uniformSkills(str){
 function cntSyncActionBar(app){
   if(!app) return;
   const tog=(id,show)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('hidden', !show); };
-  const isHired = (typeof stageIsHired==='function') ? stageIsHired(app.stage) : (app.stage==='hired'||app.stage==='onboarding');
+  const atOffer = (app.stage==='hired');          // the Job Offer stage (not onboarding)
   const interviewPhase = (app.stage==='new' || app.stage==='interview');
   const examPhase = (app.stage==='exam');
-  tog('offer-letter-btn', isHired);
-  tog('offer-summary-box', isHired);
-  if(isHired && window.cntRenderOfferBox) window.cntRenderOfferBox(app);
+  tog('offer-letter-btn', atOffer);
+  tog('offer-summary-box', atOffer);
+  if(atOffer && window.cntRenderOfferBox) window.cntRenderOfferBox(app);
   tog('prof-schedule-btn', interviewPhase);
   tog('prof-sendform-btn', examPhase);            // Send Exam is the Pre-Emp Exam action
   tog('more-schedule', !interviewPhase);
@@ -389,7 +393,7 @@ function cntRenderApplicantForm(app){
     const row=li.closest('.cnt-frow'); if(row) row.style.display=has?'':'none'; }
   const tg=document.getElementById('resume-tags-val');
   if(tg){ const t=_uniformSkills(app.tags);
-    tg.innerHTML = t.length ? t.map(x=>'<span class="badge" style="background:#fce7f3;color:#9d174d;margin-right:3px;">'+_escForm(x)+'</span>').join('') : '—';
+    tg.innerHTML = t.length ? t.map(x=>'<span class="badge" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;margin:0 4px 4px 0;font-weight:600;">'+_escForm(x)+'</span>').join('') : '—';
     const row=tg.closest('.cnt-frow'); if(row) row.style.display=t.length?'':'none'; }
   // Hide any titled field group whose rows all ended up empty (e.g. Assignment
   // when there's no recruiter/interviewer yet), so no empty section headers show.
@@ -2278,15 +2282,15 @@ function fillRequest(id){const r=hiringRequests.find(x=>x.id===id);if(r){r.statu
 // candidate backward (correct a mis-set stage) use the stage-badge override.
 // Interview opens the scheduler and only advances on Confirm slot. The
 // Pre-Employment checklist lives inside the Background Check stage.
-const STAGE_TAB_ICONS  = { new:'person', interview:'event', exam:'quiz', bgcheck:'fact_check', hired:'workspace_premium', onboarding:'badge' };
+const STAGE_TAB_ICONS  = { new:'person', interview:'event', exam:'quiz', hired:'workspace_premium', onboarding:'fact_check' };
 const PROFILE_CONTENTS = ['profile','interview','checklist'];
 
-// Which content pane a stage/tab key shows. Background Check surfaces the
-// Pre-Employment checklist; Interview surfaces the scheduler; everything else
-// shows the main profile pane.
+// Which content pane a stage/tab key shows. Onboarding surfaces the
+// Pre-Employment requirements checklist; Interview surfaces the scheduler;
+// everything else shows the main profile pane. (bgcheck kept as a legacy alias.)
 function _profTabContentFor(key){
   if(key==='interview') return 'interview';
-  if(key==='bgcheck' || key==='checklist') return 'checklist';
+  if(key==='onboarding' || key==='bgcheck' || key==='checklist') return 'checklist';
   return 'profile';
 }
 
@@ -2322,7 +2326,7 @@ function _showProfileContent(name){
 function _setActiveProfileTabBtn(viewedKey){
   const bar=document.getElementById('profile-tabs'); if(!bar) return;
   bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active','viewing'));
-  const toStage = k => k==='checklist' ? 'bgcheck' : k;   // Pre-Employment is the Background Check tab
+  const toStage = k => k==='checklist' ? 'onboarding' : k;   // Pre-Employment requirements live under Onboarding
   const app=findApplicant(currentViewedApplicantId);
   const curStage  = toStage(app ? normStage(app.stage) : 'new');
   const viewStage = toStage(viewedKey);
@@ -2382,7 +2386,7 @@ function gotoStageTab(key){
 
 // Back-compat wrapper: callers pass a CONTENT name ('profile' | 'interview' | 'checklist').
 function switchProfileTab(tab){
-  if(tab==='checklist'){ _showProfileContent('checklist'); _setActiveProfileTabBtn('bgcheck'); return; }
+  if(tab==='checklist'){ _showProfileContent('checklist'); _setActiveProfileTabBtn('onboarding'); return; }
   if(tab==='interview'){ _showProfileContent('interview'); _setActiveProfileTabBtn('interview'); return; }
   _showProfileContent('profile');
   const app=findApplicant(currentViewedApplicantId);
@@ -2500,7 +2504,7 @@ function triggerResumeModal(id){
   cntSyncActionBar(app);
   renderAIScore(app);
   renderStrictResume(app);
-  document.getElementById('checklist-name').textContent=app.name;
+  document.getElementById('checklist-name').textContent=_niceName(app.name);
   renderChecklistTab(app);
   renderRecruiterTab(app);
   if(window.cntRenderApplicantForm)cntRenderApplicantForm(app);
