@@ -2345,6 +2345,21 @@ function switchProfileTab(tab){
   _setActiveProfileTabBtn(app?normStage(app.stage):'new');
 }
 
+// ── "More" actions dropdown (profile header) ────────────────────────────
+// Consolidates the secondary actions (SMS, Add to Pool, Client view,
+// Deployment, Reopen) behind one menu so the header stays uncluttered.
+function cntToggleMore(e){ if(e) e.stopPropagation(); const m=document.getElementById('cnt-more-menu'); if(m) m.classList.toggle('hidden'); }
+document.addEventListener('click', function(e){
+  const wrap=document.getElementById('cnt-more-wrap'), menu=document.getElementById('cnt-more-menu');
+  if(!menu || menu.classList.contains('hidden')) return;
+  if(wrap && wrap.contains(e.target)){
+    // click on a menu item (not the toggle) → close after its action fires
+    if(!e.target.closest('[onclick*="cntToggleMore"]')) setTimeout(function(){ menu.classList.add('hidden'); },0);
+    return;
+  }
+  menu.classList.add('hidden');   // click outside → close
+});
+
 // ── Stage-badge override (escape hatch) ─────────────────────────────────
 // The pipeline is forward-only, so the tabs/stepper won't demote a candidate.
 // This dropdown by the stage badge sets the stage directly in EITHER direction

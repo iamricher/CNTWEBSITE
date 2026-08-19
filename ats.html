@@ -1291,24 +1291,21 @@
               <button onclick="cntDraftEmail(currentViewedApplicantId)" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
                 <span class="material-icons-outlined" style="font-size:13px;">mail</span> Email
               </button>
-              <button onclick="cntDraftSMS(currentViewedApplicantId)" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
-                <span class="material-icons-outlined" style="font-size:13px;">sms</span> SMS
-              </button>
               <button id="resume-refuse-btn" onclick="cntOpenRefuse(currentViewedApplicantId)" class="text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-red-200 cursor-pointer">
                 <span class="material-icons-outlined" style="font-size:13px;">block</span> Refuse
               </button>
-              <button onclick="cntAddToPool(currentViewedApplicantId)" class="text-amber-700 hover:bg-amber-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-amber-200 cursor-pointer">
-                <span class="material-icons-outlined" style="font-size:13px;">auto_awesome</span> Add to Pool
-              </button>
-              <button id="resume-reopen-btn" onclick="cntReopen(currentViewedApplicantId)" class="hidden text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-emerald-300 cursor-pointer">
-                <span class="material-icons-outlined" style="font-size:13px;">restart_alt</span> Reopen
-              </button>
-              <button id="endorse-btn" onclick="cntOpenEndorsement()" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
-                <span class="material-icons-outlined" style="font-size:13px;">visibility</span> Client view<span id="endorse-btn-chip"></span>
-              </button>
-              <button id="deploy-btn" onclick="cntOpenDeployment()" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
-                <span class="material-icons-outlined" style="font-size:13px;">timeline</span> Deployment<span id="deploy-btn-chip"></span>
-              </button>
+              <div class="relative" id="cnt-more-wrap">
+                <button type="button" onclick="cntToggleMore(event)" aria-haspopup="true" class="text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border border-slate-200 cursor-pointer">
+                  <span class="material-icons-outlined" style="font-size:16px;">more_horiz</span> More
+                </button>
+                <div id="cnt-more-menu" class="hidden absolute right-0 mt-1 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1">
+                  <button onclick="cntDraftSMS(currentViewedApplicantId)" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"><span class="material-icons-outlined text-slate-400" style="font-size:16px;">sms</span> SMS</button>
+                  <button onclick="cntAddToPool(currentViewedApplicantId)" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"><span class="material-icons-outlined text-slate-400" style="font-size:16px;">auto_awesome</span> Add to Pool</button>
+                  <button id="endorse-btn" onclick="cntOpenEndorsement()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"><span class="material-icons-outlined text-slate-400" style="font-size:16px;">visibility</span> Client view<span id="endorse-btn-chip"></span></button>
+                  <button id="deploy-btn" onclick="cntOpenDeployment()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"><span class="material-icons-outlined text-slate-400" style="font-size:16px;">timeline</span> Deployment<span id="deploy-btn-chip"></span></button>
+                  <button id="resume-reopen-btn" onclick="cntReopen(currentViewedApplicantId)" class="hidden w-full text-left px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 cursor-pointer"><span class="material-icons-outlined" style="font-size:16px;">restart_alt</span> Reopen</button>
+                </div>
+              </div>
             </div>
             <div class="cnt-step" id="resume-stage-stepper"></div>
           </div>
