@@ -64,7 +64,7 @@
     var app = (typeof findApplicant === 'function') ? findApplicant(currentViewedApplicantId) : null;
     if (!app) { toast('Open an applicant first.', 'info'); return; }
     if (!sb()) { toast('Not connected.', 'error'); return; }
-    var m = modal('Send interview form — ' + (app.name || ''), 'quiz', 'max-w-xl');
+    var m = modal('Send exam — ' + (app.name || ''), 'assignment', 'max-w-xl');
     m.body.innerHTML = '<div class="text-center py-8 text-slate-400 text-sm">Loading…</div>';
     Promise.all([
       sb().from('interview_surveys').select('id,title,questions,job_role').eq('active', true).order('created_at', { ascending: false }),
@@ -88,31 +88,31 @@
     var noEmail = !app.email;
     m.body.innerHTML =
       '<div class="mb-5">' +
-      '<div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">Sent forms</div>' +
+      '<div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2">Sent exams</div>' +
       '<div id="cnt-inv-list" class="flex flex-col gap-2">' + hist + '</div></div>' +
       '<div class="border-t border-slate-100 pt-4">' +
-      '<div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-3">Send a new form</div>' +
+      '<div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-3">Send a new exam</div>' +
       (surveys.length ?
         '<div class="grid grid-cols-1 gap-3">' +
         '<div><label class="' + LABEL + '">Form</label><select id="cnt-send-survey" class="' + INPUT + ' bg-white">' + opts + '</select></div>' +
         '<div><label class="' + LABEL + '">Answer deadline</label><input id="cnt-send-deadline" type="datetime-local" class="' + INPUT + '" value="' + toLocalInput(nowPlusDays(14)) + '">' +
-        '<div class="text-[11px] text-slate-400 mt-1">Applicant must complete the form by this date. Leave for two weeks (default) or adjust.</div></div>' +
-        (noEmail ? '<div class="text-[11px] rounded-lg px-3 py-2" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;">No email on file — the form will be created and you can copy the link to send manually.</div>' : '') +
+        '<div class="text-[11px] text-slate-400 mt-1">Applicant must complete the exam by this date. Leave for two weeks (default) or adjust.</div></div>' +
+        (noEmail ? '<div class="text-[11px] rounded-lg px-3 py-2" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;">No email on file — the exam will be created and you can copy the link to send manually.</div>' : '') +
         '</div>' +
         '<div class="flex items-center justify-between mt-4">' +
-        '<button class="' + BTN_GHOST + '" onclick="cntOpenSurveyBuilder()"><span class="material-icons-outlined" style="font-size:15px;">tune</span> Manage forms</button>' +
-        '<button id="cnt-send-go" class="' + BTN_PRIMARY + '"><span class="material-icons-outlined" style="font-size:15px;">send</span> ' + (noEmail ? 'Create link' : 'Send form') + '</button>' +
+        '<button class="' + BTN_GHOST + '" onclick="cntOpenSurveyBuilder()"><span class="material-icons-outlined" style="font-size:15px;">tune</span> Manage exams</button>' +
+        '<button id="cnt-send-go" class="' + BTN_PRIMARY + '"><span class="material-icons-outlined" style="font-size:15px;">send</span> ' + (noEmail ? 'Create link' : 'Send exam') + '</button>' +
         '</div>'
         :
-        '<div class="text-sm text-slate-500 mb-3">You haven’t built any interview forms yet.</div>' +
-        '<button class="' + BTN_PRIMARY + '" onclick="cntOpenSurveyBuilder()"><span class="material-icons-outlined" style="font-size:15px;">add</span> Build your first form</button>'
+        '<div class="text-sm text-slate-500 mb-3">You haven’t built any exam forms yet.</div>' +
+        '<button class="' + BTN_PRIMARY + '" onclick="cntOpenSurveyBuilder()"><span class="material-icons-outlined" style="font-size:15px;">add</span> Build your first exam</button>'
       ) + '</div>';
 
     var go = document.getElementById('cnt-send-go');
     if (go) go.addEventListener('click', function () {
       var sid = document.getElementById('cnt-send-survey').value;
       var survey = surveys.find(function (s) { return String(s.id) === String(sid); });
-      if (!survey) { toast('Pick a form first.', 'info'); return; }
+      if (!survey) { toast('Pick an exam first.', 'info'); return; }
       var dv = document.getElementById('cnt-send-deadline').value;
       var deadlineISO = dv ? new Date(dv).toISOString() : null;
       go.disabled = true; go.innerHTML = '<span class="material-icons-outlined animate-spin" style="font-size:15px;">progress_activity</span> Sending…';
@@ -121,8 +121,8 @@
         window.cntOpenSendSurvey();
         if (res && res.link) copyLink(res.link, !!app.email);
       }).catch(function (e) {
-        go.disabled = false; go.innerHTML = '<span class="material-icons-outlined" style="font-size:15px;">send</span> ' + (app.email ? 'Send form' : 'Create link');
-        toast((e && e.message) || 'Could not send the form.', 'error');
+        go.disabled = false; go.innerHTML = '<span class="material-icons-outlined" style="font-size:15px;">send</span> ' + (app.email ? 'Send exam' : 'Create link');
+        toast((e && e.message) || 'Could not send the exam.', 'error');
       });
     });
   }
@@ -140,7 +140,7 @@
       : '';
     return '<div class="border border-slate-200 rounded-xl px-3 py-2.5">' +
       '<div class="flex items-center justify-between gap-2">' +
-      '<div class="min-w-0"><div class="text-[13px] font-semibold text-slate-800 truncate">' + esc(iv.survey_title || 'Interview') + '</div>' +
+      '<div class="min-w-0"><div class="text-[13px] font-semibold text-slate-800 truncate">' + esc(iv.survey_title || 'Exam') + '</div>' +
       '<div class="text-[11px] text-slate-400">Sent ' + esc(fmtDate(iv.sent_at)) + (iv.deadline ? ' · due ' + esc(fmtDate(iv.deadline)) : '') + '</div></div>' +
       '<span class="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full flex-none" style="' + tint + '">' + chip + '</span>' +
       '</div>' +
@@ -155,8 +155,8 @@
   function copyLink(link, sent) {
     try {
       navigator.clipboard.writeText(link).then(function () { toast(sent ? 'Form sent — link also copied.' : 'Link copied to clipboard.', 'success'); },
-        function () { prompt('Copy this interview link:', link); });
-    } catch (e) { prompt('Copy this interview link:', link); }
+        function () { prompt('Copy this exam link:', link); });
+    } catch (e) { prompt('Copy this exam link:', link); }
   }
 
   function sendInvite(app, survey, deadlineISO) {
@@ -168,18 +168,18 @@
     return sb().from('interview_invites').insert(row).select('id').single().then(function (r) {
       if (r.error || !r.data) throw new Error((r.error && r.error.message) || 'Insert failed');
       var token = r.data.id, link = ORIGIN + '/interview.html?t=' + token;
-      if (window.cntLogActivity) window.cntLogActivity(app, 'email', 'Interview form “' + (survey.title || '') + '” sent');
-      if (!app.email) { toast('Interview form created — copy the link to send it.', 'success'); return { link: link, emailed: false }; }
+      if (window.cntLogActivity) window.cntLogActivity(app, 'email', 'Exam “' + (survey.title || '') + '” sent');
+      if (!app.email) { toast('Exam created — copy the link to send it.', 'success'); return { link: link, emailed: false }; }
       var deadlineTxt = deadlineISO ? ('\n\nPlease complete it by ' + fmtDate(deadlineISO) + '.') : '';
-      var subject = 'Complete your interview' + (app.role ? ' for ' + app.role : '') + ' — CNT';
+      var subject = 'Complete your pre-employment exam' + (app.role ? ' for ' + app.role : '') + ' — CNT';
       var text = 'Dear ' + (app.name ? String(app.name).split(' ')[0] : 'Applicant') + ',\n\n' +
-        'Thank you for your interest in joining CNT Promo & Ads Specialists, Inc. As part of our process, please complete this short interview form:\n\n' +
+        'Thank you for your interest in joining CNT Promo & Ads Specialists, Inc. As part of our process, please complete this short online pre-employment exam:\n\n' +
         link + deadlineTxt + '\n\nSimply open the link and answer the questions — it only takes a few minutes. Your responses go straight to our recruitment team.\n\n' +
         'Warm regards,\nCNT Recruitment Team';
       return sb().functions.invoke('send-email', { body: { to: app.email, subject: subject, text: text, kind: 'interview', applicant_ref: String(app._sid || app.id) } })
         .then(function (res) {
-          if (res.error || (res.data && res.data.error)) { toast('Form created, but email failed to send — copy the link to send manually.', 'error'); return { link: link, emailed: false }; }
-          toast('Interview form emailed to ' + app.email, 'success');
+          if (res.error || (res.data && res.data.error)) { toast('Exam created, but email failed to send — copy the link to send manually.', 'error'); return { link: link, emailed: false }; }
+          toast('Exam emailed to ' + app.email, 'success');
           return { link: link, emailed: true };
         });
     });
@@ -227,7 +227,7 @@
   // ============================================================
   window.cntOpenSurveyBuilder = function () {
     if (!sb()) { toast('Not connected.', 'error'); return; }
-    var m = modal('Interview forms', 'quiz', 'max-w-2xl');
+    var m = modal('Exam forms', 'quiz', 'max-w-2xl');
     listSurveys(m);
   };
 
@@ -244,10 +244,10 @@
           '<button class="' + BTN_GHOST + '" onclick="cntEditSurvey(\'' + esc(s.id) + '\')"><span class="material-icons-outlined" style="font-size:15px;">edit</span> Edit</button>' +
           '<button class="text-slate-300 hover:text-red-600 cursor-pointer p-1" title="Delete" onclick="cntDeleteSurvey(\'' + esc(s.id) + '\',\'' + esc(String(s.title).replace(/'/g, '')) + '\')"><span class="material-icons-outlined" style="font-size:18px;">delete_outline</span></button>' +
           '</div></div>';
-      }).join('') : '<div class="text-sm text-slate-400 py-6 text-center">No forms yet. Create one to send as an interview.</div>';
+      }).join('') : '<div class="text-sm text-slate-400 py-6 text-center">No exams yet. Create one to send as a pre-employment exam.</div>';
       m.body.innerHTML =
         '<div class="flex flex-col gap-2 mb-4">' + rows + '</div>' +
-        '<button class="' + BTN_PRIMARY + '" onclick="cntEditSurvey(\'\')"><span class="material-icons-outlined" style="font-size:15px;">add</span> New form</button>';
+        '<button class="' + BTN_PRIMARY + '" onclick="cntEditSurvey(\'\')"><span class="material-icons-outlined" style="font-size:15px;">add</span> New exam</button>';
       m._surveys = surveys;
     });
   }
@@ -256,7 +256,7 @@
   var draft = null, draftModal = null;
 
   window.cntEditSurvey = function (id) {
-    draftModal = modal(id ? 'Edit form' : 'New form', 'edit_note', 'max-w-2xl');
+    draftModal = modal(id ? 'Edit exam' : 'New exam', 'edit_note', 'max-w-2xl');
     if (!id) { draft = { title: '', description: '', job_role: '', pass_score: '', active: true, questions: [blankQ('single')] }; return renderEditor(); }
     sb().from('interview_surveys').select('*').eq('id', id).single().then(function (r) {
       var s = r && r.data; if (!s) { toast('Not found.', 'error'); return; }
@@ -283,7 +283,7 @@
     var b = draftModal.body;
     b.innerHTML =
       '<div class="grid grid-cols-1 gap-3 mb-5">' +
-      '<div><label class="' + LABEL + '">Form title</label><input id="d-title" class="' + INPUT + '" placeholder="e.g. Sales associate screening" value="' + esc(draft.title) + '"></div>' +
+      '<div><label class="' + LABEL + '">Exam title</label><input id="d-title" class="' + INPUT + '" placeholder="e.g. Sales associate pre-employment exam" value="' + esc(draft.title) + '"></div>' +
       '<div class="grid grid-cols-2 gap-3">' +
       '<div><label class="' + LABEL + '">For job role (optional)</label><input id="d-role" class="' + INPUT + '" placeholder="Suggests for matching applicants" value="' + esc(draft.job_role) + '"></div>' +
       '<div><label class="' + LABEL + '">Pass score % (optional)</label><input id="d-pass" type="number" min="0" max="100" class="' + INPUT + '" placeholder="e.g. 70" value="' + esc(draft.pass_score) + '"></div>' +
@@ -296,7 +296,7 @@
       '<div class="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">' +
       '<label class="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer"><input id="d-active" type="checkbox" ' + (draft.active ? 'checked' : '') + ' class="accent-red-800"> Active (available to send)</label>' +
       '<div class="flex items-center gap-2"><button class="' + BTN_GHOST + '" onclick="cntOpenSurveyBuilder()">Cancel</button>' +
-      '<button id="d-save" class="' + BTN_PRIMARY + '"><span class="material-icons-outlined" style="font-size:15px;">save</span> Save form</button></div>' +
+      '<button id="d-save" class="' + BTN_PRIMARY + '"><span class="material-icons-outlined" style="font-size:15px;">save</span> Save exam</button></div>' +
       '</div>';
     // bind top fields
     bind('d-title', 'title'); bind('d-role', 'job_role'); bind('d-pass', 'pass_score'); bind('d-desc', 'description');
@@ -402,7 +402,7 @@
 
   function saveDraft() {
     syncFromDom();
-    if (!(draft.title || '').trim()) { toast('Give the form a title.', 'info'); return; }
+    if (!(draft.title || '').trim()) { toast('Give the exam a title.', 'info'); return; }
     var clean = draft.questions.filter(function (q) { return (q.text || '').trim() !== ''; }).map(toDbQ);
     if (!clean.length) { toast('Add at least one question.', 'info'); return; }
     // validate choice questions have >= 2 options
@@ -422,14 +422,14 @@
       ? sb().from('interview_surveys').update(payload).eq('id', draft.id)
       : sb().from('interview_surveys').insert(Object.assign({ created_by: window.cntUserName || null }, payload));
     op.then(function (r) {
-      if (r.error) { if (btn) { btn.disabled = false; btn.innerHTML = 'Save form'; } toast(r.error.message || 'Could not save.', 'error'); return; }
+      if (r.error) { if (btn) { btn.disabled = false; btn.innerHTML = 'Save exam'; } toast(r.error.message || 'Could not save.', 'error'); return; }
       toast('Form saved.', 'success');
       window.cntOpenSurveyBuilder();
     });
   }
 
   window.cntDeleteSurvey = function (id, title) {
-    if (!confirm('Delete the form “' + title + '”? Forms already sent to applicants keep working — they store their own copy of the questions.')) return;
+    if (!confirm('Delete the exam “' + title + '”? Exams already sent to applicants keep working — they store their own copy of the questions.')) return;
     sb().from('interview_surveys').delete().eq('id', id).then(function (r) {
       if (r.error) { toast(r.error.message || 'Could not delete.', 'error'); return; }
       toast('Form deleted.', 'success'); window.cntOpenSurveyBuilder();

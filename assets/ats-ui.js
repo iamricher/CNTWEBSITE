@@ -334,23 +334,25 @@ function _uniformSkills(str){
   });
   return out;
 }
-// Stage-aware action bar. The primary CTA is stage-driven and mutually
-// exclusive: Schedule Interview during screening/interview, Generate Offer at
-// the offer/onboarding stages. Schedule Interview + Send Form drop into the More
-// menu once the candidate is past the interview phase, so e.g. a candidate at
-// Job Offer never shows a stray "Schedule Interview" button.
+// Stage-aware action bar. Each stage has ONE primary CTA, mutually exclusive:
+// Schedule Interview during screening/interview, Send Exam at the Pre-Emp Exam
+// stage (the online questionnaire IS the pre-employment exam), Generate Offer at
+// the offer/onboarding stages. A CTA that isn't the current stage's primary
+// drops into the More menu, so e.g. a candidate at Job Offer never shows a stray
+// "Schedule Interview" button.
 function cntSyncActionBar(app){
   if(!app) return;
   const tog=(id,show)=>{ const el=document.getElementById(id); if(el) el.classList.toggle('hidden', !show); };
   const isHired = (typeof stageIsHired==='function') ? stageIsHired(app.stage) : (app.stage==='hired'||app.stage==='onboarding');
   const interviewPhase = (app.stage==='new' || app.stage==='interview');
+  const examPhase = (app.stage==='exam');
   tog('offer-letter-btn', isHired);
   tog('offer-summary-box', isHired);
   if(isHired && window.cntRenderOfferBox) window.cntRenderOfferBox(app);
   tog('prof-schedule-btn', interviewPhase);
-  tog('prof-sendform-btn', interviewPhase);
+  tog('prof-sendform-btn', examPhase);            // Send Exam is the Pre-Emp Exam action
   tog('more-schedule', !interviewPhase);
-  tog('more-sendform', !interviewPhase);
+  tog('more-sendform', !examPhase);
 }
 window.cntSyncActionBar = cntSyncActionBar;
 

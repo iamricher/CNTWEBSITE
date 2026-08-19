@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <meta name="robots" content="noindex,nofollow">
-  <title>Interview — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <title>Pre-Employment Exam — CNT Promo &amp; Ads Specialists, Inc.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -101,7 +101,7 @@
       <div id="stage">
         <div class="center">
           <span class="spin"></span>
-          <div class="big" style="font-size:18px;margin-top:20px">Loading your interview…</div>
+          <div class="big" style="font-size:18px;margin-top:20px">Loading your exam…</div>
         </div>
       </div>
       <div class="foot">
@@ -132,40 +132,40 @@
     }
 
     if(!token || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)){
-      return centered('badge-warn','!','Invalid link','This interview link is incomplete or malformed. Please use the exact link from the email we sent you.');
+      return centered('badge-warn','!','Invalid link','This exam link is incomplete or malformed. Please use the exact link from the email we sent you.');
     }
     var sb = window.getSupabase && window.getSupabase();
-    if(!sb){ return centered('badge-warn','!','Temporarily unavailable','We couldn’t reach the interview service. Please try again in a few minutes.'); }
+    if(!sb){ return centered('badge-warn','!','Temporarily unavailable','We couldn’t reach the exam service. Please try again in a few minutes.'); }
 
     var QUESTIONS = [];
 
     sb.rpc('cnt_survey_public',{ p_token: token }).then(function(res){
       var d = res && res.data;
       if(res.error || !d || d.error){
-        return centered('badge-warn','!','Link not found','We couldn’t find this interview. The link may be mistyped. Please use the exact link from your email.');
+        return centered('badge-warn','!','Link not found','We couldn’t find this exam. The link may be mistyped. Please use the exact link from your email.');
       }
       if(d.status === 'submitted'){
         return thankYou(d, true);
       }
       if(d.status === 'expired'){
-        return centered('badge-warn','⏱','This interview has closed',
-          'The deadline for this interview form has passed. If you still wish to complete it, please contact us at <a href="mailto:hrdadmin@cntpromoads.com" style="color:var(--red);text-decoration:none">hrdadmin@cntpromoads.com</a>.');
+        return centered('badge-warn','⏱','This exam has closed',
+          'The deadline for this exam has passed. If you still wish to complete it, please contact us at <a href="mailto:hrdadmin@cntpromoads.com" style="color:var(--red);text-decoration:none">hrdadmin@cntpromoads.com</a>.');
       }
       renderForm(d);
     }).catch(function(){
-      centered('badge-warn','!','Something went wrong','We couldn’t load your interview right now. Please try again shortly.');
+      centered('badge-warn','!','Something went wrong','We couldn’t load your exam right now. Please try again shortly.');
     });
 
     function renderForm(d){
       QUESTIONS = Array.isArray(d.questions) ? d.questions : [];
       var deadline = d.deadline ? '<p class="meta">Please complete this by <b>'+esc(fmtDate(d.deadline))+'</b>.</p>' : '';
-      var greet = d.name ? ('Hi '+esc(String(d.name).split(' ')[0])+', thanks for your interest in joining CNT. Please answer the questions below to help us get to know you better.')
-                         : 'Thanks for your interest in joining CNT. Please answer the questions below to help us get to know you better.';
+      var greet = d.name ? ('Hi '+esc(String(d.name).split(' ')[0])+', thanks for your interest in joining CNT. Please complete the short pre-employment exam below.')
+                         : 'Thanks for your interest in joining CNT. Please complete the short pre-employment exam below.';
       var qs = QUESTIONS.map(function(q,i){ return renderQ(q,i); }).join('');
       stage.innerHTML =
         '<div class="pad">'+
           '<span class="eyebrow">CNT Recruitment</span>'+
-          '<h1>'+esc(d.title||'Interview')+'</h1>'+
+          '<h1>'+esc(d.title||'Pre-Employment Exam')+'</h1>'+
           '<p class="lead">'+greet+'</p>'+ deadline +
           '<hr class="rule">'+
           '<form id="survey" novalidate>'+ qs +
@@ -258,7 +258,7 @@
         if(res.error || !d || d.error){
           btn.disabled = false; btn.textContent = 'Submit answers';
           if(d && d.error==='already_submitted'){ return thankYou({}, true); }
-          if(d && d.error==='expired'){ return centered('badge-warn','⏱','This interview has closed','The deadline for this form has passed.'); }
+          if(d && d.error==='expired'){ return centered('badge-warn','⏱','This exam has closed','The deadline for this exam has passed.'); }
           alert('Sorry, we couldn’t submit your answers. Please try again.');
           return;
         }
@@ -271,7 +271,7 @@
 
     function thankYou(d, already){
       var msg = already
-        ? 'Your answers for this interview have already been received. There’s nothing more to do — our team will be in touch.'
+        ? 'Your answers for this exam have already been received. There’s nothing more to do — our team will be in touch.'
         : 'Your answers have been received. Our recruitment team will review them and get back to you about the next steps.';
       stage.innerHTML = '<div class="center"><span class="badge-ico badge-ok">✓</span>'+
         '<div class="big">'+(already?'Already submitted':'Thank you!')+'</div>'+
