@@ -1257,7 +1257,7 @@
 
     <!-- FIX: min-height:0 on a flex child allows it to shrink/scroll properly
          while the parent's fixed height keeps the modal from resizing -->
-    <div class="flex-1 overflow-y-auto custom-scroll bg-slate-100 print-area flex" style="min-height:0;">
+    <div class="flex-1 overflow-y-auto custom-scroll bg-slate-50 print-area flex" style="min-height:0;">
 
       <!-- Left summary sidebar removed — it duplicated the header, the Contact
            fields, and the Interview tab. The main column now uses the full width. -->
@@ -1278,7 +1278,7 @@
              where the stage pane takes the left column (market-ATS pattern). -->
         <div id="profile-form-body" class="space-y-4">
 
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <!-- Action row + stage stepper (Odoo applicant form) -->
           <div class="flex items-center justify-between gap-3 mb-4 flex-wrap no-print">
             <div class="flex items-center gap-1.5 flex-wrap">
@@ -1313,8 +1313,7 @@
             <div class="cnt-step" id="resume-stage-stepper"></div>
           </div>
 
-          <p class="cnt-sec-title" style="margin-bottom:2px;">Subject / Application</p>
-          <h1 class="text-xl font-extrabold text-slate-900 tracking-tight" id="resume-title">—</h1>
+          <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight" id="resume-title" style="letter-spacing:-.02em;">—</h1>
           <div class="flex items-center gap-2 mt-2 mb-4 flex-wrap">
             <span class="badge border border-slate-200 bg-slate-100 text-slate-600" id="resume-account-badge"></span>
             <span class="badge border" id="resume-stage-badge"></span>
