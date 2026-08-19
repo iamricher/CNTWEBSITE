@@ -431,9 +431,27 @@
       const app = findApplicant(id);
       const sid = (app && app._web) ? app._sid : null;
       _origDelApp(id);   // confirm + in-memory remove + renderAll
-      if(!findApplicant(id)) logAudit('applicant_remove','applicant', sid||id, app?app.name:'');
-      if (sb && sid && !findApplicant(id)){
-        sb.from('applications').delete().eq('id', sid).then(({error})=>{ if(error) console.error('applicant delete',error); });
+      const removed = !findApplicant(id);
+      if(!removed) return;                 // user cancelled the confirm dialog
+      if (sb && sid){
+        // Verify the DB row is actually gone. RLS silently deletes 0 rows when
+        // the caller lacks permission (no error thrown), which used to look like
+        // "the applicant won't delete" — it vanished, then reappeared on reload.
+        // If nothing was deleted, restore the row and tell the user.
+        sb.from('applications').delete().eq('id', sid).select('id').then(({data,error})=>{
+          if(error || !data || !data.length){
+            if(app) addApplicant(app);
+            if(typeof renderAll==='function') renderAll();
+            console.error('applicant delete', error||'0 rows deleted');
+            if(window.showToast) showToast(
+              (error && error.message) ? ('Could not delete: '+error.message)
+                                       : 'Could not delete this applicant — you may not have permission.', 'error');
+          } else {
+            logAudit('applicant_remove','applicant', sid, app?app.name:'');
+          }
+        });
+      } else {
+        logAudit('applicant_remove','applicant', id, app?app.name:'');   // local-only record
       }
     };
   }

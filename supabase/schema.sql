@@ -536,7 +536,7 @@ create policy "apps insert anon" on public.applications for insert to anon
 create policy "apps insert staff"  on public.applications for insert to authenticated with check (public.cnt_is_staff());
 create policy "apps read staff"    on public.applications for select to authenticated using (public.cnt_is_staff());
 create policy "apps update staff"  on public.applications for update to authenticated using (public.cnt_is_staff()) with check (public.cnt_is_staff());
-create policy "apps delete mgr"    on public.applications for delete to authenticated using (public.cnt_is_manager());
+create policy "apps delete staff"  on public.applications for delete to authenticated using (public.cnt_is_staff());
 
 -- Jobs: public reads OPEN roles (careers page); staff read all + manage
 create policy "jobs read open anon" on public.jobs for select to anon           using (status='open');
