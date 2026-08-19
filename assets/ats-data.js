@@ -1818,6 +1818,42 @@
   }
   window._maybeInterviewEmail = _maybeInterviewEmail;
 
+  // Job-offer email — its own dedicated format (like the interview one), sent
+  // automatically when an offer is generated. Carries the proposed salary and
+  // validity so it reads as a real offer, distinct from the generic stage note.
+  const OFFER_EMAIL = {
+    s: 'Job offer — {role} at CNT ({account})',
+    b: 'Dear {name},\n\nCongratulations! On behalf of CNT Promo & Ads Specialists, Inc., we are pleased to formally offer you the position of {role} under our client {account}{locationClause}.\n\nOffer details\n• Position: {role}\n• Proposed salary: {salary}\n• Offer valid until: {validity}\n\nTo accept, simply reply to this email or contact us at hrdadmin@cntpromoads.com. A formal offer letter and your pre-employment requirements will follow after you confirm.\n\nWe are excited to welcome you to the team!\n\nWarm regards,\nCNT Recruitment Team'
+  };
+  const _offerEmailSent = new Set();
+  async function _maybeOfferEmail(app){
+    if(!sb || !app || !app.email) return;
+    const proposed=String(app.proposed_salary||'').trim();
+    if(!proposed) return;   // only email once a real salary has been proposed
+    const validity=app.offer_validity||'';
+    const key=String(app._sid||app.id)+':offer:'+proposed+':'+validity;
+    if(_offerEmailSent.has(key)) return;                     // don't re-send an unchanged offer
+    _offerEmailSent.add(key);
+    let niceVal=validity;
+    try{ if(validity) niceVal=new Date(validity+'T00:00').toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'}); }catch(e){}
+    const salaryStr=/^[\d,.\s]+$/.test(proposed) ? ('₱'+proposed.trim()) : proposed;   // add ₱ for bare numbers
+    const subject=_fillTpl(OFFER_EMAIL.s, app);
+    const text=_fillTpl(OFFER_EMAIL.b, app)
+      .replace(/\{salary\}/g, salaryStr)
+      .replace(/\{validity\}/g, niceVal||'to be confirmed')
+      .replace(/\{locationClause\}/g, app.location?(', assigned at '+app.location):'');
+    try{
+      const { data, error } = await sb.functions.invoke('send-email',{ body:{ to:app.email, subject, text, kind:'offer', applicant_ref:String(app._sid||app.id) } });
+      if(error || (data&&data.error)) throw new Error((data&&data.error)||(error&&error.message)||'send failed');
+      cntLogActivity(app,'email','Job offer emailed to '+app.email+' — '+salaryStr);
+      if(window.showToast) showToast('Offer emailed to '+app.email,'success');
+    }catch(e){
+      _offerEmailSent.delete(key);
+      cntLogActivity(app,'email','Offer email not sent (email not configured?)');
+    }
+  }
+  window._maybeOfferEmail = _maybeOfferEmail;
+
   // Opt-in, default-off stage-entry email automation. Fires from executeStageChange
   // ONLY when the entered stage has auto_email enabled (Settings → Pipeline Stages).
   // Never sends without an email on file, and never falls back to the mail app —
@@ -1825,6 +1861,10 @@
   const _autoSentStageEmail = new Set();
   async function _maybeAutoStageEmail(app, stageKey, force){
     if(!sb || !app) return;
+    // Interviews and offers each send their own dedicated, richer email
+    // (scheduled-interview details / job-offer details). Don't ALSO fire the
+    // generic stage-entry email for those stages, or the candidate gets two.
+    if(!force && (stageKey==='interview' || stageKey==='hired')) return;
     const st=PIPELINE_STAGES.find(s=>s.key===stageKey);
     if(!force && (!st || !st.auto_email)) return;           // stage not opted in (bulk "Email" forces it)
     if(!app.email){ if(!force) cntLogActivity(app,'email','Auto stage email skipped — no email on file'); return; }
@@ -2082,6 +2122,9 @@
     cntLogActivity(app,'email','Offer set: '+(proposed||'—')+(validity?', valid until '+validity:''));
     cntRenderOfferBox(app);
     if(window.showToast) showToast('Offer details saved','success');
+    // Email the candidate their offer (dedicated offer format; deduped so an
+    // unchanged offer never re-sends). Only fires once a salary is proposed.
+    if(typeof _maybeOfferEmail==='function') _maybeOfferEmail(app);
   };
 
   // Persist interview scheduling fields to Supabase

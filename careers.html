@@ -454,6 +454,7 @@
                 <span id="results-count"></span>
                 <label class="job-sort"><span>Sort</span>
                   <select id="job-sort" aria-label="Sort openings">
+                    <option value="oldest">Oldest first</option>
                     <option value="latest">Latest</option>
                     <option value="priority">Priority</option>
                     <option value="az">A–Z</option>
@@ -867,10 +868,12 @@
     if(!list.length){ $('#groups').innerHTML=''; $('#pager').innerHTML=''; $('#list-state').innerHTML='<div class="state">No positions match your filters. Try broadening your search.</div>'; renderAlsoSearched(); return; }
     $('#list-state').innerHTML='';
     // flat list — client/account is hidden here, revealed only on the job detail page
-    const mode=window._jobSort||'latest';
+    const mode=window._jobSort||'oldest';
     if(qTokens.length) list.sort((a,b)=>smartScore(b)-smartScore(a) || (new Date(b.created_at||0)-new Date(a.created_at||0)) || ((+b.id||0)-(+a.id||0)));
-    // Latest = strictly newest → oldest. Ties (e.g. jobs added in the same batch,
-    // same created_at) break by id, NOT priority, so priority never reorders the list.
+    // Default = oldest → latest (ascending by date). Ties break by id, NOT
+    // priority, so priority never reorders the list.
+    else if(mode==='oldest') list.sort((a,b)=>(new Date(a.created_at||0)-new Date(b.created_at||0)) || ((+a.id||0)-(+b.id||0)));
+    // Latest = strictly newest → oldest.
     else if(mode==='latest') list.sort((a,b)=>(new Date(b.created_at||0)-new Date(a.created_at||0)) || ((+b.id||0)-(+a.id||0)));
     else if(mode==='az') list.sort((a,b)=>a.role.localeCompare(b.role));
     else list.sort((a,b)=>((PRI_RANK[a.priority]??3)-(PRI_RANK[b.priority]??3)) || a.role.localeCompare(b.role));
