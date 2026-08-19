@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Interview — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <style>
+    :root{
+      --ink:#16161a; --body:#3a3c44; --muted:#8a8d94; --line:#ecedf1; --line2:#eef0f2;
+      --bg:#f3f4f6; --card:#ffffff; --red:#C8102E; --red-soft:#FDE7EA; --ok:#166534; --ok-soft:#dcfce7;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{background:var(--bg);color:var(--body);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    .wrap{max-width:660px;margin:0 auto;padding:34px 14px 56px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+      box-shadow:0 1px 2px rgba(16,24,40,.04),0 12px 34px rgba(16,24,40,.10);}
+    .head{background:#141418;background-image:linear-gradient(180deg,#1e1e24 0%,#121216 100%);
+      border-bottom:3px solid var(--red);padding:34px 30px;text-align:center;}
+    .head img{height:46px;width:auto;display:inline-block}
+    .head .tag{color:#b7bbc4;font-size:11px;font-weight:600;letter-spacing:.16em;margin-top:14px;text-transform:uppercase}
+    .head .hash{color:#e5213f;font-size:11px;font-weight:800;letter-spacing:.14em;margin-top:7px}
+    .pad{padding:38px 40px}
+    h1{font-family:'Manrope','Inter',sans-serif;font-size:25px;font-weight:800;color:var(--ink);
+      letter-spacing:-.022em;line-height:1.24;margin:0 0 6px}
+    .eyebrow{display:inline-block;background:var(--red-soft);color:var(--red);font-size:10.5px;font-weight:700;
+      letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:100px;margin-bottom:16px}
+    .lead{color:var(--body);margin:0 0 4px}
+    .meta{font-size:13px;color:var(--muted);margin:14px 0 0}
+    .meta b{color:var(--body)}
+    .rule{height:1px;background:var(--line2);border:0;margin:26px 0}
+    .q{margin:0 0 26px}
+    .q-head{display:flex;gap:10px;align-items:baseline;margin-bottom:12px}
+    .q-num{font-family:'Manrope','Inter',sans-serif;font-weight:800;color:var(--red);font-size:13px;min-width:22px}
+    .q-text{font-weight:600;color:var(--ink);font-size:15.5px;line-height:1.5}
+    .q-req{color:var(--red);margin-left:3px}
+    .opts{display:flex;flex-direction:column;gap:9px;margin-left:32px}
+    .opt{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);
+      border-radius:11px;cursor:pointer;transition:border-color .12s,background .12s;background:#fff}
+    .opt:hover{border-color:#cfd2d9;background:#fcfcfd}
+    .opt.sel{border-color:var(--red);background:var(--red-soft)}
+    .opt input{margin:3px 0 0;accent-color:var(--red);width:16px;height:16px;flex:0 0 auto}
+    .opt span{font-size:14.5px;color:var(--body);line-height:1.5}
+    textarea{width:100%;margin-left:0;border:1px solid var(--line);border-radius:11px;padding:12px 14px;
+      font:inherit;color:var(--ink);resize:vertical;min-height:96px;background:#fff}
+    textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+    .scale{display:flex;gap:8px;margin-left:32px;flex-wrap:wrap}
+    .scale button{width:46px;height:46px;border:1px solid var(--line);border-radius:11px;background:#fff;
+      font-family:'Manrope','Inter',sans-serif;font-weight:700;font-size:15px;color:var(--body);cursor:pointer;transition:.12s}
+    .scale button:hover{border-color:#cfd2d9}
+    .scale button.sel{border-color:var(--red);background:var(--red);color:#fff}
+    .scale-ends{display:flex;justify-content:space-between;margin:8px 0 0 32px;font-size:11.5px;color:var(--muted)}
+    .err-msg{color:var(--red);font-size:12.5px;margin:7px 0 0 32px;display:none}
+    .q.invalid .err-msg{display:block}
+    .q.invalid .opt,.q.invalid textarea{border-color:#f3b5bf}
+    .submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:8px;
+      background:var(--red);color:#fff;border:0;border-radius:12px;padding:15px 22px;font-family:'Manrope','Inter',sans-serif;
+      font-weight:700;font-size:15.5px;letter-spacing:.01em;cursor:pointer;transition:.14s}
+    .submit:hover{background:#a60d26}
+    .submit:disabled{opacity:.55;cursor:not-allowed}
+    .note{font-size:12.5px;color:var(--muted);text-align:center;margin:16px 0 0}
+    .foot{background:#fafbfc;border-top:1px solid var(--line2);padding:26px 30px;text-align:center}
+    .foot .addr{font-size:11.5px;color:#a9acb3;line-height:1.75}
+    .foot a{color:var(--red);text-decoration:none}
+    .center{text-align:center;padding:54px 40px}
+    .center .big{font-family:'Manrope','Inter',sans-serif;font-size:23px;font-weight:800;color:var(--ink);margin:18px 0 8px;letter-spacing:-.02em}
+    .center p{color:var(--body);margin:0 auto;max-width:420px}
+    .badge-ico{width:56px;height:56px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px}
+    .badge-ok{background:var(--ok-soft);color:var(--ok)}
+    .badge-warn{background:#fef3c7;color:#92400e}
+    .badge-info{background:var(--red-soft);color:var(--red)}
+    .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--red);border-radius:50%;
+      display:inline-block;animation:sp .7s linear infinite}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    .score-box{background:#fafbfc;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:20px auto 0;max-width:340px}
+    .score-box .n{font-family:'Manrope','Inter',sans-serif;font-size:30px;font-weight:800;color:var(--ink)}
+    .score-box .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+    @media (max-width:560px){
+      .pad{padding:30px 22px}.head{padding:30px 22px}.foot{padding:22px 22px}.center{padding:44px 24px}
+      h1{font-size:22px}.opts,.scale,.scale-ends,.err-msg{margin-left:0}.q-head{gap:8px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <img src="assets/img/cnt-logo-white.png" alt="CNT Promo &amp; Ads Specialists, Inc.">
+        <div class="tag">A Million Jobs for a Million Filipinos.</div>
+        <div class="hash">#TatakCNT</div>
+      </div>
+      <div id="stage">
+        <div class="center">
+          <span class="spin"></span>
+          <div class="big" style="font-size:18px;margin-top:20px">Loading your interview…</div>
+        </div>
+      </div>
+      <div class="foot">
+        <div class="addr">
+          219 Lyfe Tower, Shaw Blvd. corner E. Jacinto St., Barangay Bagong Silan, Mandaluyong City<br>
+          <a href="mailto:hrdadmin@cntpromoads.com">hrdadmin@cntpromoads.com</a>
+          &nbsp;&middot;&nbsp; <a href="https://cnt-website-ats.vercel.app" target="_blank" rel="noopener">Visit our website</a>
+        </div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:16px">&copy; <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</div>
+  </div>
+
+  <script>
+  (function(){
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    var stage = document.getElementById('stage');
+    var token = new URLSearchParams(location.search).get('t') || '';
+    var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+
+    function centered(cls, ico, title, msg){
+      stage.innerHTML = '<div class="center"><span class="badge-ico '+cls+'">'+ico+'</span>'+
+        '<div class="big">'+esc(title)+'</div><p>'+msg+'</p></div>';
+    }
+    function fmtDate(d){
+      try{ return new Date(d).toLocaleString('en-PH',{month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}); }
+      catch(e){ return d; }
+    }
+
+    if(!token || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)){
+      return centered('badge-warn','!','Invalid link','This interview link is incomplete or malformed. Please use the exact link from the email we sent you.');
+    }
+    var sb = window.getSupabase && window.getSupabase();
+    if(!sb){ return centered('badge-warn','!','Temporarily unavailable','We couldn’t reach the interview service. Please try again in a few minutes.'); }
+
+    var QUESTIONS = [];
+
+    sb.rpc('cnt_survey_public',{ p_token: token }).then(function(res){
+      var d = res && res.data;
+      if(res.error || !d || d.error){
+        return centered('badge-warn','!','Link not found','We couldn’t find this interview. The link may be mistyped. Please use the exact link from your email.');
+      }
+      if(d.status === 'submitted'){
+        return thankYou(d, true);
+      }
+      if(d.status === 'expired'){
+        return centered('badge-warn','⏱','This interview has closed',
+          'The deadline for this interview form has passed. If you still wish to complete it, please contact us at <a href="mailto:hrdadmin@cntpromoads.com" style="color:var(--red);text-decoration:none">hrdadmin@cntpromoads.com</a>.');
+      }
+      renderForm(d);
+    }).catch(function(){
+      centered('badge-warn','!','Something went wrong','We couldn’t load your interview right now. Please try again shortly.');
+    });
+
+    function renderForm(d){
+      QUESTIONS = Array.isArray(d.questions) ? d.questions : [];
+      var deadline = d.deadline ? '<p class="meta">Please complete this by <b>'+esc(fmtDate(d.deadline))+'</b>.</p>' : '';
+      var greet = d.name ? ('Hi '+esc(String(d.name).split(' ')[0])+', thanks for your interest in joining CNT. Please answer the questions below to help us get to know you better.')
+                         : 'Thanks for your interest in joining CNT. Please answer the questions below to help us get to know you better.';
+      var qs = QUESTIONS.map(function(q,i){ return renderQ(q,i); }).join('');
+      stage.innerHTML =
+        '<div class="pad">'+
+          '<span class="eyebrow">CNT Recruitment</span>'+
+          '<h1>'+esc(d.title||'Interview')+'</h1>'+
+          '<p class="lead">'+greet+'</p>'+ deadline +
+          '<hr class="rule">'+
+          '<form id="survey" novalidate>'+ qs +
+            '<button type="submit" class="submit" id="send">Submit answers</button>'+
+            '<p class="note">Your responses go directly to the CNT recruitment team.</p>'+
+          '</form>'+
+        '</div>';
+      document.getElementById('survey').addEventListener('submit', onSubmit);
+      // interaction: highlight chosen options + clear invalid state
+      stage.addEventListener('change', function(e){
+        var opt = e.target.closest('.opt');
+        if(opt){
+          var box = opt.parentNode;
+          if(e.target.type==='radio'){ Array.prototype.forEach.call(box.querySelectorAll('.opt'),function(o){o.classList.remove('sel');}); }
+          opt.classList.toggle('sel', e.target.checked);
+        }
+        var qEl = e.target.closest('.q'); if(qEl) qEl.classList.remove('invalid');
+      });
+    }
+
+    function renderQ(q, i){
+      var qid = esc(q.id!=null ? q.id : ('q'+i));
+      var req = q.required ? '<span class="q-req">*</span>' : '';
+      var head = '<div class="q-head"><span class="q-num">'+(i+1)+'.</span>'+
+                 '<span class="q-text">'+esc(q.text||'')+req+'</span></div>';
+      var body = '';
+      var opts = Array.isArray(q.options) ? q.options : [];
+      if(q.type==='single' || q.type==='multi'){
+        var t = q.type==='single' ? 'radio' : 'checkbox';
+        body = '<div class="opts" data-qid="'+qid+'" data-type="'+q.type+'">'+
+          opts.map(function(o,oi){
+            return '<label class="opt"><input type="'+t+'" name="'+qid+'" value="'+oi+'"><span>'+esc(o)+'</span></label>';
+          }).join('')+'</div>';
+      } else if(q.type==='scale'){
+        var max = Math.max(2, Math.min(10, parseInt(q.max,10) || 5));
+        var btns=''; for(var n=1;n<=max;n++){ btns+='<button type="button" data-val="'+n+'">'+n+'</button>'; }
+        body = '<div class="scale" data-qid="'+qid+'" data-type="scale">'+btns+'</div>'+
+               '<div class="scale-ends"><span>'+esc(q.low||'Low')+'</span><span>'+esc(q.high||'High')+'</span></div>'+
+               '<input type="hidden" name="'+qid+'" value="">';
+      } else { // text
+        body = '<textarea name="'+qid+'" data-qid="'+qid+'" data-type="text" placeholder="Type your answer…"></textarea>';
+      }
+      var errTxt = q.type==='multi' ? 'Please choose at least one option.' : 'This question is required.';
+      return '<div class="q" data-qid="'+qid+'" data-required="'+(q.required?'1':'')+'" data-type="'+esc(q.type||'text')+'">'+
+        head + body + '<div class="err-msg">'+errTxt+'</div></div>';
+    }
+
+    // scale buttons
+    stage.addEventListener('click', function(e){
+      var b = e.target.closest('.scale button'); if(!b) return;
+      var box = b.parentNode;
+      Array.prototype.forEach.call(box.querySelectorAll('button'),function(x){x.classList.remove('sel');});
+      b.classList.add('sel');
+      var hidden = box.parentNode.querySelector('input[type=hidden]'); if(hidden) hidden.value = b.getAttribute('data-val');
+      var qEl = b.closest('.q'); if(qEl) qEl.classList.remove('invalid');
+    });
+
+    function collect(){
+      var answers = {}, firstInvalid = null;
+      Array.prototype.forEach.call(stage.querySelectorAll('.q'), function(qEl){
+        var qid = qEl.getAttribute('data-qid'), type = qEl.getAttribute('data-type');
+        var required = qEl.getAttribute('data-required')==='1', has = false, val = null;
+        if(type==='single'){
+          var r = qEl.querySelector('input[type=radio]:checked');
+          if(r){ val = { selected:[parseInt(r.value,10)] }; has = true; }
+        } else if(type==='multi'){
+          var sel = Array.prototype.map.call(qEl.querySelectorAll('input[type=checkbox]:checked'),function(c){return parseInt(c.value,10);});
+          if(sel.length){ val = { selected: sel }; has = true; }
+        } else if(type==='scale'){
+          var h = qEl.querySelector('input[type=hidden]'); var v = h && h.value ? parseInt(h.value,10) : null;
+          if(v){ val = { scale: v }; has = true; }
+        } else {
+          var ta = qEl.querySelector('textarea'); var txt = ta ? ta.value.trim() : '';
+          if(txt){ val = { text: txt }; has = true; }
+        }
+        if(has) answers[qid] = val;
+        if(required && !has){ qEl.classList.add('invalid'); if(!firstInvalid) firstInvalid = qEl; }
+      });
+      return { answers: answers, firstInvalid: firstInvalid };
+    }
+
+    function onSubmit(e){
+      e.preventDefault();
+      var out = collect();
+      if(out.firstInvalid){ out.firstInvalid.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+      var btn = document.getElementById('send');
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      sb.rpc('cnt_survey_submit',{ p_token: token, p_answers: out.answers }).then(function(res){
+        var d = res && res.data;
+        if(res.error || !d || d.error){
+          btn.disabled = false; btn.textContent = 'Submit answers';
+          if(d && d.error==='already_submitted'){ return thankYou({}, true); }
+          if(d && d.error==='expired'){ return centered('badge-warn','⏱','This interview has closed','The deadline for this form has passed.'); }
+          alert('Sorry, we couldn’t submit your answers. Please try again.');
+          return;
+        }
+        thankYou(d, false);
+      }).catch(function(){
+        btn.disabled = false; btn.textContent = 'Submit answers';
+        alert('Sorry, we couldn’t submit your answers. Please check your connection and try again.');
+      });
+    }
+
+    function thankYou(d, already){
+      var msg = already
+        ? 'Your answers for this interview have already been received. There’s nothing more to do — our team will be in touch.'
+        : 'Your answers have been received. Our recruitment team will review them and get back to you about the next steps.';
+      stage.innerHTML = '<div class="center"><span class="badge-ico badge-ok">✓</span>'+
+        '<div class="big">'+(already?'Already submitted':'Thank you!')+'</div>'+
+        '<p>'+msg+'</p></div>';
+    }
+  })();
+  </script>
+</body>
+</html>
