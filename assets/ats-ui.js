@@ -146,12 +146,18 @@ function renderAIScore(app) {
 function buildClientDropdown(){
   const list = document.getElementById('client-option-list');
   const opts = [{id:'all', label:'All Clients', color:'#64748b'}, ...ACCOUNTS];
-  list.innerHTML = opts.map(a => `
-    <div class="client-option ${currentAccount===a.id?'selected':''}" data-id="${a.id}" onclick="selectClient('${a.id}')">
+  list.innerHTML = opts.map(a => {
+    // The client name is what matters — keep it on one clean line. Only show a
+    // subtitle when it's a real category (Electronics, Retail…), never the
+    // generic "Client account" filler that just crowds and truncates the name.
+    const sub = (a.sub && a.sub.trim().toLowerCase() !== 'client account') ? a.sub : '';
+    return `
+    <div class="client-option ${currentAccount===a.id?'selected':''}" data-id="${a.id}" onclick="selectClient('${a.id}')" title="${a.label}">
       <span class="client-dot" style="background:${a.color||'#64748b'}"></span>
-      <span>${a.label}</span>
-      ${a.sub?`<span style="color:inherit;opacity:.6;font-size:10px;margin-left:auto">${a.sub}</span>`:''}
-    </div>`).join('');
+      <span class="client-name">${a.label}</span>
+      ${sub?`<span class="client-sub">${sub}</span>`:''}
+    </div>`;
+  }).join('');
 }
 function filterClientOptions(q){
   document.querySelectorAll('.client-option').forEach(el=>{
