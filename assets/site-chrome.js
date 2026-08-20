@@ -214,8 +214,6 @@
   // Log each page view (path + a persistent per-browser id) for analytics.
   function logPageView() {
     try {
-      var sb = window.getSupabase && window.getSupabase();
-      if (!sb) return;
       var vid = localStorage.getItem('cnt_vid');
       if (!vid) {
         vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
@@ -230,10 +228,21 @@
       // External referrer host (traffic source), null for direct/internal visits.
       var ref = null;
       try { if (document.referrer) { var rh = new URL(document.referrer).hostname.replace(/^www\./, ''); if (rh && rh !== location.hostname.replace(/^www\./, '')) ref = rh; } } catch (_) {}
-      Promise.resolve(sb.from('page_views').insert({ path: path, visitor_id: vid, referrer: ref })).then(function (res) {
-        // If the referrer column isn't present yet, still log the view without it.
-        if (res && res.error) sb.from('page_views').insert({ path: path, visitor_id: vid }).then(function () {}, function () {});
-      }, function () {});
+      var payload = { path: path, visitor_id: vid, referrer: ref };
+      // Fallback: direct Supabase insert (no geo) when /api/pv isn't reachable
+      // (local dev, or a non-Vercel host).
+      var direct = function () {
+        var sb = window.getSupabase && window.getSupabase(); if (!sb) return;
+        Promise.resolve(sb.from('page_views').insert(payload)).then(function (res) {
+          if (res && res.error) sb.from('page_views').insert({ path: path, visitor_id: vid }).then(function () {}, function () {});
+        }, function () {});
+      };
+      // Prefer the beacon: /api/pv attaches coarse geo (country/region/city)
+      // from Vercel's edge headers before inserting the same row.
+      try {
+        fetch('/api/pv', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), keepalive: true })
+          .then(function (r) { if (!r || !r.ok) direct(); }, function () { direct(); });
+      } catch (_) { direct(); }
     } catch (_) {}
   }
 
