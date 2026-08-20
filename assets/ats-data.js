@@ -2129,8 +2129,18 @@
         sb.from('applications').update(p).eq('id',app._sid).then(({error})=>{ if(error) console.error('persist interview',error); });
       } else if(error) console.error('persist interview',error);
     });
-    // Automatically email the applicant their interview details (+ video link).
-    if(typeof _maybeInterviewEmail==='function') _maybeInterviewEmail(app, patch);
+    // NOTE: confirming a slot no longer auto-emails the applicant. The recruiter
+    // sends the interview details deliberately via the "Send interview details"
+    // button (cntSendInterviewEmail), so nothing goes out before they're ready.
+  };
+
+  // Explicit, recruiter-triggered send of the interview details email.
+  window.cntSendInterviewEmail=function(){
+    const app=(typeof findApplicant==='function')?findApplicant(currentViewedApplicantId):null;
+    if(!app){ if(window.showToast) showToast('Open an applicant first.','info'); return; }
+    if(!(app.interviewDate && app.interviewTime)){ if(window.showToast) showToast('Set the interview date and time, then Confirm slot first.','info'); return; }
+    if(!app.email){ if(window.showToast) showToast('This applicant has no email on file.','info'); return; }
+    if(typeof _maybeInterviewEmail==='function') _maybeInterviewEmail(app, { interview_date:app.interviewDate, interview_time:app.interviewTime });
   };
 
   // Publish / unpublish a job to the website (status open<->closed)
