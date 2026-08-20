@@ -394,7 +394,9 @@
           .board-split{display:grid;grid-template-columns:minmax(320px,0.95fr) 1.25fr;gap:26px;align-items:start}
           .list-col{min-width:0}
           .detail-col{align-self:start;position:sticky;top:88px}
-          .detail-panel{background:#fff;border:1px solid var(--gray-100);border-radius:18px;box-shadow:0 10px 40px rgba(16,24,40,.08);max-height:calc(100vh - 108px);overflow-y:auto;overscroll-behavior:contain}
+          /* Fixed height so the pane stays the SAME size for every job — the
+             content scrolls inside instead of the panel growing/shrinking. */
+          .detail-panel{background:#fff;border:1px solid var(--gray-100);border-radius:18px;box-shadow:0 10px 40px rgba(16,24,40,.08);height:calc(100vh - 108px);overflow-y:auto;overscroll-behavior:contain}
           .detail-panel::-webkit-scrollbar{width:10px}
           .detail-panel::-webkit-scrollbar-thumb{background:var(--gray-100);border-radius:99px;border:3px solid #fff}
           .detail-panel::-webkit-scrollbar-thumb:hover{background:var(--gray-400)}
