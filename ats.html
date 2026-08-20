@@ -61,10 +61,11 @@
   .kanban-card .kmenu { opacity:0; transition:opacity .15s; }
   .kanban-card:hover .kmenu { opacity:1; }
   /* Odoo-style applicant form */
-  .cnt-frow { display:flex; align-items:flex-start; gap:14px; padding:6px 0; font-size:13px; line-height:1.5; min-width:0; }
-  .cnt-frow-l { color:#64748b; font-weight:600; width:116px; flex:none; }
+  .cnt-frow { display:flex; align-items:flex-start; gap:16px; padding:5px 0; font-size:13px; line-height:1.55; min-width:0; }
+  .cnt-frow-l { color:#6b7280; font-weight:600; width:120px; flex:none; }
   .cnt-frow-v { color:#0f172a; min-width:0; flex:1; word-break:break-word; }
-  .cnt-sec-title { font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#94a3b8; margin:0 0 10px; }
+  .cnt-sec-title { font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:#9aa3b2; margin:0 0 11px; display:flex; align-items:center; gap:8px; }
+  .cnt-sec-title::before { content:""; width:3px; height:11px; border-radius:2px; background:#e2e8f0; flex:none; }
   .cnt-step { display:flex; align-items:center; flex-wrap:wrap; font-size:10.5px; font-weight:700; }
   .cnt-step .s { padding:4px 9px; color:#94a3b8; white-space:nowrap; cursor:pointer; border-radius:6px; transition:.12s; }
   .cnt-step .s:hover { background:#f1f5f9; color:#475569; }
@@ -129,7 +130,7 @@
   .recruiter-check-item input[type=checkbox] { margin-top:2px; width:15px; height:15px; flex-shrink:0; accent-color:#7f1d1d; cursor:pointer; }
   .recruiter-note-row { display:flex; align-items:flex-start; gap:8px; }
   .recruiter-note-avatar { width:26px; height:26px; border-radius:50%; background:#fef2f2; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#991b1b; flex-shrink:0; margin-top:2px; }
-  .offer-glow { box-shadow:0 0 0 3px rgba(16,185,129,.25); }
+  .offer-glow { box-shadow:0 6px 18px -6px rgba(127,29,29,.45); }
 
   /* ── Searchable Client Dropdown ── */
   .client-dropdown-wrap { position:relative; }
