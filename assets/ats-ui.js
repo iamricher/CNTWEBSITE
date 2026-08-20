@@ -756,6 +756,21 @@ function executeStageChange(id,targetStage){
   const app=findApplicant(id);
   if(app){updateApplicant(id,{stage:targetStage});showToast(`${app.name} → ${getStageName(targetStage)}`,'success');renderAll();}
 }
+// One-click "Advance →" on a kanban card: move a candidate to the very next
+// pipeline stage using the exact same path drag-and-drop uses, so the interview
+// scheduler still pops and stage emails still behave identically.
+function cntAdvanceStage(id){
+  const app=findApplicant(id); if(!app) return;
+  const keys=PIPELINE_STAGES.map(s=>s.key);
+  const i=keys.indexOf(normStage(app.stage));
+  if(i<0 || i>=keys.length-1){ showToast(app.name+' is already at the last stage.','info'); return; }
+  const next=keys[i+1];
+  const nm=(typeof getStageName==='function'?getStageName(next):'')||'';
+  // Interview routes to the scheduler (its own confirm); confirm the rest inline.
+  if(next!=='interview' && !/interview/i.test(nm) && !confirm('Move '+app.name+' to '+getStageName(next)+'?')) return;
+  requestStageChange(id, next);
+}
+window.cntAdvanceStage = cntAdvanceStage;
 
 function renderAll(){
   buildClientDropdown();
@@ -1029,10 +1044,13 @@ function kanbanCardHtml(a, refused){
       <div class="flex justify-end pt-1.5 border-t border-slate-100"><button onclick="event.stopPropagation();cntReopen('${a.id}')" class="text-[11px] text-emerald-700 font-bold hover:underline cursor-pointer flex items-center gap-1"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Reopen</button></div>
     </div>`;
   }
+  const _sk=PIPELINE_STAGES.map(s=>s.key), _si=_sk.indexOf(normStage(a.stage)), _canAdv=_si>=0 && _si<_sk.length-1;
+  const _advTitle=_canAdv?('Advance to '+getStageName(_sk[_si+1])):'';
   return `<div class="kanban-card" draggable="true" ondragstart="drag(event,'${a.id}')" onclick="triggerResumeModal('${a.id}')" style="border-left:3px solid ${accColor};">
     <div class="flex items-start justify-between gap-1 mb-0.5">
       <p class="font-bold text-slate-900 text-[13px] leading-tight truncate">${_escForm(a.name)}</p>
       <span class="kmenu flex gap-1 flex-shrink-0">
+        ${_canAdv?`<button onclick="event.stopPropagation();cntAdvanceStage('${a.id}')" title="${_escForm(_advTitle)}" class="text-slate-300 hover:text-red-700 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:15px;">arrow_forward</span></button>`:''}
         <button onclick="event.stopPropagation();openEditModal('${a.id}')" title="Edit" class="text-slate-300 hover:text-slate-600 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:14px;">edit</span></button>
         <button onclick="event.stopPropagation();cntOpenRefuse('${a.id}')" title="Refuse" class="text-slate-300 hover:text-red-600 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:14px;">block</span></button>
       </span>
