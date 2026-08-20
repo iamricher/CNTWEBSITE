@@ -935,6 +935,8 @@ function renderStageProgressBar(counts){
 function renderApplicationsTable(pipeline){
   const tb=document.getElementById('applications-table-body');
   if(!tb)return;
+  const cnt=document.getElementById('pipeline-count');
+  if(cnt) cnt.textContent=pipeline.length+(pipeline.length===1?' candidate':' candidates');
   // Sort Strong Yes → Yes → (unrated, in place) → No → Strong No. Stable sort,
   // so with no verdicts the order is unchanged.
   const rows=[...pipeline].sort((a,b)=>_verdictRank(a)-_verdictRank(b));

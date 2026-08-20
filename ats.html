@@ -516,11 +516,10 @@
           </select>
           <select id="filter-stage" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
             <option value="all">All Stages</option>
-            <option value="new">Initial Screening</option>
+            <option value="new">New Applicant</option>
             <option value="interview">Interview</option>
-            <option value="exam">Pre-Employment Exam</option>
-            <option value="bgcheck">Background Check</option>
-            <option value="hired">Job Offer / Proposal</option>
+            <option value="exam">Pre-Emp Exam</option>
+            <option value="hired">Job Offer</option>
             <option value="onboarding">Onboarding</option>
             <option value="pool">Talent Pool</option>
             <option value="rejected">Not Qualified</option>
@@ -547,7 +546,8 @@
           <option value="rated">Any verdict set</option>
           <option value="none">No verdict yet</option>
         </select>
-        <button onclick="cntClearFilters()" class="ml-auto text-[11px] font-semibold text-slate-500 hover:text-red-700 border border-slate-200 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center gap-1 whitespace-nowrap"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Clear</button>
+        <span id="pipeline-count" class="ml-auto text-[11px] font-semibold text-slate-500 whitespace-nowrap"></span>
+        <button onclick="cntClearFilters()" class="text-[11px] font-semibold text-slate-500 hover:text-red-700 border border-slate-200 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center gap-1 whitespace-nowrap"><span class="material-icons-outlined" style="font-size:13px;">restart_alt</span>Clear</button>
       </div>
 
       <div id="bulk-action-bar" class="hidden bg-white rounded-2xl border border-red-200 shadow-sm px-4 py-2.5 mb-2"></div>
@@ -1049,12 +1049,20 @@
     </div>
     <form id="crud-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
       <input type="hidden" id="applicant-id">
+      <!-- Résumé-first intake: upload the CV and the fields below fill in automatically -->
+      <div>
+        <label id="app-resume-box" for="app-resume-file" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-red-400 hover:bg-red-50/40 transition">
+          <span class="material-icons-outlined text-red-800" style="font-size:24px;">upload_file</span>
+          <span class="min-w-0"><span id="app-resume-text" class="block text-sm font-semibold text-slate-800 truncate">Upload a résumé / CV to auto-fill</span><span class="block text-[11px] text-slate-400">PDF or Word (.doc/.docx), max 5 MB — name, contact, skills &amp; experience fill in automatically</span></span>
+        </label>
+        <input type="file" id="app-resume-file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" onchange="cntAppResumePick(this)">
+      </div>
       <div class="grid grid-cols-2 gap-4">
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Full Name <span class="text-red-500">*</span></label><input type="text" id="app-name" required placeholder="e.g. Juan Dela Cruz" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Client Account <span class="text-red-500">*</span></label><select id="app-account" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white" onchange="updateJobOptions()"><option value="">Select a client…</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Location <span class="text-red-500">*</span></label><select id="app-location" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a location…</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Position Applied <span class="text-red-500">*</span></label><select id="app-role" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option value="">Select a position…</option></select></div>
-        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Stage</label><select id="app-stage" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="new">Initial Screening</option><option value="interview">Interview</option><option value="exam">Pre-Employment Exam</option><option value="bgcheck">Background Check</option><option value="hired">Job Offer / Proposal</option><option value="onboarding">Onboarding</option><option value="pool">Talent Pool</option><option value="rejected">Not Qualified</option></select></div>
+        <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Stage</label><select id="app-stage" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="new">New Applicant</option><option value="interview">Interview</option><option value="exam">Pre-Emp Exam</option><option value="hired">Job Offer</option><option value="onboarding">Onboarding</option><option value="pool">Talent Pool</option><option value="rejected">Not Qualified</option></select></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Mobile <span class="text-red-500">*</span></label><div class="flex items-stretch"><span class="flex items-center gap-1.5 px-3 border border-r-0 border-slate-200 rounded-l-lg bg-slate-50 text-sm font-semibold text-slate-700 whitespace-nowrap"><span style="font-size:15px">🇵🇭</span> +63</span><input type="text" id="app-phone" required placeholder="9XX XXX XXXX" inputmode="tel" data-phone oninput="this.value=this.value.replace(/\D/g,'').replace(/^0+/,'').replace(/^63/,'').slice(0,10)" class="w-full px-3 py-2 border border-slate-200 rounded-r-lg text-sm"></div></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Email</label><input type="email" id="app-email" placeholder="juan@email.com" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Source</label><select id="app-source" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"><option value="JobStreet">JobStreet</option><option value="Indeed">Indeed</option><option value="Facebook">Facebook</option><option value="Referral">Employee Referral</option><option value="Walk-in">Walk-in</option><option value="LinkedIn">LinkedIn</option><option value="Kalibrr">Kalibrr</option><option value="OLX">OLX</option></select></div>
@@ -1076,14 +1084,6 @@
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Character References</label><textarea id="app-char-references" rows="2" placeholder="Name, position, contact number…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Languages</label><textarea id="app-languages" rows="2" placeholder="e.g. Filipino, English" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
         <div class="col-span-2"><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Notes / Remarks</label><textarea id="app-notes" rows="2" placeholder="Add recruiter notes here…" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
-        <div class="col-span-2">
-          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Résumé / CV <span class="text-slate-400 font-normal normal-case">— PDF or Word (.doc/.docx) only, max 5 MB</span></label>
-          <label id="app-resume-box" for="app-resume-file" class="flex items-center gap-3 px-3 py-2.5 border border-dashed border-slate-300 rounded-lg text-sm cursor-pointer hover:border-red-400 hover:bg-red-50/40 transition">
-            <span class="material-icons-outlined text-slate-400" style="font-size:20px;">upload_file</span>
-            <span id="app-resume-text" class="text-slate-500 truncate">Click to upload a PDF or Word document</span>
-          </label>
-          <input type="file" id="app-resume-file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" onchange="cntAppResumePick(this)">
-        </div>
       </div>
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
         <button type="button" onclick="closeCrudModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition cursor-pointer">Cancel</button>
