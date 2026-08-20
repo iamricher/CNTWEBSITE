@@ -141,8 +141,12 @@
 .footer-red-bar{ height:4px; background:var(--red); }
 
 @media (max-width:1024px){ .footer-grid{ grid-template-columns:1fr 1fr; gap:3rem; } }
-@media (max-width:768px){
+/* Switch to the hamburger before the desktop nav (logo + 6 links + Contact,
+   ~960px wide) can overflow a narrow viewport and force horizontal scroll. */
+@media (max-width:1024px){
   .nav-links, .btn-nav:not(.mobile-cta){ display:none; }
   .nav-toggle{ display:flex; }
+}
+@media (max-width:768px){
   .footer-grid{ grid-template-columns:1fr; }
 }
