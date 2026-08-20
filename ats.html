@@ -1298,6 +1298,11 @@
         <div id="profile-form-body" class="space-y-4">
 
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <!-- Stage-aware guidance: tells the recruiter exactly what to do next -->
+          <div id="prof-nextstep" class="hidden mb-4 flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 no-print">
+            <span class="material-icons-outlined text-red-800" style="font-size:17px;margin-top:1px;">flag</span>
+            <p class="text-[13px] text-slate-700 leading-snug min-w-0"><span class="font-semibold text-slate-900">Next step:</span> <span id="prof-nextstep-text"></span></p>
+          </div>
           <!-- Action row + stage stepper (Odoo applicant form) -->
           <div class="flex items-center justify-between gap-3 mb-4 flex-wrap no-print">
             <div class="flex items-center gap-1.5 flex-wrap">

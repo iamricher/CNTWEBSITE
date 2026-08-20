@@ -357,6 +357,19 @@ function cntSyncActionBar(app){
   tog('prof-sendform-btn', examPhase);            // Send Exam is the Pre-Emp Exam action
   tog('more-schedule', !interviewPhase);
   tog('more-sendform', !examPhase);
+  // Plain-language "what to do now" so a recruiter never has to guess the next move.
+  const NEXT_STEP = {
+    new:        'Review the résumé, then schedule an interview.',
+    interview:  'Hold the interview and rate the candidate, then send the pre-employment exam.',
+    exam:       'Send the pre-employment exam and record the result once it comes back.',
+    hired:      'Prepare the job offer — set the proposed salary, then generate the offer letter.',
+    onboarding: 'Collect and verify the pre-employment requirements below.',
+    pool:       'In the talent pool — reach out when a suitable role opens.',
+    rejected:   'This candidate was refused. Reopen them if you want to reconsider.'
+  };
+  const ns=document.getElementById('prof-nextstep'), nst=document.getElementById('prof-nextstep-text');
+  const msg=NEXT_STEP[app.stage];
+  if(ns && nst){ if(msg){ nst.textContent=msg; ns.classList.remove('hidden'); } else ns.classList.add('hidden'); }
 }
 window.cntSyncActionBar = cntSyncActionBar;
 
