@@ -683,7 +683,7 @@ function getCountdownChip(deadlineStr){
   return `<span class="countdown-chip ${cls}"><span class="material-icons-outlined" style="font-size:12px;">${icon}</span>${txt}</span>`;
 }
 
-const VIEWS=['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports','settings'];
+const VIEWS=['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports','settings','admin'];
 function switchView(v){
   currentView=v;
   VIEWS.forEach(name=>{

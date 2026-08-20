@@ -1231,24 +1231,14 @@
     item.onclick=openAdminUsers;
     dash.parentElement.appendChild(item);
   }
+  // Users & Roles is an inline main-content view (no pop-up window). The markup
+  // lives in ats.html (#view-admin, with #cnt-add-user-btn / #cnt-add-form /
+  // #cnt-admin-body); here we just switch to it and populate.
   async function openAdminUsers(){
     if(currentRole!=='super_admin') return;
-    let modal=document.getElementById('cnt-admin-modal');
-    if(!modal){
-      modal=document.createElement('div'); modal.id='cnt-admin-modal';
-      modal.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:450;display:flex;align-items:flex-start;justify-content:center;padding:44px 16px;overflow-y:auto;';
-      modal.innerHTML='<div style="background:#fff;border-radius:16px;max-width:820px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">'
-        +'<div style="padding:18px 22px;border-bottom:1px solid #eef2f7;display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-        +'<div><h3 style="font-weight:800;color:#0f172a;font-size:16px;">Users &amp; Roles</h3><p style="font-size:12px;color:#64748b;margin-top:2px;">Add staff logins, assign roles, or remove access.</p></div>'
-        +'<div style="display:flex;gap:8px;align-items:center;"><button id="cnt-add-user-btn" style="background:#7f1d1d;color:#fff;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:16px;">person_add</span>Add user</button>'
-        +'<button onclick="document.getElementById(\'cnt-admin-modal\').style.display=\'none\'" style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;color:#475569;font-size:18px;cursor:pointer;flex:none;">&times;</button></div></div>'
-        +'<div id="cnt-add-form" style="display:none;padding:16px 22px;border-bottom:1px solid #f1f5f9;background:#fafafa;"></div>'
-        +'<div id="cnt-admin-body" style="padding:10px 22px 22px;"></div></div>';
-      document.body.appendChild(modal);
-      modal.addEventListener('click',e=>{ if(e.target===modal) modal.style.display='none'; });
-    }
-    modal.style.display='flex';
-    document.getElementById('cnt-add-user-btn').onclick=toggleAddUserForm;
+    if(typeof switchView==='function') switchView('admin');
+    const addBtn=document.getElementById('cnt-add-user-btn'); if(addBtn) addBtn.onclick=toggleAddUserForm;
+    const f=document.getElementById('cnt-add-form'); if(f){ f.style.display='none'; f.innerHTML=''; }
     renderAdminList();
   }
   window.openAdminUsers = openAdminUsers;
