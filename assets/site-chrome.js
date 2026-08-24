@@ -15,7 +15,7 @@
 
   function navHTML(active, base, overlay) {
     var a = active || '';
-    // base is '' on the homepage (same-page anchors) or 'index.html' on sub-pages.
+    // base is '' on the homepage (same-page anchors) or '/index' on sub-pages.
     var h = function (hash) { return base + '#' + hash; };
     return '' +
     '<nav class="nav' + (overlay ? ' nav-overlay' : '') + '" id="nav" role="navigation" aria-label="Main navigation">' +
@@ -27,7 +27,7 @@
     '      <li><a href="' + h('industries') + '" class="nav-link">Industries</a></li>' +
     '      <li><a href="' + h('projects') + '" class="nav-link">Success Stories</a></li>' +
     '      <li><a href="' + h('events') + '" class="nav-link' + (a === 'events' ? ' active' : '') + '">Events</a></li>' +
-    '      <li><a href="careers.html" class="nav-link' + (a === 'careers' ? ' active' : '') + '">Careers</a></li>' +
+    '      <li><a href="/careers" class="nav-link' + (a === 'careers' ? ' active' : '') + '">Careers</a></li>' +
     '    </ul>' +
     '    <div class="nav-actions">' +
     '      <a href="' + h('contact') + '" class="btn-nav">Contact Us</a>' +
@@ -39,16 +39,16 @@
     '  <ul>' +
     '    <li><a href="' + h('about') + '">About</a></li>' +
     '    <li><a href="' + h('services') + '">Services</a></li>' +
-    '    <li><a href="status.html">Track My Application</a></li>' +
+    '    <li><a href="/status">Track My Application</a></li>' +
     '    <li><a href="' + h('industries') + '">Industries</a></li>' +
     '    <li><a href="' + h('projects') + '">Success Stories</a></li>' +
     '    <li><a href="' + h('events') + '">Events</a></li>' +
-    '    <li><a href="careers.html">Careers</a></li>' +
-    '    <li><a href="faq.html">FAQ</a></li>' +
+    '    <li><a href="/careers">Careers</a></li>' +
+    '    <li><a href="/faq">FAQ</a></li>' +
     '    <li><a href="' + h('contact') + '">Contact</a></li>' +
     '  </ul>' +
-    '  <a href="careers.html" class="btn-primary mobile-cta">Apply Now</a>' +
-    '  <a href="status.html" class="btn-ghost mobile-cta">Track My Application</a>' +
+    '  <a href="/careers" class="btn-primary mobile-cta">Apply Now</a>' +
+    '  <a href="/status" class="btn-ghost mobile-cta">Track My Application</a>' +
     '</div>';
   }
 
@@ -67,16 +67,16 @@
     '      </div>' +
     '    </div>' +
     '    <div class="footer-col"><h5>Services</h5><ul>' +
-    '      <li><a href="services.html#executive-search">Executive Search</a></li><li><a href="services.html#mass-hiring">Mass &amp; Bulk Hiring</a></li>' +
-    '      <li><a href="services.html#hr-outsourcing">HR Outsourcing</a></li><li><a href="services.html#contractual-staffing">Contractual Staffing</a></li>' +
-    '      <li><a href="services.html#background-screening">Background Screening</a></li><li><a href="services.html#training">Training &amp; Development</a></li></ul></div>' +
+    '      <li><a href="/services#executive-search">Executive Search</a></li><li><a href="/services#mass-hiring">Mass &amp; Bulk Hiring</a></li>' +
+    '      <li><a href="/services#hr-outsourcing">HR Outsourcing</a></li><li><a href="/services#contractual-staffing">Contractual Staffing</a></li>' +
+    '      <li><a href="/services#background-screening">Background Screening</a></li><li><a href="/services#training">Training &amp; Development</a></li></ul></div>' +
     '    <div class="footer-col"><h5>Industries</h5><ul>' +
     '      <li><a href="' + h('industries') + '">Banking &amp; Finance</a></li><li><a href="' + h('industries') + '">Healthcare</a></li>' +
     '      <li><a href="' + h('industries') + '">Government</a></li><li><a href="' + h('industries') + '">Technology</a></li>' +
     '      <li><a href="' + h('industries') + '">Retail &amp; FMCG</a></li><li><a href="' + h('industries') + '">Logistics</a></li></ul></div>' +
     '    <div class="footer-col"><h5>Company</h5><ul>' +
-    '      <li><a href="about.html">About Us</a></li><li><a href="' + h('projects') + '">Success Stories</a></li>' +
-    '      <li><a href="careers.html">Careers</a></li><li><a href="faq.html">FAQ</a></li><li><a href="' + h('contact') + '">Contact</a></li></ul>' +
+    '      <li><a href="/about">About Us</a></li><li><a href="' + h('projects') + '">Success Stories</a></li>' +
+    '      <li><a href="/careers">Careers</a></li><li><a href="/faq">FAQ</a></li><li><a href="' + h('contact') + '">Contact</a></li></ul>' +
     '      <h5 style="margin-top:1.75rem">Stay Updated</h5>' +
     '      <div class="newsletter-form"><input type="email" id="nl-email" placeholder="Your email" aria-label="Newsletter email" /><button id="nl-btn" aria-label="Subscribe">&rarr;</button></div>' +
     '      <p id="nl-msg" style="font-size:.78rem;color:rgba(255,255,255,.5);margin-top:8px;min-height:1em"></p>' +
@@ -84,7 +84,7 @@
     '  </div></div></div>' +
     '  <div class="footer-bottom"><div class="container">' +
     '    <p>&copy; ' + YEAR + ' CNT Promo &amp; Ads Specialists, Inc. All rights reserved.</p>' +
-    '    <div class="footer-bottom-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="events-admin.html">Content Admin</a></div>' +
+    '    <div class="footer-bottom-links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/events-admin">Content Admin</a></div>' +
     '  </div></div>' +
     '  <div class="footer-red-bar"></div>' +
     '</footer>';
@@ -138,7 +138,7 @@
   }
 
   function init() {
-    // base is '' on the homepage (same-page anchors) or 'index.html' elsewhere.
+    // base is '' on the homepage (same-page anchors) or '/index' elsewhere.
     // Resolve it once from the header placeholder and reuse it for the footer.
     var header = document.getElementById('site-header');
     var base = header ? header.getAttribute('data-base') : null;
@@ -166,7 +166,7 @@
     b.className = 'cookie-banner';
     b.setAttribute('role', 'dialog');
     b.setAttribute('aria-label', 'Cookie notice');
-    b.innerHTML = '<p>We use first-party cookies and analytics to understand how the site is used and to improve your experience. See our <a href="privacy.html">Privacy Policy</a>.</p>' +
+    b.innerHTML = '<p>We use first-party cookies and analytics to understand how the site is used and to improve your experience. See our <a href="/privacy">Privacy Policy</a>.</p>' +
       '<div class="cookie-actions"><button class="ck-decline" type="button">Decline</button><button class="ck-accept" type="button">Accept</button></div>';
     document.body.appendChild(b);
     requestAnimationFrame(function () { b.classList.add('show'); });

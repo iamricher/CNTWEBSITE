@@ -1219,8 +1219,8 @@ input, select, textarea { font-family: var(--font-body); }
     </p>
 
     <div class="hero-actions" data-reveal>
-      <a href="careers.html" class="btn-primary magnetic">Apply Now</a>
-      <a href="status.html" class="btn-ghost magnetic">Track My Application</a>
+      <a href="/careers" class="btn-primary magnetic">Apply Now</a>
+      <a href="/status" class="btn-ghost magnetic">Track My Application</a>
     </div>
 
     <div class="hero-stats" data-reveal>
@@ -1345,7 +1345,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
 
         <div class="about-cta" data-reveal style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
-          <a href="about.html" class="btn-primary">Learn More About Us</a>
+          <a href="/about" class="btn-primary">Learn More About Us</a>
           <a href="#contact" class="btn-ghost-dark">Partner With Us</a>
         </div>
       </div>
@@ -1420,7 +1420,7 @@ input, select, textarea { font-family: var(--font-body); }
       </div>
     </div>
     <div style="text-align:center;margin-top:clamp(34px,5vw,52px);" data-reveal>
-      <a href="services.html" class="btn-primary">Explore All Services <span>→</span></a>
+      <a href="/services" class="btn-primary">Explore All Services <span>→</span></a>
     </div>
   </div>
 </section>
@@ -1573,7 +1573,7 @@ input, select, textarea { font-family: var(--font-body); }
         <span><span class="d hq"></span> Head office</span>
         <span><span class="d job"></span> Where we're hiring</span>
       </div>
-      <div class="reach-cta"><a href="careers.html">Find a job near you <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="reach-cta"><a href="/careers">Find a job near you <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
     </div>
     <div class="reach-mapwrap" data-reveal>
       <div id="reach-map" role="img" aria-label="Map of the Philippines showing CNT's head office and current hiring locations"></div>
@@ -1615,7 +1615,7 @@ input, select, textarea { font-family: var(--font-body); }
     <div class="lj-grid" id="lj-grid" data-reveal>
       <div class="lj-skel"></div><div class="lj-skel"></div><div class="lj-skel"></div>
     </div>
-    <div class="lj-more"><a class="btn-outline" href="careers.html">View all open positions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <div class="lj-more"><a class="btn-outline" href="/careers">View all open positions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
   </div>
 </section>
 
@@ -1758,7 +1758,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
         <h3>Nationwide Mall Hiring Fair</h3>
         <p>We're hiring promoters, merchandisers and sales associates across Metro Manila, Central and Southern Luzon malls. Walk in with your résumé or apply online.</p>
-        <a href="careers.html" class="service-link">View openings <span>→</span></a>
+        <a href="/careers" class="service-link">View openings <span>→</span></a>
       </div>
       <div class="service-card">
         <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1767,7 +1767,7 @@ input, select, textarea { font-family: var(--font-body); }
         </div>
         <h3>New Retail Partnership</h3>
         <p>CNT has expanded its FMCG and consumer-electronics staffing portfolio with a leading brand — opening dozens of new field and in-store roles this quarter.</p>
-        <a href="careers.html" class="service-link">Explore roles <span>→</span></a>
+        <a href="/careers" class="service-link">Explore roles <span>→</span></a>
       </div>
       <div class="service-card">
         <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
@@ -2685,7 +2685,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
       });
       Object.keys(seen).forEach(function(k){
         var o=seen[k];
-        var href='careers.html?loc='+encodeURIComponent(o.label);
+        var href='/careers?loc='+encodeURIComponent(o.label);
         var ic=L.divIcon({ className:'', html:'<div class="reach-pulse" style="width:14px;height:14px;border:2px solid #fff;cursor:pointer;"></div>', iconSize:[14,14], iconAnchor:[7,7] });
         L.marker(o.pt,{icon:ic}).addTo(map)
           .bindTooltip('<b>'+esc(o.label)+'</b> · '+o.n+' open position'+(o.n!==1?'s':'')+' — click to view', { direction:'top', offset:[0,-8] })
@@ -2726,7 +2726,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     var data=res.data;
     if(res.error||!data||!data.length){ hideSection('events'); return; }
     grid.innerHTML=data.map(function(ev){
-      var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='event.html?id='+encodeURIComponent(ev.id);
+      var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='/event?id='+encodeURIComponent(ev.id);
       return '<div class="service-card" style="cursor:pointer;" onclick="location.href=\''+link+'\'">'
         +(ev.image_url?'<img src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'CNT event')+'" loading="lazy" decoding="async" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:16px;">':'')
         +'<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'
@@ -2770,7 +2770,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
         var etype=esc((j.employment_type&&String(j.employment_type).trim())||'Full-time');
         var when=ljWhen(j.created_at);
         var isNew=j.created_at && (Date.now()-new Date(j.created_at).getTime())<14*86400000;
-        var href='careers.html?job='+encodeURIComponent(j.id);
+        var href='/job?job='+encodeURIComponent(j.id);
         return '<a class="lj-card" href="'+href+'">'
           +'<div class="lj-top">'+(isNew?'<span class="lj-new">New</span>':'')+(when?'<span class="lj-time">'+esc(when)+'</span>':'')+'</div>'
           +'<div class="lj-role">'+esc(j.role||'')+'</div>'

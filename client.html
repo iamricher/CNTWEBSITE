@@ -362,7 +362,7 @@
       msg.className='msg err';
       const staff = prof && prof.role && prof.role!=='client' && prof.role!=='pending';
       // A staff login belongs in the ATS, never the client portal.
-      if(staff) msg.innerHTML='This is a staff account — please use the CNT ATS. <a href="ats.html" style="color:var(--red);text-decoration:underline">Open the staff system</a>.';
+      if(staff) msg.innerHTML='This is a staff account — please use the CNT ATS. <a href="/ats" style="color:var(--red);text-decoration:underline">Open the staff system</a>.';
       else msg.textContent='This login is not set up for the client portal. Contact CNT.';
       return;
     }

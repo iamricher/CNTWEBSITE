@@ -7,13 +7,13 @@
   <meta name="description" content="A Million Jobs for a Million Filipinos. Explore open positions and apply online at CNT Promo & Ads Specialists, Inc." />
 
   <!-- SEO / social preview -->
-  <link rel="canonical" href="https://cnt-website-ats.vercel.app/careers.html" />
+  <link rel="canonical" href="https://cnt-website-ats.vercel.app/careers" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="CNT Promo & Ads Specialists, Inc." />
   <meta property="og:title" content="Careers — A Million Jobs for a Million Filipinos" />
   <meta property="og:description" content="Explore open positions across leading client brands and apply online in minutes — no account needed." />
   <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
-  <meta property="og:url" content="https://cnt-website-ats.vercel.app/careers.html" />
+  <meta property="og:url" content="https://cnt-website-ats.vercel.app/careers" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Careers at CNT — A Million Jobs for a Million Filipinos" />
   <meta name="twitter:description" content="Browse open roles and apply online in minutes." />
@@ -486,7 +486,7 @@
   <div id="view-detail">
     <header class="detail-head">
       <div class="container">
-        <a class="backlink" href="careers.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All open positions</a>
+        <a class="backlink" href="/careers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All open positions</a>
         <div class="client" id="d-client">CLIENT</div>
         <h1 id="d-title">Role</h1>
         <div class="detail-meta">
@@ -991,7 +991,7 @@
     if(curFilter.q) p.set('q',curFilter.q);
     if(curFilter.location&&curFilter.location!=='all') p.set('loc',curFilter.location);
     const qs=p.toString();
-    try{ history.replaceState(history.state,'', 'careers.html'+(qs?'?'+qs:'')); }catch(e){}
+    try{ history.replaceState(history.state,'', '/careers'+(qs?'?'+qs:'')); }catch(e){}
   }
   { const qEl=$('#q'); if(qEl){ const run=debounce(function(){ window._page=1; renderList(); syncUrl(); },220);
       qEl.addEventListener('input',e=>{ curFilter.q=e.target.value.trim(); run(); }); } }
@@ -1316,7 +1316,7 @@
     d.innerHTML=`<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
       <h4>Application received!</h4>
       <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b>${activeJob.location?' in '+esc(activeJob.location):''} has been submitted. Our team will review it and reach out if you’re a match.</p>
-      <p style="margin-top:12px"><a href="status.html" style="color:var(--red);font-weight:600;text-decoration:underline">Track your application status &rarr;</a></p>`;
+      <p style="margin-top:12px"><a href="/status" style="color:var(--red);font-weight:600;text-decoration:underline">Track your application status &rarr;</a></p>`;
     $('#apply-inner').appendChild(d);
   }
 

@@ -569,9 +569,9 @@
                 <label>Destination
                   <select id="utm-dest">
                     <option value="/">Home</option>
-                    <option value="/careers.html">Careers</option>
-                    <option value="/services.html">Services</option>
-                    <option value="/about.html">About</option>
+                    <option value="/careers">Careers</option>
+                    <option value="/services">Services</option>
+                    <option value="/about">About</option>
                     <option value="/#contact">Contact</option>
                   </select>
                 </label>
@@ -947,7 +947,7 @@
             +'<div class="viewbar" title="'+vc.toLocaleString()+' views"><span style="width:'+Math.max(pct,vc>0?4:0)+'%"></span></div></div>'
           +'<div class="row-actions">'
           +'<button class="iconbtn stats" onclick="evStats('+ev.id+')" title="Analytics"><span class="material-icons-outlined">bar_chart</span></button>'
-          +'<a class="iconbtn view" href="event.html?id='+ev.id+'" target="_blank" rel="noopener" title="View on site"><span class="material-icons-outlined">open_in_new</span></a>'
+          +'<a class="iconbtn view" href="/event?id='+ev.id+'" target="_blank" rel="noopener" title="View on site"><span class="material-icons-outlined">open_in_new</span></a>'
           +'<button class="iconbtn" onclick="evForm('+ev.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
           +'<button class="iconbtn del" onclick="evDelete('+ev.id+')" title="Delete"><span class="material-icons-outlined">delete</span></button>'
           +'</div></div>';
@@ -973,10 +973,10 @@
       document.getElementById('anm-rank').textContent='#'+rank+' / '+_ev.length;
       document.getElementById('anm-share-pct').textContent=sharePct+'%';
       document.getElementById('anm-share-bar').style.width=Math.max(sharePct,vc>0?3:0)+'%';
-      document.getElementById('anm-view').href='event.html?id='+id;
+      document.getElementById('anm-view').href='/event?id='+id;
       // 30-day trend from page_views (available once anLoad has run)
       var trend=document.getElementById('anm-trend');
-      var series=_pvSeries && _pvSeries['/event.html?id='+id];
+      var series=_pvSeries && _pvSeries['/event?id='+id];
       if(series && _pvDays){
         var smax=Math.max.apply(null,series.concat([1]));
         var recent=series.reduce(function(a,b){return a+b;},0);
@@ -1345,7 +1345,7 @@
         ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',align:'end',labels:{boxWidth:9,boxHeight:9,usePointStyle:true,pointStyle:'circle',font:{size:12}}},tooltip:{padding:10,cornerRadius:8,titleFont:{size:12},bodyFont:{size:12}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8,font:{size:11},color:'#94A3B8'}},y:{beginAtZero:true,grid:{color:'#EEF1F6'},ticks:{precision:0,font:{size:11},color:'#94A3B8'}}}}});
       }
 
-      var evTitle=function(p){ var m=p.match(/[?&]id=([^&]+)/); if(m){ var EV=(typeof _ev!=='undefined')?_ev:null; if(EV){ var e=EV.find(function(x){return String(x.id)===m[1];}); if(e) return e.title||('Post '+m[1]); } return 'Post '+m[1]; } if(p==='/'||p==='/index.html') return 'Home'; return p.replace(/^\//,'').replace(/\.html.*$/,'')||'Home'; };
+      var evTitle=function(p){ var m=p.match(/[?&]id=([^&]+)/); if(m){ var EV=(typeof _ev!=='undefined')?_ev:null; if(EV){ var e=EV.find(function(x){return String(x.id)===m[1];}); if(e) return e.title||('Post '+m[1]); } return 'Post '+m[1]; } if(p==='/'||p==='/index') return 'Home'; return p.replace(/^\//,'').replace(/\.html.*$/,'')||'Home'; };
       var pmap={}, puByPath={}; cur.forEach(function(r){ var p=r.path||'/'; pmap[p]=(pmap[p]||0)+1; (puByPath[p]||(puByPath[p]={}))[r.visitor_id]=1; });
       var parr=Object.keys(pmap).map(function(p){return {p:p,n:pmap[p],u:Object.keys(puByPath[p]).length};}).sort(function(a,b){return b.n-a.n;}).slice(0,10);
       if(pages){ if(!parr.length){ _emptyBox(pages,'insights','No traffic yet','Page views appear here as visitors browse the site.'); }

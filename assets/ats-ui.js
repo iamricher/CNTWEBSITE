@@ -1365,7 +1365,7 @@ function jobAgeChip(job){
 // Derived from where the ATS itself is served, so it works on localhost and on
 // the deployed site without a hard-coded domain.
 function cntCopyJobLink(sid){
-  const url=new URL('careers.html?job='+encodeURIComponent(sid), location.href).href;
+  const url=new URL('/job?job='+encodeURIComponent(sid), location.href).href;
   const done=()=>showToast('Public link copied','success');
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(url).then(done).catch(()=>prompt('Copy this link:',url));
@@ -1474,7 +1474,7 @@ function renderJobPositions(){
           </button>
           ${job._sid?`<span class="flex items-center gap-3">
             <button onclick="cntCopyJobLink('${job._sid}')" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1 cursor-pointer" title="Copy the public link to share on Facebook or JobStreet"><span class="material-icons-outlined" style="font-size:13px;">link</span>Copy link</button>
-            <a href="careers.html?job=${job._sid}" target="_blank" rel="noopener" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1" title="Open public job page"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Job Page</a>
+            <a href="/job?job=${job._sid}" target="_blank" rel="noopener" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1" title="Open public job page"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Job Page</a>
           </span>`:'<span></span>'}
         </div>
       </div>`;

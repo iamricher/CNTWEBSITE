@@ -33,10 +33,10 @@ module.exports = async (req, res) => {
 
   // 2) Read the static careers shell (careers.html without ?job= serves the file).
   let shell = '';
-  try { shell = await (await fetch(base + '/careers.html')).text(); } catch (_) {}
+  try { shell = await (await fetch(base + '/careers')).text(); } catch (_) {}
   if (!shell) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send('<!doctype html><meta http-equiv="refresh" content="0;url=/careers.html">');
+    res.status(200).send('<!doctype html><meta http-equiv="refresh" content="0;url=/careers">');
     return;
   }
 

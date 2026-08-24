@@ -27,8 +27,12 @@ const server = http.createServer((req, res) => {
   if (rel === '/') rel = '/index.html';
   // Local stand-ins for the Vercel rewrites (api/job-og, api/event-og): serve
   // the static shell so job/event share URLs work in local dev + E2E too.
-  if (rel === '/job') rel = '/careers.html';
-  else if (rel === '/event.html') rel = '/event-shell.html';
+  else if (rel === '/job') rel = '/careers.html';
+  else if (rel === '/event' || rel === '/event.html') rel = '/event-shell.html';
+  // Emulate Vercel's cleanUrls: /careers -> /careers.html when the file exists.
+  else if (!path.extname(rel)) {
+    try { if (fs.existsSync(path.join(ROOT, rel + '.html'))) rel = rel + '.html'; } catch (_) {}
+  }
   // Contain to the repo root — no path traversal.
   const filePath = path.normalize(path.join(ROOT, rel));
   if (!filePath.startsWith(ROOT)) { res.writeHead(403); res.end('Forbidden'); return; }

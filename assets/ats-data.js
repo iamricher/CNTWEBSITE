@@ -1159,7 +1159,7 @@
       '<div class="flex items-start gap-3 py-2">'
       +'<div class="min-w-0 flex-1"><div class="font-semibold text-slate-800">'+_e(ev.title||'')+(ev.published?'':' <span class="badge" style="background:#f1f5f9;color:#64748b;font-size:9px;">Draft</span>')+'</div>'
       +'<div class="text-[10px] text-slate-400">'+_e(ev.event_date||'')+(ev.category?(' · '+_e(ev.category)):'')+'</div></div>'
-      +'<a href="event.html?id='+ev.id+'" target="_blank" class="text-indigo-600 hover:underline text-[11px] font-semibold cursor-pointer">View</a>'
+      +'<a href="/event?id='+ev.id+'" target="_blank" class="text-indigo-600 hover:underline text-[11px] font-semibold cursor-pointer">View</a>'
       +'<button onclick="cntEventForm('+ev.id+')" class="text-slate-500 hover:text-slate-800 text-[11px] font-semibold cursor-pointer">Edit</button>'
       +'<button onclick="cntDeleteEvent('+ev.id+')" class="text-slate-400 hover:text-red-500 text-[11px] font-semibold cursor-pointer">Delete</button>'
       +'</div>').join('')+'</div>';

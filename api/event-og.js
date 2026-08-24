@@ -3,7 +3,7 @@
 //
 //  Social crawlers (Facebook, LinkedIn, X, Messenger, Viber…) do NOT run the
 //  client JS that renders event.html, so per-event share previews must be
-//  injected server-side. vercel.json rewrites /event.html?id=… to this
+//  injected server-side. vercel.json rewrites /event?id=… to this
 //  function: it fetches the event from Supabase (public anon key), grabs the
 //  static event.html shell, and injects <title>, description and OG/Twitter
 //  tags before serving it. Real browsers still run the normal client JS.
@@ -33,10 +33,10 @@ module.exports = async (req, res) => {
   // 2) Grab the static shell (event-shell.html is served directly; /event.html
   //    always rewrites here, so we read the shell from its own static path).
   let shell = '';
-  try { shell = await (await fetch(base + '/event-shell.html')).text(); } catch (_) {}
+  try { shell = await (await fetch(base + '/event-shell')).text(); } catch (_) {}
   if (!shell) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send('<!doctype html><meta http-equiv="refresh" content="0;url=/event-shell.html?id=' + esc(id) + '">');
+    res.status(200).send('<!doctype html><meta http-equiv="refresh" content="0;url=/event-shell?id=' + esc(id) + '">');
     return;
   }
 
@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
   let desc = ev ? (ev.summary || ev.body || '') : 'Latest events and updates from CNT Promo & Ads Specialists, Inc.';
   desc = String(desc).replace(/\s+/g, ' ').trim().slice(0, 200);
   const img = (ev && ev.image_url) ? ev.image_url : FALLBACK_IMG;
-  const url = base + '/event.html?id=' + encodeURIComponent(id);
+  const url = base + '/event?id=' + encodeURIComponent(id);
 
   const meta = '<title>' + esc(title) + '</title>'
     + '<meta name="description" content="' + esc(desc) + '">'
