@@ -1250,11 +1250,17 @@
       // protected + validated server-side. Falls back to a direct insert if the
       // proxy is unavailable, so applying never breaks (RLS still enforces a
       // fresh 'new' row either way).
+      // Campaign attribution: the first-touch UTM saved by site-chrome.js when
+      // the applicant arrived on a tagged link (valid 30 days). Attaches the
+      // real source of the application even when they self-report "Website".
+      let utm={source:null,medium:null,campaign:null};
+      try{ const s=JSON.parse(localStorage.getItem('cnt_utm')||'null'); if(s&&s.v&&(Date.now()-s.t)<30*864e5){ utm={source:s.v.s||null,medium:s.v.m||null,campaign:s.v.c||null}; } }catch(_){}
       const payload={ job_id:activeJob.id??null, name, email, phone,
         role:activeJob.role, client:activeJob.client, location:activeJob.location,
         experience:f.experience.value||null, source:f.source.value||'Website',
         cover_note:f.cover_note.value.trim()||null, resume_url:path,
         referred_by:referredBy||null, referral_relation:referralRelation||null,
+        utm_source:utm.source, utm_medium:utm.medium, utm_campaign:utm.campaign,
         company_website:(f.company_website&&f.company_website.value)||'' };
       let submitted=false, proxyErr=null;
       try{
@@ -1265,14 +1271,17 @@
       }catch(_){ /* proxy unreachable → fall back */ }
       if(proxyErr) throw new Error(proxyErr);
       if(!submitted){
-        const ins=await sb.from('applications').insert({
+        const baseRow={
           job_id:activeJob.id??null, name, email, phone,
           role:activeJob.role, client:activeJob.client, location:activeJob.location,
           experience:f.experience.value||null, source:f.source.value||'Website',
           cover_note:f.cover_note.value.trim()||null, resume_url:path, stage:'new',
           referred_by:referredBy||null, referral_relation:referralRelation||null,
           consent_at:new Date().toISOString()
-        });
+        };
+        let ins=await sb.from('applications').insert(Object.assign({}, baseRow, { utm_source:utm.source, utm_medium:utm.medium, utm_campaign:utm.campaign }));
+        // If the UTM columns aren't there yet, still record the application.
+        if(ins.error && /column|schema cache|does not exist/i.test(ins.error.message||'')){ ins=await sb.from('applications').insert(baseRow); }
         if(ins.error) throw ins.error;
       }
       localStorage.setItem('cnt_last_apply', String(Date.now()));
