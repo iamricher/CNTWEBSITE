@@ -2574,6 +2574,33 @@
     const review=total-hired-refused;
     const conv=total?Math.round(hired/total*100):0;
 
+    // ── Today's focus: the recruiter's action queue ──
+    (function(){
+      const host=document.getElementById('dash-myday'); if(!host) return;
+      const today=(typeof _localDateStr==='function')?_localDateStr(new Date()):new Date().toISOString().slice(0,10);
+      const age=a=>{ const d=a.appliedDate||a.applied_date; const t=d?new Date(d).getTime():NaN; return isNaN(t)?0:Math.floor((Date.now()-t)/86400000); };
+      const isOpen=a=>{ const o=_outcome(a); return o!=='hired'&&o!=='refused'; };
+      const news = apps.filter(a=>a.stage==='new');
+      const ivToday = apps.filter(a=>a.interviewDate===today && isOpen(a));
+      const stale = apps.filter(a=>isOpen(a) && age(a)>=7 && ['new','interview','phone','qualified','scheduled','exam'].indexOf(a.stage)>=0).sort((x,y)=>age(y)-age(x));
+      const nm=a=>(typeof _niceName==='function')?_niceName(a.name):(a.name||'');
+      const card=(icon,color,label,list,fmt,empty)=>{
+        const rows=list.slice(0,4).map(a=>'<button onclick="triggerResumeModal(\''+a.id+'\')" class="w-full text-left flex items-center justify-between gap-2 px-2 py-1 rounded-lg hover:bg-slate-50 cursor-pointer"><span class="text-xs font-semibold text-slate-700 truncate">'+_e(nm(a))+'</span><span class="text-[10px] text-slate-400 shrink-0">'+fmt(a)+'</span></button>').join('');
+        const more=list.length>4?'<div class="text-[10px] text-slate-400 px-2 pt-1">+'+(list.length-4)+' more</div>':'';
+        return '<div class="bg-white border border-slate-200 rounded-2xl p-4">'
+          +'<div class="flex items-center gap-2 mb-2"><span class="material-icons-outlined" style="font-size:18px;color:'+color+'">'+icon+'</span>'
+          +'<span class="text-2xl font-extrabold text-slate-900">'+list.length+'</span>'
+          +'<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-auto text-right leading-tight">'+label+'</span></div>'
+          +(list.length?rows+more:'<div class="text-[11px] text-slate-400 px-2 py-1">'+empty+'</div>')
+          +'</div>';
+      };
+      host.innerHTML='<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">'
+        +card('how_to_reg','#dc2626','New · to review',news,a=>'review','Nothing new to review.')
+        +card('event','#7c3aed','Interviews today',ivToday,a=>a.interviewTime||'today','No interviews today.')
+        +card('schedule','#b45309','Waiting 7+ days',stale,a=>age(a)+'d','Nothing overdue.')
+        +'</div>';
+    })();
+
     // ── 6 counters ──
     document.getElementById('dash-kpis').innerHTML=
        _kpiTile('Open Job Positions',openJobs.length,'published','#0f172a','work')
