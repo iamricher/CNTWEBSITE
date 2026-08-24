@@ -2728,7 +2728,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     grid.innerHTML=data.map(function(ev){
       var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='event.html?id='+encodeURIComponent(ev.id);
       return '<div class="service-card" style="cursor:pointer;" onclick="location.href=\''+link+'\'">'
-        +(ev.image_url?'<img src="'+esc(ev.image_url)+'" alt="" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:16px;">':'')
+        +(ev.image_url?'<img src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'CNT event')+'" loading="lazy" decoding="async" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:16px;">':'')
         +'<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'
           +(date?'<span style="font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px;">'+date+'</span>':'')
           +'<span style="font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E;">'+cat+'</span>'
@@ -2793,7 +2793,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     var rows=res.data;
     if(res.error||!rows||!rows.length){ hideSection('projects'); return; }
     sgrid.innerHTML=rows.map(function(s){
-      var img=s.image_url?'<img src="'+esc(s.image_url)+'" alt="'+esc(s.title||'')+'">':'';
+      var img=s.image_url?'<img src="'+esc(s.image_url)+'" alt="'+esc(s.title||'Success story')+'" loading="lazy" decoding="async">':'';
       var imgBg=s.image_url?'':'style="background:linear-gradient(135deg,#1A1A1A,#C8102E);"';
       return '<div class="project-card"><div class="project-img" '+imgBg+'>'+img+'</div>'
         +'<div class="project-overlay"><div class="project-info">'
