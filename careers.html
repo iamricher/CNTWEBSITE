@@ -681,7 +681,7 @@
       "identifier":{"@type":"PropertyValue","name":"CNT","value":String(job.id)},
       "hiringOrganization":{"@type":"Organization","name":"CNT Promo & Ads Specialists, Inc.","sameAs":ORG_URL,"logo":"https://cnt-website-ats.vercel.app/assets/img/icon.png"},
       "jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","addressLocality":job.location||"Metro Manila","addressCountry":"PH"}},
-      "url":ORG_URL+"/careers.html?job="+job.id
+      "url":ORG_URL+"/job?job="+job.id
     };
     if(sal.length){ o.baseSalary={"@type":"MonetaryAmount","currency":"PHP","value":sal.length>1?{"@type":"QuantitativeValue","minValue":sal[0],"maxValue":sal[1],"unitText":"MONTH"}:{"@type":"QuantitativeValue","value":sal[0],"unitText":"MONTH"}}; }
     return o;
@@ -892,7 +892,7 @@
       const info=ROLE_INFO[j.role]||{};
       const snipSrc=(j.about&&j.about.trim())||(j.responsibilities&&j.responsibilities.trim())||info.summary||'';
       const snippet=snipSrc.replace(/\s*[\r\n]+\s*/g,' · ').trim();
-      return `<a class="job-row" href="careers.html?job=${j.id}" data-id="${j.id}">
+      return `<a class="job-row" href="/job?job=${j.id}" data-id="${j.id}">
         <div class="main">
           <div class="jr-top">${isNew?'<span class="jr-new">New</span>':''}${when?`<span class="jr-time">${when}</span>`:''}</div>
           <div class="title">${esc(j.role)}</div>
@@ -1057,7 +1057,7 @@
     panel.scrollTop=0;
     panel.querySelectorAll('[data-apply]').forEach(b=>b.addEventListener('click',()=>gotoJob(+b.dataset.apply)));
     panel.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{
-      const url=location.origin+'/careers.html?job='+b.dataset.copy;
+      const url=location.origin+'/job?job='+b.dataset.copy;
       const done=()=>{ b.classList.add('done'); const s=b.querySelector('span'); if(s){ const o=s.textContent; s.textContent='Copied!'; setTimeout(()=>{ s.textContent=o; b.classList.remove('done'); },1500); } };
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,function(){}); }
     }));
@@ -1088,7 +1088,7 @@
     box.innerHTML='<h3>Similar openings</h3><p class="sim-sub">Other roles you might be a great fit for.</p><div class="similar-grid">'+sim.map(j=>{
       const sal=formatSalary(j.salary_range);
       const etype=(j.employment_type&&String(j.employment_type).trim())||'Full-time';
-      return `<a class="sim-card" href="careers.html?job=${j.id}" data-id="${j.id}">
+      return `<a class="sim-card" href="/job?job=${j.id}" data-id="${j.id}">
         <div class="r">${esc(j.role)}</div>
         <div class="sim-cat">${esc(jobCategory(j.role))}${j.location?' &middot; '+esc(j.location):''}</div>
         ${sal&&sal!=='&mdash;'&&sal!=='—'?`<div class="sim-sal">${sal}<span style="font-weight:600;color:var(--gray-600)"> /mo</span></div>`:''}
@@ -1101,7 +1101,7 @@
   /* ---------- SHARE THIS JOB ---------- */
   function renderShare(job){
     const box=$('#d-share'); if(!box) return;
-    const url=location.origin+'/careers.html?job='+job.id;
+    const url=location.origin+'/job?job='+job.id;
     const text='Job opening: '+job.role+' at '+job.client;
     const eu=encodeURIComponent(url), et=encodeURIComponent(text);
     box.innerHTML=
@@ -1118,7 +1118,7 @@
   }
 
   /* ---------- ROUTER ---------- */
-  function gotoJob(id){ history.pushState({id},'', 'careers.html?job='+id); route(); window.scrollTo({top:0}); }
+  function gotoJob(id){ history.pushState({id},'', '/job?job='+id); route(); window.scrollTo({top:0}); }
   window.addEventListener('popstate',route);
   function route(){
     const params=new URLSearchParams(location.search);

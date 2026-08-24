@@ -52,10 +52,11 @@ module.exports = async (req, res) => {
     desc = 'Explore open positions and apply online with CNT Promo & Ads Specialists, Inc.';
   }
   const img = FALLBACK_IMG;
-  const url = base + '/careers.html?job=' + encodeURIComponent(id);
+  const url = base + '/job?job=' + encodeURIComponent(id);
 
   const meta = '<title>' + esc(title) + '</title>'
     + '<meta name="description" content="' + esc(desc) + '">'
+    + '<link rel="canonical" href="' + esc(url) + '">'
     + '<meta property="og:type" content="website">'
     + '<meta property="og:site_name" content="CNT Promo &amp; Ads Specialists, Inc.">'
     + '<meta property="og:title" content="' + esc(title) + '">'
@@ -72,6 +73,7 @@ module.exports = async (req, res) => {
   let out = shell
     .replace(/<title>[\s\S]*?<\/title>/i, '')
     .replace(/<meta\s+name=["']description["'][^>]*>/ig, '')
+    .replace(/<link\s+rel=["']canonical["'][^>]*>/ig, '')
     .replace(/<meta\s+property=["']og:[^"']*["'][^>]*>/ig, '')
     .replace(/<meta\s+name=["']twitter:[^"']*["'][^>]*>/ig, '');
   out = out.replace('</head>', meta + '</head>');
