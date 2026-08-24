@@ -493,6 +493,7 @@
           <span id="d-location"></span>
           <span id="d-salary"></span>
           <span id="d-openings"></span>
+          <span id="d-ref"></span>
         </div>
         <button class="btn-apply-top" onclick="document.getElementById('apply-anchor').scrollIntoView({behavior:'smooth'})">Apply for this position →</button>
         <div class="d-share" id="d-share"></div>
@@ -696,6 +697,9 @@
   const pinSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
   const cashSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
   const usersSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>';
+  const refSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>';
+  // Public job reference code — stable, unique, and safe to share (no client).
+  function jobRef(job){ const id=(job&&(job.id!=null?job.id:job._sid)); return 'CNT-'+id; }
 
   /* ---------- LOAD ---------- */
   async function loadJobs(){
@@ -896,9 +900,9 @@
       const snippet=snipSrc.replace(/\s*[\r\n]+\s*/g,' · ').trim();
       return `<a class="job-row" href="/job?job=${j.id}" data-id="${j.id}">
         <div class="main">
-          <div class="jr-top">${isNew?'<span class="jr-new">New</span>':''}${when?`<span class="jr-time">${when}</span>`:''}</div>
+          <div class="jr-top">${isNew?'<span class="jr-new">New</span>':''}${when?`<span class="jr-time">${when}</span>`:''}<span class="jr-time" style="margin-left:auto">${jobRef(j)}</span></div>
           <div class="title">${esc(j.role)}</div>
-          <div class="jr-company">${esc(jobCategory(j.role))}${j.location?' &middot; '+esc(j.location):''}</div>
+          <div class="jr-company">${esc((j.industry&&j.industry.trim())||jobCategory(j.role))}${j.location?' &middot; '+esc(j.location):''}</div>
           ${sal&&sal!=='&mdash;'&&sal!=='—'?`<div class="jr-salary">${sal}<span style="font-weight:600;color:var(--gray-600)"> a month</span></div>`:''}
           <div class="jr-tags">
             <span class="jr-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>${esc(etype)}</span>
@@ -1092,7 +1096,7 @@
       const etype=(j.employment_type&&String(j.employment_type).trim())||'Full-time';
       return `<a class="sim-card" href="/job?job=${j.id}" data-id="${j.id}">
         <div class="r">${esc(j.role)}</div>
-        <div class="sim-cat">${esc(jobCategory(j.role))}${j.location?' &middot; '+esc(j.location):''}</div>
+        <div class="sim-cat">${esc((j.industry&&j.industry.trim())||jobCategory(j.role))}${j.location?' &middot; '+esc(j.location):''}</div>
         ${sal&&sal!=='&mdash;'&&sal!=='—'?`<div class="sim-sal">${sal}<span style="font-weight:600;color:var(--gray-600)"> /mo</span></div>`:''}
         <div class="sim-tags"><span class="jr-tag">${briefcase}${esc(etype)}</span></div>
         <span class="sim-foot">View role ${arrow}</span>
@@ -1157,9 +1161,11 @@
     try{ if(job&&job.id!=null&&!_jobViewed[job.id]){ _jobViewed[job.id]=1; if(window.cntLogView) window.cntLogView('/careers.html?job='+job.id); } }catch(_){}
     $('#view-list').style.display='none';
     $('#view-detail').style.display='block';
-    // Client is confidential on the public site — show the job category instead.
-    $('#d-client').textContent=jobCategory(job.role);
+    // Client is confidential on the public site — show the industry/sector (or
+    // the role category as a fallback) so two same-role postings stay distinct.
+    $('#d-client').textContent=(job.industry&&job.industry.trim())||jobCategory(job.role);
     $('#d-title').textContent=job.role;
+    { const rf=$('#d-ref'); if(rf) rf.innerHTML=refSvg+' Ref '+jobRef(job); }
     $('#d-location').innerHTML=pinSvg+' '+esc(job.location);
     { const ds=$('#d-salary'); if(ds){ if(job.hide_salary){ ds.style.display='none'; ds.innerHTML=''; } else { ds.style.display=''; ds.innerHTML=esc(formatSalary(job.salary_range))+' /mo'; } } }
     $('#d-openings').innerHTML=usersSvg+' '+(+job.openings||1)+' opening'+((+job.openings||1)!==1?'s':'');
@@ -1315,7 +1321,7 @@
     const d=document.createElement('div'); d.className='success';
     d.innerHTML=`<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
       <h4>Application received!</h4>
-      <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b>${activeJob.location?' in '+esc(activeJob.location):''} has been submitted. Our team will review it and reach out if you’re a match.</p>
+      <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b>${activeJob.location?' in '+esc(activeJob.location):''} (Ref ${jobRef(activeJob)}) has been submitted. Our team will review it and reach out if you’re a match.</p>
       <p style="margin-top:12px"><a href="/status" style="color:var(--red);font-weight:600;text-decoration:underline">Track your application status &rarr;</a></p>`;
     $('#apply-inner').appendChild(d);
   }

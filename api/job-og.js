@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
   let job = null;
   try {
     if (id) {
-      const r = await fetch(SUPABASE_URL + '/rest/v1/jobs?id=eq.' + encodeURIComponent(id) + '&status=eq.open&select=role,location,salary_range,description,hide_salary', { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } });
+      const r = await fetch(SUPABASE_URL + '/rest/v1/jobs?id=eq.' + encodeURIComponent(id) + '&status=eq.open&select=role,location,salary_range,description,hide_salary,industry', { headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } });
       const rows = await r.json();
       if (Array.isArray(rows) && rows[0]) job = rows[0];
     }
@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
   let desc;
   if (job) {
     // Client is confidential — keep it out of the public share preview.
-    const bits = [job.location, (job.salary_range && !job.hide_salary) ? (job.salary_range + '/mo') : null].filter(Boolean).join(' · ');
+    const bits = [job.industry, job.location, (job.salary_range && !job.hide_salary) ? (job.salary_range + '/mo') : null].filter(Boolean).join(' · ');
     const extra = String(job.description || '').replace(/\s+/g, ' ').trim();
     desc = (bits + (extra ? ' — ' + extra : ' — Apply now with CNT.')).slice(0, 200);
   } else {
