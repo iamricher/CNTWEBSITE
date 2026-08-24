@@ -70,7 +70,6 @@ Deno.serve(async (req) => {
   const name = String(app.name ?? '').trim() || 'there';
   const first = name.split(/\s+/)[0] || 'there';
   const role = String(app.role ?? 'the role').trim();
-  const client = String(app.client ?? 'CNT').trim();
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const SITE = 'https://cnt-website-ats.vercel.app';
   const LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
@@ -79,7 +78,7 @@ Deno.serve(async (req) => {
   const subject = `We received your application — ${role}`;
   const text =
     `Dear ${name},\n\n` +
-    `Thank you for applying for the ${role} position with CNT Recruitment (${client}). ` +
+    `Thank you for applying for the ${role} position with CNT Recruitment. ` +
     `We have received your application and our team will review it. If you're a match, we'll reach out about next steps.\n\n` +
     `Reminder: applying to CNT is always 100% free — we never ask jobseekers for payment.\n\n` +
     `Track your application anytime at ${SITE}/status.html\n\n` +

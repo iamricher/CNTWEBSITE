@@ -717,7 +717,9 @@
   // role's known responsibilities/requirements, so matching sees real skills.
   function jmCorpus(j){
     const info=ROLE_INFO[j.role]||{};
-    return [j.role,j.client,j.location,j.description,jobCategory(j.role),info.summary,(info.resp||[]).join(' '),(info.must||[]).join(' ')]
+    // Client is intentionally excluded — it's confidential, so it must not be
+    // searchable/discoverable on the public careers page.
+    return [j.role,j.location,j.description,jobCategory(j.role),info.summary,(info.resp||[]).join(' '),(info.must||[]).join(' ')]
       .filter(Boolean).join(' ').toLowerCase();
   }
   const JM_STOP=new Set(['and','or','the','a','an','for','with','of','to','in','on','at','my','me','i','skills','skill','work','job','jobs']);
@@ -1102,7 +1104,7 @@
   function renderShare(job){
     const box=$('#d-share'); if(!box) return;
     const url=location.origin+'/job?job='+job.id;
-    const text='Job opening: '+job.role+' at '+job.client;
+    const text='Job opening: '+job.role+(job.location?' in '+job.location:'');
     const eu=encodeURIComponent(url), et=encodeURIComponent(text);
     box.innerHTML=
       '<span class="sh-label">Share this job</span>'
@@ -1155,7 +1157,8 @@
     try{ if(job&&job.id!=null&&!_jobViewed[job.id]){ _jobViewed[job.id]=1; if(window.cntLogView) window.cntLogView('/careers.html?job='+job.id); } }catch(_){}
     $('#view-list').style.display='none';
     $('#view-detail').style.display='block';
-    $('#d-client').textContent=job.client;
+    // Client is confidential on the public site — show the job category instead.
+    $('#d-client').textContent=jobCategory(job.role);
     $('#d-title').textContent=job.role;
     $('#d-location').innerHTML=pinSvg+' '+esc(job.location);
     $('#d-salary').innerHTML=esc(formatSalary(job.salary_range))+' /mo';
@@ -1173,7 +1176,7 @@
     $('#d-prose').innerHTML=`
       <h3>About the role</h3>
       <p>${esc(about)}</p>
-      <p>This is a <b>${esc(job.role)}</b> position for <b>${esc(job.client)}</b>, based in <b>${esc(job.location)}</b>, offered through CNT Promo &amp; Ads Specialists, Inc. — a DOLE-licensed employment agency. We currently have <b>${(+job.openings||1)}</b> opening${(+job.openings||1)!==1?'s':''} for this role.</p>
+      <p>This is a <b>${esc(job.role)}</b> position based in <b>${esc(job.location)}</b>, offered through CNT Promo &amp; Ads Specialists, Inc. — a DOLE-licensed employment agency. We currently have <b>${(+job.openings||1)}</b> opening${(+job.openings||1)!==1?'s':''} for this role.</p>
       ${skillsHtml}
       <span class="tag-title">Responsibilities</span>
       ${bullets(resp)}
@@ -1185,7 +1188,7 @@
       ${bullets(offer)}`;
     resetForm();
     renderSimilar(job);
-    document.title=job.role+' ('+job.client+') — CNT Careers';
+    document.title=job.role+(job.location?' — '+job.location:'')+' — CNT Careers';
   }
 
   /* ---------- APPLY ---------- */
@@ -1312,7 +1315,7 @@
     const d=document.createElement('div'); d.className='success';
     d.innerHTML=`<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
       <h4>Application received!</h4>
-      <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b> (${esc(activeJob.client)}) has been submitted. Our team will review it and reach out if you’re a match.</p>
+      <p>Thank you, ${esc(name)}. Your application for <b>${esc(activeJob.role)}</b>${activeJob.location?' in '+esc(activeJob.location):''} has been submitted. Our team will review it and reach out if you’re a match.</p>
       <p style="margin-top:12px"><a href="status.html" style="color:var(--red);font-weight:600;text-decoration:underline">Track your application status &rarr;</a></p>`;
     $('#apply-inner').appendChild(d);
   }
