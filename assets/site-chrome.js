@@ -20,7 +20,7 @@
     return '' +
     '<nav class="nav' + (overlay ? ' nav-overlay' : '') + '" id="nav" role="navigation" aria-label="Main navigation">' +
     '  <div class="nav-container">' +
-    '    <a href="' + (base || 'index.html') + '" class="nav-logo" aria-label="CNT Home"><img src="' + LOGO + '" alt="CNT Promo & Ads Specialists, Inc." /></a>' +
+    '    <a href="' + (base || '/') + '" class="nav-logo" aria-label="CNT Home"><img src="' + LOGO + '" alt="CNT Promo & Ads Specialists, Inc." /></a>' +
     '    <ul class="nav-links" role="list">' +
     '      <li><a href="' + h('about') + '" class="nav-link' + (a === 'about' ? ' active' : '') + '">About</a></li>' +
     '      <li><a href="' + h('services') + '" class="nav-link' + (a === 'services' ? ' active' : '') + '">Services</a></li>' +
@@ -142,7 +142,7 @@
     // Resolve it once from the header placeholder and reuse it for the footer.
     var header = document.getElementById('site-header');
     var base = header ? header.getAttribute('data-base') : null;
-    if (base === null) base = 'index.html'; // sub-pages default
+    if (base === null) base = '/'; // sub-pages point home to the clean root, not /index.html
     if (header) {
       var overlay = header.getAttribute('data-overlay') === '1';
       header.innerHTML = navHTML(header.getAttribute('data-active'), base, overlay);

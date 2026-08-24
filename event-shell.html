@@ -72,7 +72,7 @@
 
   <main class="article">
     <div class="container">
-      <a class="backlink" href="index.html#events"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All events &amp; updates</a>
+      <a class="backlink" href="/#events"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All events &amp; updates</a>
     </div>
     <div id="event-hero"></div>
     <div class="container">
@@ -102,11 +102,11 @@
     var hero=document.getElementById('event-hero');
     var id=new URLSearchParams(location.search).get('id');
     var sb=(window.getSupabase&&window.getSupabase());
-    if(!id){ el.innerHTML='<div class="state">No event selected. <a href="index.html#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
+    if(!id){ el.innerHTML='<div class="state">No event selected. <a href="/#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
     if(!sb){ el.innerHTML='<div class="state">Unable to load right now. Please try again later.</div>'; return; }
     sb.from('events').select('*').eq('id',id).eq('published',true).single().then(function(res){
       var ev=res.data;
-      if(res.error||!ev){ el.innerHTML='<div class="state">This event was not found or is no longer available.<br><a href="index.html#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
+      if(res.error||!ev){ el.innerHTML='<div class="state">This event was not found or is no longer available.<br><a href="/#events" style="color:var(--red);font-weight:600;">Back to events</a></div>'; return; }
       document.title=(ev.title||'Event')+' — CNT';
       // Count a view (once per browser session per event, so a refresh
       // doesn't inflate it). Fire-and-forget; never blocks the page.
