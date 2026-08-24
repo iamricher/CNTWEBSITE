@@ -228,7 +228,26 @@
       // External referrer host (traffic source), null for direct/internal visits.
       var ref = null;
       try { if (document.referrer) { var rh = new URL(document.referrer).hostname.replace(/^www\./, ''); if (rh && rh !== location.hostname.replace(/^www\./, '')) ref = rh; } } catch (_) {}
+      // Campaign attribution: read UTM tags off the arrival URL. First-touch —
+      // a tagged link sticks to this browser's following page views for 30 days,
+      // so the whole visit is credited to the campaign even after they navigate
+      // (and even when the platform strips document.referrer, e.g. in-app apps).
+      var utm = null;
+      try {
+        var q = new URLSearchParams(location.search);
+        var us = q.get('utm_source'), um = q.get('utm_medium'), uc = q.get('utm_campaign');
+        if (us || uc) {
+          utm = { s: us || null, m: um || null, c: uc || null };
+          try { localStorage.setItem('cnt_utm', JSON.stringify({ v: utm, t: Date.now() })); } catch (_) {}
+        } else {
+          try {
+            var saved = JSON.parse(localStorage.getItem('cnt_utm') || 'null');
+            if (saved && saved.v && (Date.now() - saved.t) < 30 * 86400000) utm = saved.v;
+          } catch (_) {}
+        }
+      } catch (_) {}
       var payload = { path: path, visitor_id: vid, referrer: ref };
+      if (utm) { payload.utm_source = utm.s; payload.utm_medium = utm.m; payload.utm_campaign = utm.c; }
       // Fallback: direct Supabase insert (no geo) when /api/pv isn't reachable
       // (local dev, or a non-Vercel host).
       var direct = function () {

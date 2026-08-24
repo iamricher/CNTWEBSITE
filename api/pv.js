@@ -33,6 +33,10 @@ module.exports = async (req, res) => {
     country:    clip(h['x-vercel-ip-country'], 4),
     region:     clip(h['x-vercel-ip-country-region'], 12),
     city:       clip(dec(h['x-vercel-ip-city']), 120),
+    // Campaign attribution — where a shared link sent them from.
+    utm_source:   clip(b.utm_source, 60),
+    utm_medium:   clip(b.utm_medium, 60),
+    utm_campaign: clip(b.utm_campaign, 80),
   };
 
   try {
@@ -45,11 +49,21 @@ module.exports = async (req, res) => {
       // If the geo columns aren't there yet, still log the core view.
       const t = await r.text().catch(() => '');
       if (/column|schema cache|does not exist/i.test(t)) {
-        await fetch(SUPABASE_URL + '/rest/v1/page_views', {
+        // Drop the campaign fields first (keep geo) in case only the UTM
+        // migration hasn't run yet; fall back to the core row if geo is also new.
+        const noUtm = { path: row.path, visitor_id: row.visitor_id, referrer: row.referrer, country: row.country, region: row.region, city: row.city };
+        const r2 = await fetch(SUPABASE_URL + '/rest/v1/page_views', {
           method: 'POST',
           headers: { apikey: ANON, Authorization: 'Bearer ' + ANON, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-          body: JSON.stringify({ path: row.path, visitor_id: row.visitor_id, referrer: row.referrer }),
-        }).catch(() => {});
+          body: JSON.stringify(noUtm),
+        }).catch(() => null);
+        if (!r2 || !r2.ok) {
+          await fetch(SUPABASE_URL + '/rest/v1/page_views', {
+            method: 'POST',
+            headers: { apikey: ANON, Authorization: 'Bearer ' + ANON, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+            body: JSON.stringify({ path: row.path, visitor_id: row.visitor_id, referrer: row.referrer }),
+          }).catch(() => {});
+        }
       }
     }
   } catch (_) { /* never let analytics break a page */ }

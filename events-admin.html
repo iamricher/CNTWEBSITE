@@ -186,6 +186,19 @@
     .pg-n{width:52px;text-align:right;font-size:.82rem;font-weight:700;color:var(--muted);flex-shrink:0}
     @media(max-width:560px){ .pg-path{width:120px} }
 
+    /* ── Campaign link builder ── */
+    .utm-build{padding:16px 22px 20px;display:flex;flex-direction:column;gap:12px}
+    .utm-build label{display:flex;flex-direction:column;gap:5px;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+    .utm-build input,.utm-build select{font-size:.9rem;font-weight:500;color:var(--ink);background:var(--card,#fff);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;text-transform:none;letter-spacing:normal}
+    .utm-build input:focus,.utm-build select:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.12)}
+    .utm-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .utm-out{display:flex;gap:8px;align-items:stretch;margin-top:2px}
+    .utm-out input{flex:1;background:var(--line-soft,#f3f4f6);font-size:.82rem;color:var(--muted)}
+    .btn-copy{flex-shrink:0;border:none;background:var(--red);color:#fff;font-weight:700;font-size:.82rem;padding:0 16px;border-radius:9px;cursor:pointer;transition:filter .12s ease}
+    .btn-copy:hover{filter:brightness(1.08)}
+    .utm-hint{font-size:.75rem;margin:0;line-height:1.45}
+    @media(max-width:560px){ .utm-row{grid-template-columns:1fr} }
+
     /* ── Gallery uploader ── */
     .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:10px}
     .gthumb{position:relative;border-radius:9px;overflow:hidden;border:1px solid var(--line-soft);aspect-ratio:1}
@@ -490,6 +503,45 @@
             <div class="card">
               <div class="card-head"><div><h2>Content performance</h2><p>Most-viewed events &amp; success stories.</p></div></div>
               <div id="an-content"><div class="muted" style="padding:18px 22px">Loading…</div></div>
+            </div>
+          </div>
+
+          <div class="grid2" style="margin-bottom:16px;">
+            <div class="card">
+              <div class="card-head"><div><h2>Campaigns</h2><p>Visits from your tagged links — tracked even when the platform hides the referrer.</p></div></div>
+              <div id="an-campaigns"><div class="muted" style="padding:18px 22px">Loading…</div></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div><h2>Campaign link builder</h2><p>Tag a link before you share it, so its clicks show up above.</p></div></div>
+              <div class="utm-build">
+                <label>Destination
+                  <select id="utm-dest">
+                    <option value="/">Home</option>
+                    <option value="/careers.html">Careers</option>
+                    <option value="/services.html">Services</option>
+                    <option value="/about.html">About</option>
+                    <option value="/index.html#contact">Contact</option>
+                  </select>
+                </label>
+                <div class="utm-row">
+                  <label>Source
+                    <input id="utm-source" list="utm-src-list" placeholder="facebook" autocomplete="off">
+                    <datalist id="utm-src-list"><option>facebook</option><option>instagram</option><option>tiktok</option><option>linkedin</option><option>messenger</option><option>viber</option><option>email</option><option>jobstreet</option><option>indeed</option></datalist>
+                  </label>
+                  <label>Medium
+                    <input id="utm-medium" list="utm-med-list" placeholder="social" value="social" autocomplete="off">
+                    <datalist id="utm-med-list"><option>social</option><option>post</option><option>story</option><option>reel</option><option>bio</option><option>email</option><option>paid</option></datalist>
+                  </label>
+                </div>
+                <label>Campaign
+                  <input id="utm-campaign" placeholder="oct-hiring" autocomplete="off">
+                </label>
+                <div class="utm-out">
+                  <input id="utm-url" readonly placeholder="Fill in a source to build your link…">
+                  <button type="button" id="utm-copy" class="btn-copy">Copy</button>
+                </div>
+                <p class="utm-hint muted">Tip: keep names lowercase and consistent (e.g. <b>facebook</b>, not FB) so the report groups them together.</p>
+              </div>
             </div>
           </div>
 
@@ -1122,7 +1174,8 @@
       var fromMs=_anFrom.getTime(), toMs=_anTo.getTime(), rangeMs=Math.max(toMs-fromMs,86400000);
       var numDays=Math.max(1,Math.round(rangeMs/86400000)), prevFromMs=fromMs-rangeMs;
       var since=new Date(prevFromMs).toISOString(), until=new Date(toMs).toISOString();
-      var res=await sb.from('page_views').select('path,visitor_id,created_at,referrer,country,region,city').gte('created_at',since).lte('created_at',until).order('created_at').limit(20000);
+      var res=await sb.from('page_views').select('path,visitor_id,created_at,referrer,country,region,city,utm_source,utm_medium,utm_campaign').gte('created_at',since).lte('created_at',until).order('created_at').limit(20000);
+      if(res.error){ res=await sb.from('page_views').select('path,visitor_id,created_at,referrer,country,region,city').gte('created_at',since).lte('created_at',until).order('created_at').limit(20000); }
       if(res.error){ res=await sb.from('page_views').select('path,visitor_id,created_at,referrer').gte('created_at',since).lte('created_at',until).limit(20000); }
       if(res.error){ res=await sb.from('page_views').select('path,visitor_id,created_at').gte('created_at',since).lte('created_at',until).limit(20000); }
       var pages=document.getElementById('an-pages');
@@ -1199,8 +1252,63 @@
         if(!carr2.length){ _emptyBox(conEl,'workspace_premium','No content views yet','Views of individual events & stories show here.'); }
         else { var comax=carr2[0].n; conEl.innerHTML=carr2.map(function(x){ return '<div class="pg-row"><span class="pg-path" title="'+esc(x.p)+'">'+esc(evTitle(x.p))+'</span><span class="pg-track"><span style="width:'+Math.round((x.n/comax)*100)+'%"></span></span><span class="pg-n">'+x.n.toLocaleString()+'</span></div>'; }).join(''); } }
 
+      // Campaigns — visits from tagged (UTM) links, grouped by source · campaign.
+      var campEl=document.getElementById('an-campaigns');
+      if(campEl){
+        var umap={};
+        cur.forEach(function(r){
+          if(!r.utm_source && !r.utm_campaign) return;
+          var src=(r.utm_source||'(unknown)'), camp=(r.utm_campaign||'(no campaign)');
+          var k=src+' · '+camp;
+          if(!umap[k]) umap[k]={src:src,camp:camp,n:0,u:{}};
+          umap[k].n++; if(r.visitor_id) umap[k].u[r.visitor_id]=1;
+        });
+        var uarr=Object.keys(umap).map(function(k){var o=umap[k];return {label:srcTitle(o.src)+' · '+o.camp,n:o.n,u:Object.keys(o.u).length};}).sort(function(a,b){return b.n-a.n;}).slice(0,10);
+        if(!uarr.length){ _emptyBox(campEl,'sell','No campaign traffic yet','Share a tagged link (build one on the right) and its visits appear here — even if the platform hides the referrer.'); }
+        else { var umax=uarr[0].n; campEl.innerHTML=uarr.map(function(x){ return '<div class="pg-row"><span class="pg-path" title="'+esc(x.label)+'">'+esc(x.label)+'</span><span class="pg-track"><span style="width:'+Math.round((x.n/umax)*100)+'%"></span></span><span class="pg-n" title="'+x.u+' unique visitor'+(x.u===1?'':'s')+'">'+x.n.toLocaleString()+'</span></div>'; }).join(''); }
+      }
+
       anApps(curCut, since, until);
     }
+
+    // Nice-case a utm_source token for display (facebook → Facebook), reusing the
+    // referrer channel labels where they match.
+    function srcTitle(s){
+      if(!s) return '(unknown)';
+      var byRef=srcLabel(String(s).toLowerCase());
+      if(byRef && byRef!=='Direct / typed' && byRef!==String(s).toLowerCase()) return byRef;
+      return String(s).charAt(0).toUpperCase()+String(s).slice(1);
+    }
+
+    // Campaign link builder — builds a tagged URL live and copies it.
+    function utmBuild(){
+      var dest=(document.getElementById('utm-dest')||{}).value||'/';
+      var src=((document.getElementById('utm-source')||{}).value||'').trim().toLowerCase().replace(/\s+/g,'-');
+      var med=((document.getElementById('utm-medium')||{}).value||'').trim().toLowerCase().replace(/\s+/g,'-');
+      var camp=((document.getElementById('utm-campaign')||{}).value||'').trim().toLowerCase().replace(/\s+/g,'-');
+      var out=document.getElementById('utm-url'); if(!out) return;
+      if(!src){ out.value=''; return; }
+      var base=location.origin.replace(/^http:/,'https:');
+      var url;
+      try { url=new URL(dest, base); } catch(_){ url=new URL('/', base); }
+      url.searchParams.set('utm_source',src);
+      if(med) url.searchParams.set('utm_medium',med);
+      if(camp) url.searchParams.set('utm_campaign',camp);
+      out.value=decodeURIComponent(url.toString());
+    }
+    function utmCopy(){
+      var out=document.getElementById('utm-url'), btn=document.getElementById('utm-copy');
+      if(!out||!out.value) return;
+      var done=function(){ if(btn){ var t=btn.textContent; btn.textContent='Copied!'; setTimeout(function(){btn.textContent=t;},1400); } };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(out.value).then(done, function(){ out.select(); document.execCommand('copy'); done(); }); }
+      else { out.select(); document.execCommand('copy'); done(); }
+    }
+    function utmWire(){
+      var ids=['utm-dest','utm-source','utm-medium','utm-campaign'];
+      ids.forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener('input',utmBuild); });
+      var b=document.getElementById('utm-copy'); if(b) b.addEventListener('click',utmCopy);
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',utmWire); else utmWire();
 
     async function anApps(curCut, since, until){
       var sEl=document.getElementById('an-apps-src'), stEl=document.getElementById('an-apps-stage');
