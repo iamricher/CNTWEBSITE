@@ -1147,8 +1147,12 @@
 
   /* ---------- DETAIL ---------- */
   function bullets(arr){ return '<ul class="bullets">'+arr.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>'; }
+  const _jobViewed={};
   function showDetail(job){
     activeJob=job;
+    // Log a virtual view per posting (once per browser session) so Content
+    // Studio can measure views → applications for each job.
+    try{ if(job&&job.id!=null&&!_jobViewed[job.id]){ _jobViewed[job.id]=1; if(window.cntLogView) window.cntLogView('/careers.html?job='+job.id); } }catch(_){}
     $('#view-list').style.display='none';
     $('#view-detail').style.display='block';
     $('#d-client').textContent=job.client;

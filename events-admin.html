@@ -616,6 +616,11 @@
             </div>
           </div>
 
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-head"><div><h2>Job postings</h2><p>Views of each posting on the careers page, and how many became applications.</p></div></div>
+            <div id="an-jobs"><div class="muted" style="padding:18px 22px">Loading…</div></div>
+          </div>
+
           <div class="card" style="margin-bottom:26px;">
             <div class="card-head"><div><h2>Recruitment</h2><p>Applications received in range, by source, stage &amp; campaign.</p></div></div>
             <div class="grid2 rec-2"><div id="an-apps-src"></div><div id="an-apps-stage"></div></div>
@@ -1252,6 +1257,7 @@
     // ── ANALYTICS (GA-level) ──
     var _anFrom = null, _anTo = null, _anLine = null, _anDonut = null;
     var _campVisits = {}, _campApps = {}; // campaign rollup shared by page views + applications (ROI)
+    var _jobViews = {}; // per-posting view counts (from /careers.html?job=<id> paths)
     var AN_PAL = ['#C8102E','#2563EB','#15803D','#B45309','#6D28D9','#0D9488','#BE185D','#0EA5E9','#65A30D','#DB2777'];
     var _regionNames=(function(){ try{ return new Intl.DisplayNames(['en'],{type:'region'}); }catch(_){ return null; } })();
     function countryName(c){ if(!c) return c; try{ return (_regionNames && _regionNames.of(c)) || c; }catch(_){ return c; } }
@@ -1344,6 +1350,12 @@
       var parr=Object.keys(pmap).map(function(p){return {p:p,n:pmap[p],u:Object.keys(puByPath[p]).length};}).sort(function(a,b){return b.n-a.n;}).slice(0,10);
       if(pages){ if(!parr.length){ _emptyBox(pages,'insights','No traffic yet','Page views appear here as visitors browse the site.'); }
         else { var pmax=parr[0].n; pages.innerHTML=parr.map(function(x){ var pc=views?Math.round(x.n/views*100):0; return '<div class="pg-row"><span class="pg-path" title="'+esc(x.p)+'">'+esc(evTitle(x.p))+'</span><span class="pg-track"><span style="width:'+Math.round((x.n/pmax)*100)+'%"></span></span><span class="pg-n" title="'+x.u+' unique · '+pc+'%">'+x.n.toLocaleString()+'</span></div>'; }).join(''); } }
+
+      // Per-posting views — from the /careers.html?job=<id> virtual views the
+      // careers page logs; anJobs folds in applications to show conversion.
+      _jobViews={};
+      cur.forEach(function(r){ var m=(r.path||'').match(/careers\.html\?job=([^&]+)/); if(!m) return; var jid=m[1]; if(!_jobViews[jid]) _jobViews[jid]={views:0,u:{}}; _jobViews[jid].views++; if(r.visitor_id) _jobViews[jid].u[r.visitor_id]=1; });
+      Object.keys(_jobViews).forEach(function(k){ _jobViews[k]={views:_jobViews[k].views,uniq:Object.keys(_jobViews[k].u).length}; });
 
       var smap={}; cur.forEach(function(r){ smap[srcLabel(r.referrer)]=(smap[srcLabel(r.referrer)]||0)+1; });
       var sarr=Object.keys(smap).map(function(k){return {k:k,n:smap[k]};}).sort(function(a,b){return b.n-a.n;});
@@ -1546,6 +1558,7 @@
       _renderCampaigns();
       anAging();
       anHiring(curCut, until);
+      anJobs(curCut, until);
     }
     function setKpiApps(cur, prev){ var e=document.getElementById('k-apps'); if(e) e.textContent=Number(cur).toLocaleString(); _delta(document.getElementById('k-apps-d'), cur, prev); }
 
@@ -1612,6 +1625,29 @@
         fun='<div class="loc-head">Funnel — '+total+' applied in range</div>'+rows.map(function(r){ var pct=total?Math.round(r.n/total*100):0; return _barRow(r.label+' · '+pct+'%', r.n, total); }).join('');
       }
       el.innerHTML=top+fun;
+    }
+
+    // Job postings — per-posting views (from _jobViews) folded with the
+    // applications each job received, to show a view → apply conversion.
+    async function anJobs(curCut, until){
+      var el=document.getElementById('an-jobs'); if(!el) return;
+      var jids=Object.keys(_jobViews);
+      var ap=await sb.from('applications').select('job_id').gte('created_at',new Date(curCut).toISOString()).lte('created_at',until).limit(20000);
+      var appByJob={}; (ap.data||[]).forEach(function(r){ if(r.job_id!=null) appByJob[r.job_id]=(appByJob[r.job_id]||0)+1; });
+      Object.keys(appByJob).forEach(function(k){ if(jids.indexOf(k)<0) jids.push(k); });
+      if(!jids.length){ _emptyBox(el,'work_outline','No job views yet','Views of individual postings appear here as candidates browse the careers page.'); return; }
+      var titles={};
+      var jr=await sb.from('jobs').select('id,role,client').in('id',jids).limit(2000);
+      if(!jr.error) (jr.data||[]).forEach(function(j){ titles[j.id]=(j.role||('Job '+j.id))+(j.client?' · '+j.client:''); });
+      var arr=jids.map(function(id){ var v=_jobViews[id]||{views:0,uniq:0}; return {label:titles[id]||('Job '+id),views:v.views||0,uniq:v.uniq||0,apps:appByJob[id]||0}; });
+      arr.sort(function(a,b){ return (b.views-a.views)||(b.apps-a.apps); });
+      var mx=Math.max.apply(null,arr.map(function(x){return x.views;}))||1;
+      el.innerHTML=arr.slice(0,12).map(function(x){
+        var conv=x.uniq? Math.round(x.apps/x.uniq*100):(x.apps?100:0);
+        var right=x.apps ? '<b>'+x.apps.toLocaleString()+'</b> app'+(x.apps===1?'':'s')+' · '+conv+'%' : x.views.toLocaleString()+' view'+(x.views===1?'':'s');
+        var tip=x.views.toLocaleString()+' views · '+x.uniq+' unique · '+x.apps+' applications';
+        return '<div class="camp-row"><span class="pg-path" title="'+esc(x.label)+'">'+esc(x.label)+'</span><span class="pg-track"><span style="width:'+Math.round((x.views/mx)*100)+'%"></span></span><span class="camp-val" title="'+esc(tip)+'">'+right+'</span></div>';
+      }).join('');
     }
     function srcLabel(h){
       if(!h) return 'Direct / typed';

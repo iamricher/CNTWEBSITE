@@ -211,20 +211,22 @@
     } catch (_) {}
   }
 
-  // Log each page view (path + a persistent per-browser id) for analytics.
-  function logPageView() {
+  // Persistent per-browser id used to count unique visitors.
+  function visitorId() {
+    var vid = localStorage.getItem('cnt_vid');
+    if (!vid) {
+      vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+      try { localStorage.setItem('cnt_vid', vid); } catch (_) {}
+    }
+    return vid;
+  }
+
+  // Send one analytics view for an explicit path (shared by the page-load
+  // logger and cntLogView, which SPAs call when a virtual view opens).
+  function sendView(path) {
     try {
-      var vid = localStorage.getItem('cnt_vid');
-      if (!vid) {
-        vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
-          : (Date.now().toString(36) + Math.random().toString(36).slice(2));
-        localStorage.setItem('cnt_vid', vid);
-      }
-      var path = (location.pathname || '/').replace(/\/index\.html$/, '/') || '/';
-      // Keep the ?id= on event/post pages so each one can be measured
-      // individually in Content Studio's per-post analytics.
-      var id = new URLSearchParams(location.search).get('id');
-      if (id && /(event|post)\.html$/.test(location.pathname)) path += '?id=' + id;
+      var vid = visitorId();
       // External referrer host (traffic source), null for direct/internal visits.
       var ref = null;
       try { if (document.referrer) { var rh = new URL(document.referrer).hostname.replace(/^www\./, ''); if (rh && rh !== location.hostname.replace(/^www\./, '')) ref = rh; } } catch (_) {}
@@ -264,6 +266,20 @@
       } catch (_) { direct(); }
     } catch (_) {}
   }
+
+  // Log each page view (path + a persistent per-browser id) for analytics.
+  function logPageView() {
+    var path = (location.pathname || '/').replace(/\/index\.html$/, '/') || '/';
+    // Keep the ?id= on event/post pages so each one can be measured
+    // individually in Content Studio's per-post analytics.
+    var id = new URLSearchParams(location.search).get('id');
+    if (id && /(event|post)\.html$/.test(location.pathname)) path += '?id=' + id;
+    sendView(path);
+  }
+
+  // Public: let an SPA log a virtual view (e.g. careers job details) with its
+  // own path, so each posting can be measured individually.
+  window.cntLogView = function (p) { if (p) sendView(String(p).slice(0, 300)); };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
