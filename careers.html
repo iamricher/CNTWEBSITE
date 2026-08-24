@@ -683,7 +683,7 @@
       "jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","addressLocality":job.location||"Metro Manila","addressCountry":"PH"}},
       "url":ORG_URL+"/job?job="+job.id
     };
-    if(sal.length){ o.baseSalary={"@type":"MonetaryAmount","currency":"PHP","value":sal.length>1?{"@type":"QuantitativeValue","minValue":sal[0],"maxValue":sal[1],"unitText":"MONTH"}:{"@type":"QuantitativeValue","value":sal[0],"unitText":"MONTH"}}; }
+    if(sal.length && !job.hide_salary){ o.baseSalary={"@type":"MonetaryAmount","currency":"PHP","value":sal.length>1?{"@type":"QuantitativeValue","minValue":sal[0],"maxValue":sal[1],"unitText":"MONTH"}:{"@type":"QuantitativeValue","value":sal[0],"unitText":"MONTH"}}; }
     return o;
   }
   function syncJobSchema(){
@@ -890,7 +890,7 @@
       const isNew=jobIsNew(j.created_at);
       const urgent=String(j.priority||'').toLowerCase()==='urgent';
       const etype=(j.employment_type&&String(j.employment_type).trim())||'Full-time';
-      const sal=formatSalary(j.salary_range);
+      const sal=j.hide_salary?'':formatSalary(j.salary_range);
       const info=ROLE_INFO[j.role]||{};
       const snipSrc=(j.about&&j.about.trim())||(j.responsibilities&&j.responsibilities.trim())||info.summary||'';
       const snippet=snipSrc.replace(/\s*[\r\n]+\s*/g,' · ').trim();
@@ -1088,7 +1088,7 @@
     const briefcase='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
     const arrow='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
     box.innerHTML='<h3>Similar openings</h3><p class="sim-sub">Other roles you might be a great fit for.</p><div class="similar-grid">'+sim.map(j=>{
-      const sal=formatSalary(j.salary_range);
+      const sal=j.hide_salary?'':formatSalary(j.salary_range);
       const etype=(j.employment_type&&String(j.employment_type).trim())||'Full-time';
       return `<a class="sim-card" href="/job?job=${j.id}" data-id="${j.id}">
         <div class="r">${esc(j.role)}</div>
@@ -1161,7 +1161,7 @@
     $('#d-client').textContent=jobCategory(job.role);
     $('#d-title').textContent=job.role;
     $('#d-location').innerHTML=pinSvg+' '+esc(job.location);
-    $('#d-salary').innerHTML=esc(formatSalary(job.salary_range))+' /mo';
+    { const ds=$('#d-salary'); if(ds){ if(job.hide_salary){ ds.style.display='none'; ds.innerHTML=''; } else { ds.style.display=''; ds.innerHTML=esc(formatSalary(job.salary_range))+' /mo'; } } }
     $('#d-openings').innerHTML=usersSvg+' '+(+job.openings||1)+' opening'+((+job.openings||1)!==1?'s':'');
     renderShare(job);
     const info=ROLE_INFO[job.role]||{summary:'Join the CNT team and grow your career with one of the Philippines’ leading brands.',resp:['Support day-to-day operations at the assigned outlet','Deliver excellent customer service','Meet assigned targets and standards'],must:['At least high school / senior high school graduate','Willing to be assigned on-site','Reliable and hardworking']};

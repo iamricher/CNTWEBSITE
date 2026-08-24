@@ -1,0 +1,11 @@
+-- ============================================================
+--  CNT — optional "hide salary" per job posting
+--
+--  Some clients don't want the salary shown publicly. This adds a per-job flag
+--  the recruiter can toggle in the ATS job editor; when on, the careers page and
+--  the /job share preview omit the salary (it's still stored and visible to
+--  staff in the ATS). Default false, so existing posts keep showing salary.
+--
+--  Run once in Supabase → SQL editor.
+-- ============================================================
+alter table public.jobs add column if not exists hide_salary boolean not null default false;

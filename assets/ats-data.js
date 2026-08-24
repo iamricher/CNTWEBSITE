@@ -175,7 +175,7 @@
         employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open',
         deadline:j.deadline||'', created_at:j.created_at||null,
         department:j.department||'', industry:j.industry||'', working_schedule:j.working_schedule||'',
-        contract_template:j.contract_template||'', expected_skills:j.expected_skills||'', interviewers:j.interviewers||'' });
+        contract_template:j.contract_template||'', expected_skills:j.expected_skills||'', interviewers:j.interviewers||'', hide_salary:!!j.hide_salary });
     });
     return true;
   }
@@ -192,7 +192,7 @@
   // The Odoo-style editor writes extra columns (department, industry, …). If the
   // 2026-07-29-job-odoo-fields migration hasn't run yet, Postgres rejects them —
   // so retry once without those keys and nudge the user to run the migration.
-  const _JOB_EXT=['department','industry','working_schedule','contract_template','expected_skills','interviewers'];
+  const _JOB_EXT=['department','industry','working_schedule','contract_template','expected_skills','interviewers','hide_salary'];
   const _extMiss=e=>/column|schema cache|42703/i.test((e&&(e.message||e.code))||'');
   const _stripExt=o=>{ const c=Object.assign({},o); _JOB_EXT.forEach(k=>delete c[k]); return c; };
   async function _jobsUpdate(payload,id){
@@ -226,6 +226,7 @@
     cntFillJobRecruiters(job.recruiter||'');
     document.getElementById('job-needed').value=job.needed;
     document.getElementById('job-salary').value=job.salary||'';
+    { const hs=document.getElementById('job-hide-salary'); if(hs) hs.checked=!!job.hide_salary; }
     document.getElementById('job-priority').value=(job.priority||'normal').toLowerCase();
     { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time';
       const dl=document.getElementById('job-deadline'); if(dl) dl.value=(job.deadline||'').slice(0,10); }
@@ -286,7 +287,8 @@
         working_schedule: (document.getElementById('job-schedule')||{}).value || null,
         contract_template: (document.getElementById('job-contract')||{}).value || null,
         expected_skills: (document.getElementById('job-skills')||{}).value || null,
-        interviewers: (document.getElementById('job-interviewers')||{}).value || null
+        interviewers: (document.getElementById('job-interviewers')||{}).value || null,
+        hide_salary: !!(document.getElementById('job-hide-salary')||{}).checked
       };
       // The Published toggle is the single source of truth for whether the
       // position is live on the website (open) or taken down (paused).
@@ -295,7 +297,7 @@
       if (sb && job.role && job.client){
         (async ()=>{
           try{
-            const _mem={role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status,department:job.department||'',industry:job.industry||'',working_schedule:job.working_schedule||'',contract_template:job.contract_template||'',expected_skills:job.expected_skills||'',interviewers:job.interviewers||''};
+            const _mem={role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status,department:job.department||'',industry:job.industry||'',working_schedule:job.working_schedule||'',contract_template:job.contract_template||'',expected_skills:job.expected_skills||'',interviewers:job.interviewers||'',hide_salary:!!job.hide_salary};
             if(editingSid){
               await _jobsUpdate(job,editingSid);
               for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ Object.assign(j,_mem); break; } }
