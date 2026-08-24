@@ -175,7 +175,8 @@
         employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open',
         deadline:j.deadline||'', created_at:j.created_at||null,
         department:j.department||'', industry:j.industry||'', working_schedule:j.working_schedule||'',
-        contract_template:j.contract_template||'', expected_skills:j.expected_skills||'', interviewers:j.interviewers||'', hide_salary:!!j.hide_salary });
+        contract_template:j.contract_template||'', expected_skills:j.expected_skills||'', interviewers:j.interviewers||'', hide_salary:!!j.hide_salary,
+        base_salary:(j.base_salary!=null?j.base_salary:''), client_max_salary:(j.client_max_salary!=null?j.client_max_salary:'') });
     });
     return true;
   }
@@ -192,7 +193,7 @@
   // The Odoo-style editor writes extra columns (department, industry, …). If the
   // 2026-07-29-job-odoo-fields migration hasn't run yet, Postgres rejects them —
   // so retry once without those keys and nudge the user to run the migration.
-  const _JOB_EXT=['department','industry','working_schedule','contract_template','expected_skills','interviewers','hide_salary'];
+  const _JOB_EXT=['department','industry','working_schedule','contract_template','expected_skills','interviewers','hide_salary','base_salary','client_max_salary'];
   const _extMiss=e=>/column|schema cache|42703/i.test((e&&(e.message||e.code))||'');
   const _stripExt=o=>{ const c=Object.assign({},o); _JOB_EXT.forEach(k=>delete c[k]); return c; };
   async function _jobsUpdate(payload,id){
@@ -210,7 +211,9 @@
 
   if (typeof openCreateJobModal === 'function'){
     const _origOpenJob = openCreateJobModal;
-    openCreateJobModal = function(){ _editingJobSid=null; _origOpenJob(); if(window.cntFillJobRecruiters) cntFillJobRecruiters(); };
+    openCreateJobModal = function(){ _editingJobSid=null; _origOpenJob(); if(window.cntFillJobRecruiters) cntFillJobRecruiters();
+      ['job-client-max','job-base-salary','job-salary'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+      if(window.cntCompUpdate) window.cntCompUpdate(); };
   }
 
   window.editJobPosition = function(sid){
@@ -225,8 +228,10 @@
     _fillPicker('job-location',_taxNames('location'),'Select a location…',job.location||'');
     cntFillJobRecruiters(job.recruiter||'');
     document.getElementById('job-needed').value=job.needed;
-    document.getElementById('job-salary').value=job.salary||'';
+    { const cm=document.getElementById('job-client-max'); if(cm){ const v=window.cntParseMoney(job.client_max_salary); cm.value=(!isNaN(v)&&v>0)?window.cntFmtMoney(v):''; } }
+    { const bs=document.getElementById('job-base-salary'); if(bs){ const v=window.cntParseMoney(job.base_salary); bs.value=(!isNaN(v)&&v>0)?window.cntFmtMoney(v):''; } }
     { const hs=document.getElementById('job-hide-salary'); if(hs) hs.checked=!!job.hide_salary; }
+    if(window.cntCompUpdate) window.cntCompUpdate();
     document.getElementById('job-priority').value=(job.priority||'normal').toLowerCase();
     { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time';
       const dl=document.getElementById('job-deadline'); if(dl) dl.value=(job.deadline||'').slice(0,10); }
@@ -267,11 +272,20 @@
     const _origJobSubmit = handleJobSubmit;
     handleJobSubmit = function(e){
       const editingSid = _editingJobSid;
+      // ── Salary cap: hard business rule. Require Base + Client Maximum, and
+      // never allow the base (or the generated range) to exceed the client max.
+      const _cm=window.cntParseMoney((document.getElementById('job-client-max')||{}).value);
+      const _base=window.cntParseMoney((document.getElementById('job-base-salary')||{}).value);
+      if(isNaN(_base)||_base<=0||isNaN(_cm)||_cm<=0){ if(e&&e.preventDefault)e.preventDefault(); if(window.showToast) showToast('Set both Base Salary and Client Maximum Salary before saving.','error'); return; }
+      if(_base>_cm){ if(e&&e.preventDefault)e.preventDefault(); if(window.showToast) showToast('⚠️ Base salary exceeds the client\'s approved maximum of '+window.cntFmtMoney(_cm)+'.','error'); return; }
+      const _finalRange=window.cntFinalRangeText(_base,_cm);
       const job = {
         role: document.getElementById('job-role').value,
         client: document.getElementById('job-account').value,
         location: document.getElementById('job-location').value,
-        salary_range: document.getElementById('job-salary').value || null,
+        salary_range: _finalRange || null,
+        base_salary: _base,
+        client_max_salary: _cm,
         openings: parseInt(document.getElementById('job-needed').value)||1,
         priority: (document.getElementById('job-priority').value||'normal').toLowerCase(),
         about: document.getElementById('job-about').value || null,
@@ -297,7 +311,7 @@
       if (sb && job.role && job.client){
         (async ()=>{
           try{
-            const _mem={role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status,department:job.department||'',industry:job.industry||'',working_schedule:job.working_schedule||'',contract_template:job.contract_template||'',expected_skills:job.expected_skills||'',interviewers:job.interviewers||'',hide_salary:!!job.hide_salary};
+            const _mem={role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status,department:job.department||'',industry:job.industry||'',working_schedule:job.working_schedule||'',contract_template:job.contract_template||'',expected_skills:job.expected_skills||'',interviewers:job.interviewers||'',hide_salary:!!job.hide_salary,base_salary:job.base_salary,client_max_salary:job.client_max_salary};
             if(editingSid){
               await _jobsUpdate(job,editingSid);
               for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ Object.assign(j,_mem); break; } }
@@ -368,6 +382,12 @@
         awards:(document.getElementById('app-awards')||{}).value||'',
         char_references:(document.getElementById('app-char-references')||{}).value||''
       };
+      // Salary cap: a proposed offer may never exceed the client's approved maximum.
+      if(snap.proposed_salary && window.cntJobClientMax){
+        const _cap=window.cntJobClientMax({account:snap.account, role:snap.role});
+        const _off=window.cntParseMoney(snap.proposed_salary);
+        if(_cap!=null && !isNaN(_off) && _off>_cap){ if(e&&e.preventDefault)e.preventDefault(); if(window.showToast) showToast('❌ Cannot proceed. The proposed salary of '+window.cntFmtMoney(_off)+" exceeds the client's approved maximum of "+window.cntFmtMoney(_cap)+'.','error'); return; }
+      }
       _origFormSubmit(e);   // existing in-memory add/update + renderAll
       if (sb && !isEdit && snap.name){
         (async ()=>{

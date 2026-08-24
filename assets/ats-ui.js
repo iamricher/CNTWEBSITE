@@ -284,6 +284,62 @@ function stageIsHired(key){
   return key==='hired'||key==='onboarding';
 }
 
+// ── Salary cap ─────────────────────────────────────────────────────────────
+// A ±10% band is generated from the Base Salary, and the maximum is HARD-CAPPED
+// at the Client Maximum Salary. The client max is the highest allowable figure
+// anywhere in the pipeline — public range, offers and final comp all obey it.
+function cntParseMoney(v){ if(v==null) return NaN; var n=parseFloat(String(v).replace(/[^0-9.]/g,'')); return isNaN(n)?NaN:n; }
+function cntFmtMoney(n){ if(n==null||isNaN(n)) return ''; return '₱'+Math.round(n).toLocaleString('en-PH'); }
+function cntSalaryBand(base, clientMax){
+  base=cntParseMoney(base); clientMax=cntParseMoney(clientMax);
+  if(isNaN(base)||base<=0) return null;
+  var genMin=Math.round(base*0.9), genMax=Math.round(base*1.1);
+  var hasCap=!isNaN(clientMax)&&clientMax>0;
+  var finalMax=hasCap?Math.min(genMax, clientMax):genMax;
+  var finalMin=Math.min(genMin, finalMax);
+  return { base:base, clientMax:hasCap?clientMax:null, genMin:genMin, genMax:genMax,
+           finalMin:finalMin, finalMax:finalMax, capped:(hasCap && genMax>clientMax) };
+}
+function cntFinalRangeText(base, clientMax){ var b=cntSalaryBand(base, clientMax); return b?(cntFmtMoney(b.finalMin)+' – '+cntFmtMoney(b.finalMax)):''; }
+// The Client Maximum that governs a candidate's application (looked up from its
+// job by job_id, falling back to a client+role match). Returns a number or null.
+function cntJobClientMax(app){
+  if(!app || typeof jobDatabase==='undefined' || !jobDatabase) return null;
+  try{
+    var byId=null, byMatch=null;
+    for(var k in jobDatabase){ var arr=jobDatabase[k]||[]; for(var i=0;i<arr.length;i++){ var j=arr[i];
+      var cm=cntParseMoney(j.client_max_salary); if(isNaN(cm)||cm<=0) continue;
+      if(app.job_id!=null && j._sid===app.job_id) byId=cm;
+      if(j.account===app.account && j.role===app.role && byMatch==null) byMatch=cm;
+    } }
+    return byId!=null ? byId : byMatch;
+  }catch(_){ return null; }
+}
+// Live preview in the job editor's Compensation block: fills the read-only Final
+// Approved Range and shows the generated range + cap / validation notice.
+// Returns true when the current inputs are valid to save.
+function cntCompUpdate(){
+  var cmEl=document.getElementById('job-client-max'), baseEl=document.getElementById('job-base-salary'),
+      sal=document.getElementById('job-salary'), note=document.getElementById('job-comp-note');
+  if(!baseEl||!note) return false;
+  var cm=cntParseMoney(cmEl?cmEl.value:'');
+  var band=cntSalaryBand(baseEl.value, cmEl?cmEl.value:'');
+  if(!band){ if(sal) sal.value=''; note.innerHTML='<span style="color:#94a3b8">Enter Base Salary + Client Maximum Salary to generate the range.</span>'; return false; }
+  var err='';
+  if(!isNaN(cm)&&cm>0&&band.base>cm) err='⚠️ Base salary '+cntFmtMoney(band.base)+" exceeds the client's approved maximum of "+cntFmtMoney(cm)+'.';
+  if(sal) sal.value = err ? '' : (cntFmtMoney(band.finalMin)+' – '+cntFmtMoney(band.finalMax));
+  var html='<div style="color:#64748b">Automatically generated: <b>'+cntFmtMoney(band.genMin)+' – '+cntFmtMoney(band.genMax)+'</b></div>';
+  if(err){ html+='<div style="color:#dc2626;font-weight:700">'+err+'</div>'; }
+  else {
+    html+='<div style="color:#0f172a;font-weight:700">Final approved range: '+cntFmtMoney(band.finalMin)+' – '+cntFmtMoney(band.finalMax)+'</div>';
+    if(band.capped) html+='<div style="color:#b45309">🔒 Maximum salary capped at '+cntFmtMoney(band.clientMax)+' based on client-approved budget.</div>';
+  }
+  note.innerHTML=html;
+  return !err;
+}
+window.cntParseMoney=cntParseMoney; window.cntFmtMoney=cntFmtMoney; window.cntSalaryBand=cntSalaryBand;
+window.cntFinalRangeText=cntFinalRangeText; window.cntJobClientMax=cntJobClientMax; window.cntCompUpdate=cntCompUpdate;
+
 // ── Odoo-style applicant form: fill the label/value fields + stage stepper ──
 function _escForm(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 // Applicants often type their name in all-lower or ALL-CAPS. Title-case those
@@ -2846,6 +2902,9 @@ function generateOfferLetter(){
   if(!stageIsHired(app.stage)){showToast('Offer letter is only available once the candidate reaches a Job Offer stage.','info');return;}
   const today=new Date().toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'});
   const offerAmt=app.proposed_salary||app.salary||'As discussed';
+  // Hard cap: never generate an offer above the client's approved maximum.
+  { const _cap=window.cntJobClientMax?cntJobClientMax(app):null; const _off=cntParseMoney(offerAmt);
+    if(_cap!=null && !isNaN(_off) && _off>_cap){ showToast("❌ Cannot proceed. The proposed salary of "+cntFmtMoney(_off)+" exceeds the client's approved maximum of "+cntFmtMoney(_cap)+".",'error'); return; } }
   let validUntil='';
   { let v=app.offer_validity; if(!v){ const d=new Date(); d.setDate(d.getDate()+30); v=d.toISOString().slice(0,10); } try{ validUntil=new Date(v+'T00:00').toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'}); }catch(e){ validUntil=v; } }
   const content=document.getElementById('offer-letter-content');
