@@ -208,6 +208,21 @@
     .ss-copy.ok{background:#15803D}
     .ss-del{flex-shrink:0;border:none;background:transparent;color:var(--faint);font-size:1.1rem;line-height:1;padding:0 6px;cursor:pointer;border-radius:6px}
     .ss-del:hover{color:var(--red);background:rgba(200,16,46,.08)}
+    .ss-save{flex-shrink:0;border:1px solid var(--line);background:var(--card,#fff);color:var(--muted);font-weight:700;font-size:.72rem;padding:5px 11px;border-radius:7px;cursor:pointer}
+    .ss-save.ok{background:#15803D;color:#fff;border-color:#15803D}
+    /* Bulk builder */
+    .utm-bulk{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+    .utm-bulk-head{font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+    .chip-row{display:flex;flex-wrap:wrap;gap:7px}
+    .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer;user-select:none;transition:border-color .12s,background .12s,color .12s}
+    .chip input{margin:0;accent-color:var(--red)}
+    .chip:has(input:checked){border-color:var(--red);background:rgba(200,16,46,.06);color:var(--red)}
+    .btn-genall{border:none;background:var(--red);color:#fff;font-weight:700;font-size:.84rem;padding:10px 14px;border-radius:9px;cursor:pointer;transition:filter .12s ease}
+    .btn-genall:hover{filter:brightness(1.08)}
+    #utm-bulk-out{display:flex;flex-direction:column;gap:6px}
+    #utm-bulk-out:empty{display:none}
+    .bulk-bar{display:flex;align-items:center;gap:8px;font-size:.75rem;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+    .bulk-bar span{flex:1}
     @media(max-width:560px){ .utm-row{grid-template-columns:1fr} }
 
     /* ── Gallery uploader ── */
@@ -552,6 +567,22 @@
                   <button type="button" id="utm-copy" class="btn-copy">Copy</button>
                   <button type="button" id="utm-save" class="btn-save" title="Save this link for reuse">Save</button>
                 </div>
+
+                <div class="utm-bulk">
+                  <div class="utm-bulk-head">Or make one for every platform at once</div>
+                  <div class="chip-row" id="utm-platforms">
+                    <label class="chip"><input type="checkbox" value="facebook" checked><span>Facebook</span></label>
+                    <label class="chip"><input type="checkbox" value="instagram" checked><span>Instagram</span></label>
+                    <label class="chip"><input type="checkbox" value="tiktok"><span>TikTok</span></label>
+                    <label class="chip"><input type="checkbox" value="linkedin"><span>LinkedIn</span></label>
+                    <label class="chip"><input type="checkbox" value="viber"><span>Viber</span></label>
+                    <label class="chip"><input type="checkbox" value="messenger"><span>Messenger</span></label>
+                    <label class="chip"><input type="checkbox" value="email"><span>Email</span></label>
+                  </div>
+                  <button type="button" id="utm-genall" class="btn-genall">Generate links for the ticked platforms</button>
+                  <div id="utm-bulk-out"></div>
+                </div>
+
                 <div id="utm-saved" class="utm-saved"></div>
                 <p class="utm-hint muted">Tip: keep names lowercase and consistent (e.g. <b>facebook</b>, not FB) so the report groups them together.</p>
               </div>
@@ -1317,6 +1348,35 @@
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(out.value).then(done, function(){ out.select(); document.execCommand('copy'); done(); }); }
       else { out.select(); document.execCommand('copy'); done(); }
     }
+
+    // Bulk builder — one campaign + destination, a tagged link per platform.
+    var UTM_PLAT={facebook:'social',instagram:'social',tiktok:'social',linkedin:'social',viber:'chat',messenger:'chat',email:'email'};
+    var _bulkLinks=[];
+    function utmMakeUrl(dest,src,med,camp){
+      var base=location.origin.replace(/^http:/,'https:'), url;
+      try{ url=new URL(dest,base); }catch(_){ url=new URL('/',base); }
+      url.searchParams.set('utm_source',src);
+      if(med) url.searchParams.set('utm_medium',med);
+      if(camp) url.searchParams.set('utm_campaign',camp);
+      return decodeURIComponent(url.toString());
+    }
+    function utmGenAll(){
+      var out=document.getElementById('utm-bulk-out'); if(!out) return;
+      var destSel=document.getElementById('utm-dest'); var dest=(destSel&&destSel.value)||'/';
+      var destTxt=(destSel&&destSel.selectedOptions&&destSel.selectedOptions[0])?destSel.selectedOptions[0].text:'Home';
+      var camp=((document.getElementById('utm-campaign')||{}).value||'').trim().toLowerCase().replace(/\s+/g,'-');
+      var boxes=Array.prototype.slice.call(document.querySelectorAll('#utm-platforms input:checked'));
+      if(!boxes.length){ out.innerHTML='<div class="muted" style="font-size:.78rem;padding:6px 2px">Tick at least one platform above.</div>'; return; }
+      _bulkLinks=boxes.map(function(b){ var src=b.value; return {label:srcTitle(src)+(camp?' · '+camp:'')+' → '+destTxt, url:utmMakeUrl(dest,src,UTM_PLAT[src]||'social',camp)}; });
+      out.innerHTML='<div class="bulk-bar"><span>'+_bulkLinks.length+' link'+(_bulkLinks.length===1?'':'s')+' ready</span>'+
+        '<button type="button" id="bulk-copyall" class="ss-copy">Copy all</button>'+
+        '<button type="button" id="bulk-saveall" class="ss-save">Save all</button></div>'+
+        _bulkLinks.map(function(x,i){ return '<div class="utm-saved-row"><span class="ss-label" title="'+esc(x.url)+'">'+esc(x.label)+'</span><button type="button" class="ss-copy" data-bi="'+i+'">Copy</button></div>'; }).join('');
+      out.querySelectorAll('.ss-copy[data-bi]').forEach(function(b){ b.addEventListener('click',function(){ utmCopyText(_bulkLinks[+b.dataset.bi].url,b); }); });
+      var ca=document.getElementById('bulk-copyall'); if(ca) ca.addEventListener('click',function(){ utmCopyText(_bulkLinks.map(function(x){return x.url;}).join('\n'),ca); });
+      var sa=document.getElementById('bulk-saveall'); if(sa) sa.addEventListener('click',function(){ var list=utmGetSaved(); _bulkLinks.forEach(function(x){ if(!list.some(function(y){return y.url===x.url;})) list.unshift({label:x.label,url:x.url}); }); utmSetSaved(list); utmRenderSaved(); sa.classList.add('ok'); sa.textContent='Saved'; setTimeout(function(){sa.classList.remove('ok');sa.textContent='Save all';},1200); });
+    }
+
     // Saved links — reusable tagged URLs kept in localStorage (per browser).
     function utmGetSaved(){ try{ return JSON.parse(localStorage.getItem('cnt_utm_saved')||'[]'); }catch(_){ return []; } }
     function utmSetSaved(a){ try{ localStorage.setItem('cnt_utm_saved', JSON.stringify(a.slice(0,30))); }catch(_){} }
@@ -1355,6 +1415,7 @@
       ids.forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener('input',utmBuild); });
       var b=document.getElementById('utm-copy'); if(b) b.addEventListener('click',utmCopy);
       var s=document.getElementById('utm-save'); if(s) s.addEventListener('click',utmSave);
+      var g=document.getElementById('utm-genall'); if(g) g.addEventListener('click',utmGenAll);
       utmRenderSaved();
     }
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',utmWire); else utmWire();
