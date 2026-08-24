@@ -2910,7 +2910,7 @@ function generateOfferLetter(){
   const content=document.getElementById('offer-letter-content');
   content.innerHTML=`
     <div class="border-b-2 border-slate-800 pb-4 mb-6 flex justify-between items-start">
-      <div><img src="https://cnt-website-ats.vercel.app/assets/img/cnt-logo.png" alt="CNT Recruitment & Manpower Services" class="h-12 w-auto" /></div>
+      <div><img src="/assets/img/cnt-logo.png" alt="CNT Recruitment & Manpower Services" class="h-12 w-auto" /></div>
       <div class="text-right text-xs text-slate-500"><p>${today}</p><p>Ref: OFFER-${Date.now().toString().slice(-6)}</p></div>
     </div>
     <p class="mb-2">Dear <strong>${_escForm(app.name)}</strong>,</p>
@@ -2954,7 +2954,7 @@ function generateContract(){
   const content=document.getElementById('offer-letter-content'); if(!content) return;
   content.innerHTML=`
     <div class="text-center border-b-2 border-slate-800 pb-3 mb-5">
-      <img src="https://cnt-website-ats.vercel.app/assets/img/cnt-logo.png" alt="CNT" class="h-10 w-auto mx-auto mb-2" />
+      <img src="/assets/img/cnt-logo.png" alt="CNT" class="h-10 w-auto mx-auto mb-2" />
       <h2 class="text-lg font-extrabold tracking-wide text-slate-900">EMPLOYMENT CONTRACT</h2>
       <p class="text-[11px] text-slate-500">Kontrata sa Empleyo · Ref: CON-${Date.now().toString().slice(-6)} · ${today}</p>
     </div>

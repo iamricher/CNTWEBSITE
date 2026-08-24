@@ -9,8 +9,8 @@
 (function () {
   'use strict';
 
-  var LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo.png';
-  var FOOTER_LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
+  var LOGO = '/assets/img/cnt-logo.png';
+  var FOOTER_LOGO = '/assets/img/cnt-logo-white.png';
   var YEAR = new Date().getFullYear();
 
   function navHTML(active, base, overlay) {
