@@ -27,15 +27,14 @@
     }
 
     /* Ambient brand aura + faint grid + grain */
-    .aura{ position:fixed; inset:0; z-index:0; pointer-events:none;
+    .photo{ position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:#0a0b0e url('/assets/img/background-comingsoon.jpg') center center / cover no-repeat; }
+    /* Legibility scrim: deep on the left (copy) → the recruitment scene reads on the right. */
+    .scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
       background:
-        radial-gradient(60% 55% at 88% 6%, rgba(200,16,46,.26), transparent 60%),
-        radial-gradient(55% 50% at 4% 98%, rgba(200,16,46,.16), transparent 62%),
-        linear-gradient(155deg,#111217 0%,#0a0b0e 60%,#08080b 100%); }
-    .grid{ position:fixed; inset:0; z-index:0; opacity:.04; pointer-events:none;
-      background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
-      background-size:76px 76px;
-      -webkit-mask-image:radial-gradient(circle at 30% 40%,#000,transparent 78%); mask-image:radial-gradient(circle at 30% 40%,#000,transparent 78%); }
+        radial-gradient(58% 55% at 90% 6%, rgba(200,16,46,.22), transparent 60%),
+        linear-gradient(90deg, rgba(10,11,14,.96) 0%, rgba(10,11,14,.9) 32%, rgba(10,11,14,.72) 56%, rgba(10,11,14,.5) 80%, rgba(10,11,14,.6) 100%),
+        linear-gradient(180deg, rgba(10,11,14,.55) 0%, rgba(10,11,14,0) 22%, rgba(10,11,14,0) 66%, rgba(10,11,14,.9) 100%); }
     .grain{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
@@ -135,8 +134,8 @@
     </div>
   </div>
 
-  <div class="aura"></div>
-  <div class="grid"></div>
+  <div class="photo"></div>
+  <div class="scrim"></div>
   <div class="grain"></div>
 
   <header class="mast">
@@ -147,7 +146,7 @@
   <main class="hero">
     <div class="eyebrow"><b>Connecting Talent Nationwide</b> <span class="sep"></span> Authorized Employment Agency</div>
     <h1>A Million Jobs for a<br><span class="em">Million Filipinos.</span></h1>
-    <p class="lead">Whether you're advancing your career or building your team, <b>CNT Promo &amp; Ads Specialists, Inc.</b> brings the Philippines' leading brands together with its most capable professionals. A more considered way to hire — and to be hired — is on its way.</p>
+    <p class="lead"><b>CNT Promo &amp; Ads Specialists, Inc.</b> is launching a brand-new website and online application system — a faster, simpler way to explore opportunities and apply to CNT. A smarter way to get hired is on its way.</p>
     <div class="actions">
       <a class="cta" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       <div class="social">
