@@ -15,97 +15,117 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    :root{ --red:#C8102E; --red-lt:#e5213f; --ink:#0b0c10; }
+    :root{ --red:#C8102E; --red-lt:#e5213f; --ink:#0c0d11; --muted:#a6a9b1; --label:#7c8089; }
     *{ box-sizing:border-box; margin:0; padding:0; }
     html,body{ min-height:100%; }
     body{
       font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
       color:#fff; background:var(--ink);
       min-height:100dvh; overflow-x:hidden; position:relative;
-      display:flex; align-items:center; justify-content:center;
-      padding:clamp(20px,4.2vh,52px) clamp(22px,5vw,48px);
+      display:flex; flex-direction:column;
       -webkit-font-smoothing:antialiased;
     }
 
-    /* Cinematic building backdrop — CNT's own LYFE Tower. */
-    .bg{ position:fixed; inset:0; z-index:0;
-      background:var(--ink) url('/assets/img/lyfe-tower.jpg') center center / cover no-repeat;
-      filter:brightness(.6) saturate(.9); transform:scale(1.04); }
-    .grad{ position:fixed; inset:0; z-index:1;
+    /* Ambient brand wash + faint grain (touch of red). */
+    .glow{ position:fixed; inset:0; z-index:0; pointer-events:none;
       background:
-        radial-gradient(72% 52% at 82% 4%, rgba(200,16,46,.22), transparent 60%),
-        radial-gradient(120% 90% at 50% 34%, transparent 38%, rgba(11,12,16,.55) 74%, rgba(11,12,16,.9) 100%),
-        linear-gradient(180deg, rgba(11,12,16,.6) 0%, rgba(11,12,16,.32) 38%, rgba(11,12,16,.72) 80%, rgba(11,12,16,.96) 100%); }
-    .grain{ position:fixed; inset:0; z-index:2; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+        radial-gradient(54% 48% at 8% 90%, rgba(200,16,46,.15), transparent 60%),
+        radial-gradient(46% 42% at 96% 8%, rgba(200,16,46,.09), transparent 60%); }
+    .grain{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.045; mix-blend-mode:overlay;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
-    /* Hero */
-    .hero{ position:relative; z-index:3; width:100%; max-width:760px; text-align:center;
-      display:flex; flex-direction:column; align-items:center; }
-    .logo{ height:clamp(46px,8vw,60px); width:auto; display:block; margin-bottom:clamp(22px,4.4vw,32px); }
+    /* Framed tower portrait — its own object, so it can read clean and bright. */
+    .frame{ order:-1; position:relative; z-index:1; flex:none;
+      height:clamp(138px,21vh,230px); padding:clamp(14px,4vw,24px); padding-bottom:0; }
+    .shot{ height:100%; border-radius:16px; overflow:hidden; position:relative;
+      border:1px solid rgba(255,255,255,.14);
+      background:var(--ink) url('/assets/img/lyfe-tower.jpg') center 28% / cover no-repeat;
+      box-shadow:0 26px 70px rgba(0,0,0,.5); }
+    .shot::after{ content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg, transparent 55%, rgba(8,9,12,.65) 100%); }
+    .cap{ position:absolute; left:14px; bottom:12px; z-index:1;
+      font-size:clamp(9px,2.1vw,11px); letter-spacing:.14em; text-transform:uppercase; font-weight:600;
+      color:rgba(255,255,255,.82); display:inline-flex; align-items:center; gap:8px; }
+    .cap::before{ content:''; width:6px; height:6px; border-radius:2px; background:var(--red); box-shadow:0 0 8px rgba(200,16,46,.7); }
 
-    .pill{ display:inline-flex; align-items:center; gap:9px; padding:8px 16px 8px 14px; border-radius:99px;
-      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-      font-size:clamp(10px,2.4vw,11.5px); letter-spacing:.18em; text-transform:uppercase; font-weight:600; color:#e7e9ee;
-      margin-bottom:clamp(22px,4.6vw,30px); }
+    /* Content */
+    .content{ position:relative; z-index:1; flex:1;
+      display:flex; flex-direction:column; justify-content:center;
+      padding:clamp(24px,6vw,44px) clamp(22px,6vw,44px) clamp(24px,5vw,40px); }
+    .logo{ height:clamp(42px,8vw,54px); width:auto; display:block; margin-bottom:clamp(16px,3.6vw,22px); }
+
+    .pill{ align-self:flex-start; display:inline-flex; align-items:center; gap:9px; padding:7px 15px 7px 13px; border-radius:99px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+      font-size:clamp(10px,2.4vw,11.5px); letter-spacing:.16em; text-transform:uppercase; font-weight:600; color:#e7e9ee;
+      margin-bottom:clamp(16px,3.4vw,22px); }
     .pill .dot{ width:8px; height:8px; border-radius:50%; background:var(--red-lt); flex:none;
       box-shadow:0 0 0 0 rgba(229,33,63,.6); animation:pulse 2.2s infinite; }
     @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(229,33,63,.55); } 70%{ box-shadow:0 0 0 11px rgba(229,33,63,0); } 100%{ box-shadow:0 0 0 0 rgba(229,33,63,0); } }
 
-    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.03em; line-height:1.03;
-      font-size:clamp(2.35rem,8.6vw,4.5rem); margin-bottom:clamp(18px,3.4vw,26px);
-      text-shadow:0 2px 30px rgba(0,0,0,.45); }
-    h1 .em{ background:linear-gradient(100deg, #ff5a70, var(--red) 78%);
+    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.03em; line-height:1.04;
+      font-size:clamp(2.15rem,8.4vw,3.6rem); margin-bottom:clamp(14px,3vw,20px); }
+    h1 .em{ background:linear-gradient(100deg, #ff5a70, var(--red) 80%);
       -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
 
-    .sub{ font-size:clamp(1rem,3vw,1.18rem); line-height:1.62; color:#c6c9d1; max-width:520px;
-      margin-bottom:clamp(26px,5vw,34px); }
-    .sub b{ color:#fff; font-weight:600; }
+    .sub{ font-size:clamp(.98rem,2.9vw,1.14rem); line-height:1.6; color:var(--muted); max-width:440px;
+      margin-bottom:clamp(14px,3.2vw,26px); }
+    .sub b{ color:#eceef1; font-weight:600; }
 
-    .chips{ display:flex; gap:clamp(10px,2.6vw,14px); flex-wrap:wrap; justify-content:center;
-      margin-bottom:clamp(28px,5.4vw,38px); }
-    .chip{ display:inline-flex; align-items:center; gap:9px; padding:10px 18px; border-radius:11px;
-      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.13);
-      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-      font-size:clamp(.73rem,2.2vw,.83rem); letter-spacing:.04em; color:#e2e4ea; font-weight:600; }
+    .chips{ display:flex; gap:clamp(9px,2.4vw,12px); flex-wrap:wrap; margin-bottom:clamp(16px,3.4vw,28px); }
+    .chip{ display:inline-flex; align-items:center; gap:9px; padding:9px 16px; border-radius:10px;
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12);
+      font-size:clamp(.72rem,2.1vw,.8rem); letter-spacing:.04em; color:#dfe1e7; font-weight:600; }
     .chip::before{ content:''; width:6px; height:6px; border-radius:2px; background:var(--red); flex:none;
-      box-shadow:0 0 8px rgba(200,16,46,.6); }
+      box-shadow:0 0 8px rgba(200,16,46,.55); }
 
-    .actions{ display:flex; align-items:center; gap:clamp(14px,3.5vw,18px); flex-wrap:wrap; justify-content:center; }
+    .actions{ display:flex; align-items:center; gap:clamp(13px,3.4vw,18px); flex-wrap:wrap; }
     .cta{ display:inline-flex; align-items:center; gap:10px; font-weight:700;
-      font-size:clamp(.95rem,2.7vw,1.02rem); padding:clamp(14px,3vw,16px) clamp(28px,5.6vw,34px);
-      border-radius:11px; text-decoration:none; color:#fff;
+      font-size:clamp(.92rem,2.6vw,1rem); padding:clamp(13px,2.9vw,15px) clamp(26px,5.4vw,32px);
+      border-radius:10px; text-decoration:none; color:#fff;
       background:linear-gradient(180deg, var(--red-lt), var(--red));
-      box-shadow:0 12px 32px rgba(200,16,46,.4), inset 0 1px 0 rgba(255,255,255,.18);
+      box-shadow:0 12px 30px rgba(200,16,46,.38), inset 0 1px 0 rgba(255,255,255,.18);
       transition:transform .16s ease, filter .16s ease; }
     .cta:hover{ transform:translateY(-2px); filter:brightness(1.08); }
-    .social{ display:flex; gap:10px; }
-    .social a{ width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center;
-      color:#c3c6cd; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.13);
-      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:all .16s ease; }
+    .social{ display:flex; gap:9px; }
+    .social a{ width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+      color:#c0c3ca; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); transition:all .16s ease; }
     .social a:hover{ color:#fff; background:var(--red); border-color:var(--red); transform:translateY(-2px); }
-    .social svg{ width:19px; height:19px; }
+    .social svg{ width:18px; height:18px; }
 
-    .foot{ margin-top:clamp(28px,5.2vw,42px); font-size:clamp(.7rem,2vw,.78rem);
-      color:#83868f; letter-spacing:.01em; line-height:1.8; }
-    .foot a{ color:#c3c6cd; text-decoration:none; }
+    .foot{ margin-top:clamp(22px,4.6vw,34px); font-size:clamp(.7rem,1.9vw,.77rem);
+      color:var(--label); letter-spacing:.01em; line-height:1.75; }
+    .foot a{ color:#c0c3ca; text-decoration:none; }
     .foot a:hover{ color:#fff; }
 
-    /* Staggered reveal (plays as the loader clears). */
-    @keyframes rise{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
-    .hero > *{ animation:rise .8s cubic-bezier(.2,.7,.2,1) both; }
-    .hero > *:nth-child(1){ animation-delay:1.35s; }
-    .hero > *:nth-child(2){ animation-delay:1.44s; }
-    .hero > *:nth-child(3){ animation-delay:1.53s; }
-    .hero > *:nth-child(4){ animation-delay:1.62s; }
-    .hero > *:nth-child(5){ animation-delay:1.71s; }
-    .hero > *:nth-child(6){ animation-delay:1.8s; }
-    .hero > *:nth-child(7){ animation-delay:1.89s; }
-    @media(prefers-reduced-motion:reduce){
-      .bg{ transform:none; } .pill .dot{ animation:none; }
-      .hero > *{ animation:none; } }
+    /* ---- Desktop: content left, framed tower right ---- */
+    @media(min-width:921px){
+      body{ flex-direction:row; align-items:stretch; }
+      .frame{ order:0; flex:0 0 46%; height:auto;
+        padding:clamp(30px,4.5vh,56px); padding-left:clamp(6px,1vw,16px);
+        display:flex; }
+      .shot{ width:100%; background-position:center center; }
+      .content{ flex:1; padding:clamp(36px,5vh,64px) clamp(30px,4vw,60px)
+        clamp(36px,5vh,64px) clamp(44px,5vw,84px); }
+      .logo{ height:clamp(46px,3.6vw,56px); margin-bottom:clamp(20px,2.2vw,30px); }
+      h1{ font-size:clamp(2.4rem,3.6vw,3.7rem); }
+      .sub{ font-size:clamp(1rem,1.2vw,1.16rem); max-width:460px; }
+    }
 
     @media(max-width:520px){ .cta{ flex:1; justify-content:center; min-width:0; } }
+
+    /* Staggered reveal (plays as the loader clears). */
+    @keyframes rise{ from{ opacity:0; transform:translateY(15px); } to{ opacity:1; transform:none; } }
+    .content > *, .frame{ animation:rise .8s cubic-bezier(.2,.7,.2,1) both; }
+    .frame{ animation-delay:1.3s; }
+    .content > *:nth-child(1){ animation-delay:1.4s; }
+    .content > *:nth-child(2){ animation-delay:1.48s; }
+    .content > *:nth-child(3){ animation-delay:1.56s; }
+    .content > *:nth-child(4){ animation-delay:1.64s; }
+    .content > *:nth-child(5){ animation-delay:1.72s; }
+    .content > *:nth-child(6){ animation-delay:1.8s; }
+    .content > *:nth-child(7){ animation-delay:1.88s; }
+    @media(prefers-reduced-motion:reduce){
+      .content > *, .frame{ animation:none; } .pill .dot{ animation:none; } }
 
     /* ---- Intro preloader (matches /home) ---- */
     .loader{ position:fixed; inset:0; z-index:60;
@@ -133,24 +153,18 @@
     </div>
   </div>
 
-  <div class="bg"></div>
-  <div class="grad"></div>
+  <div class="glow"></div>
   <div class="grain"></div>
 
-  <main class="hero">
+  <section class="content">
     <img class="logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
-
-    <div class="pill"><span class="dot"></span> Something Big Is Coming</div>
-
+    <div class="pill"><span class="dot"></span> A New Chapter Is Coming</div>
     <h1>A Million Jobs for a<br><span class="em">Million Filipinos.</span></h1>
-
-    <p class="sub">We're building something big — the new home of <b>CNT Promo &amp; Ads Specialists, Inc.</b> A more considered way to hire, and to be hired, is on its way.</p>
-
+    <p class="sub">Our new website is almost here — a smarter way to connect the Philippines' leading brands with great Filipino talent.</p>
     <div class="chips">
       <span class="chip">Connecting Talent Nationwide</span>
       <span class="chip">Authorized Employment Agency</span>
     </div>
-
     <div class="actions">
       <a class="cta" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       <div class="social">
@@ -159,12 +173,13 @@
         <a href="https://www.tiktok.com/@cnt.jobhiring" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.26 2.2 1.6 3.63 3.8 3.9v2.63c-1.3.13-2.48-.3-3.8-1.03v5.9c0 3.4-2.55 5.83-5.87 5.42-2.9-.36-4.77-2.7-4.6-5.68.16-2.74 2.5-4.82 5.3-4.6v2.7c-.5-.1-1-.1-1.5.03-1.1.3-1.76 1.28-1.57 2.45.18 1.1 1.16 1.83 2.35 1.66 1.02-.15 1.72-1.06 1.72-2.2V3h2.44z"/></svg></a>
       </div>
     </div>
-
     <p class="foot">
       219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St., Brgy. Bagong Silang, 1550 Mandaluyong, Philippines<br>
       Copyright &copy; 2026 CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.
     </p>
-  </main>
+  </section>
+
+  <div class="frame"><div class="shot"><span class="cap">219 LYFE Tower · Mandaluyong</span></div></div>
 
   <script>
     /* Intro loader — same behavior as /home: a random-stepped % counter
