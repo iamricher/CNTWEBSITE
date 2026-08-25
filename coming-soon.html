@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coming Soon — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="CNT Promo & Ads Specialists, Inc. — our new website is launching soon. A Million Jobs for a Million Filipinos." />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/png" href="/assets/img/icon.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Coming Soon — CNT Promo &amp; Ads Specialists, Inc." />
+  <meta property="og:description" content="Our new website is launching soon." />
+  <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{ --red:#C8102E; --red-lt:#e5213f; --ink:#0f0f12; }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    body{
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      color:#fff; background:#0c0c0f;
+      min-height:100dvh; display:flex; align-items:center; justify-content:center;
+      padding:32px 20px; position:relative; overflow:hidden;
+    }
+    /* Ambient brand glow */
+    .bg{ position:fixed; inset:0; z-index:0;
+      background:
+        radial-gradient(60% 55% at 78% 12%, rgba(200,16,46,.34), transparent 60%),
+        radial-gradient(55% 50% at 12% 92%, rgba(200,16,46,.20), transparent 60%),
+        linear-gradient(160deg,#141418 0%,#0c0c0f 60%,#0a0a0c 100%);
+    }
+    .grid{ position:fixed; inset:0; z-index:0; opacity:.05;
+      background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
+      background-size:64px 64px; -webkit-mask-image:radial-gradient(circle at 50% 40%,#000,transparent 78%); mask-image:radial-gradient(circle at 50% 40%,#000,transparent 78%); }
+    .wrap{ position:relative; z-index:1; width:100%; max-width:660px; text-align:center; }
+    .logo{ height:56px; width:auto; margin:0 auto 40px; display:block; }
+    .badge{ display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:700;
+      letter-spacing:.16em; text-transform:uppercase; color:#ffd0d8;
+      background:rgba(200,16,46,.14); border:1px solid rgba(200,16,46,.4);
+      padding:8px 16px; border-radius:100px; margin-bottom:28px; }
+    .dot{ width:8px; height:8px; border-radius:50%; background:var(--red-lt); box-shadow:0 0 0 0 rgba(229,33,63,.7); animation:pulse 2s infinite; }
+    @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(229,33,63,.55)} 70%{box-shadow:0 0 0 12px rgba(229,33,63,0)} 100%{box-shadow:0 0 0 0 rgba(229,33,63,0)} }
+    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.03em; line-height:1.03;
+      font-size:clamp(2.7rem,8vw,4.6rem); margin-bottom:22px; }
+    h1 .em{ color:var(--red-lt); }
+    .lead{ font-size:clamp(1rem,2.4vw,1.18rem); line-height:1.65; color:#c9cbd2; max-width:520px; margin:0 auto 14px; }
+    .tag{ font-size:.86rem; font-weight:600; letter-spacing:.02em; color:#8b8e97; margin-bottom:40px; }
+    .tag b{ color:#fff; }
+    .cta{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:center; }
+    .btn{ display:inline-flex; align-items:center; gap:9px; font-weight:700; font-size:.95rem;
+      padding:14px 26px; border-radius:12px; text-decoration:none; transition:transform .15s ease, filter .15s ease; }
+    .btn-red{ background:var(--red); color:#fff; box-shadow:0 10px 30px rgba(200,16,46,.35); }
+    .btn-red:hover{ transform:translateY(-2px); filter:brightness(1.08); }
+    .btn-ghost{ color:#e7e8ec; border:1px solid rgba(255,255,255,.18); }
+    .btn-ghost:hover{ border-color:rgba(255,255,255,.4); }
+    .social{ display:flex; gap:14px; justify-content:center; margin-top:44px; }
+    .social a{ width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+      color:#c9cbd2; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); transition:all .15s ease; }
+    .social a:hover{ color:#fff; background:var(--red); border-color:var(--red); transform:translateY(-2px); }
+    .social svg{ width:19px; height:19px; }
+    .foot{ margin-top:52px; font-size:.76rem; color:#6b6e77; letter-spacing:.01em; line-height:1.7; }
+    .foot a{ color:#c9cbd2; text-decoration:none; }
+    .foot a:hover{ color:#fff; }
+    @media(max-width:520px){ .logo{ height:44px; margin-bottom:32px; } .btn{ width:100%; justify-content:center; } }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grid"></div>
+  <main class="wrap">
+    <img class="logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
+    <span class="badge"><span class="dot"></span> Launching Soon</span>
+    <h1>Something great is <span class="em">coming.</span></h1>
+    <p class="lead">We're building a brand-new home for CNT Promo &amp; Ads Specialists, Inc. — a faster, smarter way to connect Filipino talent with the country's leading brands.</p>
+    <p class="tag"><b>A Million Jobs for a Million Filipinos.</b> &nbsp;·&nbsp; #TatakCNT</p>
+
+    <div class="cta">
+      <a class="btn btn-red" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn btn-ghost" href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener">Follow our page</a>
+    </div>
+
+    <div class="social">
+      <a href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+      <a href="https://www.linkedin.com/in/cnt-promo-and-ads-specialists-inc-24b7633a7/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+      <a href="https://www.tiktok.com/@cnt.jobhiring" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.26 2.2 1.6 3.63 3.8 3.9v2.63c-1.3.13-2.48-.3-3.8-1.03v5.9c0 3.4-2.55 5.83-5.87 5.42-2.9-.36-4.77-2.7-4.6-5.68.16-2.74 2.5-4.82 5.3-4.6v2.7c-.5-.1-1-.1-1.5.03-1.1.3-1.76 1.28-1.57 2.45.18 1.1 1.16 1.83 2.35 1.66 1.02-.15 1.72-1.06 1.72-2.2V3h2.44z"/></svg></a>
+    </div>
+
+    <p class="foot">
+      DOLE-Licensed Manpower &amp; Recruitment Agency<br>
+      219 Lyfe Tower, Shaw Blvd., Mandaluyong City &nbsp;·&nbsp; <a href="mailto:hrdadmin@cntpromoads.com">hrdadmin@cntpromoads.com</a><br>
+      &copy; <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc. All rights reserved.
+    </p>
+  </main>
+  <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+</body>
+</html>
