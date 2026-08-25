@@ -106,9 +106,33 @@
     }
 
     @media(max-width:520px){ .cta{ flex:1; justify-content:center; min-width:0; } }
+
+    /* ---- Intro preloader ---- */
+    .loader{ position:fixed; inset:0; z-index:60; background:var(--ink);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
+      opacity:1; transition:opacity .6s ease; }
+    .loader.done{ opacity:0; pointer-events:none; }
+    .loader .lg{ height:clamp(46px,9vw,56px); width:auto; opacity:0; transform:translateY(7px);
+      animation:loGo .7s ease forwards; }
+    .loader .bar{ width:clamp(130px,32vw,164px); height:2px; border-radius:2px; overflow:hidden;
+      background:rgba(255,255,255,.12); }
+    .loader .bar i{ display:block; height:100%; width:0; background:var(--red);
+      animation:loBar 1.15s cubic-bezier(.4,0,.2,1) forwards; }
+    .loader .lbl{ font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--label); font-weight:600; }
+    @keyframes loGo{ to{ opacity:1; transform:none; } }
+    @keyframes loBar{ 0%{ width:0; } 72%{ width:84%; } 100%{ width:100%; } }
+    @media(prefers-reduced-motion:reduce){
+      .loader .lg{ animation:none; opacity:1; transform:none; }
+      .loader .bar i{ animation:none; width:100%; } }
   </style>
 </head>
 <body>
+  <div class="loader" id="loader">
+    <img class="lg" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
+    <div class="bar"><i></i></div>
+    <div class="lbl">Loading</div>
+  </div>
+
   <div class="photo"></div>
   <div class="veil"></div>
 
@@ -143,8 +167,25 @@
 
     <footer class="bot">
       <span>219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St.,<br>Brgy. Bagong Silang, 1550 Mandaluyong, Philippines</span>
-      <span class="rt">&copy; CNT Promo &amp; Ads Specialists, Inc.<br>All Rights Reserved.</span>
+      <span class="rt">Copyright &copy; 2026 CNT Promo &amp; Ads Specialists, Inc.<br>All Rights Reserved.</span>
     </footer>
   </section>
+
+  <script>
+    (function(){
+      var el = document.getElementById('loader');
+      if(!el) return;
+      var start = Date.now(), MIN = 1150;
+      function hide(){
+        var wait = Math.max(0, MIN - (Date.now() - start));
+        setTimeout(function(){
+          el.classList.add('done');
+          setTimeout(function(){ el.style.display = 'none'; }, 650);
+        }, wait);
+      }
+      if(document.readyState === 'complete') hide();
+      else window.addEventListener('load', hide);
+    })();
+  </script>
 </body>
 </html>
