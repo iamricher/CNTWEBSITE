@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Coming Soon — CNT Promo &amp; Ads Specialists, Inc.</title>
   <meta name="description" content="CNT Promo & Ads Specialists, Inc. — a DOLE-licensed manpower and recruitment agency connecting the Philippines' leading brands with exceptional Filipino talent. Our new website is launching soon." />
   <meta name="robots" content="noindex" />
@@ -21,8 +21,9 @@
     body{
       font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
       color:#fff; background:#0b0b0e;
-      min-height:100dvh; display:flex; align-items:center; justify-content:center;
-      padding:40px 22px; position:relative; overflow:hidden;
+      height:100dvh; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(16px,3.2vh,40px) 20px; position:relative;
       -webkit-font-smoothing:antialiased;
     }
     /* Ambient brand glow + faint grid */
@@ -36,47 +37,52 @@
       background-size:70px 70px;
       -webkit-mask-image:radial-gradient(circle at 50% 42%,#000,transparent 76%); mask-image:radial-gradient(circle at 50% 42%,#000,transparent 76%); }
 
-    .wrap{ position:relative; z-index:1; width:100%; max-width:720px; text-align:center; }
-    .logo{ height:52px; width:auto; margin:0 auto 44px; display:block; }
+    /* Content fits the viewport; spacing scales with screen height (vh clamps). */
+    .wrap{ position:relative; z-index:1; width:100%; max-width:720px; text-align:center;
+      display:flex; flex-direction:column; align-items:center; }
+    .logo{ height:clamp(38px,5.4vh,52px); width:auto; margin-bottom:clamp(16px,3.4vh,42px); display:block; }
 
-    .eyebrow{ display:inline-flex; align-items:center; gap:10px; font-size:11.5px; font-weight:700;
-      letter-spacing:.22em; text-transform:uppercase; color:#e9c6cc;
-      margin-bottom:30px; }
-    .eyebrow .line{ width:26px; height:1px; background:linear-gradient(90deg,transparent,var(--red-lt)); }
+    .eyebrow{ display:inline-flex; align-items:center; gap:10px; font-weight:700;
+      font-size:clamp(9.5px,1.4vh,11.5px); letter-spacing:.2em; text-transform:uppercase; color:#e9c6cc;
+      margin-bottom:clamp(12px,2.4vh,28px); }
+    .eyebrow .line{ width:clamp(16px,2.4vw,26px); height:1px; background:linear-gradient(90deg,transparent,var(--red-lt)); }
     .eyebrow .line.r{ background:linear-gradient(90deg,var(--red-lt),transparent); }
 
-    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.028em; line-height:1.06;
-      font-size:clamp(2.4rem,7vw,4.1rem); margin-bottom:26px; }
+    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.028em; line-height:1.05;
+      font-size:clamp(1.9rem,5.6vh,4.1rem); margin-bottom:clamp(12px,2.2vh,24px); }
     h1 .em{ color:var(--red-lt); }
 
-    .lead{ font-size:clamp(1rem,2.2vw,1.16rem); line-height:1.7; color:#c4c6cd;
-      max-width:560px; margin:0 auto; font-weight:400; }
+    .lead{ font-size:clamp(.9rem,1.85vh,1.14rem); line-height:1.6; color:#c4c6cd;
+      max-width:560px; font-weight:400; }
     .lead b{ color:#fff; font-weight:600; }
 
-    .rule{ width:52px; height:3px; border-radius:99px; background:var(--red); margin:34px auto 30px; }
+    .rule{ width:48px; height:3px; border-radius:99px; background:var(--red); margin:clamp(16px,3vh,32px) auto clamp(14px,2.6vh,28px); }
 
-    .creds{ font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
-      color:#7f828b; margin-bottom:38px; }
+    .creds{ font-weight:600; font-size:clamp(.66rem,1.35vh,.78rem); letter-spacing:.05em; text-transform:uppercase;
+      color:#7f828b; margin-bottom:clamp(18px,3.4vh,36px); }
     .creds span{ color:#b8bbc2; }
 
-    .cta{ display:inline-flex; align-items:center; gap:10px; font-weight:700; font-size:.96rem;
-      padding:15px 30px; border-radius:12px; text-decoration:none;
+    .cta{ display:inline-flex; align-items:center; gap:10px; font-weight:700;
+      font-size:clamp(.88rem,1.7vh,.96rem); padding:clamp(11px,1.8vh,15px) clamp(22px,3.2vw,30px);
+      border-radius:12px; text-decoration:none;
       background:var(--red); color:#fff; box-shadow:0 12px 34px rgba(200,16,46,.34);
       transition:transform .16s ease, filter .16s ease; }
     .cta:hover{ transform:translateY(-2px); filter:brightness(1.08); }
 
-    .social{ display:flex; gap:13px; justify-content:center; margin-top:46px; }
-    .social a{ width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    .social{ display:flex; gap:12px; justify-content:center; margin-top:clamp(22px,4vh,46px); }
+    .social a{ width:clamp(38px,5vh,42px); height:clamp(38px,5vh,42px); border-radius:11px;
+      display:flex; align-items:center; justify-content:center;
       color:#b8bbc2; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.09);
       transition:all .16s ease; }
     .social a:hover{ color:#fff; background:var(--red); border-color:var(--red); transform:translateY(-2px); }
     .social svg{ width:18px; height:18px; }
 
-    .foot{ margin-top:56px; font-size:.75rem; color:#63666f; letter-spacing:.01em; line-height:1.8; }
+    .foot{ margin-top:clamp(20px,4vh,52px); font-size:clamp(.68rem,1.3vh,.76rem);
+      color:#63666f; letter-spacing:.01em; line-height:1.75; }
     .foot a{ color:#b8bbc2; text-decoration:none; }
     .foot a:hover{ color:#fff; }
 
-    @media(max-width:520px){ .logo{ height:42px; margin-bottom:34px; } .cta{ width:100%; justify-content:center; } }
+    @media(max-width:520px){ .cta{ width:100%; justify-content:center; } .lead{ max-width:none; } }
   </style>
 </head>
 <body>
