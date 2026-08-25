@@ -1,18 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
-  "_comment": "COMING-SOON GATE — sends every public page to /coming-soon while the site is finalised. /ats, /client and /events-admin stay reachable. TO GO LIVE: delete the whole 'redirects' array and redeploy.",
-  "redirects": [
-    { "source": "/", "destination": "/coming-soon", "permanent": false },
-    { "source": "/careers", "destination": "/coming-soon", "permanent": false },
-    { "source": "/about", "destination": "/coming-soon", "permanent": false },
-    { "source": "/services", "destination": "/coming-soon", "permanent": false },
-    { "source": "/faq", "destination": "/coming-soon", "permanent": false },
-    { "source": "/status", "destination": "/coming-soon", "permanent": false },
-    { "source": "/privacy", "destination": "/coming-soon", "permanent": false },
-    { "source": "/terms", "destination": "/coming-soon", "permanent": false },
-    { "source": "/job", "destination": "/coming-soon", "permanent": false }
-  ],
+  "_comment": "COMING-SOON MODE — the site root (index.html) currently serves the coming-soon page; the real homepage lives at /home. TO GO LIVE: rename index.html back to coming-soon.html and home.html back to index.html, then redeploy.",
   "rewrites": [
     { "source": "/event", "destination": "/api/event-og" },
     { "source": "/event.html", "destination": "/api/event-og" },
