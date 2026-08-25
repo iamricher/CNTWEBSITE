@@ -4,66 +4,79 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coming Soon — CNT Promo &amp; Ads Specialists, Inc.</title>
-  <meta name="description" content="CNT Promo & Ads Specialists, Inc. — our new website is launching soon. A Million Jobs for a Million Filipinos." />
+  <meta name="description" content="CNT Promo & Ads Specialists, Inc. — a DOLE-licensed manpower and recruitment agency connecting the Philippines' leading brands with exceptional Filipino talent. Our new website is launching soon." />
   <meta name="robots" content="noindex" />
   <link rel="icon" type="image/png" href="/assets/img/icon.png" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Coming Soon — CNT Promo &amp; Ads Specialists, Inc." />
-  <meta property="og:description" content="Our new website is launching soon." />
+  <meta property="og:title" content="CNT Promo &amp; Ads Specialists, Inc. — Launching Soon" />
+  <meta property="og:description" content="A DOLE-licensed manpower and recruitment agency. Our new website is on its way." />
   <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    :root{ --red:#C8102E; --red-lt:#e5213f; --ink:#0f0f12; }
+    :root{ --red:#C8102E; --red-lt:#e5213f; }
     *{ box-sizing:border-box; margin:0; padding:0; }
     html,body{ height:100%; }
     body{
       font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-      color:#fff; background:#0c0c0f;
+      color:#fff; background:#0b0b0e;
       min-height:100dvh; display:flex; align-items:center; justify-content:center;
-      padding:32px 20px; position:relative; overflow:hidden;
+      padding:40px 22px; position:relative; overflow:hidden;
+      -webkit-font-smoothing:antialiased;
     }
-    /* Ambient brand glow */
+    /* Ambient brand glow + faint grid */
     .bg{ position:fixed; inset:0; z-index:0;
       background:
-        radial-gradient(60% 55% at 78% 12%, rgba(200,16,46,.34), transparent 60%),
-        radial-gradient(55% 50% at 12% 92%, rgba(200,16,46,.20), transparent 60%),
-        linear-gradient(160deg,#141418 0%,#0c0c0f 60%,#0a0a0c 100%);
-    }
-    .grid{ position:fixed; inset:0; z-index:0; opacity:.05;
+        radial-gradient(58% 52% at 80% 8%, rgba(200,16,46,.30), transparent 60%),
+        radial-gradient(52% 48% at 8% 96%, rgba(200,16,46,.16), transparent 60%),
+        linear-gradient(160deg,#131317 0%,#0b0b0e 62%,#08080a 100%); }
+    .grid{ position:fixed; inset:0; z-index:0; opacity:.045;
       background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
-      background-size:64px 64px; -webkit-mask-image:radial-gradient(circle at 50% 40%,#000,transparent 78%); mask-image:radial-gradient(circle at 50% 40%,#000,transparent 78%); }
-    .wrap{ position:relative; z-index:1; width:100%; max-width:660px; text-align:center; }
-    .logo{ height:56px; width:auto; margin:0 auto 40px; display:block; }
-    .badge{ display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:700;
-      letter-spacing:.16em; text-transform:uppercase; color:#ffd0d8;
-      background:rgba(200,16,46,.14); border:1px solid rgba(200,16,46,.4);
-      padding:8px 16px; border-radius:100px; margin-bottom:28px; }
-    .dot{ width:8px; height:8px; border-radius:50%; background:var(--red-lt); box-shadow:0 0 0 0 rgba(229,33,63,.7); animation:pulse 2s infinite; }
-    @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(229,33,63,.55)} 70%{box-shadow:0 0 0 12px rgba(229,33,63,0)} 100%{box-shadow:0 0 0 0 rgba(229,33,63,0)} }
-    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.03em; line-height:1.03;
-      font-size:clamp(2.7rem,8vw,4.6rem); margin-bottom:22px; }
+      background-size:70px 70px;
+      -webkit-mask-image:radial-gradient(circle at 50% 42%,#000,transparent 76%); mask-image:radial-gradient(circle at 50% 42%,#000,transparent 76%); }
+
+    .wrap{ position:relative; z-index:1; width:100%; max-width:720px; text-align:center; }
+    .logo{ height:52px; width:auto; margin:0 auto 44px; display:block; }
+
+    .eyebrow{ display:inline-flex; align-items:center; gap:10px; font-size:11.5px; font-weight:700;
+      letter-spacing:.22em; text-transform:uppercase; color:#e9c6cc;
+      margin-bottom:30px; }
+    .eyebrow .line{ width:26px; height:1px; background:linear-gradient(90deg,transparent,var(--red-lt)); }
+    .eyebrow .line.r{ background:linear-gradient(90deg,var(--red-lt),transparent); }
+
+    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.028em; line-height:1.06;
+      font-size:clamp(2.4rem,7vw,4.1rem); margin-bottom:26px; }
     h1 .em{ color:var(--red-lt); }
-    .lead{ font-size:clamp(1rem,2.4vw,1.18rem); line-height:1.65; color:#c9cbd2; max-width:520px; margin:0 auto 14px; }
-    .tag{ font-size:.86rem; font-weight:600; letter-spacing:.02em; color:#8b8e97; margin-bottom:40px; }
-    .tag b{ color:#fff; }
-    .cta{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:center; }
-    .btn{ display:inline-flex; align-items:center; gap:9px; font-weight:700; font-size:.95rem;
-      padding:14px 26px; border-radius:12px; text-decoration:none; transition:transform .15s ease, filter .15s ease; }
-    .btn-red{ background:var(--red); color:#fff; box-shadow:0 10px 30px rgba(200,16,46,.35); }
-    .btn-red:hover{ transform:translateY(-2px); filter:brightness(1.08); }
-    .btn-ghost{ color:#e7e8ec; border:1px solid rgba(255,255,255,.18); }
-    .btn-ghost:hover{ border-color:rgba(255,255,255,.4); }
-    .social{ display:flex; gap:14px; justify-content:center; margin-top:44px; }
+
+    .lead{ font-size:clamp(1rem,2.2vw,1.16rem); line-height:1.7; color:#c4c6cd;
+      max-width:560px; margin:0 auto; font-weight:400; }
+    .lead b{ color:#fff; font-weight:600; }
+
+    .rule{ width:52px; height:3px; border-radius:99px; background:var(--red); margin:34px auto 30px; }
+
+    .creds{ font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+      color:#7f828b; margin-bottom:38px; }
+    .creds span{ color:#b8bbc2; }
+
+    .cta{ display:inline-flex; align-items:center; gap:10px; font-weight:700; font-size:.96rem;
+      padding:15px 30px; border-radius:12px; text-decoration:none;
+      background:var(--red); color:#fff; box-shadow:0 12px 34px rgba(200,16,46,.34);
+      transition:transform .16s ease, filter .16s ease; }
+    .cta:hover{ transform:translateY(-2px); filter:brightness(1.08); }
+
+    .social{ display:flex; gap:13px; justify-content:center; margin-top:46px; }
     .social a{ width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
-      color:#c9cbd2; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); transition:all .15s ease; }
+      color:#b8bbc2; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.09);
+      transition:all .16s ease; }
     .social a:hover{ color:#fff; background:var(--red); border-color:var(--red); transform:translateY(-2px); }
-    .social svg{ width:19px; height:19px; }
-    .foot{ margin-top:52px; font-size:.76rem; color:#6b6e77; letter-spacing:.01em; line-height:1.7; }
-    .foot a{ color:#c9cbd2; text-decoration:none; }
+    .social svg{ width:18px; height:18px; }
+
+    .foot{ margin-top:56px; font-size:.75rem; color:#63666f; letter-spacing:.01em; line-height:1.8; }
+    .foot a{ color:#b8bbc2; text-decoration:none; }
     .foot a:hover{ color:#fff; }
-    @media(max-width:520px){ .logo{ height:44px; margin-bottom:32px; } .btn{ width:100%; justify-content:center; } }
+
+    @media(max-width:520px){ .logo{ height:42px; margin-bottom:34px; } .cta{ width:100%; justify-content:center; } }
   </style>
 </head>
 <body>
@@ -71,15 +84,18 @@
   <div class="grid"></div>
   <main class="wrap">
     <img class="logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
-    <span class="badge"><span class="dot"></span> Launching Soon</span>
-    <h1>Something great is <span class="em">coming.</span></h1>
-    <p class="lead">We're building a brand-new home for CNT Promo &amp; Ads Specialists, Inc. — a faster, smarter way to connect Filipino talent with the country's leading brands.</p>
-    <p class="tag"><b>A Million Jobs for a Million Filipinos.</b> &nbsp;·&nbsp; #TatakCNT</p>
 
-    <div class="cta">
-      <a class="btn btn-red" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <a class="btn btn-ghost" href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener">Follow our page</a>
-    </div>
+    <div class="eyebrow"><span class="line"></span> Our New Website Is Launching Soon <span class="line r"></span></div>
+
+    <h1>A Million Jobs for a<br><span class="em">Million Filipinos.</span></h1>
+
+    <p class="lead">Since 2009, <b>CNT Promo &amp; Ads Specialists, Inc.</b> has been the trusted bridge between the country's leading organizations and exceptional Filipino talent. A refined digital home — built for the way the Philippines hires and gets hired — is on its way.</p>
+
+    <div class="rule"></div>
+
+    <p class="creds">DOLE-Licensed Manpower &amp; Recruitment Agency <span>·</span> Est. 2009</p>
+
+    <a class="cta" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
 
     <div class="social">
       <a href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
@@ -88,9 +104,8 @@
     </div>
 
     <p class="foot">
-      DOLE-Licensed Manpower &amp; Recruitment Agency<br>
       219 Lyfe Tower, Shaw Blvd., Mandaluyong City &nbsp;·&nbsp; <a href="mailto:hrdadmin@cntpromoads.com">hrdadmin@cntpromoads.com</a><br>
-      &copy; <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc. All rights reserved.
+      &copy; <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.
     </p>
   </main>
   <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
