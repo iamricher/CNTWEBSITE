@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
-  "_comment": "COMING-SOON MODE — the site root (index.html) currently serves the coming-soon page; the real homepage lives at /home. TO GO LIVE: rename index.html back to coming-soon.html and home.html back to index.html, then redeploy.",
   "rewrites": [
     { "source": "/event", "destination": "/api/event-og" },
     { "source": "/event.html", "destination": "/api/event-og" },
