@@ -34,9 +34,14 @@
       background:var(--ink) url('/assets/img/lyfe-tower.jpg') center center / cover no-repeat; }
     /* Mobile: a clean, neutral dim so the tower is a quiet backdrop. */
     .veil{ position:fixed; inset:0; z-index:1;
-      background:linear-gradient(180deg,
-        rgba(13,14,18,.9) 0%, rgba(13,14,18,.76) 22%, rgba(13,14,18,.7) 45%,
-        rgba(13,14,18,.83) 66%, rgba(13,14,18,.95) 86%, rgba(13,14,18,.99) 100%); }
+      background:
+        radial-gradient(120% 46% at 82% 2%, rgba(200,16,46,.16), transparent 56%),
+        linear-gradient(180deg,
+          rgba(13,14,18,.9) 0%, rgba(13,14,18,.76) 22%, rgba(13,14,18,.7) 45%,
+          rgba(13,14,18,.83) 66%, rgba(13,14,18,.95) 86%, rgba(13,14,18,.99) 100%); }
+
+    /* Desktop-only accents (hidden on mobile). */
+    .edge, .vlabel{ display:none; }
 
     /* Structured content column. */
     .panel{ position:relative; z-index:2; min-height:100dvh; background:transparent;
@@ -97,12 +102,34 @@
       .photo{ inset:0 0 0 auto; width:45%; border-left:1px solid var(--line-2);
         background-position:center center; }
       .veil{ background:linear-gradient(90deg, rgba(13,14,18,0) 58%, rgba(13,14,18,.14) 100%); }
-      .panel{ width:55%; background:var(--ink);
+      .panel{ width:55%; overflow:hidden;
+        background:
+          radial-gradient(58% 52% at 6% 90%, rgba(200,16,46,.16), transparent 60%),
+          radial-gradient(50% 44% at 94% 6%, rgba(200,16,46,.09), transparent 60%),
+          var(--ink);
         padding:clamp(30px,3.4vw,48px) clamp(40px,4.6vw,72px); }
+      /* faint grid texture so the column reads structured, not empty */
+      .panel::before{ content:''; position:absolute; inset:0; z-index:0; opacity:.05; pointer-events:none;
+        background-image:linear-gradient(rgba(255,255,255,.9) 1px,transparent 1px),
+          linear-gradient(90deg,rgba(255,255,255,.9) 1px,transparent 1px);
+        background-size:60px 60px;
+        -webkit-mask-image:radial-gradient(circle at 24% 44%,#000,transparent 74%);
+                mask-image:radial-gradient(circle at 24% 44%,#000,transparent 74%); }
+      .top, .mid, .bot{ position:relative; z-index:1; }
       .top .tag{ font-size:11px; }
       .mid{ padding:clamp(30px,4vw,52px) 0; }
       h1{ font-size:clamp(2.4rem,3.5vw,3.5rem); }
       .lead{ font-size:clamp(1.02rem,1.2vw,1.16rem); max-width:480px; }
+
+      /* red accent line down the content/tower seam */
+      .edge{ display:block; position:fixed; top:0; bottom:0; left:55%; width:2px; z-index:3; pointer-events:none;
+        background:linear-gradient(180deg, transparent 0%, rgba(200,16,46,.55) 24%,
+          rgba(200,16,46,.55) 76%, transparent 100%); }
+      /* editorial vertical label in the left margin */
+      .vlabel{ display:block; position:fixed; left:clamp(12px,1.5vw,20px); bottom:clamp(96px,17vh,168px); z-index:3;
+        writing-mode:vertical-rl; transform:rotate(180deg);
+        font-size:10px; letter-spacing:.34em; text-transform:uppercase; color:var(--label); font-weight:600;
+        pointer-events:none; }
     }
 
     @media(max-width:520px){ .cta{ flex:1; justify-content:center; min-width:0; } }
@@ -139,6 +166,8 @@
 
   <div class="photo"></div>
   <div class="veil"></div>
+  <div class="edge"></div>
+  <div class="vlabel">cntpromoads.com.ph</div>
 
   <section class="panel">
     <header class="top">
