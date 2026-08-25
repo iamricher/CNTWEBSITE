@@ -108,7 +108,11 @@
     @media(max-width:520px){ .cta{ flex:1; justify-content:center; min-width:0; } }
 
     /* ---- Intro preloader ---- */
-    .loader{ position:fixed; inset:0; z-index:60; background:var(--ink);
+    .loader{ position:fixed; inset:0; z-index:60;
+      background:
+        radial-gradient(92% 60% at 82% 6%, rgba(200,16,46,.24), transparent 58%),
+        radial-gradient(80% 55% at 12% 96%, rgba(200,16,46,.13), transparent 60%),
+        var(--ink);
       display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
       opacity:1; transition:opacity .6s ease; }
     .loader.done{ opacity:0; pointer-events:none; }
