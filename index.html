@@ -35,7 +35,7 @@
     /* Mobile: a clean, neutral dim so the tower is a quiet backdrop. */
     .veil{ position:fixed; inset:0; z-index:1;
       background:
-        radial-gradient(120% 46% at 82% 2%, rgba(200,16,46,.16), transparent 56%),
+        radial-gradient(120% 46% at 82% 2%, rgba(200,16,46,.11), transparent 56%),
         linear-gradient(180deg,
           rgba(13,14,18,.9) 0%, rgba(13,14,18,.76) 22%, rgba(13,14,18,.7) 45%,
           rgba(13,14,18,.83) 66%, rgba(13,14,18,.95) 86%, rgba(13,14,18,.99) 100%); }
@@ -100,12 +100,13 @@
     /* ---- Desktop / wide: structured split — content left, tower right. ---- */
     @media(min-width:881px){
       .photo{ inset:0 0 0 auto; width:45%; border-left:1px solid var(--line-2);
-        background-position:center center; }
-      .veil{ background:linear-gradient(90deg, rgba(13,14,18,0) 58%, rgba(13,14,18,.14) 100%); }
+        background-position:center center; filter:brightness(.78) contrast(1.03) saturate(.94); }
+      .veil{ background:linear-gradient(90deg,
+        rgba(13,14,18,.94) 55%, rgba(13,14,18,.62) 66%, rgba(13,14,18,.47) 84%, rgba(13,14,18,.45) 100%); }
       .panel{ width:55%; overflow:hidden;
         background:
-          radial-gradient(58% 52% at 6% 90%, rgba(200,16,46,.16), transparent 60%),
-          radial-gradient(50% 44% at 94% 6%, rgba(200,16,46,.09), transparent 60%),
+          radial-gradient(58% 52% at 6% 90%, rgba(200,16,46,.1), transparent 60%),
+          radial-gradient(50% 44% at 94% 6%, rgba(200,16,46,.055), transparent 60%),
           var(--ink);
         padding:clamp(30px,3.4vw,48px) clamp(40px,4.6vw,72px); }
       /* faint grid texture so the column reads structured, not empty */
@@ -134,34 +135,30 @@
 
     @media(max-width:520px){ .cta{ flex:1; justify-content:center; min-width:0; } }
 
-    /* ---- Intro preloader ---- */
+    /* ---- Intro preloader (matches /home) ---- */
     .loader{ position:fixed; inset:0; z-index:60;
       background:
-        radial-gradient(92% 60% at 82% 6%, rgba(200,16,46,.24), transparent 58%),
-        radial-gradient(80% 55% at 12% 96%, rgba(200,16,46,.13), transparent 60%),
+        radial-gradient(92% 60% at 82% 6%, rgba(200,16,46,.2), transparent 58%),
+        radial-gradient(80% 55% at 12% 96%, rgba(200,16,46,.11), transparent 60%),
         var(--ink);
-      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
-      opacity:1; transition:opacity .6s ease; }
-    .loader.done{ opacity:0; pointer-events:none; }
-    .loader .lg{ height:clamp(46px,9vw,56px); width:auto; opacity:0; transform:translateY(7px);
-      animation:loGo .7s ease forwards; }
-    .loader .bar{ width:clamp(130px,32vw,164px); height:2px; border-radius:2px; overflow:hidden;
-      background:rgba(255,255,255,.12); }
-    .loader .bar i{ display:block; height:100%; width:0; background:var(--red);
-      animation:loBar 1.15s cubic-bezier(.4,0,.2,1) forwards; }
-    .loader .lbl{ font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--label); font-weight:600; }
-    @keyframes loGo{ to{ opacity:1; transform:none; } }
-    @keyframes loBar{ 0%{ width:0; } 72%{ width:84%; } 100%{ width:100%; } }
-    @media(prefers-reduced-motion:reduce){
-      .loader .lg{ animation:none; opacity:1; transform:none; }
-      .loader .bar i{ animation:none; width:100%; } }
+      display:flex; align-items:center; justify-content:center; }
+    .loader-inner{ display:flex; flex-direction:column; align-items:center; gap:clamp(20px,4vw,30px); }
+    .loader-logo{ width:clamp(150px,42vw,200px); height:auto; display:block; opacity:.92; }
+    .loader-bar{ width:clamp(180px,52vw,240px); height:2px; border-radius:99px; overflow:hidden;
+      background:rgba(255,255,255,.1); }
+    .loader-fill{ height:100%; width:0%;
+      background:linear-gradient(90deg, #9c0c22, var(--red-lt)); transition:width .05s linear; }
+    .loader-text{ font-family:'Manrope',sans-serif; font-weight:600;
+      color:rgba(255,255,255,.4); font-size:.75rem; letter-spacing:.1em; }
   </style>
 </head>
 <body>
   <div class="loader" id="loader">
-    <img class="lg" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
-    <div class="bar"><i></i></div>
-    <div class="lbl">Loading</div>
+    <div class="loader-inner">
+      <img class="loader-logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
+      <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+      <span class="loader-text" id="loaderText">0%</span>
+    </div>
   </div>
 
   <div class="photo"></div>
@@ -205,19 +202,29 @@
   </section>
 
   <script>
+    /* Intro loader — same behavior as /home: a random-stepped % counter
+       fills the bar, then the overlay lifts and fades away. */
     (function(){
-      var el = document.getElementById('loader');
-      if(!el) return;
-      var start = Date.now(), MIN = 1150;
-      function hide(){
-        var wait = Math.max(0, MIN - (Date.now() - start));
-        setTimeout(function(){
-          el.classList.add('done');
-          setTimeout(function(){ el.style.display = 'none'; }, 650);
-        }, wait);
-      }
-      if(document.readyState === 'complete') hide();
-      else window.addEventListener('load', hide);
+      var loader = document.getElementById('loader');
+      var fill = document.getElementById('loaderFill');
+      var text = document.getElementById('loaderText');
+      if(!loader || !fill || !text) return;
+      var progress = 0;
+      var interval = setInterval(function(){
+        progress += Math.random() * 18 + 5;
+        if(progress > 100) progress = 100;
+        fill.style.width = progress + '%';
+        text.textContent = Math.round(progress) + '%';
+        if(progress >= 100){
+          clearInterval(interval);
+          setTimeout(function(){
+            loader.style.transition = 'opacity .6s ease, transform .6s ease';
+            loader.style.opacity = '0';
+            loader.style.transform = 'translateY(-8px)';
+            setTimeout(function(){ loader.style.display = 'none'; }, 600);
+          }, 300);
+        }
+      }, 60);
     })();
   </script>
 </body>
