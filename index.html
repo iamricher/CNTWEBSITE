@@ -13,125 +13,97 @@
   <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    :root{
-      --red:#C8102E; --red-lt:#e5213f;
-      --ink:#0d0e12; --muted:#9da1a9; --label:#787c85;
-      --line:rgba(255,255,255,.11); --line-2:rgba(255,255,255,.16);
-    }
+    :root{ --red:#C8102E; --red-lt:#e5213f; --ink:#0b0c10; }
     *{ box-sizing:border-box; margin:0; padding:0; }
     html,body{ min-height:100%; }
     body{
       font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
       color:#fff; background:var(--ink);
       min-height:100dvh; overflow-x:hidden; position:relative;
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(20px,4.2vh,52px) clamp(22px,5vw,48px);
       -webkit-font-smoothing:antialiased;
     }
 
-    /* The building — CNT's own LYFE Tower. */
-    .photo{ position:fixed; inset:0; z-index:0;
-      background:var(--ink) url('/assets/img/lyfe-tower.jpg') center center / cover no-repeat; }
-    /* Mobile: a clean, neutral dim so the tower is a quiet backdrop. */
-    .veil{ position:fixed; inset:0; z-index:1;
+    /* Cinematic building backdrop — CNT's own LYFE Tower. */
+    .bg{ position:fixed; inset:0; z-index:0;
+      background:var(--ink) url('/assets/img/lyfe-tower.jpg') center center / cover no-repeat;
+      filter:brightness(.6) saturate(.9); transform:scale(1.04); }
+    .grad{ position:fixed; inset:0; z-index:1;
       background:
-        radial-gradient(120% 46% at 82% 2%, rgba(200,16,46,.11), transparent 56%),
-        linear-gradient(180deg,
-          rgba(13,14,18,.9) 0%, rgba(13,14,18,.76) 22%, rgba(13,14,18,.7) 45%,
-          rgba(13,14,18,.83) 66%, rgba(13,14,18,.95) 86%, rgba(13,14,18,.99) 100%); }
+        radial-gradient(72% 52% at 82% 4%, rgba(200,16,46,.22), transparent 60%),
+        radial-gradient(120% 90% at 50% 34%, transparent 38%, rgba(11,12,16,.55) 74%, rgba(11,12,16,.9) 100%),
+        linear-gradient(180deg, rgba(11,12,16,.6) 0%, rgba(11,12,16,.32) 38%, rgba(11,12,16,.72) 80%, rgba(11,12,16,.96) 100%); }
+    .grain{ position:fixed; inset:0; z-index:2; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
-    /* Desktop-only accents (hidden on mobile). */
-    .edge, .vlabel{ display:none; }
+    /* Hero */
+    .hero{ position:relative; z-index:3; width:100%; max-width:760px; text-align:center;
+      display:flex; flex-direction:column; align-items:center; }
+    .logo{ height:clamp(46px,8vw,60px); width:auto; display:block; margin-bottom:clamp(22px,4.4vw,32px); }
 
-    /* Structured content column. */
-    .panel{ position:relative; z-index:2; min-height:100dvh; background:transparent;
-      display:flex; flex-direction:column;
-      padding:clamp(20px,5vw,30px) clamp(22px,6vw,32px) clamp(22px,5vw,30px); }
+    .pill{ display:inline-flex; align-items:center; gap:9px; padding:8px 16px 8px 14px; border-radius:99px;
+      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+      font-size:clamp(10px,2.4vw,11.5px); letter-spacing:.18em; text-transform:uppercase; font-weight:600; color:#e7e9ee;
+      margin-bottom:clamp(22px,4.6vw,30px); }
+    .pill .dot{ width:8px; height:8px; border-radius:50%; background:var(--red-lt); flex:none;
+      box-shadow:0 0 0 0 rgba(229,33,63,.6); animation:pulse 2.2s infinite; }
+    @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(229,33,63,.55); } 70%{ box-shadow:0 0 0 11px rgba(229,33,63,0); } 100%{ box-shadow:0 0 0 0 rgba(229,33,63,0); } }
 
-    /* Masthead */
-    .top{ display:flex; align-items:center; justify-content:space-between; gap:16px;
-      padding-bottom:clamp(15px,3.4vw,20px); border-bottom:1px solid var(--line); }
-    .top .logo{ height:clamp(34px,7.5vw,42px); width:auto; display:block; }
-    .top .tag{ font-size:clamp(8.5px,2.1vw,10.5px); letter-spacing:.24em; text-transform:uppercase;
-      color:var(--label); font-weight:600; text-align:right; line-height:1.5; }
+    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.03em; line-height:1.03;
+      font-size:clamp(2.35rem,8.6vw,4.5rem); margin-bottom:clamp(18px,3.4vw,26px);
+      text-shadow:0 2px 30px rgba(0,0,0,.45); }
+    h1 .em{ background:linear-gradient(100deg, #ff5a70, var(--red) 78%);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
 
-    /* Main statement */
-    .mid{ flex:1; display:flex; flex-direction:column; justify-content:center;
-      padding:clamp(26px,7vw,40px) 0; }
-    .eyebrow{ display:inline-flex; align-items:center; gap:11px; font-weight:700;
-      font-size:clamp(10px,2.5vw,11.5px); letter-spacing:.2em; text-transform:uppercase; color:#b9bcc3;
-      margin-bottom:clamp(16px,3.6vw,22px); }
-    .eyebrow .tick{ width:9px; height:9px; border-radius:2px; background:var(--red); flex:none;
-      box-shadow:0 0 0 4px rgba(200,16,46,.16); }
-    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.026em; line-height:1.05;
-      font-size:clamp(2.15rem,8.4vw,3.5rem); margin-bottom:clamp(16px,3.4vw,22px); }
-    h1 .em{ color:var(--red-lt); }
-    .lead{ font-size:clamp(1rem,3.3vw,1.14rem); line-height:1.72; color:var(--muted); max-width:460px; }
-    .lead b{ color:#eceef1; font-weight:600; }
+    .sub{ font-size:clamp(1rem,3vw,1.18rem); line-height:1.62; color:#c6c9d1; max-width:520px;
+      margin-bottom:clamp(26px,5vw,34px); }
+    .sub b{ color:#fff; font-weight:600; }
 
-    .meta{ display:flex; align-items:center; gap:clamp(11px,3vw,15px); flex-wrap:wrap;
-      margin-top:clamp(22px,5.4vw,30px);
-      font-size:clamp(.66rem,2vw,.74rem); letter-spacing:.14em; text-transform:uppercase;
-      color:var(--label); font-weight:600; }
-    .meta b{ color:#c3c6cd; font-weight:600; }
-    .meta .sep{ width:1px; height:13px; background:var(--line-2); display:inline-block; }
+    .chips{ display:flex; gap:clamp(10px,2.6vw,14px); flex-wrap:wrap; justify-content:center;
+      margin-bottom:clamp(28px,5.4vw,38px); }
+    .chip{ display:inline-flex; align-items:center; gap:9px; padding:10px 18px; border-radius:11px;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.13);
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      font-size:clamp(.73rem,2.2vw,.83rem); letter-spacing:.04em; color:#e2e4ea; font-weight:600; }
+    .chip::before{ content:''; width:6px; height:6px; border-radius:2px; background:var(--red); flex:none;
+      box-shadow:0 0 8px rgba(200,16,46,.6); }
 
-    .actions{ display:flex; align-items:center; gap:clamp(14px,4vw,20px); flex-wrap:wrap;
-      margin-top:clamp(22px,5.4vw,30px); }
+    .actions{ display:flex; align-items:center; gap:clamp(14px,3.5vw,18px); flex-wrap:wrap; justify-content:center; }
     .cta{ display:inline-flex; align-items:center; gap:10px; font-weight:700;
-      font-size:clamp(.9rem,2.6vw,.98rem); padding:clamp(13px,3vw,15px) clamp(24px,5.4vw,30px);
-      border-radius:8px; text-decoration:none; background:var(--red); color:#fff;
-      box-shadow:0 10px 26px rgba(200,16,46,.28); transition:filter .16s ease, transform .16s ease; }
-    .cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+      font-size:clamp(.95rem,2.7vw,1.02rem); padding:clamp(14px,3vw,16px) clamp(28px,5.6vw,34px);
+      border-radius:11px; text-decoration:none; color:#fff;
+      background:linear-gradient(180deg, var(--red-lt), var(--red));
+      box-shadow:0 12px 32px rgba(200,16,46,.4), inset 0 1px 0 rgba(255,255,255,.18);
+      transition:transform .16s ease, filter .16s ease; }
+    .cta:hover{ transform:translateY(-2px); filter:brightness(1.08); }
     .social{ display:flex; gap:10px; }
-    .social a{ width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center;
-      color:#b3b6bd; border:1px solid var(--line); background:rgba(255,255,255,.02); transition:all .16s ease; }
-    .social a:hover{ color:#fff; border-color:var(--red); background:var(--red); }
-    .social svg{ width:18px; height:18px; }
+    .social a{ width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+      color:#c3c6cd; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.13);
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:all .16s ease; }
+    .social a:hover{ color:#fff; background:var(--red); border-color:var(--red); transform:translateY(-2px); }
+    .social svg{ width:19px; height:19px; }
 
-    /* Colophon */
-    .bot{ display:flex; align-items:center; justify-content:space-between; gap:10px 18px; flex-wrap:wrap;
-      padding-top:clamp(15px,3.2vw,20px); border-top:1px solid var(--line);
-      font-size:clamp(.66rem,2vw,.74rem); color:var(--label); line-height:1.65; }
-    .bot a{ color:#b3b6bd; text-decoration:none; }
-    .bot a:hover{ color:#fff; }
-    .bot .rt{ text-align:right; }
+    .foot{ margin-top:clamp(28px,5.2vw,42px); font-size:clamp(.7rem,2vw,.78rem);
+      color:#83868f; letter-spacing:.01em; line-height:1.8; }
+    .foot a{ color:#c3c6cd; text-decoration:none; }
+    .foot a:hover{ color:#fff; }
 
-    /* ---- Desktop / wide: structured split — content left, tower right. ---- */
-    @media(min-width:881px){
-      .photo{ inset:0 0 0 auto; width:45%; border-left:1px solid var(--line-2);
-        background-position:center center; filter:brightness(.78) contrast(1.03) saturate(.94); }
-      .veil{ background:linear-gradient(90deg,
-        rgba(13,14,18,.94) 55%, rgba(13,14,18,.62) 66%, rgba(13,14,18,.47) 84%, rgba(13,14,18,.45) 100%); }
-      .panel{ width:55%; overflow:hidden;
-        background:
-          radial-gradient(58% 52% at 6% 90%, rgba(200,16,46,.1), transparent 60%),
-          radial-gradient(50% 44% at 94% 6%, rgba(200,16,46,.055), transparent 60%),
-          var(--ink);
-        padding:clamp(30px,3.4vw,48px) clamp(40px,4.6vw,72px); }
-      /* faint grid texture so the column reads structured, not empty */
-      .panel::before{ content:''; position:absolute; inset:0; z-index:0; opacity:.05; pointer-events:none;
-        background-image:linear-gradient(rgba(255,255,255,.9) 1px,transparent 1px),
-          linear-gradient(90deg,rgba(255,255,255,.9) 1px,transparent 1px);
-        background-size:60px 60px;
-        -webkit-mask-image:radial-gradient(circle at 24% 44%,#000,transparent 74%);
-                mask-image:radial-gradient(circle at 24% 44%,#000,transparent 74%); }
-      .top, .mid, .bot{ position:relative; z-index:1; }
-      .top .tag{ font-size:11px; }
-      .mid{ padding:clamp(30px,4vw,52px) 0; }
-      h1{ font-size:clamp(2.4rem,3.5vw,3.5rem); }
-      .lead{ font-size:clamp(1.02rem,1.2vw,1.16rem); max-width:480px; }
-
-      /* red accent line down the content/tower seam */
-      .edge{ display:block; position:fixed; top:0; bottom:0; left:55%; width:2px; z-index:3; pointer-events:none;
-        background:linear-gradient(180deg, transparent 0%, rgba(200,16,46,.55) 24%,
-          rgba(200,16,46,.55) 76%, transparent 100%); }
-      /* editorial vertical label in the left margin */
-      .vlabel{ display:block; position:fixed; left:clamp(12px,1.5vw,20px); bottom:clamp(96px,17vh,168px); z-index:3;
-        writing-mode:vertical-rl; transform:rotate(180deg);
-        font-size:10px; letter-spacing:.34em; text-transform:uppercase; color:var(--label); font-weight:600;
-        pointer-events:none; }
-    }
+    /* Staggered reveal (plays as the loader clears). */
+    @keyframes rise{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+    .hero > *{ animation:rise .8s cubic-bezier(.2,.7,.2,1) both; }
+    .hero > *:nth-child(1){ animation-delay:1.35s; }
+    .hero > *:nth-child(2){ animation-delay:1.44s; }
+    .hero > *:nth-child(3){ animation-delay:1.53s; }
+    .hero > *:nth-child(4){ animation-delay:1.62s; }
+    .hero > *:nth-child(5){ animation-delay:1.71s; }
+    .hero > *:nth-child(6){ animation-delay:1.8s; }
+    .hero > *:nth-child(7){ animation-delay:1.89s; }
+    @media(prefers-reduced-motion:reduce){
+      .bg{ transform:none; } .pill .dot{ animation:none; }
+      .hero > *{ animation:none; } }
 
     @media(max-width:520px){ .cta{ flex:1; justify-content:center; min-width:0; } }
 
@@ -161,45 +133,38 @@
     </div>
   </div>
 
-  <div class="photo"></div>
-  <div class="veil"></div>
-  <div class="edge"></div>
-  <div class="vlabel">cntpromoads.com.ph</div>
+  <div class="bg"></div>
+  <div class="grad"></div>
+  <div class="grain"></div>
 
-  <section class="panel">
-    <header class="top">
-      <img class="logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
-      <div class="tag">Mandaluyong · Philippines<br>Authorized Employment Agency</div>
-    </header>
+  <main class="hero">
+    <img class="logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
 
-    <main class="mid">
-      <div class="eyebrow"><span class="tick"></span> Our New Website Is Launching Soon</div>
+    <div class="pill"><span class="dot"></span> Something Big Is Coming</div>
 
-      <h1>A Million Jobs for a<br><span class="em">Million Filipinos.</span></h1>
+    <h1>A Million Jobs for a<br><span class="em">Million Filipinos.</span></h1>
 
-      <p class="lead">Whether you're advancing your career or building your team, <b>CNT Promo &amp; Ads Specialists, Inc.</b> brings the Philippines' leading brands together with its most capable professionals. A more considered way to hire — and to be hired — is on its way.</p>
+    <p class="sub">We're building something big — the new home of <b>CNT Promo &amp; Ads Specialists, Inc.</b> A more considered way to hire, and to be hired, is on its way.</p>
 
-      <div class="meta">
-        <span>Connecting Talent Nationwide</span>
-        <span class="sep"></span>
-        <span>Corporate Employment &amp; Staffing</span>
+    <div class="chips">
+      <span class="chip">Connecting Talent Nationwide</span>
+      <span class="chip">Authorized Employment Agency</span>
+    </div>
+
+    <div class="actions">
+      <a class="cta" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <div class="social">
+        <a href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+        <a href="https://www.linkedin.com/in/cnt-promo-and-ads-specialists-inc-24b7633a7/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        <a href="https://www.tiktok.com/@cnt.jobhiring" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.26 2.2 1.6 3.63 3.8 3.9v2.63c-1.3.13-2.48-.3-3.8-1.03v5.9c0 3.4-2.55 5.83-5.87 5.42-2.9-.36-4.77-2.7-4.6-5.68.16-2.74 2.5-4.82 5.3-4.6v2.7c-.5-.1-1-.1-1.5.03-1.1.3-1.76 1.28-1.57 2.45.18 1.1 1.16 1.83 2.35 1.66 1.02-.15 1.72-1.06 1.72-2.2V3h2.44z"/></svg></a>
       </div>
+    </div>
 
-      <div class="actions">
-        <a class="cta" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <div class="social">
-          <a href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-          <a href="https://www.linkedin.com/in/cnt-promo-and-ads-specialists-inc-24b7633a7/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
-          <a href="https://www.tiktok.com/@cnt.jobhiring" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.26 2.2 1.6 3.63 3.8 3.9v2.63c-1.3.13-2.48-.3-3.8-1.03v5.9c0 3.4-2.55 5.83-5.87 5.42-2.9-.36-4.77-2.7-4.6-5.68.16-2.74 2.5-4.82 5.3-4.6v2.7c-.5-.1-1-.1-1.5.03-1.1.3-1.76 1.28-1.57 2.45.18 1.1 1.16 1.83 2.35 1.66 1.02-.15 1.72-1.06 1.72-2.2V3h2.44z"/></svg></a>
-        </div>
-      </div>
-    </main>
-
-    <footer class="bot">
-      <span>219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St.,<br>Brgy. Bagong Silang, 1550 Mandaluyong, Philippines</span>
-      <span class="rt">Copyright &copy; 2026 CNT Promo &amp; Ads Specialists, Inc.<br>All Rights Reserved.</span>
-    </footer>
-  </section>
+    <p class="foot">
+      219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St., Brgy. Bagong Silang, 1550 Mandaluyong, Philippines<br>
+      Copyright &copy; 2026 CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.
+    </p>
+  </main>
 
   <script>
     /* Intro loader — same behavior as /home: a random-stepped % counter
