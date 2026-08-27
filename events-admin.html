@@ -365,7 +365,8 @@
     /* ── Forms ── */
     .field{margin-bottom:15px}
     label{display:block;font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-    input,textarea{width:100%;border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;font-family:inherit;font-size:.88rem;color:var(--ink);background:#fff;transition:border-color .15s,box-shadow .15s}
+    input,textarea,select{width:100%;border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;font-family:inherit;font-size:.88rem;color:var(--ink);background:#fff;transition:border-color .15s,box-shadow .15s}
+    select{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
     input::placeholder,textarea::placeholder{color:#AEB6C2}
     input:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.12)}
     textarea{resize:vertical;line-height:1.55}
@@ -460,7 +461,7 @@
     .btn{ border-radius:11px; box-shadow:0 1px 2px rgba(200,16,46,.18), 0 10px 20px -8px rgba(200,16,46,.45); }
     .btn:hover{ box-shadow:0 12px 24px -8px rgba(200,16,46,.5); }
     /* Inputs — calmer border, rounder, refined focus */
-    input,textarea{ border-radius:11px; border-color:#E3E7EE; }
+    input,textarea,select{ border-radius:11px; border-color:#E3E7EE; }
     input:focus,textarea:focus{ box-shadow:0 0 0 3px rgba(200,16,46,.13); }
     /* Auth + modal — more premium */
     .auth-card{ border-color:#EAEDF3; border-radius:22px; box-shadow:0 34px 80px -26px rgba(16,24,40,.3); }
@@ -863,8 +864,6 @@
           <div class="field"><label>Google Maps link</label><input id="of-maps" placeholder="https://maps.app.goo.gl/…"></div>
           <div class="field"><label>Embedded-map query</label><input id="of-mapq" placeholder="Building name, street, city"></div>
         </div>
-        <div class="field"><label>Getting here — one item per line</label><textarea id="of-getting" rows="3" placeholder="5-minute walk from Shaw Boulevard MRT-3 Station&#10;Along Shaw Blvd, beside Shangri-La Plaza&#10;Building parking available for visitors"></textarea><p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Each line becomes a “Getting here” item on the office page.</p></div>
-        <div class="field"><label>Facilities / amenities — one per line</label><textarea id="of-amenities" rows="3" placeholder="Grade-A office tower&#10;24/7 building security&#10;Reception &amp; lounge&#10;Nearby dining &amp; retail"></textarea><p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Shown as tags under “Facilities.”</p></div>
 
         <div class="field"><label>Cover photo — the hero banner (blends into the map)</label>
           <label class="up"><span class="material-icons-outlined">wallpaper</span>Upload cover<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'of-hero','of-hero-prev')"></label>
@@ -1197,7 +1196,7 @@
     function ofEnsureMap(){
       if(_ofMap || !window.L) return;
       _ofMap = L.map('of-map',{scrollWheelZoom:true}).setView(PH_CENTER,5);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(_ofMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'&copy; OpenStreetMap contributors'}).addTo(_ofMap);
       _ofMap.on('click',function(e){ ofSetPin(e.latlng.lat,e.latlng.lng,false); });
     }
     function ofPlaceMarker(lat,lng,recenter){
@@ -1257,8 +1256,6 @@
       document.getElementById('of-hours').value = o.hours||'';
       document.getElementById('of-maps').value = o.maps||'';
       document.getElementById('of-mapq').value = o.mapq||'';
-      document.getElementById('of-getting').value = o.getting_there||'';
-      document.getElementById('of-amenities').value = Array.isArray(o.amenities)?o.amenities.join('\n'):'';
       document.getElementById('of-hasdata').checked = !!o.has_data;
       document.getElementById('of-main').checked = !!o.is_main;
       document.getElementById('of-visible').checked = slug ? !!o.visible : true;
@@ -1304,8 +1301,6 @@
         email_note:document.getElementById('of-email-note').value.trim()||null,
         maps:document.getElementById('of-maps').value.trim()||null,
         mapq:document.getElementById('of-mapq').value.trim()||null,
-        getting_there:document.getElementById('of-getting').value.replace(/\r/g,'').trim()||null,
-        amenities:document.getElementById('of-amenities').value.replace(/\r/g,'').split('\n').map(function(s){return s.trim();}).filter(Boolean),
         hero:document.getElementById('of-hero').value.trim()||null,
         photos:_ofImages,
         visible:document.getElementById('of-visible').checked };
