@@ -24,7 +24,7 @@
     '    <ul class="nav-links" role="list">' +
     '      <li><a href="' + h('about') + '" class="nav-link' + (a === 'about' ? ' active' : '') + '">About</a></li>' +
     '      <li><a href="' + h('services') + '" class="nav-link' + (a === 'services' ? ' active' : '') + '">Services</a></li>' +
-    '      <li><a href="' + h('industries') + '" class="nav-link">Industries</a></li>' +
+    '      <li><a href="' + h('reach') + '" class="nav-link">Locations</a></li>' +
     '      <li><a href="' + h('projects') + '" class="nav-link">Success Stories</a></li>' +
     '      <li><a href="' + h('events') + '" class="nav-link' + (a === 'events' ? ' active' : '') + '">Events</a></li>' +
     '      <li><a href="/careers" class="nav-link' + (a === 'careers' ? ' active' : '') + '">Careers</a></li>' +
@@ -39,6 +39,7 @@
     '  <ul>' +
     '    <li><a href="' + h('about') + '">About</a></li>' +
     '    <li><a href="' + h('services') + '">Services</a></li>' +
+    '    <li><a href="' + h('reach') + '">Locations</a></li>' +
     '    <li><a href="/status">Track My Application</a></li>' +
     '    <li><a href="' + h('industries') + '">Industries</a></li>' +
     '    <li><a href="' + h('projects') + '">Success Stories</a></li>' +

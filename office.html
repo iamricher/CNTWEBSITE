@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Office — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="CNT office details — photos, exact map location, address, contact number, office hours, and email." />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CNT Office" />
+  <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="/assets/img/icon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
+  <script src="assets/offices-data.js"></script>
+  <style>
+    :root{--red:#C8102E;--red-deep:#A50D24;--red-lt:#E5213F;--red-pale:#FFF0F2;--charcoal:#1A1A1A;--ink:#111;--sub:#4A4A4A;--muted:#6B7280;--faint:#9CA3AF;--line:#EBEBEB;--bg:#F6F7F9;--white:#fff;--display:'Manrope',sans-serif;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.7}
+    a{color:inherit;text-decoration:none}
+    img{display:block;max-width:100%}
+    .wrap{width:min(1120px,100% - 44px);margin-inline:auto}
+
+    .crumb-bar{padding:clamp(16px,2.4vw,24px) 0}
+    .crumb{display:inline-flex;align-items:center;gap:7px;font-size:.86rem;font-weight:700;color:var(--muted);transition:color .15s}
+    .crumb:hover{color:var(--red)}
+    .crumb svg{flex:none}
+
+    /* ── Section rhythm & headings ── */
+    .section{padding:clamp(34px,5vw,64px) 0}
+    .section.tight{padding-top:0}
+    .eyebrow{display:inline-flex;align-items:center;font-size:.64rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,var(--red-deep),var(--red-lt));padding:6px 14px;border-radius:99px;box-shadow:0 8px 20px -10px rgba(200,16,46,.55)}
+    .sec-head{max-width:660px;margin-bottom:clamp(20px,3vw,30px)}
+    .sec-head h2{font-family:var(--display);font-size:clamp(1.55rem,3.1vw,2.35rem);font-weight:800;letter-spacing:-.025em;color:var(--charcoal);line-height:1.1;margin-top:14px}
+    .sec-head p{color:var(--muted);margin-top:10px;font-size:1.02rem;line-height:1.6}
+
+    /* ── Interactive map hero ── */
+    .hero-map{position:relative;width:100%;height:clamp(360px,46vw,560px);overflow:hidden;background:#e9edf2}
+    .hero-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+    /* office photo blended in from the right via a gradient mask */
+    .hm-photo{position:absolute;top:0;right:0;bottom:0;width:47%;height:100%;object-fit:cover;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40%);mask-image:linear-gradient(90deg,transparent 0,#000 40%)}
+    @media(max-width:600px){ .hm-photo{width:62%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 55%);mask-image:linear-gradient(90deg,transparent 0,#000 55%)} }
+    /* dark at top+bottom (text) but clear through the middle so the map pin stays visible */
+    .hm-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(6,8,12,.40) 0%,rgba(6,8,12,.06) 26%,transparent 46%,rgba(6,8,12,.55) 82%,rgba(6,8,12,.94) 100%),rgba(6,8,12,.20)}
+    .hc-cap{position:absolute;left:0;right:0;bottom:0;z-index:2;pointer-events:none}   /* map stays draggable */
+    .hc-cap .hc-badge,.hm-dir{pointer-events:auto}
+    .hc-cap .wrap{padding-bottom:clamp(26px,4vw,46px)}
+    .hc-cap .cap-in{max-width:min(540px,64%)}
+    @media(max-width:600px){ .hc-cap .cap-in{max-width:100%} }
+    .hc-badge{display:inline-flex;align-items:center;font-size:.64rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,var(--red-deep),var(--red-lt));padding:6px 14px;border-radius:99px;box-shadow:0 8px 20px -10px rgba(200,16,46,.6)}
+    .hc-cap h1{font-family:var(--display);font-size:clamp(2.3rem,5.6vw,4.1rem);font-weight:800;letter-spacing:-.035em;color:#fff;line-height:1;margin-top:15px;text-shadow:0 2px 40px rgba(0,0,0,.55)}
+    .hc-cap .locality{margin-top:12px;color:rgba(255,255,255,.86);font-size:clamp(.95rem,1.6vw,1.12rem);font-weight:500;max-width:42ch;text-shadow:0 1px 22px rgba(0,0,0,.55)}
+    .hm-dir{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:700;font-size:.92rem;padding:12px 22px;border-radius:12px;background:var(--red);color:#fff;box-shadow:0 12px 26px -8px rgba(200,16,46,.55);transition:background .16s,transform .16s}
+    .hm-dir:hover{background:var(--red-lt);transform:translateY(-2px)}
+
+    .office-body{padding:clamp(30px,4.4vw,60px) 0 clamp(40px,6vw,64px)}
+
+    /* ── Unified office-details panel ── */
+    .info-panel{background:#fff;border:1px solid #ECEEF3;border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04),0 26px 56px -32px rgba(16,24,40,.34)}
+    .ip-head{display:flex;align-items:center;gap:16px;padding:clamp(22px,2.6vw,30px);background:linear-gradient(90deg,#FFF5F7,#ffffff 46%)}
+    .ip-head .txt{min-width:0}
+    .ip-head .addr{margin-top:5px;font-size:clamp(1.04rem,1.5vw,1.22rem);font-weight:700;color:#1E2733;line-height:1.5}
+    .ip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#EEF1F5;border-top:1px solid #EEF1F5}
+    .ip-cell{background:#fff;padding:clamp(20px,2.3vw,26px);display:flex;gap:14px;align-items:flex-start}
+    .ip-txt{min-width:0}
+    .ip-ic{width:42px;height:42px;border-radius:12px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;flex:none}
+    .ip-lbl{font-size:.63rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9AA3B2}
+    .ip-head .ip-lbl{color:var(--red)}
+    .ip-val{margin-top:6px;font-size:.98rem;font-weight:600;color:#28313F;line-height:1.5;white-space:pre-line}
+    .ip-val a{color:#28313F}
+    .ip-val a:hover{color:var(--red)}
+    .ip-note{display:block;font-size:.72rem;font-weight:500;color:#9AA3B2;margin-top:5px}
+    @media(max-width:760px){ .ip-grid{grid-template-columns:1fr} }
+
+    .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:clamp(20px,2.6vw,30px)}
+    .btn-maps,.btn-apply{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.92rem;padding:13px 24px;border-radius:12px;transition:background .16s,transform .16s,border-color .16s,color .16s}
+    .btn-maps{background:var(--red);color:#fff;box-shadow:0 12px 26px -8px rgba(200,16,46,.5)}
+    .btn-maps:hover{background:var(--red-lt);transform:translateY(-2px)}
+    .btn-apply{background:#fff;color:var(--charcoal);border:1px solid #E3E7EE}
+    .btn-apply:hover{border-color:var(--red);color:var(--red);transform:translateY(-2px)}
+    /* ── Gallery showcase ── */
+    .showcase{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+    .showcase figure{border-radius:18px;overflow:hidden;background:#e9edf2;aspect-ratio:4/3;box-shadow:0 1px 2px rgba(16,24,40,.04),0 20px 46px -28px rgba(16,24,40,.3);cursor:zoom-in}
+    .showcase figure img{width:100%;height:100%;object-fit:cover;transition:transform .55s ease}
+    .showcase figure:hover img{transform:scale(1.06)}
+    .showcase figure:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+    @media(max-width:680px){ .showcase{grid-template-columns:repeat(2,1fr)} }
+
+    /* ── Location ── */
+    .loc-map{border-radius:20px;overflow:hidden;border:1px solid #E6E9EF;box-shadow:0 1px 2px rgba(16,24,40,.04),0 24px 54px -30px rgba(16,24,40,.32);background:#e9edf2}
+    .loc-map iframe{width:100%;height:clamp(300px,38vw,440px);border:0;display:block}
+    .loc-foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:18px}
+    .loc-foot .addr{color:#3A4350;font-weight:600;font-size:.98rem;line-height:1.5;max-width:56ch}
+
+    /* ── Lightbox ── */
+    .lb{position:fixed;inset:0;z-index:1000;background:rgba(8,10,14,.93);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:clamp(16px,4vw,52px)}
+    .lb.on{display:flex}
+    .lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 30px 90px -20px rgba(0,0,0,.75);animation:lbin .26s ease}
+    @keyframes lbin{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+    .lb-btn{position:absolute;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.26);color:#fff;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:background .16s,transform .16s}
+    .lb-btn:hover{background:rgba(200,16,46,.9);transform:scale(1.06)}
+    .lb-close{top:clamp(14px,3vw,26px);right:clamp(14px,3vw,26px)}
+    .lb-prev{left:clamp(10px,2vw,28px);top:50%;transform:translateY(-50%)}
+    .lb-prev:hover{transform:translateY(-50%) scale(1.06)}
+    .lb-next{right:clamp(10px,2vw,28px);top:50%;transform:translateY(-50%)}
+    .lb-next:hover{transform:translateY(-50%) scale(1.06)}
+    .lb-count{position:absolute;bottom:clamp(16px,3vw,28px);left:50%;transform:translateX(-50%);color:rgba(255,255,255,.85);font-size:.8rem;font-weight:600;letter-spacing:.04em}
+
+    /* ── Satellite (coming soon) ── */
+    .soon-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#1b1f27,#0e1015)}
+    .soon-hero::after{content:"";position:absolute;right:-6%;top:-34%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.32),transparent 62%);z-index:1}
+    .soon-hero .wrap{position:relative;z-index:2;padding:clamp(56px,9vw,104px) 0 clamp(70px,10vw,120px)}
+    .soon-hero h1{font-family:var(--display);color:#fff;font-size:clamp(2.4rem,6vw,4.3rem);font-weight:800;letter-spacing:-.035em;line-height:1;margin-top:16px}
+    .soon-hero .tag{margin-top:16px;color:rgba(255,255,255,.82);font-size:clamp(1rem,1.8vw,1.2rem);max-width:46ch;line-height:1.55}
+    .soon-body{padding:0 0 clamp(56px,8vw,96px)}
+    .soon-grid{display:grid;grid-template-columns:1fr;gap:clamp(18px,2.6vw,26px);margin-top:clamp(-52px,-5vw,-74px);position:relative;z-index:3}
+    @media(min-width:880px){ .soon-grid{grid-template-columns:1.15fr .85fr;align-items:start} }
+    .soon-card{background:#fff;border:1px solid #ECEEF3;border-radius:22px;padding:clamp(28px,4vw,44px);box-shadow:0 2px 6px rgba(16,24,40,.05),0 34px 66px -32px rgba(16,24,40,.34)}
+    .soon-card h2{font-family:var(--display);font-size:clamp(1.4rem,2.6vw,1.95rem);font-weight:800;color:var(--charcoal);letter-spacing:-.02em}
+    .soon-card p{color:#5A6472;margin-top:12px;font-size:1.02rem;line-height:1.65}
+    .soon-list{margin-top:22px;display:grid;gap:13px}
+    .soon-li{display:flex;align-items:center;gap:12px;font-size:.95rem;font-weight:600;color:#3A4350}
+    .soon-li .ic{width:30px;height:30px;border-radius:9px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;flex:none}
+    .soon-card .cta-row{margin-top:26px}
+    .soon-aside{background:#fff;border:1px solid #ECEEF3;border-radius:22px;overflow:hidden;box-shadow:0 2px 6px rgba(16,24,40,.05),0 34px 66px -32px rgba(16,24,40,.34)}
+    .soon-aside .loc-map{border:0;border-radius:0;box-shadow:none}
+    .soon-aside .cap{padding:16px 20px;border-top:1px solid #EEF1F5}
+    .soon-aside .cap .lbl{font-size:.63rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--red)}
+    .soon-aside .cap .v{margin-top:4px;font-weight:700;color:#28313F}
+  </style>
+</head>
+<body>
+  <div id="site-header" data-active="offices"></div>
+
+  <main id="office-main"></main>
+
+  <div id="site-footer"></div>
+
+  <script>
+    (function(){
+      var mount=document.getElementById('office-main'); if(!mount) return;
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+      var id=(new URLSearchParams(location.search)).get('id');
+      function findStatic(id){ var L=window.CNT_OFFICES||[]; for(var i=0;i<L.length;i++){ if(L[i].id===id) return L[i]; } return null; }
+      // Map a Content Studio (Supabase) row to the shape this page renders.
+      function dbToOffice(r){
+        return { id:r.slug, name:r.name, role:r.role||'Satellite Branch', region:r.region||'luzon',
+          main:!!r.is_main, hasData:!!r.has_data, hero:r.hero||'',
+          coords:(r.lat!=null&&r.lng!=null)?[Number(r.lat),Number(r.lng)]:null,
+          photos:Array.isArray(r.photos)?r.photos:[], address:r.address||'', person:r.person||'',
+          phone:r.phone||'', tel:r.tel||'', hours:r.hours||'', email:r.email||'', emailNote:r.email_note||'',
+          maps:r.maps||'', mapq:r.mapq||'' };
+      }
+      var _carTimer=null;
+      function render(o){
+      document.title = o.name + ' Office — CNT Promo & Ads Specialists, Inc.';
+      if(_carTimer){ clearInterval(_carTimer); _carTimer=null; }
+
+      var crumb='<div class="crumb-bar"><div class="wrap"><a class="crumb" href="/home#reach"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All offices</a></div></div>';
+
+      var REG={main:'Main Branch',luzon:'Luzon',visayas:'Visayas',mindanao:'Mindanao'};
+      var arrowSvg='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      function icon(name){
+        var p={ pin:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+          clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+          phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/>',
+          mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+          user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+          camera:'<path d="M4 8h3l2-2h6l2 2h3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><circle cx="12" cy="13" r="3.2"/>' };
+        return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(p[name]||'')+'</svg>';
+      }
+      function ipCell(ic,label,value,href,note){
+        var v=value?(href?'<a href="'+href+'">'+esc(value)+'</a>':esc(value)):'<span style="color:#9AA3B2;font-style:italic">To be added</span>';
+        return '<div class="ip-cell"><div class="ip-ic">'+icon(ic)+'</div><div class="ip-txt"><div class="ip-lbl">'+label+'</div><div class="ip-val">'+v+(note?'<span class="ip-note">'+esc(note)+'</span>':'')+'</div></div></div>';
+      }
+
+      if(o.hasData){
+        var ph=o.photos||[];
+        // Use coordinates (not the place name) so the map shows a plain pin — no
+        // Google business info-card, which duplicates the hero's Get directions.
+        var q=encodeURIComponent(o.coords?(o.coords[0]+','+o.coords[1]):(o.mapq||o.address||o.name));
+        var locality = o.main
+          ? 'The national headquarters of CNT Promo &amp; Ads Specialists, Inc.'
+          : ('A CNT branch serving the '+esc(REG[o.region]||o.region)+' region.');
+        var mapHero =
+          '<section class="hero-map">'
+          + '<iframe title="Map of '+esc(o.name)+' office" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q='+q+'&z=16&output=embed"></iframe>'
+          + ((o.hero||ph[0])?'<img class="hm-photo" src="'+(o.hero||ph[0])+'" alt="'+esc(o.name)+' office" aria-hidden="true">':'')
+          + '<div class="hm-scrim"></div>'
+          + '<div class="hc-cap"><div class="wrap"><div class="cap-in"><span class="hc-badge">'+esc(o.role)+'</span><h1>'+esc(o.name)+'</h1><p class="locality">'+locality+'</p>'
+            + (o.maps?'<div><a class="hm-dir" href="'+o.maps+'" target="_blank" rel="noopener">Get directions '+arrowSvg+'</a></div>':'')
+          + '</div></div></div></section>';
+        var gallerySection = ph.length
+          ? '<section class="section tight"><div class="wrap"><div class="sec-head"><span class="eyebrow">Gallery</span><h2>Step inside our '+esc(o.name)+' office</h2><p>A look at the space our people work in every day.</p></div>'
+            + '<div class="showcase">'+ph.map(function(p,i){ return '<figure><img src="'+p+'" alt="'+esc(o.name)+' office photo '+(i+1)+'"'+(i>2?' loading="lazy"':'')+'></figure>'; }).join('')+'</div></div></section>'
+          : '';
+
+        mount.innerHTML = crumb
+          + mapHero
+          + '<div class="office-body"><div class="wrap">'
+            + '<div class="info-panel">'
+              + '<div class="ip-head"><div class="ip-ic">'+icon('pin')+'</div><div class="txt"><div class="ip-lbl">Address</div><p class="addr">'+esc(o.address)+'</p></div></div>'
+              + '<div class="ip-grid">'
+                + ipCell('clock','Office hours',o.hours)
+                + (o.person?ipCell('user','Contact person',o.person):'')
+                + ipCell('phone','Contact number',o.phone,o.tel?('tel:'+o.tel):null)
+                + ipCell('mail','Email',o.email,o.email?('mailto:'+o.email):null,o.emailNote)
+              + '</div>'
+            + '</div>'
+          + '</div></div>'
+          + gallerySection
+          + '<div class="lb" id="lb" aria-hidden="true">'
+            + '<button class="lb-btn lb-close" id="lb-close" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+            + '<button class="lb-btn lb-prev" id="lb-prev" aria-label="Previous photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>'
+            + '<img id="lb-img" alt="">'
+            + '<button class="lb-btn lb-next" id="lb-next" aria-label="Next photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>'
+            + '<div class="lb-count" id="lb-count"></div>'
+          + '</div>';
+
+        // ── lightbox: click any gallery photo → fullscreen with prev/next ──
+        if(ph.length){
+          var lb=document.getElementById('lb'), lbImg=document.getElementById('lb-img'), lbCount=document.getElementById('lb-count'), lbIdx=0;
+          var lbShow=function(i){ lbIdx=(i+ph.length)%ph.length; lbImg.src=ph[lbIdx]; lbImg.alt=o.name+' office photo '+(lbIdx+1); if(lbCount) lbCount.textContent=(lbIdx+1)+' / '+ph.length; };
+          var lbOpen=function(i){ lbShow(i); lb.classList.add('on'); lb.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; };
+          var lbClose=function(){ lb.classList.remove('on'); lb.setAttribute('aria-hidden','true'); document.body.style.overflow=''; lbImg.removeAttribute('src'); };
+          mount.querySelectorAll('.showcase figure').forEach(function(el,i){ el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+            el.addEventListener('click',function(){ lbOpen(i); });
+            el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); lbOpen(i); } });
+          });
+          document.getElementById('lb-close').addEventListener('click',lbClose);
+          document.getElementById('lb-prev').addEventListener('click',function(e){ e.stopPropagation(); lbShow(lbIdx-1); });
+          document.getElementById('lb-next').addEventListener('click',function(e){ e.stopPropagation(); lbShow(lbIdx+1); });
+          lb.addEventListener('click',function(e){ if(e.target===lb) lbClose(); });
+          if(window.__lbKey) document.removeEventListener('keydown',window.__lbKey);
+          window.__lbKey=function(e){ if(!lb.classList.contains('on')) return; if(e.key==='Escape') lbClose(); else if(e.key==='ArrowLeft') lbShow(lbIdx-1); else if(e.key==='ArrowRight') lbShow(lbIdx+1); };
+          document.addEventListener('keydown',window.__lbKey);
+        }
+      } else {
+        var regionLabel = esc(REG[o.region]||o.region||'Philippines');
+        var soonMap = o.coords
+          ? '<div class="soon-aside"><div class="loc-map"><iframe title="'+esc(o.name)+' area map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q='+encodeURIComponent(o.name+', Philippines')+'&z=11&output=embed"></iframe></div><div class="cap"><div class="lbl">Serving</div><div class="v">'+esc(o.name)+' · '+regionLabel+'</div></div></div>'
+          : '';
+        mount.innerHTML = crumb
+          + '<section class="soon-hero"><div class="wrap"><span class="eyebrow">'+regionLabel+' · '+esc(o.role)+'</span>'
+            + '<h1>'+esc(o.name)+'</h1>'
+            + '<p class="tag">A new CNT branch is coming to '+esc(o.name)+'. We’re expanding nationwide so more Filipinos can find work closer to home.</p></div></section>'
+          + '<div class="soon-body"><div class="wrap"><div class="soon-grid">'
+            + '<div class="soon-card"><h2>Full branch details coming soon</h2>'
+              + '<p>This page will soon showcase the '+esc(o.name)+' office in full — photos of the space, exact map location, address, contact number and office hours.</p>'
+              + '<div class="soon-list">'
+                + '<div class="soon-li"><span class="ic">'+icon('camera')+'</span>Office photos</div>'
+                + '<div class="soon-li"><span class="ic">'+icon('pin')+'</span>Exact address &amp; map pin</div>'
+                + '<div class="soon-li"><span class="ic">'+icon('clock')+'</span>Office hours</div>'
+                + '<div class="soon-li"><span class="ic">'+icon('phone')+'</span>Direct contact number</div>'
+              + '</div>'
+              + '<div class="cta-row"><a class="btn-maps" href="/careers">Apply online '+arrowSvg+'</a><a class="btn-apply" href="/office?id=mandaluyong">Explore our head office</a></div>'
+            + '</div>'
+            + soonMap
+          + '</div></div></div>';
+      }
+      }
+
+      // Instant paint from the bundled list, then swap in live Content Studio data.
+      var st=findStatic(id);
+      if(st) render(st);
+      var sb=window.getSupabase&&window.getSupabase();
+      if(sb && id){
+        sb.from('offices').select('*').eq('slug',id).maybeSingle().then(function(res){
+          if(res && res.data){ render(dbToOffice(res.data)); }
+          else if(!st){ location.replace('/home#reach'); }
+        }, function(){ if(!st){ location.replace('/home#reach'); } });
+      } else if(!st){ location.replace('/home#reach'); }
+    })();
+  </script>
+</body>
+</html>

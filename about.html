@@ -31,10 +31,12 @@
     section{padding:clamp(64px,9vw,120px) 0}
 
     /* HERO */
-    .about-hero{background:radial-gradient(130% 130% at 100% 0%, rgba(95,22,30,.5) 0%, transparent 46%), linear-gradient(160deg,#1c1c1c 0%,#0b0b0b 100%);color:#fff;padding:clamp(90px,12vw,150px) 0 clamp(60px,8vw,100px);position:relative;overflow:hidden}
-    .about-hero .eyebrow{color:var(--red-lt)}.about-hero .eyebrow::before{background:var(--red-lt)}
+    .about-hero{background:radial-gradient(130% 130% at 100% 0%, rgba(95,22,30,.5) 0%, transparent 46%), linear-gradient(105deg, rgba(14,15,20,.93) 0%, rgba(14,15,20,.8) 44%, rgba(12,13,17,.52) 100%), url('/assets/img/HALL-SUN.jpg') center 40%/cover no-repeat;color:#fff;padding:clamp(90px,12vw,150px) 0 clamp(60px,8vw,100px);position:relative;overflow:hidden}
+    .about-hero .eyebrow{background:linear-gradient(90deg,rgba(108,14,26,.9),rgba(30,10,14,.15));border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:.45rem 1.05rem .45rem .95rem;color:rgba(255,255,255,.9);letter-spacing:.16em}.about-hero .eyebrow::before{display:none}
     .about-hero h1{font-family:var(--display);font-size:clamp(2.6rem,6vw,4.6rem);font-weight:800;letter-spacing:-.04em;line-height:1;max-width:15ch}
     .about-hero h1 em{font-style:normal;color:var(--red-lt);text-shadow:0 0 44px rgba(229,33,63,.4)}
+    .about-hero::after{content:"";position:absolute;right:-8%;top:-46%;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(229,33,63,.34),transparent 62%);pointer-events:none;z-index:1}
+    .about-hero .wrap{position:relative;z-index:2}
     .about-hero p{color:rgba(255,255,255,.72);font-size:clamp(1.05rem,1.6vw,1.25rem);max-width:60ch;margin-top:1.5rem}
 
     /* STORY */

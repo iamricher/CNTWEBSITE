@@ -13,6 +13,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/supabase-config.js"></script>
   <style>
     :root{
@@ -432,6 +434,59 @@
     .empty{padding:64px 24px}
     .empty .ic{width:62px;height:62px;border-radius:18px;box-shadow:0 10px 24px rgba(200,16,46,.16)}
     .empty .ic .material-icons-outlined{font-size:30px}
+
+    /* ============ REFRESH PASS — calmer surface, softer depth, refined tokens ============ */
+    :root{ --line:#EAEDF3; --line-soft:#F0F2F7; }
+    body{
+      background:
+        radial-gradient(1100px 520px at 100% -10%, rgba(200,16,46,.075), transparent 60%),
+        radial-gradient(760px 420px at -8% 0%, rgba(200,16,46,.04), transparent 58%),
+        linear-gradient(180deg, #FCFCFE 0%, #F5F6F9 62%);
+    }
+    body::before{ opacity:.5; background-image:repeating-linear-gradient(-24deg, rgba(200,16,46,.03) 0 2px, transparent 2px 108px); }
+    .topbar{ background:rgba(255,255,255,.8); border-bottom-color:#ECEEF3; }
+    /* Cards float a touch softer, with a cleaner hairline */
+    .card{ border-color:#EAEDF3; border-radius:16px; box-shadow:0 1px 2px rgba(16,24,40,.04), 0 20px 44px -18px rgba(16,24,40,.16); }
+    .card-head h2{ font-size:1.06rem; }
+    /* Metric cards — rounder, more lift on hover */
+    .stat, .kpi{ border-radius:15px; }
+    .stat{ padding:17px 18px; }
+    .stat:hover{ box-shadow:0 16px 32px -14px rgba(16,24,40,.22); border-color:#E1E5EC; }
+    .stat-ic, .tile-ic{ border-radius:13px; }
+    /* Sidebar — softer radius + richer active */
+    .sidenav-item{ border-radius:11px; }
+    .sidenav-item.active{ background:linear-gradient(135deg, var(--red-lt), var(--red-deep)); box-shadow:0 10px 22px -8px rgba(200,16,46,.5); }
+    /* Buttons — layered brand shadow */
+    .btn{ border-radius:11px; box-shadow:0 1px 2px rgba(200,16,46,.18), 0 10px 20px -8px rgba(200,16,46,.45); }
+    .btn:hover{ box-shadow:0 12px 24px -8px rgba(200,16,46,.5); }
+    /* Inputs — calmer border, rounder, refined focus */
+    input,textarea{ border-radius:11px; border-color:#E3E7EE; }
+    input:focus,textarea:focus{ box-shadow:0 0 0 3px rgba(200,16,46,.13); }
+    /* Auth + modal — more premium */
+    .auth-card{ border-color:#EAEDF3; border-radius:22px; box-shadow:0 34px 80px -26px rgba(16,24,40,.3); }
+    .auth-badge{ border-radius:16px; box-shadow:0 12px 26px -10px rgba(200,16,46,.38); }
+    .modal .box{ border-radius:20px; }
+
+    /* ============ BOLD PASS — dark sidebar rail ============ */
+    .side{
+      background:linear-gradient(180deg,#171A21 0%,#101216 100%);
+      border-right:1px solid rgba(255,255,255,.07);
+      padding:20px 14px;
+    }
+    .side .nav-label{ color:#6A7180; }
+    .sidenav-item{ color:#AEB4C1; font-weight:600; }
+    .sidenav-item:hover{ background:rgba(255,255,255,.06); color:#fff; }
+    .sidenav-item.active{ background:linear-gradient(135deg,var(--red-lt),var(--red-deep)); color:#fff;
+      box-shadow:0 12px 26px -8px rgba(200,16,46,.6); }
+    .side-foot{ border-top-color:rgba(255,255,255,.08); }
+    .signout-item{ color:#AEB4C1; }
+    .signout-item:hover{ color:#FF6B7D; background:rgba(255,255,255,.05); }
+    /* count badge stays readable on the dark rail */
+    .sidenav-item:not(.active) .nav-count{ background:var(--red); color:#fff; }
+    /* Bolder page titles */
+    .page-head h1{ font-size:1.9rem; letter-spacing:-.03em; }
+    /* On the mobile top-strip the rail is dark too */
+    @media(max-width:760px){ .side{ background:linear-gradient(180deg,#171A21,#101216); } }
   </style>
 </head>
 <body>
@@ -490,6 +545,7 @@
         <div class="sidenav-item" id="nav-events" onclick="showView('events')"><span class="material-icons-outlined">campaign</span><span>Events &amp; Updates</span></div>
         <div class="sidenav-item" id="nav-stories" onclick="showView('stories')"><span class="material-icons-outlined">workspace_premium</span><span>Success Stories</span></div>
         <div class="sidenav-item" id="nav-testimonials" onclick="showView('testimonials')"><span class="material-icons-outlined">format_quote</span><span>Testimonials</span></div>
+        <div class="sidenav-item" id="nav-locations" onclick="showView('locations')"><span class="material-icons-outlined">place</span><span>Locations</span></div>
         <p class="nav-label" style="margin-top:14px">Inbox</p>
         <div class="sidenav-item" id="nav-messages" onclick="showView('messages')"><span class="material-icons-outlined">mail</span><span>Messages</span><span class="nav-count" id="nav-msg-count" style="display:none"></span></div>
         <div class="sidenav-item" id="nav-subscribers" onclick="showView('subscribers')"><span class="material-icons-outlined">group</span><span>Subscribers</span></div>
@@ -528,7 +584,6 @@
             <div class="kpi"><span class="kpi-lbl">Unique visitors</span><b class="kpi-val" id="k-uniq">—</b><span class="kpi-delta" id="k-uniq-d"></span></div>
             <div class="kpi"><span class="kpi-lbl">Views / visitor</span><b class="kpi-val" id="k-vpv">—</b><span class="kpi-delta" id="k-vpv-d"></span></div>
             <div class="kpi"><span class="kpi-lbl">New visitors</span><b class="kpi-val" id="k-new">—</b><span class="kpi-delta" id="k-new-d"></span></div>
-            <div class="kpi"><span class="kpi-lbl">Applications</span><b class="kpi-val" id="k-apps">—</b><span class="kpi-delta" id="k-apps-d"></span></div>
           </div>
 
           <div class="card" style="margin-bottom:16px;">
@@ -616,28 +671,6 @@
             </div>
           </div>
 
-          <div class="card" style="margin-bottom:16px;">
-            <div class="card-head"><div><h2>Job postings</h2><p>Views of each posting on the careers page, and how many became applications.</p></div></div>
-            <div id="an-jobs"><div class="muted" style="padding:18px 22px">Loading…</div></div>
-          </div>
-
-          <div class="card" style="margin-bottom:26px;">
-            <div class="card-head"><div><h2>Recruitment</h2><p>Applications received in range, by source, stage &amp; campaign.</p></div></div>
-            <div class="grid2 rec-2"><div id="an-apps-src"></div><div id="an-apps-stage"></div></div>
-            <div id="an-apps-camp" style="border-top:1px solid var(--line-soft);margin-top:2px"></div>
-          </div>
-
-          <div class="grid2" style="margin-bottom:16px;">
-            <div class="card">
-              <div class="card-head"><div><h2>Open pipeline — waiting time</h2><p>How long the applications still in play have waited for a next step.</p></div></div>
-              <div id="an-aging"><div class="muted" style="padding:18px 22px">Loading…</div></div>
-            </div>
-            <div class="card">
-              <div class="card-head"><div><h2>Time to hire</h2><p>Apply → Job Offer, and how far applicants progress.</p></div></div>
-              <div id="an-hiring"><div class="muted" style="padding:18px 22px">Loading…</div></div>
-            </div>
-          </div>
-
           <h2 class="sec-title">Content &amp; inbox</h2>
           <div class="stat-strip" style="margin-bottom:26px;">
             <div class="stat"><span class="stat-ic c-blue"><span class="material-icons-outlined">groups</span></span><div><span class="stat-num" id="stat-visits">—</span><span class="stat-lbl">All-time visits</span></div></div>
@@ -675,6 +708,15 @@
             <button class="btn" onclick="tsForm()"><span class="material-icons-outlined">add</span>New testimonial</button>
           </div>
           <div class="card"><div id="ts-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- LOCATIONS -->
+        <section id="view-locations" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Locations</h1><p>Branch directory behind the homepage locator and each office page. Drop the exact pin on the map.</p></div>
+            <button class="btn" onclick="ofForm()"><span class="material-icons-outlined">add</span>New location</button>
+          </div>
+          <div class="card"><div id="of-list"><div class="muted">Loading…</div></div></div>
         </section>
 
         <!-- MESSAGES -->
@@ -780,6 +822,67 @@
     </div>
   </div>
 
+  <!-- OFFICE / LOCATION MODAL -->
+  <div class="modal" id="of-modal">
+    <div class="box">
+      <div class="box-head"><h3 id="of-modal-title">New location</h3><button class="x" onclick="ofClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <input type="hidden" id="of-orig-slug">
+        <div class="grid2">
+          <div class="field"><label>Branch name *</label><input id="of-name" placeholder="e.g. Cebu"></div>
+          <div class="field"><label>URL id (slug) *</label><input id="of-slug" placeholder="cebu"><p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Used in the page address: /office?id=<b>slug</b>. Lowercase, no spaces.</p></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Region</label>
+            <select id="of-region"><option value="main">Main Branch</option><option value="luzon">Luzon</option><option value="visayas">Visayas</option><option value="mindanao">Mindanao</option></select>
+          </div>
+          <div class="field"><label>Role label</label><input id="of-role" list="of-roles" placeholder="Satellite Branch"><datalist id="of-roles"><option>Head Office</option><option>Satellite Branch</option></datalist></div>
+        </div>
+
+        <div class="field"><label>Pin location — click the map or drag the marker</label>
+          <div id="of-map" style="height:280px;border-radius:12px;overflow:hidden;border:1px solid var(--line,#e5e7eb);"></div>
+          <div class="grid2" style="margin-top:10px;">
+            <div class="field" style="margin:0"><label>Latitude</label><input id="of-lat" type="number" step="0.0001" placeholder="10.3157" oninput="ofSyncPinFromInputs()"></div>
+            <div class="field" style="margin:0"><label>Longitude</label><input id="of-lng" type="number" step="0.0001" placeholder="123.8854" oninput="ofSyncPinFromInputs()"></div>
+          </div>
+          <p style="font-size:.72rem;color:var(--faint);margin-top:6px;">This exact point is where the pin shows on the homepage map.</p>
+        </div>
+
+        <div class="field"><label>Address</label><textarea id="of-address" rows="2" placeholder="Building, street, city, ZIP, Philippines"></textarea></div>
+        <div class="grid2">
+          <div class="field"><label>Contact person (optional)</label><input id="of-person" placeholder="Leave blank for walk-in / online"></div>
+          <div class="field"><label>Phone — display</label><input id="of-phone" placeholder="(032) 123-4567"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Phone — dial (tel:)</label><input id="of-tel" placeholder="+6332123 4567"></div>
+          <div class="field"><label>Email</label><input id="of-email" placeholder="branch@cntpromoads.com"></div>
+        </div>
+        <div class="field"><label>Email note (optional)</label><input id="of-email-note" placeholder="Temporary — a dedicated branch email is coming soon."></div>
+        <div class="field"><label>Office hours</label><textarea id="of-hours" rows="2" placeholder="Monday – Friday: 8:30 AM – 6:30 PM&#10;Saturday: 8:30 AM – 3:00 PM"></textarea></div>
+        <div class="grid2">
+          <div class="field"><label>Google Maps link</label><input id="of-maps" placeholder="https://maps.app.goo.gl/…"></div>
+          <div class="field"><label>Embedded-map query</label><input id="of-mapq" placeholder="Building name, street, city"></div>
+        </div>
+
+        <div class="field"><label>Cover photo — the hero banner (blends into the map)</label>
+          <label class="up"><span class="material-icons-outlined">wallpaper</span>Upload cover<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'of-hero','of-hero-prev')"></label>
+          <input id="of-hero" type="hidden">
+          <div id="of-hero-prev"></div>
+          <p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Shown large at the top of the office page. Leave empty to use the first gallery photo.</p>
+        </div>
+        <div class="field"><label>Photos — gallery (building + interiors)</label>
+          <label class="up"><span class="material-icons-outlined">add_photo_alternate</span>Add photos<input type="file" accept="image/*" multiple style="display:none;" onchange="ofGalleryUpload(this)"></label>
+          <div id="of-gallery" class="gallery-grid"></div>
+        </div>
+
+        <label class="chk"><input type="checkbox" id="of-hasdata"><span>Details ready — publish full office page<small>Off = shows as “Coming soon” in the locator, no detail page yet.</small></span></label>
+        <label class="chk"><input type="checkbox" id="of-main"><span>Head office<small>Marks it with the CNT logo pin on the map.</small></span></label>
+        <label class="chk"><input type="checkbox" id="of-visible" checked><span>Visible on the website<small>Uncheck to hide this branch from the public locator.</small></span></label>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="ofClose()">Cancel</button><button class="btn" onclick="ofSave()"><span class="material-icons-outlined">check</span>Save location</button></div>
+    </div>
+  </div>
+
   <!-- PER-POST ANALYTICS MODAL -->
   <div class="modal" id="an-modal">
     <div class="box">
@@ -820,6 +923,7 @@
   (function(){
     var sb = window.getSupabase && window.getSupabase();
     var _ev = [], _st = [], _ts = [], _msg = [], _sub = [], _evImages = [];
+    var _of = [], _ofImages = [], _ofMap = null, _ofMarker = null; // offices/locations
     var _pvSeries = null, _pvDays = null; // per-path 30-day view series for post analytics
     var _actor = { email:null, role:null };
     // Append a row to the shared audit_log (staff-gated). Fire-and-forget.
@@ -840,10 +944,11 @@
     var SKELETON = (function(){ var r='<div class="sk-row"><div class="sk sk-thumb"></div><div style="flex:1"><div class="sk sk-line" style="width:42%"></div><div class="sk sk-line" style="width:24%;height:9px;margin-top:9px"></div></div></div>'; return r+r+r; })();
 
     window.showView = function(v){
-      ['dashboard','events','stories','testimonials','messages','subscribers','activity'].forEach(function(n){
+      ['dashboard','events','stories','testimonials','locations','messages','subscribers','activity'].forEach(function(n){
         var view=document.getElementById('view-'+n); if(view) view.style.display = n===v?'block':'none';
         var nav=document.getElementById('nav-'+n); if(nav) nav.classList.toggle('active', n===v);
       });
+      if(v==='locations' && _ofMap){ setTimeout(function(){ try{ _ofMap.invalidateSize(); }catch(_){} },60); }
     };
     window.showTab = window.showView; // back-compat
 
@@ -854,7 +959,7 @@
       var r = await sb.rpc('cnt_is_super_admin');
       if(r.error || !r.data){ show('denied-view'); return; }
       _actor.email = (s.data.session.user && s.data.session.user.email) || null; _actor.role = 'super_admin';
-      show('manager-view'); evLoad(); stLoad(); tsLoad(); msgLoad(); subLoad(); anLoad(); auLoad(); loadMetrics();
+      show('manager-view'); evLoad(); stLoad(); tsLoad(); ofLoad(); msgLoad(); subLoad(); anLoad(); auLoad(); loadMetrics();
     }
 
     // shared image uploader → public event-images bucket
@@ -1054,6 +1159,163 @@
       if(res.error){ toast('Delete failed: '+res.error.message); return; }
       logAudit('delete','event',id,ev?ev.title:null);
       evLoad(); toast('Post deleted');
+    };
+
+    // ── LOCATIONS / OFFICES ──
+    var OF_REGIONS = { main:'Main Branch', luzon:'Luzon', visayas:'Visayas', mindanao:'Mindanao' };
+    var PH_CENTER = [12.8797, 121.7740];
+    function ofSlugify(s){ return (s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+
+    async function ofLoad(){
+      var el=document.getElementById('of-list'); if(!el) return; el.innerHTML=SKELETON;
+      var res = await sb.from('offices').select('*').order('sort_order',{ascending:true}).order('name',{ascending:true});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _of = res.data||[];
+      if(!_of.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">place</span></div><h3>No locations yet</h3><p>Add your head office and satellite branches.</p><button class="btn" onclick="ofForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Add your first location</button></div>'; return; }
+      el.innerHTML=_of.map(function(o){
+        var photo = (Array.isArray(o.photos)&&o.photos[0]) ? o.photos[0] : '';
+        var thumb = photo ? '<div class="thumb"><img src="'+esc(photo)+'" alt=""></div>'
+          : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;"><span class="material-icons-outlined" style="color:var(--red)">'+(o.is_main?'apartment':'place')+'</span></div>';
+        var pill = o.is_main ? '<span class="pill pill-live">Head office</span>'
+          : (o.has_data ? '<span class="pill pill-live">Page ready</span>' : '<span class="pill" style="background:#FEF3C7;color:#92400E">Coming soon</span>');
+        if(!o.visible) pill += '<span class="pill pill-draft">Hidden</span>';
+        var coords = (o.lat!=null&&o.lng!=null) ? (Number(o.lat).toFixed(4)+', '+Number(o.lng).toFixed(4)) : '<span style="color:#B45309">No pin set</span>';
+        var meta = esc(OF_REGIONS[o.region]||o.region||'')+' · '+coords;
+        return '<div class="row">'+thumb
+          +'<div class="t"><b>'+esc(o.name||'Untitled')+'</b>'+pill+'<small>'+meta+'</small></div>'
+          +'<div class="row-actions">'
+          +(o.has_data?('<a class="iconbtn view" href="/office?id='+encodeURIComponent(o.slug)+'" target="_blank" rel="noopener" title="View page"><span class="material-icons-outlined">open_in_new</span></a>'):'')
+          +'<button class="iconbtn" onclick="ofForm(\''+esc(o.slug)+'\')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
+          +'<button class="iconbtn del" onclick="ofDelete(\''+esc(o.slug)+'\')" title="Delete"><span class="material-icons-outlined">delete</span></button>'
+          +'</div></div>';
+      }).join('');
+    }
+
+    // ── map picker ──
+    function ofEnsureMap(){
+      if(_ofMap || !window.L) return;
+      _ofMap = L.map('of-map',{scrollWheelZoom:true}).setView(PH_CENTER,5);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(_ofMap);
+      _ofMap.on('click',function(e){ ofSetPin(e.latlng.lat,e.latlng.lng,false); });
+    }
+    function ofPlaceMarker(lat,lng,recenter){
+      if(!_ofMap || !isFinite(lat) || !isFinite(lng)) return;
+      if(!_ofMarker){
+        _ofMarker = L.marker([lat,lng],{draggable:true}).addTo(_ofMap);
+        _ofMarker.on('dragend',function(){ var p=_ofMarker.getLatLng(); ofSetPin(p.lat,p.lng,false); });
+      } else { _ofMarker.setLatLng([lat,lng]); }
+      if(recenter) _ofMap.setView([lat,lng], Math.max(_ofMap.getZoom(),13));
+    }
+    function ofSetPin(lat,lng,recenter){
+      lat=Number(lat); lng=Number(lng);
+      document.getElementById('of-lat').value = isFinite(lat)?lat.toFixed(5):'';
+      document.getElementById('of-lng').value = isFinite(lng)?lng.toFixed(5):'';
+      ofPlaceMarker(lat,lng,recenter);
+    }
+    window.ofSyncPinFromInputs=function(){
+      var lat=parseFloat(document.getElementById('of-lat').value), lng=parseFloat(document.getElementById('of-lng').value);
+      if(isFinite(lat)&&isFinite(lng)) ofPlaceMarker(lat,lng,false);
+    };
+
+    // ── photos ──
+    function renderOfGallery(){
+      var el=document.getElementById('of-gallery'); if(!el) return;
+      el.innerHTML=_ofImages.map(function(u,i){ return '<div class="gthumb"><img src="'+esc(u)+'" alt=""><button class="rm" title="Remove" onclick="ofGalleryRemove('+i+')"><span class="material-icons-outlined">close</span></button></div>'; }).join('');
+    }
+    window.ofGalleryRemove=function(i){ _ofImages.splice(i,1); renderOfGallery(); };
+    window.ofGalleryUpload=async function(input){
+      var files = input&&input.files?Array.prototype.slice.call(input.files):[]; if(!files.length) return;
+      toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
+      for(var i=0;i<files.length;i++){ var f=files[i];
+        if(!/^image\//.test(f.type)||f.size>5*1048576) continue;
+        var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
+        var path='offices/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        if(up.error){ toast('Upload failed: '+up.error.message); continue; }
+        _ofImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl); renderOfGallery();
+      }
+      input.value=''; toast('Photos added');
+    };
+
+    // ── form ──
+    window.ofForm=function(slug){
+      var o = slug ? (_of.filter(function(x){return x.slug===slug;})[0]||{}) : {};
+      document.getElementById('of-modal-title').textContent = slug?'Edit location':'New location';
+      document.getElementById('of-orig-slug').value = slug||'';
+      document.getElementById('of-name').value = o.name||'';
+      document.getElementById('of-slug').value = o.slug||'';
+      document.getElementById('of-region').value = o.region||'luzon';
+      document.getElementById('of-role').value = o.role|| (slug?'':'Satellite Branch');
+      document.getElementById('of-address').value = o.address||'';
+      document.getElementById('of-person').value = o.person||'';
+      document.getElementById('of-phone').value = o.phone||'';
+      document.getElementById('of-tel').value = o.tel||'';
+      document.getElementById('of-email').value = o.email||'';
+      document.getElementById('of-email-note').value = o.email_note||'';
+      document.getElementById('of-hours').value = o.hours||'';
+      document.getElementById('of-maps').value = o.maps||'';
+      document.getElementById('of-mapq').value = o.mapq||'';
+      document.getElementById('of-hasdata').checked = !!o.has_data;
+      document.getElementById('of-main').checked = !!o.is_main;
+      document.getElementById('of-visible').checked = slug ? !!o.visible : true;
+      document.getElementById('of-hero').value = o.hero||'';
+      document.getElementById('of-hero-prev').innerHTML = o.hero?'<img src="'+esc(o.hero)+'" alt="">':'';
+      _ofImages = Array.isArray(o.photos)?o.photos.slice():[];
+      renderOfGallery();
+      // auto-fill slug from name only for NEW entries
+      var nameEl=document.getElementById('of-name'), slugEl=document.getElementById('of-slug');
+      nameEl.oninput = slug ? null : function(){ slugEl.value = ofSlugify(nameEl.value); };
+      document.getElementById('of-modal').classList.add('on');
+      setTimeout(function(){
+        ofEnsureMap();
+        if(!_ofMap) return;
+        if(o.lat!=null && o.lng!=null){ ofSetPin(o.lat,o.lng,true); }
+        else {
+          if(_ofMarker){ _ofMap.removeLayer(_ofMarker); _ofMarker=null; }
+          document.getElementById('of-lat').value=''; document.getElementById('of-lng').value=''; _ofMap.setView(PH_CENTER,5);
+        }
+        _ofMap.invalidateSize();
+      }, 90);
+    };
+    window.ofClose=function(){ document.getElementById('of-modal').classList.remove('on'); };
+    window.ofSave=async function(){
+      var origSlug=document.getElementById('of-orig-slug').value;
+      var slug = ofSlugify(document.getElementById('of-slug').value);
+      var name = document.getElementById('of-name').value.trim();
+      if(!name){ toast('Branch name is required'); return; }
+      if(!slug){ toast('URL id (slug) is required'); return; }
+      var lat=parseFloat(document.getElementById('of-lat').value), lng=parseFloat(document.getElementById('of-lng').value);
+      var row = { slug:slug, name:name,
+        role:document.getElementById('of-role').value.trim()||null,
+        region:document.getElementById('of-region').value,
+        is_main:document.getElementById('of-main').checked,
+        has_data:document.getElementById('of-hasdata').checked,
+        lat:isFinite(lat)?lat:null, lng:isFinite(lng)?lng:null,
+        address:document.getElementById('of-address').value.trim()||null,
+        person:document.getElementById('of-person').value.trim()||null,
+        phone:document.getElementById('of-phone').value.trim()||null,
+        tel:document.getElementById('of-tel').value.trim()||null,
+        hours:document.getElementById('of-hours').value.replace(/\r/g,'').trim()||null,
+        email:document.getElementById('of-email').value.trim()||null,
+        email_note:document.getElementById('of-email-note').value.trim()||null,
+        maps:document.getElementById('of-maps').value.trim()||null,
+        mapq:document.getElementById('of-mapq').value.trim()||null,
+        hero:document.getElementById('of-hero').value.trim()||null,
+        photos:_ofImages,
+        visible:document.getElementById('of-visible').checked };
+      var res = origSlug ? await sb.from('offices').update(row).eq('slug',origSlug)
+                         : await sb.from('offices').insert(row);
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      logAudit(origSlug?'update':'create','office',slug,name);
+      ofClose(); ofLoad(); toast(origSlug?'Location updated':'Location added');
+    };
+    window.ofDelete=async function(slug){
+      var o=_of.filter(function(x){return x.slug===slug;})[0];
+      if(!confirm('Delete "'+(o?o.name:'this location')+'" from the website?')) return;
+      var res=await sb.from('offices').delete().eq('slug',slug);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      logAudit('delete','office',slug,o?o.name:null);
+      ofLoad(); toast('Location deleted');
     };
 
     // ── SUCCESS STORIES ──
@@ -1530,6 +1792,7 @@
 
     async function anApps(curCut, since, until){
       var sEl=document.getElementById('an-apps-src'), stEl=document.getElementById('an-apps-stage'), cpEl=document.getElementById('an-apps-camp');
+      if(!sEl) return; // ATS/recruitment removed from Content Studio — skip fetch + render
       var res=await sb.from('applications').select('source,stage,created_at,utm_source,utm_campaign').gte('created_at',since).lte('created_at',until).limit(20000);
       if(res.error){ res=await sb.from('applications').select('source,stage,created_at').gte('created_at',since).lte('created_at',until).limit(20000); }
       if(res.error){ if(sEl) sEl.innerHTML='<div class="loc-head">By source</div><div class="muted" style="padding:6px 22px 16px;font-size:.8rem">'+esc(res.error.message)+'</div>'; return; }

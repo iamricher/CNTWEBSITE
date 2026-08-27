@@ -30,6 +30,8 @@
 
   <!-- Website Icon (Favicon) -->
 <link rel="icon" type="image/png" href="/assets/img/icon.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="assets/offices-data.js"></script>
 <link rel="shortcut icon" href="/assets/img/icon.png">
 <link rel="apple-touch-icon" href="/assets/img/icon.png">
 
@@ -1562,21 +1564,115 @@ input, select, textarea { font-family: var(--font-body); }
   .reach-pulse{border-radius:50%;background:rgba(200,16,46,.9);box-shadow:0 0 0 rgba(200,16,46,.6);animation:reachPulse 2s infinite}
   @keyframes reachPulse{0%{box-shadow:0 0 0 0 rgba(200,16,46,.5)}70%{box-shadow:0 0 0 16px rgba(200,16,46,0)}100%{box-shadow:0 0 0 0 rgba(200,16,46,0)}}
   @media(prefers-reduced-motion:reduce){.reach-pulse{animation:none}}
+  /* Office detail card — compact, premium */
+  .reach-legend{margin-top:1.3rem}
+  .office-detail{margin-top:1.3rem;max-width:430px}
+  .od-card{background:#fff;border:1px solid #ECEEF3;border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04),0 22px 50px -22px rgba(16,24,40,.24)}
+  .od-photo{position:relative;height:128px;background:#0d1117}
+  .od-photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .od-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,12,16,0) 36%,rgba(10,12,16,.85) 100%)}
+  .od-photo-cap{position:absolute;left:17px;right:17px;bottom:12px;z-index:1}
+  .od-photo-cap h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:1.32rem;font-weight:800;letter-spacing:-.01em;color:#fff;margin-top:6px}
+  .od-photo.ph{background:linear-gradient(155deg,#1b1e26 0%,#0f1116 100%)}
+  .od-ph-tag{position:absolute;top:11px;right:12px;z-index:1;font-size:.56rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:4px 10px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+  .od-hd{padding:16px 18px 2px}
+  .od-hd h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:1.28rem;font-weight:800;letter-spacing:-.01em;color:var(--charcoal,#1A1A1A);margin-top:6px}
+  .od-badge{display:inline-block;font-size:.56rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px}
+  .od-photo-cap .od-badge{color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+  .od-hd .od-badge.main{color:#fff;background:#111}
+  .od-hd .od-badge.sat{color:var(--red-deep,#A50D24);background:var(--red-pale,#FFF0F2)}
+  .od-body{padding:14px 18px 16px}
+  .od-grid{display:grid;grid-template-columns:1fr 1fr}
+  .od-cell{padding:9px 0}
+  .od-cell.od-first{padding-top:2px}
+  .od-cell.od-full{grid-column:1 / -1}
+  .od-cell.od-tb{border-top:1px solid #F1F3F7;padding-top:10px}
+  .od-cell.od-vl{border-left:1px solid #F1F3F7;padding-left:14px}
+  .od-lbl{display:block;font-size:.6rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#9AA3B2}
+  .od-val{display:block;font-size:.87rem;font-weight:600;color:#2E3A4C;margin-top:3px;line-height:1.45}
+  .od-val a{color:var(--red,#C8102E);word-break:break-word}
+  .od-note{margin-top:12px;font-size:.8rem;color:#6B7686;line-height:1.5}
+  .od-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+  .od-maps,.od-apply{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:.82rem;padding:10px 15px;border-radius:10px;transition:background .16s,transform .16s,border-color .16s,color .16s}
+  .od-maps{background:var(--red,#C8102E);color:#fff;box-shadow:0 8px 18px -8px rgba(200,16,46,.5)}
+  .od-maps:hover{background:var(--red-lt,#E5213F);transform:translateY(-1px)}
+  .od-apply{background:#fff;color:var(--charcoal,#1A1A1A);border:1px solid #E3E7EE}
+  .od-apply:hover{border-color:var(--red,#C8102E);color:var(--red,#C8102E)}
+  .od-soon-box{padding:16px 18px 2px}
+  .od-soon-box b{display:block;font-size:.98rem;color:var(--charcoal,#1A1A1A)}
+  .od-soon-box span{display:block;font-size:.85rem;color:#64748B;margin-top:5px;line-height:1.55}
 </style>
-<section class="reach section" id="reach" aria-label="Where CNT hires across the Philippines">
+<style>
+  /* Homepage office locator (list + live map) */
+  .reach .container{display:block}
+  .reach .reach-copy{max-width:none;margin-bottom:clamp(20px,3vw,30px)}
+  .locator{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:900px){ .locator{grid-template-columns:minmax(340px,38%) 1fr;height:560px} }
+  .loc-panel{display:flex;flex-direction:column;min-height:0;background:#fff;border:1px solid #ECEEF3;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -24px rgba(16,24,40,.18)}
+  .loc-controls{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;flex-wrap:wrap}
+  .near-btn{display:inline-flex;align-items:center;gap:8px;background:var(--red,#C8102E);color:#fff;font:inherit;font-weight:700;font-size:.85rem;border:none;border-radius:11px;padding:10px 15px;cursor:pointer;transition:background .16s,transform .16s}
+  .near-btn:hover{background:var(--red-lt,#E5213F);transform:translateY(-1px)}
+  .loc-count{margin-left:auto;font-size:.8rem;font-weight:700;color:#94A3B8}
+  .loc-search{display:flex;align-items:center;gap:9px;margin:0 16px 12px;padding:0 12px;border:1px solid #E5E7EB;border-radius:11px;background:#F9FAFB}
+  .loc-search svg{color:#94A3B8;flex:none}
+  .loc-search input{flex:1;border:none;outline:none;background:none;font:inherit;font-size:.88rem;padding:11px 0;color:#1F2937}
+  .loc-search:focus-within{border-color:var(--red,#C8102E);background:#fff;box-shadow:0 0 0 3px rgba(200,16,46,.1)}
+  .loc-filters{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 12px;border-bottom:1px solid #F1F3F7}
+  .loc-filters .chip{font:inherit;font-size:.76rem;font-weight:600;color:#4B5563;background:#fff;border:1px solid #E5E7EB;border-radius:99px;padding:6px 12px;cursor:pointer;transition:.15s}
+  .loc-filters .chip:hover{border-color:#CBD2DB;color:#111}
+  .loc-filters .chip.on{background:var(--red,#C8102E);border-color:var(--red,#C8102E);color:#fff}
+  .loc-list{flex:1;overflow-y:auto;min-height:0;padding:6px}
+  @media(max-width:899px){ .loc-list{max-height:460px} }
+  .geo-msg{padding:9px 16px;font-size:.8rem;color:#6B7280;display:none}
+  .geo-msg.show{display:block}
+  .loc-list{overflow-x:hidden}
+  .branch{position:relative;display:block;text-align:left;background:#fff;border:1px solid #EEF1F5;border-radius:12px;padding:14px 15px;margin:6px 0;cursor:pointer;transition:border-color .14s,box-shadow .14s,background .14s}
+  .branch:hover{border-color:#DCE1E8;box-shadow:0 8px 20px -12px rgba(16,24,40,.25)}
+  .branch.on{border-color:var(--red,#C8102E);background:#FFFDFD;box-shadow:0 0 0 2px rgba(200,16,46,.16)}
+  .b-head{display:flex;align-items:center;gap:6px;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--red,#C8102E)}
+  .b-head .b-hq{margin-left:6px;color:#fff;background:#111;border-radius:5px;padding:1px 6px;font-size:.55rem;letter-spacing:.04em}
+  .b-head .b-soon{margin-left:auto;color:#94A3B8;background:#F3F4F6;border-radius:99px;padding:2px 8px;font-size:.55rem}
+  .branch h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:1.04rem;font-weight:800;letter-spacing:-.01em;color:#1A1A1A;margin-top:5px}
+  .b-addr{font-size:.82rem;color:#5A6472;margin-top:4px;line-height:1.5}
+  .b-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;font-size:.8rem;color:#374151}
+  .b-meta a{color:var(--red,#C8102E);font-weight:600}
+  .b-dist{display:none;align-items:center;gap:5px;margin-top:8px;font-size:.75rem;font-weight:700;color:#0D9488}
+  .b-dist.show{display:inline-flex}
+  .b-view{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:.78rem;font-weight:700;color:var(--red,#C8102E)}
+  .b-view svg{transition:transform .15s} .branch:hover .b-view svg{transform:translateX(3px)}
+  .loc-empty{padding:26px 18px;text-align:center;color:#94A3B8;font-size:.86rem}
+  .loc-map{border-radius:16px;overflow:hidden;border:1px solid #ECEEF3;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -24px rgba(16,24,40,.18)}
+  #reach-map{height:100%;width:100%;min-height:340px;background:#e9edf2}
+  @media(max-width:899px){ #reach-map{height:340px} }
+  .mk-logo{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid var(--red,#C8102E);box-shadow:0 6px 16px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .mk-logo img{width:30px;height:30px;object-fit:contain}
+  .mk-dot{width:17px;height:17px;border-radius:50%;background:var(--red,#C8102E);border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+  .mk-dot.on{transform:scale(1.25);box-shadow:0 0 0 5px rgba(200,16,46,.22),0 3px 8px rgba(0,0,0,.3)}
+  .mk-me{width:16px;height:16px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.22)}
+  .lp b{font-family:var(--font-display,'Manrope',sans-serif);font-weight:800} .lp a{color:var(--red,#C8102E);font-weight:700}
+</style>
+<section class="reach section" id="reach" aria-label="Find a CNT location near you">
   <div class="container">
     <div class="reach-copy" data-reveal>
-      <div class="k">Nationwide reach</div>
-      <h2>Talent, wherever you are in the Philippines</h2>
-      <p>From our Metro Manila headquarters, CNT places Filipinos into roles across the country. Explore where we're hiring right now.</p>
-      <div class="reach-legend">
-        <span><span class="d hq"></span> Head office</span>
-        <span><span class="d job"></span> Where we're hiring</span>
-      </div>
-      <div class="reach-cta"><a href="/careers">Find a job near you <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="k">Our locations</div>
+      <h2>Find a CNT location near you</h2>
+      <p>Head office in Mandaluyong plus satellite branches nationwide. Search, tap “Near me,” or open any branch for its full details.</p>
     </div>
-    <div class="reach-mapwrap" data-reveal>
-      <div id="reach-map" role="img" aria-label="Map of the Philippines showing CNT's head office and current hiring locations"></div>
+    <div class="locator" data-reveal>
+      <div class="loc-panel">
+        <div class="loc-controls">
+          <button class="near-btn" id="near-btn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> Near me</button>
+          <span class="loc-count" id="loc-count"></span>
+        </div>
+        <div class="loc-search">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input id="loc-search-input" type="text" placeholder="Search by office or address…" autocomplete="off" aria-label="Search offices" />
+        </div>
+        <div class="loc-filters" id="loc-filters"></div>
+        <div class="geo-msg" id="geo-msg"></div>
+        <div class="loc-list" id="loc-list"></div>
+      </div>
+      <div class="loc-map"><div id="reach-map" role="img" aria-label="Map of the Philippines showing CNT offices"></div></div>
     </div>
   </div>
 </section>
@@ -2631,11 +2727,9 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
   var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
   var hideSection=function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; };
 
-  // Nationwide reach map — lazy-loads Leaflet only when scrolled into view, then
-  // pins the HQ + the real locations we're currently hiring in (from the jobs
-  // table). Honest by construction: pins come from live data, not a claim.
+  // Legacy hiring-map — disabled; replaced by the CNT offices map (script below).
   (function(){
-    var mapEl=document.getElementById('reach-map'); if(!mapEl) return;
+    var mapEl=null; if(!mapEl) return;
     // Approx coordinates for common PH hiring locations (matched by name).
     var CITY={
       'mandaluyong':[14.5774,121.0359],'makati':[14.5547,121.0244],'taguig':[14.5176,121.0509],
@@ -2715,6 +2809,195 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
       var io=new IntersectionObserver(function(en){ en.forEach(function(x){ if(x.isIntersecting){ boot(); io.disconnect(); } }); },{ rootMargin:'200px' });
       io.observe(mapEl);
     } else boot();
+  })();
+
+  // ── CNT offices map (legacy — disabled; replaced by the homepage locator below) ──
+  (function(){ return;
+    var mapEl=document.getElementById('reach-map'); if(!mapEl) return;
+    var detailEl=document.getElementById('office-detail');
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+    var OFFICES=[
+      { id:'mandaluyong', name:'Mandaluyong', role:'Head Office', main:true, coords:[14.5774,121.0359],
+        photo:'/assets/img/OFFFICE-LOBBY.jpg',
+        address:'219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St., Brgy. Bagong Silang, 1550 Mandaluyong, Philippines',
+        phone:'(02) 8293-5269', tel:'+63282935269',
+        hours:'Monday – Friday: 8:30 AM – 6:30 PM\nSaturday: 8:30 AM – 3:00 PM',
+        email:'hrdadmin@cntpromoads.com', maps:'https://maps.app.goo.gl/Ud5JvjJwZJmpBLyM7', hasData:true },
+      { id:'tacloban', name:'Tacloban', role:'Satellite Branch', coords:[11.2543,125.0038], hasData:false },
+      { id:'pangasinan', name:'Pangasinan', role:'Satellite Branch', coords:[15.8949,120.2863], hasData:false },
+      { id:'isabela', name:'Isabela', role:'Satellite Branch', coords:[16.9754,121.8107], hasData:false },
+      { id:'iloilo', name:'Iloilo', role:'Satellite Branch', coords:[10.7202,122.5621], hasData:false },
+      { id:'davao', name:'Davao', role:'Satellite Branch', coords:[7.1907,125.4553], hasData:false },
+      { id:'cdo', name:'Cagayan de Oro', role:'Satellite Branch', coords:[8.4542,124.6319], hasData:false },
+      { id:'bicol', name:'Bicol', role:'Satellite Branch', coords:[13.1391,123.7438], hasData:false },
+      { id:'cebu', name:'Cebu', role:'Satellite Branch', coords:[10.3157,123.8854], hasData:false }
+    ];
+    var markers={}, mapRef=null;
+    function cell(label,value,href,pre){
+      var v = value ? (href?'<a href="'+href+'">'+esc(value)+'</a>':(pre?'<span style="white-space:pre-line">'+esc(value)+'</span>':esc(value))) : '<span class="od-soon">To be added</span>';
+      return '<span class="od-lbl">'+label+'</span><span class="od-val">'+v+'</span>';
+    }
+    function renderDetail(o){
+      if(!detailEl) return;
+      var apply='<a class="od-apply" href="/careers">Apply online</a>';
+      var h='<div class="od-card">';
+      // Header — real photo (with data) or a branded photo placeholder (satellites)
+      if(o.hasData && o.photo){
+        h+='<div class="od-photo"><img src="'+o.photo+'" alt="'+esc(o.name)+' office" loading="lazy">'
+          +'<div class="od-photo-cap"><span class="od-badge">'+esc(o.role)+'</span><h3>'+esc(o.name)+'</h3></div></div>';
+      } else {
+        h+='<div class="od-photo ph"><span class="od-ph-tag">Photo coming soon</span>'
+          +'<div class="od-photo-cap"><span class="od-badge">'+esc(o.role)+'</span><h3>'+esc(o.name)+'</h3></div></div>';
+      }
+      h+='<div class="od-body">';
+      if(o.hasData){
+        h+='<div class="od-grid">'
+          +'<div class="od-cell od-full od-first">'+cell('Address',o.address)+'</div>'
+          +'<div class="od-cell od-tb">'+cell('Contact number',o.phone,o.tel?('tel:'+o.tel):null)+'</div>'
+          +'<div class="od-cell od-tb od-vl">'+cell('Office hours',o.hours,null,true)+'</div>'
+          +'<div class="od-cell od-full od-tb">'+cell('Email',o.email,o.email?('mailto:'+o.email):null)+'</div>'
+          +'</div>';
+        h+='<p class="od-note">Walk in during office hours — or apply anytime online.</p>';
+        h+='<div class="od-actions">';
+        if(o.maps) h+='<a class="od-maps" href="'+o.maps+'" target="_blank" rel="noopener">View on Google Maps <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>';
+        h+=apply+'</div>';
+      } else {
+        h+='<p class="od-note" style="margin-top:2px">Full details for our <b style="color:#1A1A1A">'+esc(o.name)+'</b> satellite branch — office photo, address, contact number and hours — are coming soon. You can already apply online.</p>';
+        h+='<div class="od-actions">'+apply+'</div>';
+      }
+      h+='</div></div>';
+      detailEl.innerHTML=h;
+    }
+    function select(id,pan){
+      var o=null; for(var i=0;i<OFFICES.length;i++){ if(OFFICES[i].id===id){o=OFFICES[i];break;} } if(!o) return;
+      renderDetail(o);
+      if(mapRef&&pan){ try{ mapRef.setView(o.coords,6,{animate:true}); }catch(e){} }
+      if(markers[id]&&markers[id].openTooltip){ try{ markers[id].openTooltip(); }catch(e){} }
+    }
+    select('mandaluyong', false);
+    function loadCss(href){ var l=document.createElement('link'); l.rel='stylesheet'; l.href=href; document.head.appendChild(l); }
+    function loadJs(src){ return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+    function initMap(){
+      var L=window.L; if(!L) return;
+      mapRef=L.map(mapEl,{ scrollWheelZoom:false, attributionControl:true, zoomControl:true }).setView([12.2,122.6],5.4);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{ attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:12 }).addTo(mapRef);
+      OFFICES.forEach(function(o){
+        var html=o.main
+          ? '<div class="reach-pin" style="width:17px;height:17px;border-radius:50%;background:#111;border:3px solid #fff;"></div>'
+          : '<div class="reach-pulse" style="width:14px;height:14px;border:2px solid #fff;cursor:pointer;"></div>';
+        var icon=L.divIcon({ className:'', html:html, iconSize:[o.main?17:14,o.main?17:14], iconAnchor:[o.main?9:7,o.main?9:7] });
+        var m=L.marker(o.coords,{icon:icon}).addTo(mapRef)
+          .bindTooltip('<b>'+esc(o.name)+'</b> — view all offices',{ direction:'top', offset:[0,-9] })
+          .on('click',function(){ window.location.href='/locations'; });
+        markers[o.id]=m;
+      });
+      setTimeout(function(){ try{ mapRef.invalidateSize(); }catch(e){} },200);
+    }
+    function boot(){
+      loadCss('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css');
+      loadJs('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js').then(initMap).catch(function(){ mapEl.innerHTML='<div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">Map unavailable.</div>'; });
+    }
+    if('IntersectionObserver' in window){ var io=new IntersectionObserver(function(en){ en.forEach(function(x){ if(x.isIntersecting){ boot(); io.disconnect(); } }); },{ rootMargin:'250px' }); io.observe(mapEl); } else boot();
+  })();
+
+  // ── Homepage office locator — list + live map + Near me + search ──
+  (function(){
+    var listEl=document.getElementById('loc-list'), mapEl=document.getElementById('reach-map');
+    if(!listEl||!mapEl||!window.CNT_OFFICES) return;
+    var OFFICES=window.CNT_OFFICES.slice(), map=null, markers={}, meMarker=null, activeId=null, filter='all', query='', userLoc=null, mapReady=false, pendingNear=false, booting=false;
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+    function hav(a,b){ var R=6371,dLat=(b[0]-a[0])*Math.PI/180,dLon=(b[1]-a[1])*Math.PI/180,s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2); return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s)); }
+    // Map a Content Studio (Supabase) row to the shape the locator renders.
+    function dbToOffice(r){
+      return { id:r.slug, name:r.name, role:r.role||'Satellite Branch', region:r.region||'luzon',
+        main:!!r.is_main, hasData:!!r.has_data,
+        coords:(r.lat!=null&&r.lng!=null)?[Number(r.lat),Number(r.lng)]:null,
+        photos:Array.isArray(r.photos)?r.photos:[], address:r.address||'', person:r.person||'',
+        phone:r.phone||'', tel:r.tel||'', hours:r.hours||'', email:r.email||'', emailNote:r.email_note||'',
+        maps:r.maps||'', mapq:r.mapq||'' };
+    }
+    function branchCard(o,dist){
+      var soon=!o.hasData, addr=o.hasData&&o.address?esc(o.address):'Branch details coming soon';
+      var meta=o.hasData?((o.phone?'<span>'+esc(o.phone)+'</span>':'')+(o.email?'<a href="mailto:'+esc(o.email)+'">'+esc(o.email)+'</a>':'')):'';
+      var d=dist!=null?'<span class="b-dist show"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'+dist.toFixed(dist<10?1:0)+' km away</span>':'';
+      return '<div class="branch" data-id="'+o.id+'" role="button" tabindex="0">'
+        +'<div class="b-head"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> '+esc(o.role)+(o.main?'<span class="b-hq">HQ</span>':'')+(soon?'<span class="b-soon">Coming soon</span>':'')+'</div>'
+        +'<h3>'+esc(o.name)+'</h3><p class="b-addr">'+addr+'</p>'+(meta?'<div class="b-meta">'+meta+'</div>':'')+d
+        +'<a class="b-view" href="/office?id='+o.id+'">View office page <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>';
+    }
+    function matches(o){
+      if(filter!=='all' && o.region!==filter) return false;
+      if(query){ var q=query.toLowerCase(); if((o.name+' '+o.role+' '+(o.address||'')+' '+o.region).toLowerCase().indexOf(q)<0) return false; }
+      return true;
+    }
+    function renderList(){
+      var items=OFFICES.filter(matches);
+      if(userLoc){ items.forEach(function(o){ o._d=o.coords?hav(userLoc,o.coords):Infinity; }); items.sort(function(a,b){return a._d-b._d;}); }
+      document.getElementById('loc-count').textContent=items.length+' office'+(items.length!==1?'s':'');
+      listEl.innerHTML = items.length ? items.map(function(o){ return branchCard(o, userLoc&&o.coords?o._d:null); }).join('') : '<div class="loc-empty">No offices match your search.</div>';
+      listEl.querySelectorAll('.branch').forEach(function(b){ b.addEventListener('click',function(e){ if(e.target.closest('.b-view')) return; selectOffice(b.getAttribute('data-id'),true); }); });
+      if(activeId){ var a=listEl.querySelector('.branch[data-id="'+activeId+'"]'); if(a) a.classList.add('on'); }
+    }
+    function selectOffice(id,pan){
+      activeId=id;
+      listEl.querySelectorAll('.branch').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-id')===id); });
+      document.querySelectorAll('.mk-dot').forEach(function(d){ d.classList.toggle('on', d.getAttribute('data-id')===id); });
+      if(!mapReady){ boot(); return; }
+      var o=null; for(var i=0;i<OFFICES.length;i++){ if(OFFICES[i].id===id){o=OFFICES[i];break;} }
+      if(o&&markers[id]){ if(pan) map.setView(o.coords,13,{animate:true}); markers[id].openPopup(); }
+    }
+    var FILT=[{k:'all',l:'All'}].concat(window.CNT_REGIONS.map(function(r){return {k:r.key,l:r.label};}));
+    document.getElementById('loc-filters').innerHTML=FILT.map(function(f){ return '<button class="chip'+(f.k==='all'?' on':'')+'" data-k="'+f.k+'" type="button">'+esc(f.l)+'</button>'; }).join('');
+    document.querySelectorAll('#loc-filters .chip').forEach(function(c){ c.addEventListener('click',function(){ filter=c.getAttribute('data-k'); document.querySelectorAll('#loc-filters .chip').forEach(function(x){x.classList.remove('on');}); c.classList.add('on'); renderList(); }); });
+    var si=document.getElementById('loc-search-input'), searchT=null;
+    if(si) si.addEventListener('input',function(){ clearTimeout(searchT); searchT=setTimeout(function(){ query=si.value.trim(); renderList(); },220); });
+    var geoMsg=document.getElementById('geo-msg');
+    function doNear(){
+      if(!navigator.geolocation){ geoMsg.textContent='Location is not supported on this device.'; geoMsg.classList.add('show'); return; }
+      geoMsg.textContent='Finding your location…'; geoMsg.classList.add('show');
+      navigator.geolocation.getCurrentPosition(function(pos){
+        userLoc=[pos.coords.latitude,pos.coords.longitude];
+        if(map){ if(meMarker) map.removeLayer(meMarker); meMarker=L.marker(userLoc,{icon:L.divIcon({className:'',html:'<div class="mk-me"></div>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(map).bindPopup('<div class="lp"><b>You are here</b></div>'); }
+        renderList();
+        var nearest=null; OFFICES.forEach(function(o){ if(!o.coords) return; var d=hav(userLoc,o.coords); if(!nearest||d<nearest.d) nearest={o:o,d:d}; });
+        if(nearest){ geoMsg.textContent='Nearest: '+nearest.o.name+' — '+nearest.d.toFixed(nearest.d<10?1:0)+' km away.'; if(map){ try{ map.fitBounds([userLoc,nearest.o.coords],{padding:[50,50],maxZoom:11}); }catch(e){} } selectOffice(nearest.o.id,false); }
+      }, function(err){ geoMsg.textContent = err.code===1 ? 'Location access was blocked. Enable it to find the nearest office.' : 'Could not get your location. Please try again.'; }, {enableHighAccuracy:true,timeout:9000,maximumAge:60000});
+    }
+    document.getElementById('near-btn').addEventListener('click',function(){ if(!mapReady){ pendingNear=true; geoMsg.textContent='Loading map…'; geoMsg.classList.add('show'); boot(); } else doNear(); });
+    function loadJs(src){ return new Promise(function(res,rej){ if(window.L) return res(); var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+    function clearMarkers(){ Object.keys(markers).forEach(function(k){ try{ map.removeLayer(markers[k]); }catch(e){} }); markers={}; }
+    function addMarkers(){
+      if(!map||!window.L) return; var L=window.L;
+      OFFICES.forEach(function(o){ if(!o.coords) return;
+        var icon=o.main?L.divIcon({className:'',html:'<div class="mk-logo"><img src="/assets/img/icon.png" alt="CNT"></div>',iconSize:[44,44],iconAnchor:[22,22]}):L.divIcon({className:'',html:'<div class="mk-dot" data-id="'+o.id+'"></div>',iconSize:[17,17],iconAnchor:[8,8]});
+        var m=L.marker(o.coords,{icon:icon,title:o.name}).addTo(map);
+        m.bindPopup('<div class="lp"><b>'+esc(o.name)+'</b><br>'+(o.hasData&&o.address?esc(o.address).slice(0,80)+'…':esc(o.role))+'<br><a href="/office?id='+o.id+'">View office page →</a></div>');
+        m.on('click',function(){ selectOffice(o.id,false); });
+        markers[o.id]=m;
+      });
+    }
+    function initMap(){
+      if(mapReady||!window.L) return; var L=window.L;
+      map=L.map(mapEl,{scrollWheelZoom:false,zoomControl:true,attributionControl:true}).setView([12.4,122.5],5.2);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+      addMarkers();
+      mapReady=true; setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },200);
+      if(pendingNear){ pendingNear=false; doNear(); }
+    }
+    function boot(){ if(booting||mapReady) return; booting=true; loadJs('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js').then(initMap).catch(function(){ mapEl.innerHTML='<div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">Map unavailable.</div>'; }); }
+    renderList();
+    // Prefer live data managed in Content Studio (Supabase). The static list above
+    // paints instantly; swap in DB rows when they arrive. Any error keeps the fallback.
+    (function(){
+      var sb2 = window.getSupabase && window.getSupabase(); if(!sb2) return;
+      sb2.from('offices').select('*').eq('visible',true).order('sort_order',{ascending:true}).order('name',{ascending:true}).then(function(res){
+        if(res.error || !res.data || !res.data.length) return;
+        OFFICES = res.data.map(dbToOffice);
+        renderList();
+        if(mapReady){ clearMarkers(); addMarkers(); }
+      }, function(){});
+    })();
+    if('IntersectionObserver' in window){ var io=new IntersectionObserver(function(en){ en.forEach(function(x){ if(x.isIntersecting){ boot(); io.disconnect(); } }); },{rootMargin:'300px'}); io.observe(mapEl); } else boot();
   })();
 
   // Events & Updates — show only events published in Content Studio; hide the
