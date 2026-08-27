@@ -202,21 +202,25 @@
         return '<div class="ip-cell"><div class="ip-ic">'+icon(ic)+'</div><div class="ip-txt"><div class="ip-lbl">'+label+'</div><div class="ip-val">'+v+(note?'<span class="ip-note">'+esc(note)+'</span>':'')+'</div></div></div>';
       }
 
-      if(o.hasData){
+      {
+        var soon = !o.hasData;                 // satellite / not-yet-open branch
         var ph=o.photos||[];
         // Use coordinates (not the place name) so the map shows a plain pin — no
         // Google business info-card, which duplicates the hero's Get directions.
         var q=encodeURIComponent(o.coords?(o.coords[0]+','+o.coords[1]):(o.mapq||o.address||o.name));
-        var locality = o.main
-          ? 'The national headquarters of CNT Promo &amp; Ads Specialists, Inc.'
-          : ('A CNT branch serving the '+esc(REG[o.region]||o.region)+' region.');
+        var mapsLink = o.maps || (o.coords?('https://www.google.com/maps/search/?api=1&query='+o.coords[0]+','+o.coords[1]):'');
+        var locality = soon
+          ? 'This branch is opening soon — full details are on the way.'
+          : (o.main
+              ? 'The national headquarters of CNT Promo &amp; Ads Specialists, Inc.'
+              : ('A CNT branch serving the '+esc(REG[o.region]||o.region)+' region.'));
         var mapHero =
           '<section class="hero-map">'
           + '<iframe title="Map of '+esc(o.name)+' office" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q='+q+'&z=16&output=embed"></iframe>'
           + ((o.hero||ph[0])?'<img class="hm-photo" src="'+(o.hero||ph[0])+'" alt="'+esc(o.name)+' office" aria-hidden="true">':'')
           + '<div class="hm-scrim"></div>'
-          + '<div class="hc-cap"><div class="wrap"><div class="cap-in"><span class="hc-badge">'+esc(o.role)+'</span><h1>'+esc(o.name)+'</h1><p class="locality">'+locality+'</p>'
-            + (o.maps?'<div><a class="hm-dir" href="'+o.maps+'" target="_blank" rel="noopener">Get directions '+arrowSvg+'</a></div>':'')
+          + '<div class="hc-cap"><div class="wrap"><div class="cap-in"><span class="hc-badge">'+esc(o.role)+'</span>'+(soon?' <span class="hc-badge" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)">Opening soon</span>':'')+'<h1>'+esc(o.name)+'</h1><p class="locality">'+locality+'</p>'
+            + (mapsLink?'<div><a class="hm-dir" href="'+mapsLink+'" target="_blank" rel="noopener">Get directions '+arrowSvg+'</a></div>':'')
           + '</div></div></div></section>';
         var gallerySection = ph.length
           ? '<section class="section tight"><div class="wrap"><div class="sec-head"><span class="eyebrow">Gallery</span><h2>Step inside our '+esc(o.name)+' office</h2><p>A look at the space our people work in every day.</p></div>'
@@ -239,7 +243,7 @@
           + mapHero
           + '<div class="office-body"><div class="wrap">'
             + '<div class="info-panel">'
-              + '<div class="ip-head"><div class="ip-ic">'+icon('pin')+'</div><div class="txt"><div class="ip-lbl">Address</div><p class="addr">'+esc(o.address)+'</p></div></div>'
+              + '<div class="ip-head"><div class="ip-ic">'+icon('pin')+'</div><div class="txt"><div class="ip-lbl">Address</div><p class="addr">'+(o.address?esc(o.address):(soon?'<span style="color:#9AA3B2;font-style:italic;font-weight:600">Full address coming soon</span>':''))+'</p></div></div>'
               + '<div class="ip-grid">'
                 + ipCell('clock','Office hours',o.hours)
                 + (o.person?ipCell('user','Contact person',o.person):'')
@@ -247,6 +251,7 @@
                 + ipCell('mail','Email',o.email,o.email?('mailto:'+o.email):null,o.emailNote)
               + '</div>'
             + '</div>'
+            + (soon?'<div class="cta-row"><a class="btn-maps" href="/careers">Apply online '+arrowSvg+'</a><a class="btn-apply" href="/office?id=mandaluyong">Visit our head office</a></div>':'')
           + '</div></div>'
           + gallerySection
           + '<div class="lb" id="lb" aria-hidden="true">'
@@ -275,28 +280,6 @@
           window.__lbKey=function(e){ if(!lb.classList.contains('on')) return; if(e.key==='Escape') lbClose(); else if(e.key==='ArrowLeft') lbShow(lbIdx-1); else if(e.key==='ArrowRight') lbShow(lbIdx+1); };
           document.addEventListener('keydown',window.__lbKey);
         }
-      } else {
-        var regionLabel = esc(REG[o.region]||o.region||'Philippines');
-        var soonMap = o.coords
-          ? '<div class="soon-aside"><div class="loc-map"><iframe title="'+esc(o.name)+' area map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q='+encodeURIComponent(o.name+', Philippines')+'&z=11&output=embed"></iframe></div><div class="cap"><div class="lbl">Serving</div><div class="v">'+esc(o.name)+' · '+regionLabel+'</div></div></div>'
-          : '';
-        mount.innerHTML = crumb
-          + '<section class="soon-hero"><div class="wrap"><span class="eyebrow">'+regionLabel+' · '+esc(o.role)+'</span>'
-            + '<h1>'+esc(o.name)+'</h1>'
-            + '<p class="tag">A new CNT branch is coming to '+esc(o.name)+'. We’re expanding nationwide so more Filipinos can find work closer to home.</p></div></section>'
-          + '<div class="soon-body"><div class="wrap"><div class="soon-grid">'
-            + '<div class="soon-card"><h2>Full branch details coming soon</h2>'
-              + '<p>This page will soon showcase the '+esc(o.name)+' office in full — photos of the space, exact map location, address, contact number and office hours.</p>'
-              + '<div class="soon-list">'
-                + '<div class="soon-li"><span class="ic">'+icon('camera')+'</span>Office photos</div>'
-                + '<div class="soon-li"><span class="ic">'+icon('pin')+'</span>Exact address &amp; map pin</div>'
-                + '<div class="soon-li"><span class="ic">'+icon('clock')+'</span>Office hours</div>'
-                + '<div class="soon-li"><span class="ic">'+icon('phone')+'</span>Direct contact number</div>'
-              + '</div>'
-              + '<div class="cta-row"><a class="btn-maps" href="/careers">Apply online '+arrowSvg+'</a><a class="btn-apply" href="/office?id=mandaluyong">Explore our head office</a></div>'
-            + '</div>'
-            + soonMap
-          + '</div></div></div>';
       }
       }
 
