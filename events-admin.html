@@ -863,6 +863,8 @@
           <div class="field"><label>Google Maps link</label><input id="of-maps" placeholder="https://maps.app.goo.gl/…"></div>
           <div class="field"><label>Embedded-map query</label><input id="of-mapq" placeholder="Building name, street, city"></div>
         </div>
+        <div class="field"><label>Getting here — one item per line</label><textarea id="of-getting" rows="3" placeholder="5-minute walk from Shaw Boulevard MRT-3 Station&#10;Along Shaw Blvd, beside Shangri-La Plaza&#10;Building parking available for visitors"></textarea><p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Each line becomes a “Getting here” item on the office page.</p></div>
+        <div class="field"><label>Facilities / amenities — one per line</label><textarea id="of-amenities" rows="3" placeholder="Grade-A office tower&#10;24/7 building security&#10;Reception &amp; lounge&#10;Nearby dining &amp; retail"></textarea><p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Shown as tags under “Facilities.”</p></div>
 
         <div class="field"><label>Cover photo — the hero banner (blends into the map)</label>
           <label class="up"><span class="material-icons-outlined">wallpaper</span>Upload cover<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'of-hero','of-hero-prev')"></label>
@@ -1255,6 +1257,8 @@
       document.getElementById('of-hours').value = o.hours||'';
       document.getElementById('of-maps').value = o.maps||'';
       document.getElementById('of-mapq').value = o.mapq||'';
+      document.getElementById('of-getting').value = o.getting_there||'';
+      document.getElementById('of-amenities').value = Array.isArray(o.amenities)?o.amenities.join('\n'):'';
       document.getElementById('of-hasdata').checked = !!o.has_data;
       document.getElementById('of-main').checked = !!o.is_main;
       document.getElementById('of-visible').checked = slug ? !!o.visible : true;
@@ -1300,6 +1304,8 @@
         email_note:document.getElementById('of-email-note').value.trim()||null,
         maps:document.getElementById('of-maps').value.trim()||null,
         mapq:document.getElementById('of-mapq').value.trim()||null,
+        getting_there:document.getElementById('of-getting').value.replace(/\r/g,'').trim()||null,
+        amenities:document.getElementById('of-amenities').value.replace(/\r/g,'').split('\n').map(function(s){return s.trim();}).filter(Boolean),
         hero:document.getElementById('of-hero').value.trim()||null,
         photos:_ofImages,
         visible:document.getElementById('of-visible').checked };

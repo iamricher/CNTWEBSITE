@@ -22,15 +22,19 @@ create table if not exists public.offices (
   email_note  text,                             -- e.g. "Temporary — dedicated email coming soon."
   maps        text,                             -- Google Maps share URL
   mapq        text,                             -- query for the embedded map iframe
-  photos      jsonb not null default '[]'::jsonb, -- array of image URLs
-  hero        text,                             -- cover photo shown as the hero banner (blends into the map)
-  sort_order  int not null default 0,
-  visible     boolean not null default true,    -- uncheck to hide from the public site
-  created_at  timestamptz default now()
+  photos       jsonb not null default '[]'::jsonb, -- array of image URLs
+  hero         text,                            -- cover photo shown as the hero banner (blends into the map)
+  getting_there text,                           -- "Getting here" items, one per line
+  amenities    jsonb not null default '[]'::jsonb, -- facilities/amenities tags
+  sort_order   int not null default 0,
+  visible      boolean not null default true,   -- uncheck to hide from the public site
+  created_at   timestamptz default now()
 );
 
--- add the hero column to tables created before it existed
+-- add columns to tables created before they existed
 alter table public.offices add column if not exists hero text;
+alter table public.offices add column if not exists getting_there text;
+alter table public.offices add column if not exists amenities jsonb not null default '[]'::jsonb;
 
 alter table public.offices enable row level security;
 
