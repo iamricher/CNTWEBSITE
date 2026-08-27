@@ -1644,8 +1644,8 @@ input, select, textarea { font-family: var(--font-body); }
   .loc-map{border-radius:16px;overflow:hidden;border:1px solid #ECEEF3;box-shadow:0 1px 2px rgba(16,24,40,.04),0 18px 40px -24px rgba(16,24,40,.18)}
   #reach-map{height:100%;width:100%;min-height:340px;background:#e9edf2}
   @media(max-width:899px){ #reach-map{height:340px} }
-  .mk-logo{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid var(--red,#C8102E);box-shadow:0 6px 16px rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .mk-logo img{width:30px;height:30px;object-fit:contain}
+  .mk-logo{width:40px;height:40px;border-radius:50% 50% 50% 0;background:#fff;border:3px solid var(--red,#C8102E);box-shadow:0 7px 16px rgba(0,0,0,.34);display:flex;align-items:center;justify-content:center;transform:rotate(-45deg)}
+  .mk-logo img{width:22px;height:22px;object-fit:contain;transform:rotate(45deg)}
   .mk-dot{width:17px;height:17px;border-radius:50%;background:var(--red,#C8102E);border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.3)}
   .mk-dot.on{transform:scale(1.25);box-shadow:0 0 0 5px rgba(200,16,46,.22),0 3px 8px rgba(0,0,0,.3)}
   .mk-me{width:16px;height:16px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.22)}
@@ -2969,7 +2969,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     function addMarkers(){
       if(!map||!window.L) return; var L=window.L;
       OFFICES.forEach(function(o){ if(!o.coords) return;
-        var icon=o.main?L.divIcon({className:'',html:'<div class="mk-logo"><img src="/assets/img/icon.png" alt="CNT"></div>',iconSize:[44,44],iconAnchor:[22,22]}):L.divIcon({className:'',html:'<div class="mk-dot" data-id="'+o.id+'"></div>',iconSize:[17,17],iconAnchor:[8,8]});
+        var icon=o.main?L.divIcon({className:'',html:'<div class="mk-logo"><img src="/assets/img/icon.png" alt="CNT"></div>',iconSize:[40,40],iconAnchor:[20,46]}):L.divIcon({className:'',html:'<div class="mk-dot" data-id="'+o.id+'"></div>',iconSize:[17,17],iconAnchor:[8,8]});
         var m=L.marker(o.coords,{icon:icon,title:o.name}).addTo(map);
         m.bindPopup('<div class="lp"><b>'+esc(o.name)+'</b><br>'+(o.hasData&&o.address?esc(o.address).slice(0,80)+'…':esc(o.role))+'<br><a href="/office?id='+o.id+'">View office page →</a></div>');
         m.on('click',function(){ selectOffice(o.id,false); });
