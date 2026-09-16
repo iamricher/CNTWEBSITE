@@ -1319,22 +1319,10 @@ input, select, textarea { font-family: var(--font-body); }
     <span>Executive Search</span><span class="dot">·</span>
     <span>Mass Hiring</span><span class="dot">·</span>
     <span>HR Outsourcing</span><span class="dot">·</span>
-    <span>Payroll Management</span><span class="dot">·</span>
-    <span>Contractual Staffing</span><span class="dot">·</span>
-    <span>Workforce Consulting</span><span class="dot">·</span>
-    <span>Background Screening</span><span class="dot">·</span>
-    <span>Training & Development</span><span class="dot">·</span>
-    <span>Compliance Advisory</span><span class="dot">·</span>
-    <span>Executive Search</span><span class="dot">·</span>
+    <span>Payroll Management</span><span class="dot">·</span>    <span>Workforce Consulting</span><span class="dot">·</span>    <span>Training & Development</span><span class="dot">·</span>    <span>Executive Search</span><span class="dot">·</span>
     <span>Mass Hiring</span><span class="dot">·</span>
     <span>HR Outsourcing</span><span class="dot">·</span>
-    <span>Payroll Management</span><span class="dot">·</span>
-    <span>Contractual Staffing</span><span class="dot">·</span>
-    <span>Workforce Consulting</span><span class="dot">·</span>
-    <span>Background Screening</span><span class="dot">·</span>
-    <span>Training & Development</span><span class="dot">·</span>
-    <span>Compliance Advisory</span><span class="dot">·</span>
-  </div>
+    <span>Payroll Management</span><span class="dot">·</span>    <span>Workforce Consulting</span><span class="dot">·</span>    <span>Training & Development</span><span class="dot">·</span>  </div>
 </div>
 
 <!-- ============================= ABOUT ============================= -->
@@ -1453,19 +1441,19 @@ input, select, textarea { font-family: var(--font-body); }
 
       <div class="service-card" data-service="04">
         <div class="service-icon">
-          <svg viewBox="0 0 48 48" fill="none"><path d="M24 8l4 8 9 1.3-6.5 6.3 1.5 9L24 28l-8 4.6 1.5-9L11 17.3 20 16z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M24 34v6M16 42h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 48 48" fill="none"><path d="M24 8v32M31 15H21a5 5 0 0 0 0 10h6a5 5 0 0 1 0 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
-        <h3>Contractual Staffing</h3>
-        <p>Project-based, seasonal, and contractual workforce deployment — fully managed engagement including payroll, benefits, and labor law compliance.</p>
+        <h3>Payroll Management</h3>
+        <p>Accurate, on-time, fully compliant payroll for your entire workforce — SSS, PhilHealth, Pag-IBIG, and BIR handled down to the last remittance.</p>
         <div class="service-num">04</div>
       </div>
 
       <div class="service-card" data-service="05">
         <div class="service-icon">
-          <svg viewBox="0 0 48 48" fill="none"><rect x="6" y="6" width="36" height="36" rx="4" stroke="currentColor" stroke-width="2"/><path d="M16 24l6 6 10-12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 48 48" fill="none"><path d="M8 8v32h32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M38 16 27 27l-7-7-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <h3>Background Screening</h3>
-        <p>Comprehensive pre-employment verification — educational credentials, employment history, character references, and national clearance processing.</p>
+        <h3>Workforce Consulting</h3>
+        <p>Strategic workforce planning aligned to your business goals — so you scale with the right people at the right time.</p>
         <div class="service-num">05</div>
       </div>
 
@@ -1494,7 +1482,7 @@ input, select, textarea { font-family: var(--font-body); }
 
   // Fallback: enrich the hardcoded cards (only runs if the DB is unreachable).
   function enrichFallback(){
-    var slugs=['executive-search','mass-hiring','hr-outsourcing','contractual-staffing','background-screening','training'];
+    var slugs=['executive-search','mass-hiring','hr-outsourcing','payroll','consulting','training'];
     [].slice.call(grid.querySelectorAll('.service-card')).forEach(function(c,i){
       var slug=slugs[i]; if(!slug) return;
       c.setAttribute('data-slug',slug);
@@ -2320,9 +2308,9 @@ input, select, textarea { font-family: var(--font-body); }
               <option>Executive Search</option>
               <option>Mass / Bulk Hiring</option>
               <option>HR Outsourcing</option>
-              <option>Contractual Staffing</option>
-              <option>Background Screening</option>
-              <option>Training & Development</option>
+              <option>Payroll Management</option>
+              <option>Training &amp; Development</option>
+              <option>Workforce Consulting</option>
               <option>General Inquiry</option>
             </select>
           </div>
