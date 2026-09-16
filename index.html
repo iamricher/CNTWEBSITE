@@ -1386,7 +1386,7 @@ input, select, textarea { font-family: var(--font-body); }
           More Than a Staffing Firm.<br />We Are Your <em>People Partner.</em>
         </h2>
         <p class="body-text" data-reveal>
-          Since 1992, CNT Promo &amp; Ads Specialists, Inc. has been the employment and staffing agency of choice for hundreds of corporations, government institutions, and SMEs across the Philippines. We don't just fill positions — we architect winning teams.
+          Since 1992, CNT Promo &amp; Ads Specialists, Inc. has been the employment and staffing agency of choice for corporations, government institutions, and SMEs across the Philippines. We don't just fill positions — we architect winning teams.
         </p>
         <p class="body-text" data-reveal>
           Our dedicated recruitment professionals combine deep industry knowledge with a rigorous vetting process to deliver candidates who not only have the skills your business demands, but the character and cultural fit to thrive within your organization.
@@ -2287,7 +2287,7 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
             <div>
               <strong>Phone</strong>
-              <span>8293-5269</span>
+              <a href="tel:+63282935269">(02) 8293-5269</a>
             </div>
           </div>
           <div class="contact-item">
@@ -3176,7 +3176,9 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     }
     function branchCard(o,dist){
       var soon=!o.hasData, addr=o.hasData&&o.address?esc(o.address):'Branch details coming soon';
-      var meta=o.hasData?((o.phone?'<span>'+esc(o.phone)+'</span>':'')+(o.email?'<a href="mailto:'+esc(o.email)+'">'+esc(o.email)+'</a>':'')):'';
+      var telHref=String(o.tel||'').replace(/[^+\d]/g,'');   // prefer a clean E.164 tel...
+      if(!/^\+?\d{7,13}$/.test(telHref)) telHref=String(o.phone||'').split(/[\/,]/)[0].replace(/[^+\d]/g,'');   // ...else first listed number (some offices list two)
+      var meta=o.hasData?((o.phone?'<a href="tel:'+esc(telHref)+'" onclick="event.stopPropagation()">'+esc(o.phone)+'</a>':'')+(o.email?'<a href="mailto:'+esc(o.email)+'" onclick="event.stopPropagation()">'+esc(o.email)+'</a>':'')):'';
       var d=dist!=null?'<span class="b-dist show"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'+dist.toFixed(dist<10?1:0)+' km away</span>':'';
       return '<div class="branch" data-id="'+o.id+'" role="button" tabindex="0">'
         +'<div class="b-head"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> '+esc(o.role)+(o.main?'<span class="b-hq">HQ</span>':'')+(soon?'<span class="b-soon">Coming soon</span>':'')+d+'</div>'
