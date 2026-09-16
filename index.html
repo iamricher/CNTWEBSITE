@@ -2890,9 +2890,15 @@ function initHeroAnimations() {
   const btn = qs('#backToTop');
   if (!btn) return;
 
-  window.addEventListener('scroll', () => {
-    btn.classList.toggle('visible', window.scrollY > 500);
-  }, { passive: true });
+  // Show the back-to-top only near the very bottom of the page (the Messenger
+  // FAB below it is always visible; this keeps the corner clear mid-scroll).
+  const toggleBtt = () => {
+    const nearBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 600);
+    btn.classList.toggle('visible', nearBottom);
+  };
+  window.addEventListener('scroll', toggleBtt, { passive: true });
+  window.addEventListener('resize', toggleBtt, { passive: true });
+  toggleBtt();
 
   btn.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
