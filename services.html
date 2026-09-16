@@ -104,9 +104,9 @@
   <section class="cat">
     <div class="wrap">
       <div class="cat-head">
-        <div class="k">Staffing Solutions</div>
-        <h2>Find the right people, fast.</h2>
-        <p>Whether you need one specialist or an entire team, our recruiters source, screen, and deploy talent that fits your role and culture.</p>
+        <div class="k">Our Services</div>
+        <h2>Everything you need to build and run your workforce.</h2>
+        <p>From sourcing and mass hiring to HR, payroll, training, and compliance — one partner for the full talent lifecycle across the Philippines.</p>
       </div>
       <div class="svc-grid">
         <div class="svc-card" id="executive-search">
@@ -130,19 +130,6 @@
           <ul><li>Flexible, scalable headcount</li><li>Fully managed engagement</li><li>Payroll &amp; benefits handled</li><li>DOLE-compliant contracts</li></ul>
           <a class="go" href="/#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CORPORATE -->
-  <section class="cat">
-    <div class="wrap">
-      <div class="cat-head">
-        <div class="k">Corporate Services</div>
-        <h2>Run your people operations, worry-free.</h2>
-        <p>Offload the administrative weight of HR, payroll, and compliance to a partner who does it every day — accurately and on time.</p>
-      </div>
-      <div class="svc-grid">
         <div class="svc-card" id="hr-outsourcing">
           <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
           <h3>HR Outsourcing</h3>
@@ -164,19 +151,6 @@
           <ul><li>Labor law advisory</li><li>Contract &amp; policy review</li><li>DOLE compliance support</li><li>Risk mitigation</li></ul>
           <a class="go" href="/#contact">Discuss this service <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TALENT SOLUTIONS -->
-  <section class="cat">
-    <div class="wrap">
-      <div class="cat-head">
-        <div class="k">Talent Solutions</div>
-        <h2>Strengthen and safeguard your workforce.</h2>
-        <p>Beyond hiring — we help you develop your people, verify who you bring on board, and plan your workforce for what's next.</p>
-      </div>
-      <div class="svc-grid">
         <div class="svc-card" id="training">
           <div class="svc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
           <h3>Training &amp; Development</h3>
@@ -245,16 +219,12 @@
     }
     var sb=window.getSupabase && window.getSupabase();
     if(!sb){ fallbackLinks(); return; }
-    sb.from('services').select('*').eq('published',true).order('sort_order',{ascending:true}).then(function(res){
+    // One unified list of all published services, sorted alphabetically by title.
+    sb.from('services').select('*').eq('published',true).order('title',{ascending:true}).then(function(res){
       var rows=res && res.data;
       if(res.error || !rows || !rows.length){ fallbackLinks(); return; }
-      document.querySelectorAll('section.cat').forEach(function(sec){
-        var kEl=sec.querySelector('.cat-head .k'), grid=sec.querySelector('.svc-grid');
-        if(!kEl||!grid) return;
-        var cat=kEl.textContent.trim();
-        var mine=rows.filter(function(r){return (r.category||'').trim()===cat;});
-        if(mine.length) grid.innerHTML=mine.map(card).join('');
-      });
+      var grid=document.querySelector('.svc-grid');
+      if(grid) grid.innerHTML=rows.map(card).join('');
     }, function(){ fallbackLinks(); });
   })();
   </script>

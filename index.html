@@ -1488,31 +1488,40 @@ input, select, textarea { font-family: var(--font-body); }
 // clickable to the service detail page. Dark gradient shows until a photo is uploaded.
 (function(){
   var grid=document.querySelector('#services .services-grid'); if(!grid) return;
-  var cards=[].slice.call(grid.querySelectorAll('.service-card'));
-  var slugs=['executive-search','mass-hiring','hr-outsourcing','contractual-staffing','background-screening','training'];
   var arrow='<span class="svc-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
-  cards.forEach(function(c,i){
-    var slug=slugs[i]; if(!slug) return;
-    c.setAttribute('data-slug',slug);
-    if(!c.querySelector('.svc-bg')){ var bg=document.createElement('div'); bg.className='svc-bg'; c.insertBefore(bg, c.firstChild); }
-    // Eyebrow (category) sits above the title — filled from the DB.
-    var h3=c.querySelector('h3');
-    if(h3 && !c.querySelector('.svc-eyebrow')){ var ey=document.createElement('div'); ey.className='svc-eyebrow'; h3.parentNode.insertBefore(ey, h3); }
-    if(!c.querySelector('.svc-arrow')) c.insertAdjacentHTML('beforeend', arrow);
-    c.setAttribute('role','link'); c.setAttribute('tabindex','0');
-    c.addEventListener('click',function(){ location.href='/service?s='+slug; });
-    c.addEventListener('keydown',function(e){ if(e.key==='Enter'){ location.href='/service?s='+slug; } });
-  });
-  var sb=window.getSupabase && window.getSupabase(); if(!sb) return;
-  sb.from('services').select('slug,image_url,category').in('slug',slugs).then(function(res){
-    if(res.error||!res.data) return;
-    var map={}; res.data.forEach(function(r){ map[r.slug]=r; });
-    cards.forEach(function(c){
-      var row=map[c.getAttribute('data-slug')]; if(!row) return;
-      if(row.image_url){ var bg=c.querySelector('.svc-bg'); if(bg) bg.style.backgroundImage='url("'+String(row.image_url).replace(/["\\]/g,'')+'")'; }
-      var ey=c.querySelector('.svc-eyebrow'); if(ey && row.category) ey.textContent=row.category;
+  var esc=function(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  function bind(c,slug){ c.setAttribute('role','link'); c.setAttribute('tabindex','0'); c.addEventListener('click',function(){ location.href='/service?s='+slug; }); c.addEventListener('keydown',function(e){ if(e.key==='Enter') location.href='/service?s='+slug; }); }
+
+  // Fallback: enrich the hardcoded cards (only runs if the DB is unreachable).
+  function enrichFallback(){
+    var slugs=['executive-search','mass-hiring','hr-outsourcing','contractual-staffing','background-screening','training'];
+    [].slice.call(grid.querySelectorAll('.service-card')).forEach(function(c,i){
+      var slug=slugs[i]; if(!slug) return;
+      c.setAttribute('data-slug',slug);
+      if(!c.querySelector('.svc-bg')){ var bg=document.createElement('div'); bg.className='svc-bg'; c.insertBefore(bg,c.firstChild); }
+      if(!c.querySelector('.svc-arrow')) c.insertAdjacentHTML('beforeend',arrow);
+      bind(c,slug);
     });
-  }, function(){});
+  }
+
+  var sb=window.getSupabase && window.getSupabase();
+  if(!sb){ enrichFallback(); return; }
+  // DB-driven: show only PUBLISHED services, sorted alphabetically by title. Deleting
+  // or unpublishing a service in Content Studio removes it from the homepage automatically.
+  sb.from('services').select('slug,title,category,tagline,overview,image_url').eq('published',true).order('title',{ascending:true}).then(function(res){
+    if(res.error || !res.data || !res.data.length){ enrichFallback(); return; }
+    grid.innerHTML=res.data.map(function(s){
+      var desc=esc(s.tagline||s.overview||'');
+      var bg=s.image_url ? ' style="background-image:url(\''+String(s.image_url).replace(/["\\']/g,'')+'\')"' : '';
+      return '<div class="service-card" data-slug="'+esc(s.slug)+'">'
+        +'<div class="svc-bg"'+bg+'></div>'
+        +'<h3>'+esc(s.title||'')+'</h3>'
+        +'<p>'+desc+'</p>'
+        +arrow
+      +'</div>';
+    }).join('');
+    [].slice.call(grid.querySelectorAll('.service-card')).forEach(function(c){ bind(c, c.getAttribute('data-slug')); });
+  }, function(){ enrichFallback(); });
 })();
 </script>
 
