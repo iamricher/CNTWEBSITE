@@ -41,7 +41,10 @@
 
     /* ── Interactive map hero ── */
     .hero-map{position:relative;width:100%;height:clamp(360px,46vw,560px);overflow:hidden;background:#e9edf2}
-    .hero-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+    /* oversize + offset the map so its centre pin lands upper-left, clear of the photo & caption;
+       pointer-events:none keeps it static (no drag/scroll) — it's a fixed backdrop, not a live map */
+    .hero-map iframe{position:absolute;top:-27%;left:-35%;width:130%;height:130%;border:0;display:block;pointer-events:none}
+    @media(max-width:600px){ .hero-map iframe{top:-22%;left:-20%;width:118%;height:118%} }
     /* office photo blended in from the right via a gradient mask */
     .hm-photo{position:absolute;top:0;right:0;bottom:0;width:47%;height:100%;object-fit:cover;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40%);mask-image:linear-gradient(90deg,transparent 0,#000 40%)}
     @media(max-width:600px){ .hm-photo{width:62%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 55%);mask-image:linear-gradient(90deg,transparent 0,#000 55%)} }
@@ -52,7 +55,12 @@
     .hc-cap .wrap{padding-bottom:clamp(26px,4vw,46px)}
     .hc-cap .cap-in{max-width:min(540px,64%)}
     @media(max-width:600px){ .hc-cap .cap-in{max-width:100%} }
-    .hc-badge{display:inline-flex;align-items:center;font-size:.64rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,var(--red-deep),var(--red-lt));padding:6px 14px;border-radius:99px;box-shadow:0 8px 20px -10px rgba(200,16,46,.6)}
+    /* Site-wide kicker chip: glass pill + live red dot (matches hero, legal & services badges). */
+    .hc-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.92);line-height:1;padding:.46rem .9rem .46rem .72rem;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+    .hc-badge::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;flex:none;background:var(--red-lt,#E5213F);box-shadow:0 0 0 3px rgba(229,33,63,.18),0 0 9px rgba(229,33,63,.7);animation:cntPulse 2.2s ease-out infinite}
+    .hc-badge[style]::before{display:none}   /* the inline-styled "Opening soon" badge keeps no dot */
+    @keyframes cntPulse{0%{box-shadow:0 0 0 0 rgba(229,33,63,.55),0 0 9px rgba(229,33,63,.6)}70%{box-shadow:0 0 0 8px rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}100%{box-shadow:0 0 0 0 rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}}
+    @media(prefers-reduced-motion:reduce){.hc-badge::before{animation:none}}
     .hc-cap h1{font-family:var(--display);font-size:clamp(2.3rem,5.6vw,4.1rem);font-weight:800;letter-spacing:-.035em;color:#fff;line-height:1;margin-top:15px;text-shadow:0 2px 40px rgba(0,0,0,.55)}
     .hc-cap .locality{margin-top:12px;color:rgba(255,255,255,.86);font-size:clamp(.95rem,1.6vw,1.12rem);font-weight:500;max-width:42ch;text-shadow:0 1px 22px rgba(0,0,0,.55)}
     .hm-dir{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:700;font-size:.92rem;padding:12px 22px;border-radius:12px;background:var(--red);color:#fff;box-shadow:0 12px 26px -8px rgba(200,16,46,.55);transition:background .16s,transform .16s}
@@ -65,8 +73,10 @@
     .ip-head{display:flex;align-items:center;gap:16px;padding:clamp(22px,2.6vw,30px);background:linear-gradient(90deg,#FFF5F7,#ffffff 46%)}
     .ip-head .txt{min-width:0}
     .ip-head .addr{margin-top:5px;font-size:clamp(1.04rem,1.5vw,1.22rem);font-weight:700;color:#1E2733;line-height:1.5}
-    .ip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#EEF1F5;border-top:1px solid #EEF1F5}
+    .ip-grid{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-top:1px solid #EEF1F5}
     .ip-cell{background:#fff;padding:clamp(20px,2.3vw,26px);display:flex;gap:14px;align-items:flex-start}
+    .ip-cell:not(:nth-child(3n+1)){box-shadow:inset 1px 0 0 #EEF1F5}
+    .ip-cell:nth-child(n+4){box-shadow:inset 0 1px 0 #EEF1F5}
     .ip-txt{min-width:0}
     .ip-ic{width:42px;height:42px;border-radius:12px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;flex:none}
     .ip-lbl{font-size:.63rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9AA3B2}
@@ -75,7 +85,7 @@
     .ip-val a{color:#28313F}
     .ip-val a:hover{color:var(--red)}
     .ip-note{display:block;font-size:.72rem;font-weight:500;color:#9AA3B2;margin-top:5px}
-    @media(max-width:760px){ .ip-grid{grid-template-columns:1fr} }
+    @media(max-width:760px){ .ip-grid{grid-template-columns:1fr} .ip-cell{box-shadow:none!important;border-top:1px solid #EEF1F5} .ip-cell:first-child{border-top:none} }
 
     .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:clamp(20px,2.6vw,30px)}
     .btn-maps,.btn-apply{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.92rem;padding:13px 24px;border-radius:12px;transition:background .16s,transform .16s,border-color .16s,color .16s}
@@ -182,9 +192,9 @@
       document.title = o.name + ' Office — CNT Promo & Ads Specialists, Inc.';
       if(_carTimer){ clearInterval(_carTimer); _carTimer=null; }
 
-      var crumb='<div class="crumb-bar"><div class="wrap"><a class="crumb" href="/home#reach"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All offices</a></div></div>';
+      var crumb='<div class="crumb-bar"><div class="wrap"><a class="crumb" href="/#reach"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> All offices</a></div></div>';
 
-      var REG={main:'Main Branch',luzon:'Luzon',visayas:'Visayas',mindanao:'Mindanao'};
+      var REG={main:'Metro Manila',luzon:'Luzon',visayas:'Visayas',mindanao:'Mindanao'};
       var arrowSvg='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
       function icon(name){
         var p={ pin:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
@@ -248,7 +258,7 @@
                 + ipCell('clock','Office hours',o.hours)
                 + (o.person?ipCell('user','Contact person',o.person):'')
                 + ipCell('phone','Contact number',o.phone,o.tel?('tel:'+o.tel):null)
-                + ipCell('mail','Email',o.email,o.email?('mailto:'+o.email):null,o.emailNote)
+                + ipCell('mail','Email',o.email,o.email?('mailto:'+o.email):null)
               + '</div>'
             + '</div>'
             + (soon?'<div class="cta-row"><a class="btn-maps" href="/careers">Apply online '+arrowSvg+'</a><a class="btn-apply" href="/office?id=mandaluyong">Visit our head office</a></div>':'')
@@ -290,9 +300,9 @@
       if(sb && id){
         sb.from('offices').select('*').eq('slug',id).maybeSingle().then(function(res){
           if(res && res.data){ render(dbToOffice(res.data)); }
-          else if(!st){ location.replace('/home#reach'); }
-        }, function(){ if(!st){ location.replace('/home#reach'); } });
-      } else if(!st){ location.replace('/home#reach'); }
+          else if(!st){ location.replace('/#reach'); }
+        }, function(){ if(!st){ location.replace('/#reach'); } });
+      } else if(!st){ location.replace('/#reach'); }
     })();
   </script>
 </body>

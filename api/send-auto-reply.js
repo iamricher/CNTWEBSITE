@@ -59,7 +59,8 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   '.pad{padding-left:24px!important;padding-right:24px!important;}' +
   '.pad-y{padding-top:32px!important;padding-bottom:32px!important;}' +
   '.head{padding-top:32px!important;padding-bottom:32px!important;}' +
-  '.logo{height:42px!important;}' +
+  '.logo{height:38px!important;}' +
+  '.hide-sm{display:none!important;}' +
   '.h1{font-size:22px!important;}' +
   '.btn-a{display:block!important;text-align:center!important;}' +
   '.outer{padding:0!important;}' +
@@ -68,21 +69,35 @@ const SHELL = (eyebrow, heading, bodyHtml) =>
   '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="outer" style="background:#f3f4f6;padding:36px 12px;font-family:\'Inter\',-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,\'Helvetica Neue\',Helvetica,Arial,sans-serif;"><tr><td align="center">' +
   '<table role="presentation" width="600" cellpadding="0" cellspacing="0" class="card" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #ecedf1;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04),0 12px 34px rgba(16,24,40,.10);">' +
   // refined dark header: centred logo, thin red accent line, cool-gray tagline
-  '<tr><td class="pad head" align="center" style="background:#141418;background-image:linear-gradient(180deg,#1e1e24 0%,#121216 100%);border-bottom:3px solid #C8102E;padding:40px 34px;text-align:center;">' +
-  '<img src="' + BRAND_LOGO + '" alt="CNT Promo &amp; Ads Specialists, Inc." height="50" class="logo" style="height:50px;width:auto;display:inline-block;">' +
-  '<div style="color:#b7bbc4;font-size:11px;font-weight:600;letter-spacing:.16em;margin-top:16px;text-transform:uppercase;">A Million Jobs for a Million Filipinos.</div>' +
-  '<div style="color:#e5213f;font-size:11px;font-weight:800;letter-spacing:.14em;margin-top:8px;">#TatakCNT</div></td></tr>' +
+  // dark header band with a red brand accent line — matches the site hero/footer
+  '<tr><td class="pad" style="background:#14161b;background-image:linear-gradient(120deg,#1c1e25 0%,#111318 100%);border-bottom:3px solid #C8102E;padding:28px 34px;">' +
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
+  '<td align="left" valign="middle"><img src="' + BRAND_LOGO + '" alt="CNT Promo &amp; Ads Specialists, Inc." height="44" class="logo" style="height:44px;width:auto;display:block;"></td>' +
+  '<td align="right" valign="middle" class="hide-sm" style="color:rgba(255,255,255,.6);font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;line-height:1.6;">A Million Jobs<br>for a Million Filipinos<br><span style="color:#e5213f;">#TatakCNT</span></td>' +
+  '</tr></table></td></tr>' +
   // body — eyebrow label, tight display heading, airy body copy
   '<tr><td class="pad pad-y" style="padding:42px 44px;color:#3a3c44;font-size:15.5px;line-height:1.75;letter-spacing:.002em;">' +
   '<span style="display:inline-block;background:#FDE7EA;color:#C8102E;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:100px;">' + esc(eyebrow) + '</span>' +
   '<h1 class="h1" style="font-family:\'Manrope\',\'Inter\',-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:26px;font-weight:800;color:#16161a;letter-spacing:-.022em;line-height:1.22;margin:18px 0 16px;">' + heading + '</h1>' +
   bodyHtml + '</td></tr>' +
   // footer
-  '<tr><td class="pad" style="background:#fafbfc;border-top:1px solid #eef0f2;padding:32px 34px;text-align:center;">' +
-  '<div style="font-size:12px;color:#8a8d94;line-height:1.75;">This is an automated message from <b style="color:#4b4d54;">CNT Promo &amp; Ads Specialists, Inc.</b><br>Please do not reply to this email.</div>' +
-  '<div style="margin-top:14px;font-size:11.5px;color:#a9acb3;line-height:1.75;letter-spacing:.01em;">219 Lyfe Tower, Shaw Blvd. corner E. Jacinto St., Barangay Bagong Silang, Mandaluyong City<br>' +
-  '<a href="mailto:hrdadmin@cntpromoads.com" style="color:#C8102E;">hrdadmin@cntpromoads.com</a> &nbsp;&middot;&nbsp; <a href="' + SITE + '" style="color:#C8102E;">Visit our website</a></div>' +
-  '<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eef0f2;font-size:11px;color:#bcbfc6;letter-spacing:.01em;">&copy; ' + new Date().getFullYear() + ' CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</div>' +
+  // dark footer — matches the site's hero/footer; links are light, red is accent only
+  '<tr><td class="pad" style="background:#14161b;background-image:linear-gradient(180deg,#191b21 0%,#111318 100%);padding:34px 34px 28px;text-align:center;">' +
+  '<div style="font-size:12px;color:#9aa0aa;line-height:1.7;">This is a system-generated message from <b style="color:#e6e8ec;">CNT Promo &amp; Ads Specialists, Inc.</b> &mdash; please do not reply.</div>' +
+  '<div style="margin:24px 0 0;font-size:10px;color:#71767f;text-transform:uppercase;letter-spacing:.14em;font-weight:700;">Stay connected</div>' +
+  '<div style="margin:13px 0 0;">' +
+  '<a href="https://www.facebook.com/CntPromoAds" style="display:inline-block;margin:0 5px;"><img src="' + SITE + '/assets/img/email/fb.png" width="38" height="38" alt="Facebook" style="display:inline-block;width:38px;height:38px;border:0;"></a>' +
+  '<a href="https://www.linkedin.com/company/cnt-promo-ads-specialists-inc/" style="display:inline-block;margin:0 5px;"><img src="' + SITE + '/assets/img/email/li.png" width="38" height="38" alt="LinkedIn" style="display:inline-block;width:38px;height:38px;border:0;"></a>' +
+  '<a href="https://www.tiktok.com/@cnt.jobhiring" style="display:inline-block;margin:0 5px;"><img src="' + SITE + '/assets/img/email/tt.png" width="38" height="38" alt="TikTok" style="display:inline-block;width:38px;height:38px;border:0;"></a></div>' +
+  '<div style="margin:20px 0 0;font-size:11.5px;color:#7f858e;line-height:1.7;">219 Lyfe Tower, Shaw Blvd. cor. E. Jacinto St., Bagong Silang, Mandaluyong City<br>' +
+  '<a href="mailto:hrdadmin@cntpromoads.com" style="color:#cfd3da;">hrdadmin@cntpromoads.com</a> <span style="color:#4a4e57;">&nbsp;&middot;&nbsp;</span> <a href="' + SITE + '" style="color:#cfd3da;">Visit our website</a></div>' +
+  '</td></tr>' +
+  // thin brand red line
+  '<tr><td style="height:3px;background:#C8102E;background-image:linear-gradient(90deg,#A50D24 0%,#E5213F 50%,#A50D24 100%);font-size:0;line-height:0;">&nbsp;</td></tr>' +
+  // regulatory / anti-scam bar
+  '<tr><td style="background:#0d0f13;padding:15px 34px;text-align:center;font-size:10.5px;color:#7a7f88;line-height:1.7;">' +
+  '<b style="color:#e5213f;">Beware of scams.</b> CNT never charges applicants any fee at any stage. Report suspicious messages to hrdadmin@cntpromoads.com.<br>' +
+  '<span style="color:#5b606a;">&copy; ' + new Date().getFullYear() + ' CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</span>' +
   '</td></tr>' +
   '</table>' +
   '<div style="font-size:11px;color:#b3b6bd;margin-top:18px;letter-spacing:.01em;">Sent by CNT Promo &amp; Ads Specialists, Inc.</div>' +
@@ -114,6 +129,25 @@ function template(type, data) {
   };
 }
 
+// Internal alert emailed to CNT staff so a new contact inquiry is seen right
+// away (not only via the Content Studio inbox). Reply-to is the sender, so staff
+// can respond straight from the alert.
+function staffTemplate(data) {
+  var name = esc(data.name || 'Website visitor');
+  var row = (label, val) => val ? ('<tr><td style="padding:6px 14px 6px 0;color:#6b7280;font-size:12.5px;white-space:nowrap;vertical-align:top;">' + label + '</td><td style="padding:6px 0;color:#16161a;font-size:13.5px;">' + esc(val) + '</td></tr>') : '';
+  return {
+    subject: 'New inquiry: ' + (data.subject ? String(data.subject) : 'General Inquiry') + ' — ' + name,
+    html: SHELL('New Inquiry', 'New website inquiry',
+      '<p style="margin:0 0 14px;">A new message came in through the website contact form:</p>' +
+      '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 6px;border-collapse:collapse;">' +
+      row('Name', data.name) + row('Email', data.to) + row('Company', data.company) + row('Subject', data.subject) +
+      '</table>' +
+      (data.message ? BOX('<b>Message</b><br>' + esc(data.message).replace(/\n/g, '<br>')) : '') +
+      BTN(SITE + '/content-studio.html', 'Open the inbox') +
+      '<p style="margin:18px 0 0;color:#6b7280;font-size:12.5px;">Reply to this email to respond to ' + name + ' directly.</p>')
+  };
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   if (req.method !== 'POST') { res.status(405).json({ ok: false, error: 'method' }); return; }
@@ -125,18 +159,25 @@ module.exports = async (req, res) => {
 
   const KEY = process.env.RESEND_API_KEY;
   const FROM = process.env.RESEND_FROM || 'CNT Promo & Ads Specialists, Inc. <onboarding@resend.dev>';
+  const STAFF_INBOX = process.env.STAFF_INBOX || 'hrdadmin@cntpromoads.com';
   if (!KEY) { res.status(200).json({ ok: false, error: 'not-configured' }); return; } // no-op until set up
 
+  const send = (payload) => fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({ from: FROM }, payload))
+  }).then((r) => r.json().catch(() => ({}))).catch(() => ({ error: 'exception' }));
+
   const tpl = template(type, body);
+  const jobs = [ send({ to: [to], subject: tpl.subject, html: tpl.html, reply_to: 'hrdadmin@cntpromoads.com' }) ];
+  // Also alert CNT staff on a new contact inquiry (best-effort).
+  if (type === 'contact') {
+    const st = staffTemplate(body);
+    jobs.push(send({ to: [STAFF_INBOX], subject: st.subject, html: st.html, reply_to: to }));
+  }
   try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: FROM, to: [to], subject: tpl.subject, html: tpl.html, reply_to: 'hrdadmin@cntpromoads.com' })
-    });
-    const out = await r.json().catch(() => ({}));
-    if (!r.ok) { res.status(200).json({ ok: false, error: (out && out.message) || 'send-failed' }); return; }
-    res.status(200).json({ ok: true, id: out && out.id });
+    const results = await Promise.all(jobs);
+    res.status(200).json({ ok: true, sent: results.length, ids: results.map((x) => x && x.id).filter(Boolean) });
   } catch (e) {
     res.status(200).json({ ok: false, error: 'exception' });
   }

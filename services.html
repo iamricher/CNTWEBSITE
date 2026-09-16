@@ -10,6 +10,7 @@
   <meta property="og:title" content="Services — CNT Promo & Ads Specialists, Inc." />
   <meta property="og:description" content="End-to-end workforce solutions across the Philippines — staffing, HR outsourcing, payroll, compliance, training, and more." />
   <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
+  <meta property="og:url" content="https://cnt-website-ats.vercel.app/services" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -25,13 +26,15 @@
     a{text-decoration:none;color:inherit}
     .wrap{width:min(1140px,100% - 44px);margin-inline:auto}
     /* Hero */
-    .svc-hero{position:relative;background:linear-gradient(160deg,#1f1f1f,#0d0d0d);color:#fff;padding:clamp(70px,11vw,130px) 0 clamp(48px,7vw,80px);overflow:hidden}
+    .svc-hero{position:relative;background:linear-gradient(100deg,rgba(11,11,13,.9) 0%,rgba(11,11,13,.55) 44%,rgba(11,11,13,.3) 100%),url('/assets/img/services_sample.jpg') center/cover no-repeat;color:#fff;padding:clamp(70px,11vw,130px) 0 clamp(48px,7vw,80px);overflow:hidden}
     .svc-hero::after{content:"";position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.34),transparent 62%)}
     .svc-hero .wrap{position:relative;z-index:2}
-    .svc-hero .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--red-lt);margin-bottom:1.1rem;display:flex;align-items:center;gap:.7rem}
-    .svc-hero .eyebrow::before{content:'';width:30px;height:2px;background:var(--red-lt)}
+    .svc-hero .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.9);margin-bottom:1.15rem;line-height:1;padding:.42rem .82rem .42rem .68rem;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015))}
+    .svc-hero .eyebrow::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;flex:none;background:var(--red-lt);box-shadow:0 0 0 3px rgba(229,33,63,.18),0 0 9px rgba(229,33,63,.7);animation:cntPulse 2.2s ease-out infinite}
+    @keyframes cntPulse{0%{box-shadow:0 0 0 0 rgba(229,33,63,.55),0 0 9px rgba(229,33,63,.6)}70%{box-shadow:0 0 0 8px rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}100%{box-shadow:0 0 0 0 rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}}
+    @media(prefers-reduced-motion:reduce){.svc-hero .eyebrow::before{animation:none}}
     .svc-hero h1{font-family:'Manrope',sans-serif;font-size:clamp(2.4rem,6vw,4rem);font-weight:800;letter-spacing:-.03em;line-height:1.04;max-width:16ch}
-    .svc-hero h1 em{font-style:normal;color:var(--red-lt)}
+    .svc-hero h1 em{font-style:normal;background:linear-gradient(100deg,#FF3D51 0%,#E5213F 38%,#C8102E 72%,#A50D24 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
     .svc-hero p{color:rgba(255,255,255,.66);margin-top:1.3rem;font-size:clamp(1rem,2vw,1.16rem);max-width:60ch}
     .svc-hero .stats{display:flex;gap:clamp(24px,5vw,56px);margin-top:clamp(32px,5vw,48px);flex-wrap:wrap}
     .svc-hero .stat b{font-family:'Manrope',sans-serif;display:block;font-size:clamp(1.6rem,3vw,2.3rem);font-weight:800;letter-spacing:-.02em}
@@ -46,7 +49,7 @@
     .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.4vw,28px)}
     .svc-card{border:1px solid var(--line);border-radius:16px;padding:clamp(1.5rem,2.4vw,2rem);background:#fff;display:flex;flex-direction:column;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
     .svc-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(16,24,40,.10);border-color:#F3B6BF}
-    .svc-ic{width:52px;height:52px;border-radius:13px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;margin-bottom:1.3rem;transition:background .2s ease,color .2s ease}
+    .svc-ic{display:none}
     .svc-card:hover .svc-ic{background:var(--red);color:#fff}
     .svc-ic svg{width:26px;height:26px}
     .svc-card h3{font-family:'Manrope',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:-.01em;color:var(--charcoal);margin-bottom:.55rem}
@@ -82,7 +85,7 @@
   <meta name="twitter:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
 </head>
 <body>
-  <div id="site-header" data-active="services"></div>
+  <div id="site-header" data-active="services" data-overlay="1"></div>
 
   <header class="svc-hero">
     <div class="wrap">
@@ -90,8 +93,8 @@
       <h1>End-to-end <em>workforce solutions</em> for the Philippines.</h1>
       <p>From a single executive hire to a nationwide workforce of thousands — CNT handles sourcing, screening, deployment, payroll, and compliance so you can focus on running your business.</p>
       <div class="stats">
-        <div class="stat"><b>15+</b><span>Years in manpower services</span></div>
-        <div class="stat"><b>10,000+</b><span>Workers deployed</span></div>
+        <div class="stat"><b>30+</b><span>Years in Business</span></div>
+        <div class="stat"><b>10,000+</b><span>Workers Deployed</span></div>
         <div class="stat"><b>Nationwide</b><span>Luzon · Visayas · Mindanao</span></div>
       </div>
     </div>
@@ -215,6 +218,45 @@
 
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"CNT Promo & Ads Specialists, Inc.","url":"https://cnt-website-ats.vercel.app/","logo":"https://cnt-website-ats.vercel.app/assets/img/icon.png","makesOffer":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"Executive Search"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Mass & Bulk Hiring"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Contractual Staffing"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"HR Outsourcing"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Payroll Management"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Compliance Advisory"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Training & Development"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Background Screening"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Workforce Consulting"}}]}
+  </script>
+  <script>
+  // Cards come from Content Studio (Supabase `services`), grouped by category.
+  // Any error keeps the hardcoded cards and just points them at /service?s=<id>.
+  (function(){
+    var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    var goArrow='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    var IC={search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/>',team:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>',badge:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',people:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>',peso:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',cap:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',verify:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/><path d="M8 11h6"/>',chart:'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>'};
+    var svg=function(p){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(IC[p]||IC.search)+'</svg>';};
+    function card(s){
+      var hls=Array.isArray(s.highlights)?s.highlights:[];
+      return '<div class="svc-card" id="'+esc(s.slug)+'">'
+        +'<h3>'+esc(s.title)+'</h3><p>'+esc(s.tagline||s.overview||'')+'</p>'
+        +(hls.length?'<ul>'+hls.map(function(h){return '<li>'+esc(h.t)+'</li>';}).join('')+'</ul>':'')
+        +'<a class="go" href="/service?s='+esc(s.slug)+'">Learn more '+goArrow+'</a></div>';
+    }
+    function fallbackLinks(){
+      document.querySelectorAll('.svc-card[id]').forEach(function(c){
+        var go=c.querySelector('a.go'); if(!go) return;
+        go.setAttribute('href','/service?s='+c.id);
+        var first=go.firstChild;
+        if(first && first.nodeType===3) first.nodeValue='Learn more ';
+        else go.insertBefore(document.createTextNode('Learn more '), go.firstChild);
+      });
+    }
+    var sb=window.getSupabase && window.getSupabase();
+    if(!sb){ fallbackLinks(); return; }
+    sb.from('services').select('*').eq('published',true).order('sort_order',{ascending:true}).then(function(res){
+      var rows=res && res.data;
+      if(res.error || !rows || !rows.length){ fallbackLinks(); return; }
+      document.querySelectorAll('section.cat').forEach(function(sec){
+        var kEl=sec.querySelector('.cat-head .k'), grid=sec.querySelector('.svc-grid');
+        if(!kEl||!grid) return;
+        var cat=kEl.textContent.trim();
+        var mine=rows.filter(function(r){return (r.category||'').trim()===cat;});
+        if(mine.length) grid.innerHTML=mine.map(card).join('');
+      });
+    }, function(){ fallbackLinks(); });
+  })();
   </script>
 </body>
 </html>

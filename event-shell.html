@@ -21,20 +21,35 @@
     a{text-decoration:none;color:inherit}
     img{display:block;max-width:100%;height:auto}
     .container{width:min(760px,100% - 40px);margin-inline:auto}
-    .article{padding:28px 0 80px}
-    .backlink{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--gray-600);margin-bottom:20px}
-    .backlink:hover{color:var(--red)}
-    /* Banner hero — auto-styled; looks good with or without a photo */
-    .hero{width:100%;margin-bottom:34px}
-    .hero .banner{position:relative;width:min(1000px,100% - 40px);margin-inline:auto;min-height:clamp(240px,38vw,420px);border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#1A1A1A,#C8102E);box-shadow:0 18px 50px rgba(0,0,0,.16);display:flex;align-items:flex-end}
-    .hero .banner>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .hero .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.74),rgba(0,0,0,.12) 58%,rgba(0,0,0,.04))}
-    .hero .cap{position:relative;padding:clamp(22px,4vw,40px);width:100%}
-    .hero .cap .pills{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-    .hero .cap .pill-date{font-size:.72rem;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--red);padding:5px 12px;border-radius:7px}
-    .hero .cap .pill-cat{font-size:.7rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:7px;backdrop-filter:blur(4px)}
-    .hero .cap h1{font-family:'Manrope',sans-serif;font-size:clamp(1.6rem,4vw,2.7rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.35)}
-    .body p{font-size:1.06rem;color:#333;margin-bottom:1.15rem}
+    /* Premium editorial header (light, title-first) */
+    .article{padding:clamp(26px,4vw,44px) 0 90px}
+    .ev-back{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;color:#8a90a0;margin-bottom:clamp(26px,4vw,44px);transition:color .16s}
+    .ev-back:hover{color:var(--red)}
+    .ev-back svg{width:15px;height:15px}
+    .ev-kick{display:flex;align-items:center;gap:11px;font-family:'Manrope',sans-serif;font-weight:800;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px}
+    .ev-kick .cat{display:inline-flex;align-items:center;gap:9px;color:var(--red)}
+    .ev-kick .cat::before{content:"";width:22px;height:2px;background:var(--red);border-radius:2px}
+    .ev-kick .dot{width:3px;height:3px;border-radius:50%;background:#c4ccd6}
+    .ev-kick .date{color:#9aa3b2}
+    .ev-head h1{font-family:'Manrope',sans-serif;font-weight:800;font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:1.1;letter-spacing:-.025em;color:#12141a}
+    .ev-dek{font-size:clamp(1.08rem,1.6vw,1.26rem);line-height:1.62;color:#556072;margin-top:18px;max-width:64ch}
+    .ev-meta{display:flex;align-items:center;gap:14px;margin-top:26px;padding-top:18px;border-top:1px solid #ECEFF3}
+    .ev-share-lbl{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9aa3b2}
+    .ev-share{display:flex;gap:9px;margin-left:auto}
+    .ev-share .sh{width:38px;height:38px;border-radius:50%;border:1px solid #E5E9F0;background:#fff;color:#5A6474;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .16s,color .16s,transform .16s,box-shadow .16s}
+    .ev-share .sh svg{width:16px;height:16px}
+    .ev-share .sh:hover{border-color:var(--red);color:var(--red);transform:translateY(-2px);box-shadow:0 8px 20px -8px rgba(200,16,46,.4)}
+    .ev-share .sh-cp.copied{border-color:#15803D;color:#15803D}
+    figure.ev-cover{margin:clamp(26px,4vw,40px) 0 0}
+    .ev-cover .frame{border-radius:18px;overflow:hidden;height:clamp(240px,40vw,440px);background:#0b0b0d;box-shadow:0 30px 68px -34px rgba(16,24,40,.5)}
+    .ev-cover img{width:100%;height:100%;object-fit:cover;object-position:center 38%}
+    .ev-cover figcaption{margin-top:12px;font-size:.85rem;font-style:italic;color:#98a0ad;text-align:center}
+    @media(max-width:560px){.ev-share-lbl{display:none}}
+    /* Premium article body */
+    .body{margin-top:clamp(30px,4vw,46px)}
+    .body p{font-size:1.12rem;line-height:1.85;color:#3a4250;margin-bottom:1.3rem}
+    .body p.lead{font-size:1.24rem;line-height:1.7;color:#1e2733;font-weight:500}
+    .body .subhead{font-family:'Manrope',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin:2.6rem 0 1rem}
     .body img{width:100%;border-radius:14px;margin:14px 0;box-shadow:0 10px 34px rgba(0,0,0,.10)}
     /* Newspaper-style photo spread: a dominant lead image + a dense mosaic */
     .gallery-title{font-family:'Manrope',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--charcoal);margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--red);display:inline-block}
@@ -54,16 +69,16 @@
     /* Lightbox — click a photo to open a full viewer with prev/next */
     .lb{position:fixed;inset:0;z-index:9000;background:rgba(10,10,12,.94);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .22s ease;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
     .lb.open{display:flex;opacity:1}
-    .lb-stage{position:relative;width:min(1100px,92vw);height:min(84vh,900px);display:flex;align-items:center;justify-content:center}
+    .lb-stage{position:relative;width:min(1100px,calc(100vw - 168px));height:min(84vh,900px);display:flex;align-items:center;justify-content:center}
     .lb-stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 24px 80px rgba(0,0,0,.6);user-select:none}
     .lb-btn{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s ease;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
     .lb-btn:hover{background:var(--red)}
-    .lb-prev{left:-4px}.lb-next{right:-4px}
+    .lb-prev{left:-66px}.lb-next{right:-66px}
     .lb-close{position:absolute;top:20px;right:24px;width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;transition:background .18s ease}
     .lb-close:hover{background:var(--red)}
     .lb-count{position:absolute;bottom:-38px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.85);font-size:.85rem;font-weight:700;letter-spacing:.06em;white-space:nowrap}
     .gallery a{cursor:zoom-in}
-    @media(max-width:640px){.lb-btn{width:44px;height:44px}.lb-prev{left:2px}.lb-next{right:2px}}
+    @media(max-width:640px){.lb-stage{width:calc(100vw - 112px)}.lb-btn{width:44px;height:44px}.lb-prev{left:-50px}.lb-next{right:-50px}}
   </style>
 </head>
 <body>
@@ -72,10 +87,7 @@
 
   <main class="article">
     <div class="container">
-      <a class="backlink" href="/#events"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All events &amp; updates</a>
-    </div>
-    <div id="event-hero"></div>
-    <div class="container">
+      <div id="event-hero" class="ev-head"></div>
       <div id="event-content"><div class="state">Loading…</div></div>
     </div>
   </main>
@@ -98,6 +110,12 @@
   (function(){
     var yrEl=document.getElementById('yr'); if(yrEl) yrEl.textContent=new Date().getFullYear();
     var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    // Copy the current event link (used by the Share row's copy button).
+    window.cntCopyLink=function(btn){
+      var revert=function(){ btn.classList.add('copied'); btn.setAttribute('title','Link copied!'); setTimeout(function(){ btn.classList.remove('copied'); btn.setAttribute('title','Copy link'); },1600); };
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(location.href).then(revert,revert); return; } }catch(_){}
+      try{ var t=document.createElement('textarea'); t.value=location.href; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); revert(); }catch(_){}
+    };
     var el=document.getElementById('event-content');
     var hero=document.getElementById('event-hero');
     var id=new URLSearchParams(location.search).get('id');
@@ -111,16 +129,30 @@
       // Count a view (once per browser session per event, so a refresh
       // doesn't inflate it). Fire-and-forget; never blocks the page.
       try{ var vk='cnt_ev_'+id; if(!sessionStorage.getItem(vk)){ sessionStorage.setItem(vk,'1'); Promise.resolve(sb.rpc('cnt_increment_event_view',{ev_id:Number(id)})).catch(function(){}); } }catch(_){}
-      // Banner hero — auto-styled, works with or without a photo
-      hero.className='hero';
-      hero.innerHTML='<div class="banner">'
-        +(ev.image_url?'<img src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'')+'">':'')
-        +'<div class="scrim"></div>'
-        +'<div class="cap"><div class="pills">'
-          +(ev.event_date?'<span class="pill-date">'+esc(ev.event_date)+'</span>':'')
-          +(ev.category?'<span class="pill-cat">'+esc(ev.category)+'</span>':'')
-        +'</div><h1>'+esc(ev.title||'')+'</h1></div></div>';
-      var paras=String(ev.body||ev.summary||'').split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
+      // Premium editorial header (light): back, kicker, title, dek, share, cover
+      var _su=location.href;
+      var _fb='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(_su);
+      var _li='https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(_su);
+      hero.innerHTML=
+        '<a class="ev-back" href="/#events"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All events &amp; updates</a>'
+        +'<div class="ev-kick">'
+          +(ev.category?'<span class="cat">'+esc(ev.category)+'</span>':'')
+          +((ev.category&&ev.event_date)?'<span class="dot"></span>':'')
+          +(ev.event_date?'<span class="date">'+esc(ev.event_date)+'</span>':'')
+        +'</div>'
+        +'<h1>'+esc(ev.title||'')+'</h1>'
+        +(ev.summary?'<p class="ev-dek">'+esc(ev.summary)+'</p>':'')
+        +'<div class="ev-meta"><span class="ev-share-lbl">Share</span><div class="ev-share">'
+          +'<a class="sh" href="'+_fb+'" target="_blank" rel="noopener" aria-label="Share on Facebook" title="Share on Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 22v-8h2.7l.4-3H13V9.1c0-.9.3-1.5 1.6-1.5H16V5c-.3 0-1.2-.1-2.2-.1-2.2 0-3.8 1.4-3.8 3.9V11H7.5v3H10v8h3z"/></svg></a>'
+          +'<a class="sh" href="'+_li+'" target="_blank" rel="noopener" aria-label="Share on LinkedIn" title="Share on LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.94 5A1.94 1.94 0 1 1 3.06 5a1.94 1.94 0 0 1 3.88 0zM3.3 8.4h3.3V21H3.3V8.4zM9.4 8.4h3.16v1.72h.05c.44-.83 1.52-1.72 3.13-1.72 3.35 0 3.97 2.2 3.97 5.06V21h-3.3v-4.9c0-1.17-.02-2.67-1.63-2.67-1.63 0-1.88 1.27-1.88 2.58V21H9.4V8.4z"/></svg></a>'
+          +'<button class="sh sh-cp" type="button" onclick="cntCopyLink(this)" aria-label="Copy link" title="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></button>'
+        +'</div></div>'
+        +(ev.image_url?'<figure class="ev-cover"><div class="frame"><img src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'')+'"></div></figure>':'');
+      var _leadDone=false;
+      var paras=String(ev.body||ev.summary||'').split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){
+        if(p.length<=44 && p===p.toUpperCase() && /[A-Z]/.test(p)) return '<h2 class="subhead">'+esc(p)+'</h2>';
+        var cls=_leadDone?'':' class="lead"'; _leadDone=true; return '<p'+cls+'>'+esc(p)+'</p>';
+      }).join('');
       var gallery='';
       var pics=Array.isArray(ev.images)?ev.images.filter(Boolean):[];
       if(pics.length){

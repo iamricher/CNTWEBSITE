@@ -141,8 +141,17 @@
       +'<a href="'+url+'" download style="font-size:12px;font-weight:600;color:#7f1d1d;display:inline-flex;align-items:center;gap:5px;"><span class="material-icons-outlined" style="font-size:15px;">download</span>Download</a>'
       +'</span></div>';
     if(isPdf){
-      box.innerHTML=actions+'<iframe src="'+url+'#toolbar=1&view=FitH" style="width:100%;height:400px;border:0;display:block;background:#f8fafc;" title="Uploaded resume"></iframe>';
+      // Hide the browser's black PDF chrome (#toolbar=0&navpanes=0) — the card
+      // already has its own Open / Download actions — and start at the minimum
+      // height so it never flashes a stretched frame before it's measured.
+      box.innerHTML=actions+'<iframe src="'+url+'#toolbar=0&navpanes=0&view=FitH" style="width:100%;height:'+CV_MIN+'px;border:0;display:block;background:#f8fafc;" title="Uploaded resume"></iframe>';
+      // Size the frame to fill the panel once the modal has actually laid out —
+      // running only once on render measured 0px and left it stuck at the min.
+      const _ifr=box.querySelector('iframe');
+      if(_ifr) _ifr.addEventListener('load', _fitResumeFrame);
       _fitResumeFrame();
+      requestAnimationFrame(_fitResumeFrame);
+      setTimeout(_fitResumeFrame, 160);
     } else {
       // Word files can't render in an iframe, but mammoth can turn a .docx
       // into HTML we can show. Only .docx — the legacy binary .doc format is
@@ -173,7 +182,7 @@
         needed:j.openings||1, salary:j.salary_range||'', priority:(j.priority||'normal').toLowerCase(),
         about:j.about||'', responsibilities:j.responsibilities||'', must_have:j.must_have||'', nice_to_have:j.nice_to_have||'', we_offer:j.we_offer||'',
         employment_type:j.employment_type||'Full-Time', recruiter:j.recruiter||'', status:j.status||'open',
-        deadline:j.deadline||'', created_at:j.created_at||null,
+        deadline:j.deadline||'', created_at:j.created_at||null, pinned:!!j.pinned,
         department:j.department||'', industry:j.industry||'', working_schedule:j.working_schedule||'',
         contract_template:j.contract_template||'', expected_skills:j.expected_skills||'', interviewers:j.interviewers||'', hide_salary:!!j.hide_salary,
         base_salary:(j.base_salary!=null?j.base_salary:''), client_max_salary:(j.client_max_salary!=null?j.client_max_salary:'') });
@@ -209,14 +218,37 @@
     if(error) throw error; return data;
   }
 
+  // Auto-email subscribers when a brand-new OPEN job is posted (best-effort; the
+  // API guards with jobs.notified_at so it can never double-send). Mirrors the
+  // events flow in Content Studio → api/notify-subscribers.js (type='job').
+  async function _notifyJobSubscribers(id){
+    try{
+      const { data:{ session } } = await sb.auth.getSession();
+      const token = session && session.access_token;
+      if(!token || id==null) return;
+      const r = await fetch('/api/notify-subscribers', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body: JSON.stringify({ type:'job', id:id })
+      });
+      const out = await r.json().catch(()=>({}));
+      if(window.showToast){
+        if(out && out.ok && out.sent) showToast('📧 Emailed '+out.sent+' subscriber'+(out.sent===1?'':'s')+' about this job','success');
+        else if(out && out.ok) { /* no subscribers yet — stay quiet */ }
+      }
+    }catch(_){/* never block the post on the email step */}
+  }
+
   if (typeof openCreateJobModal === 'function'){
     const _origOpenJob = openCreateJobModal;
-    openCreateJobModal = function(){ _editingJobSid=null; _origOpenJob(); if(window.cntFillJobRecruiters) cntFillJobRecruiters();
+    openCreateJobModal = function(){ if(window.cntCanEditJobs && !window.cntCanEditJobs()){ if(window.showToast) showToast('Pin-only access — you can’t post jobs','error'); return; } _editingJobSid=null; _origOpenJob(); if(window.cntFillJobRecruiters) cntFillJobRecruiters();
       ['job-client-max','job-base-salary','job-salary'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+      { var pn=document.getElementById('job-pinned'); if(pn) pn.checked=false; }
       if(window.cntCompUpdate) window.cntCompUpdate(); };
   }
 
   window.editJobPosition = function(sid){
+    if(window.cntCanEditJobs && !window.cntCanEditJobs()){ if(window.showToast) showToast('Pin-only access — you can’t edit jobs','error'); return; }
     let job=null;
     for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===sid); if(j){job=j;break;} }
     if(!job) return;
@@ -233,6 +265,7 @@
     { const hs=document.getElementById('job-hide-salary'); if(hs) hs.checked=!!job.hide_salary; }
     if(window.cntCompUpdate) window.cntCompUpdate();
     document.getElementById('job-priority').value=(job.priority||'normal').toLowerCase();
+    { const pn=document.getElementById('job-pinned'); if(pn) pn.checked=!!job.pinned; }
     { const et=document.getElementById('job-employment'); if(et) et.value=job.employment_type||'Full-Time';
       const dl=document.getElementById('job-deadline'); if(dl) dl.value=(job.deadline||'').slice(0,10); }
     document.getElementById('job-about').value=job.about||'';
@@ -256,6 +289,7 @@
   };
 
   window.deleteJobPosition = async function(sid){
+    if(window.cntCanEditJobs && !window.cntCanEditJobs()){ if(window.showToast) showToast('Pin-only access — you can’t remove jobs','error'); return; }
     if(!sb) return;
     let found=null, acc=null;
     for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===sid); if(j){found=j;acc=k;break;} }
@@ -271,6 +305,7 @@
   if (typeof handleJobSubmit === 'function'){
     const _origJobSubmit = handleJobSubmit;
     handleJobSubmit = function(e){
+      if(window.cntCanEditJobs && !window.cntCanEditJobs()){ if(e&&e.preventDefault)e.preventDefault(); if(window.showToast) showToast('Pin-only access — you can’t save jobs','error'); return; }
       const editingSid = _editingJobSid;
       // ── Salary cap: hard business rule. Require Base + Client Maximum, and
       // never allow the base (or the generated range) to exceed the client max.
@@ -302,7 +337,8 @@
         contract_template: (document.getElementById('job-contract')||{}).value || null,
         expected_skills: (document.getElementById('job-skills')||{}).value || null,
         interviewers: (document.getElementById('job-interviewers')||{}).value || null,
-        hide_salary: !!(document.getElementById('job-hide-salary')||{}).checked
+        hide_salary: !!(document.getElementById('job-hide-salary')||{}).checked,
+        pinned: !!(document.getElementById('job-pinned')||{}).checked
       };
       // The Published toggle is the single source of truth for whether the
       // position is live on the website (open) or taken down (paused).
@@ -311,7 +347,7 @@
       if (sb && job.role && job.client){
         (async ()=>{
           try{
-            const _mem={role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status,department:job.department||'',industry:job.industry||'',working_schedule:job.working_schedule||'',contract_template:job.contract_template||'',expected_skills:job.expected_skills||'',interviewers:job.interviewers||'',hide_salary:!!job.hide_salary,base_salary:job.base_salary,client_max_salary:job.client_max_salary};
+            const _mem={role:job.role,account:job.client,location:job.location,needed:job.openings,salary:job.salary_range||'',priority:job.priority,about:job.about||'',responsibilities:job.responsibilities||'',must_have:job.must_have||'',nice_to_have:job.nice_to_have||'',we_offer:job.we_offer||'',employment_type:job.employment_type,recruiter:job.recruiter||'',deadline:job.deadline||'',status:job.status,department:job.department||'',industry:job.industry||'',working_schedule:job.working_schedule||'',contract_template:job.contract_template||'',expected_skills:job.expected_skills||'',interviewers:job.interviewers||'',hide_salary:!!job.hide_salary,base_salary:job.base_salary,client_max_salary:job.client_max_salary,pinned:!!job.pinned};
             if(editingSid){
               await _jobsUpdate(job,editingSid);
               for(const k of Object.keys(jobDatabase)){ const j=jobDatabase[k].find(x=>x._sid===editingSid); if(j){ Object.assign(j,_mem); break; } }
@@ -319,10 +355,13 @@
             } else {
               const { data } = await sb.from('jobs').select('id').eq('role',job.role).eq('client',job.client).eq('location',job.location).limit(1);
               let sid;
+              let _fresh=false;
               if (data && data.length){ await _jobsUpdate(job,data[0].id); sid=data[0].id; }
-              else { const ins=await _jobsInsert(job); sid=ins&&ins.id; }
+              else { const ins=await _jobsInsert(job); sid=ins&&ins.id; _fresh=true; }
               const arr=jobDatabase[job.client]||[]; const entry=arr.find(x=>x.role===job.role&&x.location===job.location&&!x._sid)||arr[arr.length-1]; if(entry&&sid){ entry._sid=sid; Object.assign(entry,_mem); }
               logAudit('job_post','job', sid, job.role+' · '+job.client); if(window.showToast) showToast('Posted to website careers page','success');
+              // Brand-new + live on the site → notify job-alert subscribers.
+              if(_fresh && sid && job.status==='open') _notifyJobSubscribers(sid);
             }
             renderAll(); if(typeof renderJobPositions==='function') renderJobPositions();
           }catch(err){ console.error('job sync',err); if(window.showToast) showToast('Saved, but website sync failed: '+(err.message||''),'error'); }
@@ -1041,8 +1080,8 @@
   const ROLE_MODULES = {
     super_admin:            ['dashboard','request','applications','job','talent-pool','interviews','onboarding','reports','settings'],
     account_officer:        ['dashboard','request','applications','reports'],
-    recruitment_manager:    ['dashboard','request','applications','reports'],
-    recruitment_supervisor: ['dashboard','request','applications','interviews'],
+    recruitment_manager:    ['dashboard','request','applications','job','reports'],
+    recruitment_supervisor: ['dashboard','request','applications','job','interviews'],
     recruiter:              ['dashboard','applications','job','talent-pool','interviews','onboarding'],
   };
   function roleLabel(r){ return ROLE_LABELS[r] || (r||'User'); }
@@ -2167,6 +2206,7 @@
 
   // Publish / unpublish a job to the website (status open<->closed)
   window.cntTogglePublish=function(accId,sid,role,location){
+    if(window.cntCanEditJobs && !window.cntCanEditJobs()){ if(window.showToast) showToast('Pin-only access — you can’t publish/unpublish','error'); return; }
     const arr=jobDatabase[accId]||[];
     const job=arr.find(j=>(sid&&String(j._sid)===String(sid))||(j.role===role&&j.location===location));
     if(!job) return;
@@ -2174,6 +2214,25 @@
     if(sb && job._sid){ sb.from('jobs').update({ status:job.status }).eq('id',job._sid).then(({error})=>{ if(error){ console.error('publish',error); if(window.showToast) showToast('Publish sync failed','error'); } }); }
     logAudit(job.status==='closed'?'job_unpublish':'job_publish','job',job._sid||accId,(job.role||'')+' · '+(job.account||accId));
     if(window.showToast) showToast(job.status==='closed'?'Unpublished from website':'Published to website careers page','success');
+    if(typeof renderJobPositions==='function') renderJobPositions();
+  };
+
+  // Pin a priority job to the top of the public careers page (and homepage).
+  // Persists to jobs.pinned; rolls back if the DB rejects (migration not applied).
+  window.cntTogglePin=function(accId,sid,role,location){
+    const arr=jobDatabase[accId]||[];
+    const job=arr.find(j=>(sid&&String(j._sid)===String(sid))||(j.role===role&&j.location===location));
+    if(!job) return;
+    job.pinned=!job.pinned;
+    if(sb && job._sid){
+      sb.from('jobs').update({ pinned:job.pinned }).eq('id',job._sid).then(({error})=>{
+        if(error){ job.pinned=!job.pinned; console.error('pin',error);
+          if(window.showToast) showToast('Pin didn’t save — run the pinned-jobs migration','error');
+          if(typeof renderJobPositions==='function') renderJobPositions(); }
+      });
+    }
+    logAudit(job.pinned?'job_pin':'job_unpin','job',job._sid||accId,(job.role||'')+' · '+(job.account||accId));
+    if(window.showToast) showToast(job.pinned?'Pinned to top of careers page':'Unpinned','success');
     if(typeof renderJobPositions==='function') renderJobPositions();
   };
 

@@ -17,8 +17,12 @@ const TYPES = {
   '.js':   'text/javascript; charset=utf-8',
   '.css':  'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.svg':  'image/svg+xml',
   '.png':  'image/png',
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
   '.ico':  'image/x-icon',
 };
 
@@ -29,6 +33,8 @@ const server = http.createServer((req, res) => {
   // the static shell so job/event share URLs work in local dev + E2E too.
   else if (rel === '/job') rel = '/careers.html';
   else if (rel === '/event' || rel === '/event.html') rel = '/event-shell.html';
+  // Content Studio was renamed from events-admin — keep the old path working.
+  else if (rel === '/events-admin' || rel === '/events-admin.html') rel = '/content-studio.html';
   // Emulate Vercel's cleanUrls: /careers -> /careers.html when the file exists.
   else if (!path.extname(rel)) {
     try { if (fs.existsSync(path.join(ROOT, rel + '.html'))) rel = rel + '.html'; } catch (_) {}
@@ -37,8 +43,23 @@ const server = http.createServer((req, res) => {
   const filePath = path.normalize(path.join(ROOT, rel));
   if (!filePath.startsWith(ROOT)) { res.writeHead(403); res.end('Forbidden'); return; }
   fs.readFile(filePath, (err, buf) => {
-    if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found'); return; }
-    res.writeHead(200, { 'Content-Type': TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream' });
+    if (err) {
+      // Serve the custom 404 page (mirrors Vercel serving /404.html), else plain text.
+      fs.readFile(path.join(ROOT, '404.html'), (e2, page) => {
+        if (e2) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found'); return; }
+        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+        res.end(page);
+      });
+      return;
+    }
+    // Dev server: never let the browser cache assets, so edits to shared files
+    // (site-chrome.css/js, etc.) always show on reload without a hard refresh.
+    res.writeHead(200, {
+      'Content-Type': TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
     res.end(buf);
   });
 });

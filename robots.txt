@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /ats.html
-Disallow: /events-admin.html
+Disallow: /content-studio
 Disallow: /client.html
 Disallow: /event-shell.html
 Disallow: /api/

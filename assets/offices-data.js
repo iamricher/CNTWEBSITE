@@ -1,7 +1,7 @@
 /* ── CNT offices — single source of truth for the directory + per-office pages ──
    To publish a satellite branch: fill its fields and set hasData:true. */
 window.CNT_REGIONS = [
-  { key:'main',     label:'Main Branch' },
+  { key:'main',     label:'Metro Manila' },
   { key:'luzon',    label:'Luzon' },
   { key:'visayas',  label:'Visayas' },
   { key:'mindanao', label:'Mindanao' }

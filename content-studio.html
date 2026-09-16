@@ -367,6 +367,15 @@
     label{display:block;font-size:.66rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
     input,textarea,select{width:100%;border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;font-family:inherit;font-size:.88rem;color:var(--ink);background:#fff;transition:border-color .15s,box-shadow .15s}
     select{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+    .hours-ed{display:grid;gap:8px}
+    .hrow{display:grid;grid-template-columns:88px 1fr 14px 1fr auto;align-items:center;gap:8px}
+    .hrow .hd{font-size:.82rem;font-weight:700;color:var(--sub,#4A4A4A)}
+    .hrow select{padding:8px 28px 8px 10px;font-size:.82rem;background-position:right 8px center}
+    .hrow .hdash{color:var(--faint,#9CA3AF);text-align:center}
+    .hrow .hcl{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted,#6B7280);white-space:nowrap;cursor:pointer;margin:0}
+    .hrow .hcl input{width:15px;height:15px;accent-color:var(--red);margin:0;flex:none}
+    .hrow.closed .ho,.hrow.closed .hc{opacity:.35;pointer-events:none}
+    @media(max-width:600px){ .hrow{grid-template-columns:1fr 14px 1fr} .hrow .hd{grid-column:1/-1;margin-bottom:2px} .hrow .hcl{grid-column:1/-1;margin-top:4px} }
     input::placeholder,textarea::placeholder{color:#AEB6C2}
     input:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.12)}
     textarea{resize:vertical;line-height:1.55}
@@ -377,7 +386,22 @@
     .chk{display:flex;align-items:flex-start;gap:10px;font-size:.84rem;font-weight:600;color:var(--sub);cursor:pointer;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:var(--radius-sm);padding:12px 14px}
     .chk input{width:17px;height:17px;margin-top:1px;accent-color:var(--red);flex:none;cursor:pointer}
     .chk small{display:block;font-weight:500;color:var(--faint);font-size:.75rem;margin-top:2px}
-    #ev-preview img,#st-preview img{max-height:130px;border-radius:10px;margin-top:10px;border:1px solid var(--line-soft)}
+    #ev-preview img,#st-preview img,#team-photo-prev img{max-height:130px;border-radius:10px;margin-top:10px;border:1px solid var(--line-soft)}
+    #team-photo-prev img{border-radius:50%;width:96px;height:96px;object-fit:cover;object-position:50% 20%;max-height:none}
+    #clients-logo-prev img{max-height:70px;width:auto;object-fit:contain;border-radius:8px;background:#fff;padding:8px 12px;border:1px solid var(--line-soft)}
+    /* Rich-text editor for legal pages — shows formatted text, hides HTML tags */
+    .rte-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+    .rte-btn{font:inherit;font-size:.78rem;font-weight:700;color:var(--sub);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;transition:.14s}
+    .rte-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-pale)}
+    .rte{border:1px solid var(--line);border-radius:10px;padding:16px 18px;max-height:50vh;overflow-y:auto;background:#fff;font-size:.92rem;line-height:1.65;color:var(--ink)}
+    .rte:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-pale)}
+    .rte h2{font-family:var(--display);font-size:1.05rem;font-weight:800;margin:1.2rem 0 .45rem;color:var(--ink)}
+    .rte h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 .5rem;font-weight:800}
+    .rte p{margin:0 0 .75rem}
+    .rte ul,.rte ol{margin:0 0 .85rem 1.25rem}
+    .rte li{margin-bottom:.32rem}
+    .rte a{color:var(--red);text-decoration:underline}
+    .rte strong,.rte b{font-weight:700;color:var(--ink)}
 
     /* ── Modal ── */
     .modal{position:fixed;inset:0;background:rgba(15,23,42,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto;z-index:60;animation:fade .18s ease}
@@ -393,9 +417,18 @@
     .modal .box-foot{padding:15px 22px;border-top:1px solid var(--line-soft);display:flex;justify-content:flex-end;gap:9px;background:var(--panel-2);border-radius:0 0 18px 18px}
 
     /* ── Auth (login / denied) ── */
-    .auth{padding:9vh 20px 40px}
+    /* Pre-auth screens use the same dimmed hero image as the website's hero. */
+    .auth{
+      min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px;
+      background:
+        radial-gradient(125% 120% at 50% 38%, transparent 0%, rgba(9,10,13,.5) 100%),
+        linear-gradient(180deg, rgba(9,10,13,.74) 0%, rgba(10,11,14,.54) 45%, rgba(9,10,13,.82) 100%),
+        url('/assets/img/hero_banner.jpg') center/cover no-repeat fixed;
+    }
     .auth-card{width:100%;max-width:404px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
-    .auth-top{padding:30px 30px 6px;text-align:center}
+    .auth-top{padding:36px 30px 8px;text-align:center}
+    .auth-logo{width:184px;height:auto;margin:0 auto 22px;display:block}
+    .auth-top h2{margin-top:0}
     .auth-badge{width:52px;height:52px;border-radius:15px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
     .auth-badge .material-icons-outlined{font-size:26px}
     .auth-top h2{font-family:var(--display);font-size:1.2rem;font-weight:800;letter-spacing:-.01em}
@@ -508,9 +541,9 @@
   <div id="login-view" class="auth" style="display:none;">
     <div class="auth-card">
       <div class="auth-top">
-        <div class="auth-badge"><span class="material-icons-outlined">lock</span></div>
+        <img class="auth-logo" src="/assets/img/cnt-logo.png" alt="CNT Promo &amp; Ads Specialists, Inc." />
         <h2>Content Studio</h2>
-        <p>Sign in with your super-admin account to manage the website's events and success stories.</p>
+        <p>Sign in to your account to continue</p>
       </div>
       <div class="auth-body">
         <form id="login-form">
@@ -546,12 +579,18 @@
         <div class="sidenav-item" id="nav-events" onclick="showView('events')"><span class="material-icons-outlined">campaign</span><span>Events &amp; Updates</span></div>
         <div class="sidenav-item" id="nav-stories" onclick="showView('stories')"><span class="material-icons-outlined">workspace_premium</span><span>Success Stories</span></div>
         <div class="sidenav-item" id="nav-testimonials" onclick="showView('testimonials')"><span class="material-icons-outlined">format_quote</span><span>Testimonials</span></div>
+        <div class="sidenav-item" id="nav-faq" onclick="showView('faq')"><span class="material-icons-outlined">help_outline</span><span>FAQ</span></div>
+        <div class="sidenav-item" id="nav-team" onclick="showView('team')"><span class="material-icons-outlined">groups</span><span>Team</span></div>
+        <div class="sidenav-item" id="nav-clients" onclick="showView('clients')"><span class="material-icons-outlined">domain</span><span>Clients</span></div>
+        <div class="sidenav-item" id="nav-services" onclick="showView('services')"><span class="material-icons-outlined">design_services</span><span>Services</span></div>
         <div class="sidenav-item" id="nav-locations" onclick="showView('locations')"><span class="material-icons-outlined">place</span><span>Locations</span></div>
+        <div class="sidenav-item" id="nav-legal" onclick="showView('legal')"><span class="material-icons-outlined">gavel</span><span>Legal</span></div>
         <p class="nav-label" style="margin-top:14px">Inbox</p>
         <div class="sidenav-item" id="nav-messages" onclick="showView('messages')"><span class="material-icons-outlined">mail</span><span>Messages</span><span class="nav-count" id="nav-msg-count" style="display:none"></span></div>
         <div class="sidenav-item" id="nav-subscribers" onclick="showView('subscribers')"><span class="material-icons-outlined">group</span><span>Subscribers</span></div>
         <p class="nav-label" style="margin-top:14px">System</p>
         <div class="sidenav-item" id="nav-activity" onclick="showView('activity')"><span class="material-icons-outlined">history</span><span>Audit trail</span></div>
+        <div class="sidenav-item" id="nav-users" onclick="showView('users')" style="display:none"><span class="material-icons-outlined">manage_accounts</span><span>Users</span></div>
       </aside>
 
       <main class="content">
@@ -562,6 +601,7 @@
             <div class="an-controls">
               <label class="an-pick"><span class="material-icons-outlined">calendar_month</span>
                 <select id="an-preset" onchange="anPreset()">
+                  <option value="today">Today</option>
                   <option value="7">Last 7 days</option>
                   <option value="14">Last 14 days</option>
                   <option value="30" selected>Last 30 days</option>
@@ -711,6 +751,42 @@
           <div class="card"><div id="ts-list"><div class="muted">Loading…</div></div></div>
         </section>
 
+        <!-- FAQ -->
+        <section id="view-faq" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>FAQ</h1><p>Questions &amp; answers shown on the public <b>/faq</b> page. Drag to reorder.</p></div>
+            <button class="btn" onclick="faqForm()"><span class="material-icons-outlined">add</span>New question</button>
+          </div>
+          <div class="card"><div id="faq-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- TEAM -->
+        <section id="view-team" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Team</h1><p>Leadership shown under “The people behind CNT” on the <b>/about</b> page. Drag to reorder.</p></div>
+            <button class="btn" onclick="teamForm()"><span class="material-icons-outlined">add</span>New member</button>
+          </div>
+          <div class="card"><div id="team-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- CLIENTS -->
+        <section id="view-clients" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Clients</h1><p>Logos in the “Trusted by Industry Leaders” marquee on the homepage. Drag to reorder.</p></div>
+            <button class="btn" onclick="clientsForm()"><span class="material-icons-outlined">add</span>New client</button>
+          </div>
+          <div class="card"><div id="clients-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- SERVICES -->
+        <section id="view-services" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Services</h1><p>Your service detail pages and the services overview cards. Drag to reorder.</p></div>
+            <button class="btn" onclick="svForm()"><span class="material-icons-outlined">add</span>New service</button>
+          </div>
+          <div class="card"><div id="services-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
         <!-- LOCATIONS -->
         <section id="view-locations" class="view" style="display:none;">
           <div class="page-head">
@@ -718,6 +794,16 @@
             <button class="btn" onclick="ofForm()"><span class="material-icons-outlined">add</span>New location</button>
           </div>
           <div class="card"><div id="of-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- LEGAL -->
+        <section id="view-legal" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Legal</h1><p>Edit the <b>/privacy</b> and <b>/terms</b> pages. Saved changes go live immediately; each page shows its built-in copy until you save.</p></div>
+          </div>
+          <div class="card">
+            <div id="legal-list"><div class="muted">Loading…</div></div>
+          </div>
         </section>
 
         <!-- MESSAGES -->
@@ -748,6 +834,27 @@
             <button class="btn btn-ghost" onclick="auLoad()"><span class="material-icons-outlined">refresh</span>Refresh</button>
           </div>
           <div class="card"><div id="au-list"><div class="muted">Loading…</div></div></div>
+        </section>
+
+        <!-- USERS (Content Studio logins — super_admin only) -->
+        <section id="view-users" class="view" style="display:none;">
+          <div class="page-head">
+            <div><h1>Users</h1><p>Content Studio logins. These are separate from the ATS — Content Managers can edit the website but cannot access the recruitment system.</p></div>
+            <button class="btn" onclick="cuToggleForm()"><span class="material-icons-outlined">person_add</span>Add Content Manager</button>
+          </div>
+          <div class="card" id="cu-form-card" style="display:none;margin-bottom:16px;">
+            <div class="field-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="field"><label>Email</label><input id="cu-email" type="email" autocomplete="off" placeholder="name@cntpromoads.com"></div>
+              <div class="field"><label>Temporary password</label><input id="cu-pass" type="text" autocomplete="off" placeholder="min 6 characters"></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+              <button class="btn" id="cu-create" onclick="cuCreate()"><span class="material-icons-outlined">check</span>Create login</button>
+              <button class="btn btn-ghost" onclick="cuToggleForm()">Cancel</button>
+              <span id="cu-msg" style="font-size:.85rem;"></span>
+            </div>
+            <p class="muted" style="font-size:.76rem;margin-top:10px;">They sign in at <b>/content-studio</b> with this email + password. Ask them to change the password after first login.</p>
+          </div>
+          <div class="card"><div id="cu-list"><div class="muted">Loading…</div></div></div>
         </section>
       </main>
     </div>
@@ -780,6 +887,7 @@
           <p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Leave empty to publish now. Set a future time to keep the post hidden until then.</p>
         </div>
         <label class="chk"><input type="checkbox" id="ev-published" checked><span>Published<small>Visible on the website. Uncheck to save as a draft.</small></span></label>
+        <label class="chk"><input type="checkbox" id="ev-notify" checked><span>Email subscribers<small>Send this post as a job-alert email to everyone subscribed. Sent once per post.</small></span></label>
       </div>
       <div class="box-foot"><button class="btn btn-ghost" onclick="evClose()">Cancel</button><button class="btn" onclick="evSave()"><span class="material-icons-outlined">check</span>Save post</button></div>
     </div>
@@ -823,21 +931,143 @@
     </div>
   </div>
 
+  <!-- FAQ MODAL -->
+  <div class="modal" id="faq-modal">
+    <div class="box">
+      <div class="box-head"><h3 id="faq-modal-title">New question</h3><button class="x" onclick="faqClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <input type="hidden" id="faq-id">
+        <div class="field"><label>Question *</label><input id="faq-question" placeholder="Is it free to apply for a job through CNT?"></div>
+        <div class="field"><label>Answer *</label><textarea id="faq-answer" rows="5" placeholder="Yes. Applying through CNT is 100% free…"></textarea>
+          <small class="hint" style="display:block;margin-top:5px;font-size:.72rem;color:var(--faint)">Basic HTML is allowed for links &amp; bold — e.g. &lt;a href="/careers"&gt;Careers&lt;/a&gt;, &lt;b&gt;free&lt;/b&gt;.</small></div>
+        <label class="chk"><input type="checkbox" id="faq-published" checked><span>Published<small>Visible on the /faq page. Uncheck to save as a draft.</small></span></label>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="faqClose()">Cancel</button><button class="btn" onclick="faqSave()"><span class="material-icons-outlined">check</span>Save question</button></div>
+    </div>
+  </div>
+
+  <!-- TEAM MODAL -->
+  <div class="modal" id="team-modal">
+    <div class="box">
+      <div class="box-head"><h3 id="team-modal-title">New member</h3><button class="x" onclick="teamClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <div class="grid2">
+          <div class="field"><label>Name *</label><input id="team-name" placeholder="Atty. Cecilio Tobillo"></div>
+          <div class="field"><label>Role / title</label><input id="team-role" placeholder="President"></div>
+        </div>
+        <div class="field"><label>Photo</label>
+          <div id="team-photo-prev" class="img-prev" style="margin-bottom:8px;"></div>
+          <label class="up"><span class="material-icons-outlined">upload</span>Upload photo<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'team-photo','team-photo-prev')"></label>
+          <input id="team-photo" type="hidden">
+        </div>
+        <div class="field"><label>Photo focus <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— which part of the photo the circle keeps</small></label>
+          <select id="team-photo-pos" onchange="teamPreviewPos()">
+            <option value="50% 20%">Face / top — best for portraits</option>
+            <option value="50% 50%">Center</option>
+            <option value="50% 80%">Bottom</option>
+          </select>
+        </div>
+        <div class="field"><label>Short bio <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— optional, one line shown under the name on /about</small></label>
+          <textarea id="team-bio" rows="2" placeholder="e.g. Leads company-wide IT, security and systems."></textarea>
+        </div>
+        <label class="chk"><input type="checkbox" id="team-published" checked><span>Published<small>Visible on the /about page. Uncheck to save as a draft.</small></span></label>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="teamClose()">Cancel</button><button class="btn" onclick="teamSave()"><span class="material-icons-outlined">check</span>Save member</button></div>
+    </div>
+  </div>
+
+  <!-- CLIENT MODAL -->
+  <div class="modal" id="clients-modal">
+    <div class="box">
+      <div class="box-head"><h3 id="clients-modal-title">New client</h3><button class="x" onclick="clientsClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <div class="field"><label>Client name *</label><input id="clients-name" placeholder="e.g. Universal Robina Corporation"></div>
+        <div class="field"><label>Logo <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— PNG with a transparent background works best</small></label>
+          <div id="clients-logo-prev" class="img-prev" style="margin-bottom:8px;"></div>
+          <label class="up"><span class="material-icons-outlined">upload</span>Upload logo<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'clients-logo','clients-logo-prev')"></label>
+          <input id="clients-logo" type="hidden">
+        </div>
+        <label class="chk"><input type="checkbox" id="clients-published" checked><span>Published<small>Visible in the homepage client marquee. Uncheck to hide.</small></span></label>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="clientsClose()">Cancel</button><button class="btn" onclick="clientsSave()"><span class="material-icons-outlined">check</span>Save client</button></div>
+    </div>
+  </div>
+
+  <!-- SERVICE MODAL -->
+  <div class="modal" id="sv-modal">
+    <div class="box" style="max-width:760px;">
+      <div class="box-head"><h3 id="sv-modal-title">New service</h3><button class="x" onclick="svClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <div class="field"><label>Title *</label><input id="sv-title" placeholder="e.g. Training &amp; Development"></div>
+        <div class="field"><label>Highlight word <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— a word inside the title shown in red (optional)</small></label><input id="sv-red" placeholder="e.g. Development"></div>
+        <div class="field"><label>Tagline <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— hero sub-line</small></label><textarea id="sv-tagline" rows="2" placeholder="One-line summary shown under the title."></textarea></div>
+        <div class="field"><label>Overview <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— “What this covers” paragraph</small></label><textarea id="sv-overview" rows="4" placeholder="A short paragraph describing the service."></textarea></div>
+        <div class="field"><label>Photo <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— optional; shown behind the hero</small></label>
+          <div id="sv-image-prev" class="img-prev" style="margin-bottom:8px;"></div>
+          <label class="up"><span class="material-icons-outlined">upload</span>Upload photo<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'sv-image','sv-image-prev')"></label>
+          <input id="sv-image" type="hidden">
+        </div>
+        <div class="field"><label>Gallery photos <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— shown in the “See it in action” section on the service page</small></label>
+          <label class="up"><span class="material-icons-outlined">add_photo_alternate</span>Add photos<input type="file" accept="image/*" multiple style="display:none;" onchange="svGalleryUpload(this)"></label>
+          <div id="sv-gallery" class="gallery-grid"></div>
+        </div>
+        <div class="field"><label>What’s included — highlights</label>
+          <div id="sv-highlights"></div>
+          <button type="button" class="btn btn-ghost" onclick="svAddHl()" style="margin-top:8px;"><span class="material-icons-outlined">add</span>Add highlight</button>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Who it’s for <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— one per line (audience chips)</small></label><textarea id="sv-who" rows="4" placeholder="Boards &amp; CEOs&#10;Fast-scaling companies&#10;Confidential replacements"></textarea></div>
+          <div class="field"><label>Scope — what’s covered <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— one per line</small></label><textarea id="sv-scope" rows="4" placeholder="Role scoping &amp; success profile&#10;Market mapping &amp; outreach&#10;Assessment &amp; referencing"></textarea></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>How it helps — For your business <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— one per line</small></label><textarea id="sv-client" rows="4" placeholder="Avoid the cost of a mis-hire&#10;A shortlist you can decide from"></textarea></div>
+          <div class="field"><label>How it helps — For candidates <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— one per line</small></label><textarea id="sv-applicant" rows="4" placeholder="A clear picture of the role&#10;A respectful, professional process"></textarea></div>
+        </div>
+        <div class="field"><label>By the numbers <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— one per line, format: value | label. Leave blank to use the default company stats.</small></label><textarea id="sv-stats" rows="3" placeholder="30+ | Years in manpower services&#10;10,000+ | Workers deployed nationwide&#10;Nationwide | Luzon · Visayas · Mindanao"></textarea></div>
+        <div class="grid2">
+          <label class="chk" style="align-self:end;"><input type="checkbox" id="sv-published" checked><span>Published<small>Visible on the website. Uncheck to hide.</small></span></label>
+        </div>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="svClose()">Cancel</button><button class="btn" onclick="svSave()"><span class="material-icons-outlined">check</span>Save service</button></div>
+    </div>
+  </div>
+
+  <!-- LEGAL MODAL -->
+  <div class="modal" id="legal-modal">
+    <div class="box" style="max-width:840px;">
+      <div class="box-head"><h3 id="legal-modal-title">Edit page</h3><button class="x" onclick="legalClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
+      <div class="box-body">
+        <div class="field"><label>&ldquo;Last updated&rdquo; line</label><input id="legal-updated" placeholder="Last updated: 14 August 2026"></div>
+        <div class="field"><label>Page content <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">&mdash; edit the text directly; use the buttons for headings, bold, lists and links</small></label>
+          <div class="rte-toolbar">
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault()" onclick="rteCmd('formatBlock','H2')" title="Section heading">Heading</button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault()" onclick="rteCmd('formatBlock','P')" title="Normal text">Text</button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault()" onclick="rteCmd('bold')" title="Bold"><b>B</b></button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault()" onclick="rteCmd('insertUnorderedList')" title="Bullet list">&bull; List</button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault()" onclick="rteLink()" title="Add link">Link</button>
+            <button type="button" class="rte-btn" onmousedown="event.preventDefault()" onclick="rteCmd('unlink')" title="Remove link">Unlink</button>
+          </div>
+          <div id="legal-body" class="rte" contenteditable="true"></div>
+        </div>
+        <p id="legal-hint" class="muted" style="font-size:.78rem;margin-top:-2px;"></p>
+      </div>
+      <div class="box-foot"><button class="btn btn-ghost" onclick="legalClose()">Cancel</button><button class="btn" onclick="legalSave()"><span class="material-icons-outlined">check</span>Save page</button></div>
+    </div>
+  </div>
+
   <!-- OFFICE / LOCATION MODAL -->
   <div class="modal" id="of-modal">
     <div class="box">
       <div class="box-head"><h3 id="of-modal-title">New location</h3><button class="x" onclick="ofClose()" aria-label="Close"><span class="material-icons-outlined">close</span></button></div>
       <div class="box-body">
         <input type="hidden" id="of-orig-slug">
-        <div class="grid2">
-          <div class="field"><label>Branch name *</label><input id="of-name" placeholder="e.g. Cebu"></div>
-          <div class="field"><label>URL id (slug) *</label><input id="of-slug" placeholder="cebu"><p style="font-size:.72rem;color:var(--faint);margin-top:5px;">Used in the page address: /office?id=<b>slug</b>. Lowercase, no spaces.</p></div>
-        </div>
+        <div class="field"><label>Branch name *</label><input id="of-name" placeholder="e.g. Cebu"></div>
+        <input type="hidden" id="of-slug">
         <div class="grid2">
           <div class="field"><label>Region</label>
-            <select id="of-region"><option value="main">Main Branch</option><option value="luzon">Luzon</option><option value="visayas">Visayas</option><option value="mindanao">Mindanao</option></select>
+            <select id="of-region"><option value="main">Metro Manila</option><option value="luzon">Luzon</option><option value="visayas">Visayas</option><option value="mindanao">Mindanao</option></select>
           </div>
-          <div class="field"><label>Role label</label><input id="of-role" list="of-roles" placeholder="Satellite Branch"><datalist id="of-roles"><option>Head Office</option><option>Satellite Branch</option></datalist></div>
+          <div class="field"><label>Role label</label><select id="of-role"><option>Head Office</option><option>Satellite Branch</option></select></div>
         </div>
 
         <div class="field"><label>Pin location — click the map or drag the marker</label>
@@ -852,17 +1082,16 @@
         <div class="field"><label>Address</label><textarea id="of-address" rows="2" placeholder="Building, street, city, ZIP, Philippines"></textarea></div>
         <div class="grid2">
           <div class="field"><label>Contact person (optional)</label><input id="of-person" placeholder="Leave blank for walk-in / online"></div>
-          <div class="field"><label>Phone — display</label><input id="of-phone" placeholder="(032) 123-4567"></div>
+          <div class="field"><label>Phone</label><input id="of-phone" placeholder="09XX XXX XXXX or (032) 123-4567"></div>
         </div>
-        <div class="grid2">
-          <div class="field"><label>Phone — dial (tel:)</label><input id="of-tel" placeholder="+6332123 4567"></div>
-          <div class="field"><label>Email</label><input id="of-email" placeholder="branch@cntpromoads.com"></div>
-        </div>
-        <div class="field"><label>Email note (optional)</label><input id="of-email-note" placeholder="Temporary — a dedicated branch email is coming soon."></div>
-        <div class="field"><label>Office hours</label><textarea id="of-hours" rows="2" placeholder="Monday – Friday: 8:30 AM – 6:30 PM&#10;Saturday: 8:30 AM – 3:00 PM"></textarea></div>
-        <div class="grid2">
-          <div class="field"><label>Google Maps link</label><input id="of-maps" placeholder="https://maps.app.goo.gl/…"></div>
-          <div class="field"><label>Embedded-map query</label><input id="of-mapq" placeholder="Building name, street, city"></div>
+        <div class="field"><label>Email</label><input id="of-email" placeholder="branch@cntpromoads.com"></div>
+        <div class="field"><label>Office hours</label>
+          <div id="of-hours-editor" class="hours-ed">
+            <div class="hrow" data-key="wk"><span class="hd">Mon – Fri</span><select class="ho"></select><span class="hdash">–</span><select class="hc"></select><label class="hcl"><input type="checkbox">Closed</label></div>
+            <div class="hrow" data-key="sat"><span class="hd">Saturday</span><select class="ho"></select><span class="hdash">–</span><select class="hc"></select><label class="hcl"><input type="checkbox">Closed</label></div>
+            <div class="hrow" data-key="sun"><span class="hd">Sunday</span><select class="ho"></select><span class="hdash">–</span><select class="hc"></select><label class="hcl"><input type="checkbox">Closed</label></div>
+          </div>
+          <input type="hidden" id="of-hours">
         </div>
 
         <div class="field"><label>Cover photo — the hero banner (blends into the map)</label>
@@ -923,7 +1152,7 @@
   <script>
   (function(){
     var sb = window.getSupabase && window.getSupabase();
-    var _ev = [], _st = [], _ts = [], _msg = [], _sub = [], _evImages = [];
+    var _ev = [], _st = [], _ts = [], _msg = [], _sub = [], _evImages = [], _faq = [], _team = [], _clients = [], _legal = {};
     var _of = [], _ofImages = [], _ofMap = null, _ofMarker = null; // offices/locations
     var _pvSeries = null, _pvDays = null; // per-path 30-day view series for post analytics
     var _actor = { email:null, role:null };
@@ -938,14 +1167,15 @@
     var isScheduled = function(ev){ return ev && ev.publish_at && new Date(ev.publish_at) > new Date(); };
     var esc = function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
     var show = function(id){
-      ['login-view','denied-view','manager-view'].forEach(function(v){ document.getElementById(v).style.display = v===id?'block':'none'; });
+      ['login-view','denied-view','manager-view'].forEach(function(v){ document.getElementById(v).style.display = v===id ? (v==='manager-view'?'block':'flex') : 'none'; });
       var acct = document.getElementById('topbar-account'); if(acct) acct.style.display = (id==='manager-view')?'flex':'none';
+      var bar = document.querySelector('.topbar'); if(bar) bar.style.display = (id==='manager-view')?'':'none';
     };
     var toast = function(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(function(){t.classList.remove('on');},2600); };
     var SKELETON = (function(){ var r='<div class="sk-row"><div class="sk sk-thumb"></div><div style="flex:1"><div class="sk sk-line" style="width:42%"></div><div class="sk sk-line" style="width:24%;height:9px;margin-top:9px"></div></div></div>'; return r+r+r; })();
 
     window.showView = function(v){
-      ['dashboard','events','stories','testimonials','locations','messages','subscribers','activity'].forEach(function(n){
+      ['dashboard','events','stories','testimonials','faq','team','clients','services','locations','legal','messages','subscribers','activity','users'].forEach(function(n){
         var view=document.getElementById('view-'+n); if(view) view.style.display = n===v?'block':'none';
         var nav=document.getElementById('nav-'+n); if(nav) nav.classList.toggle('active', n===v);
       });
@@ -957,25 +1187,95 @@
       if(!sb){ show('denied-view'); return; }
       var s = await sb.auth.getSession();
       if(!s.data.session){ show('login-view'); return; }
-      var r = await sb.rpc('cnt_is_super_admin');
+      // Content Studio = super_admin OR content_manager (separate from the ATS).
+      var r = await sb.rpc('cnt_can_manage_content');
       if(r.error || !r.data){ show('denied-view'); return; }
-      _actor.email = (s.data.session.user && s.data.session.user.email) || null; _actor.role = 'super_admin';
-      show('manager-view'); evLoad(); stLoad(); tsLoad(); ofLoad(); msgLoad(); subLoad(); anLoad(); auLoad(); loadMetrics();
+      var sup = await sb.rpc('cnt_is_super_admin');
+      var isSuper = !sup.error && !!sup.data;
+      window._cntIsSuper = isSuper;
+      _actor.email = (s.data.session.user && s.data.session.user.email) || null;
+      _actor.role = isSuper ? 'super_admin' : 'content_manager';
+      // Anyone who can manage content (super_admin or content_manager) can also
+      // manage Content Studio logins.
+      var navUsers = document.getElementById('nav-users'); if(navUsers) navUsers.style.display = '';
+      show('manager-view'); evLoad(); stLoad(); tsLoad(); faqLoad(); teamLoad(); clientsLoad(); svLoad(); ofLoad(); legalLoad(); msgLoad(); subLoad(); anLoad(); auLoad(); loadMetrics();
+      cuLoad();
     }
+
+    // ── Users: Content Studio logins (super_admin only) ──
+    window.cuToggleForm = function(){ var c=document.getElementById('cu-form-card'); if(!c) return; c.style.display = c.style.display==='none' ? 'block' : 'none'; var m=document.getElementById('cu-msg'); if(m) m.textContent=''; };
+    window.cuLoad = async function(){
+      var box=document.getElementById('cu-list'); if(!box) return;
+      box.innerHTML='<div class="muted">Loading…</div>';
+      var r = await sb.from('profiles').select('id,email,full_name,role,created_at').eq('role','content_manager').order('created_at',{ascending:false});
+      if(r.error){ box.innerHTML='<div class="muted">Could not load users: '+esc(r.error.message)+'</div>'; return; }
+      var rows=r.data||[];
+      if(!rows.length){ box.innerHTML='<div class="muted">No Content Managers yet. Add one to give someone access to Content Studio — without the ATS.</div>'; return; }
+      box.innerHTML = rows.map(function(u){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);">'
+          +'<div style="width:38px;height:38px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:700;flex:none;">'+esc((u.email||'?').slice(0,1).toUpperCase())+'</div>'
+          +'<div style="flex:1;min-width:0;"><b>'+esc(u.full_name||u.email||'—')+'</b><br><small class="muted">'+esc(u.email||'')+'</small></div>'
+          +'<span class="pill pill-live">Content Manager</span>'
+          +'<button class="btn btn-ghost" title="Remove Content Studio access" onclick="cuRevoke(\''+u.id+'\',\''+esc(u.email||'').replace(/\x27/g,"")+'\')"><span class="material-icons-outlined">block</span></button>'
+          +'</div>';
+      }).join('');
+    };
+    window.cuCreate = async function(){
+      var email=(document.getElementById('cu-email').value||'').trim();
+      var pass=(document.getElementById('cu-pass').value||'');
+      var msg=document.getElementById('cu-msg'); var btn=document.getElementById('cu-create');
+      var fail=function(t){ msg.style.color='#dc2626'; msg.textContent=t; };
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ fail('Enter a valid email.'); return; }
+      if(pass.length<6){ fail('Password must be at least 6 characters.'); return; }
+      btn.disabled=true; msg.style.color='var(--sub)'; msg.textContent='Creating…';
+      try{
+        var tmp=window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, { auth:{ persistSession:false, autoRefreshToken:false, storageKey:'cnt-cs-signup-tmp' } });
+        var res=await tmp.auth.signUp({ email:email, password:pass });
+        if(res.error) throw res.error;
+        var uid=res.data && res.data.user && res.data.user.id;
+        if(uid){ var pe=(await sb.from('profiles').update({ role:'content_manager' }).eq('id',uid)).error; if(pe) throw pe; }
+        logAudit('user_create','user', uid||email, email+' · content_manager');
+        msg.style.color='#16a34a'; msg.textContent='Created '+email+' as Content Manager.';
+        document.getElementById('cu-email').value=''; document.getElementById('cu-pass').value='';
+        cuLoad();
+      }catch(e){ fail((e.message||'Could not create user')+(/confirm/i.test(e.message||'')?' — turn off email confirmation in Supabase → Authentication.':'')); }
+      btn.disabled=false;
+    };
+    window.cuRevoke = async function(id,email){
+      if(!confirm('Remove Content Studio access for '+email+'?\n\nThey will no longer be able to sign in to Content Studio. (Their login is kept — you can restore access later by re-adding them.)')) return;
+      var r=await sb.from('profiles').update({ role:'pending' }).eq('id',id);
+      if(r.error){ toast('Failed: '+r.error.message); return; }
+      logAudit('user_revoke','user', id, email+' · content access removed');
+      toast('Access removed'); cuLoad();
+    };
 
     // shared image uploader → public event-images bucket
     window.imgUpload = async function(input, imgId, prevId){
       var f = input && input.files && input.files[0]; if(!f) return;
-      if(!/^image\//.test(f.type)){ toast('Please choose an image file.'); input.value=''; return; }
+      // The storage bucket only accepts these web-displayable formats. iPhone
+      // HEIC/HEIF photos pass the browser's "image/*" filter but the server
+      // rejects them — catch that here with a clear, actionable message.
+      var OK_IMG = ['image/jpeg','image/png','image/webp','image/gif'];
+      if(OK_IMG.indexOf((f.type||'').toLowerCase()) < 0){
+        toast('Use a JPG, PNG, WEBP or GIF. iPhone HEIC photos aren’t supported — export/share it as JPG first, or set Camera → Formats to “Most Compatible”.');
+        input.value=''; return;
+      }
       if(f.size>5*1048576){ toast('Image is larger than 5 MB.'); input.value=''; return; }
       var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
       var path='events/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
       toast('Uploading image…');
       var up = await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
-      if(up.error){ toast('Upload failed: '+up.error.message); return; }
+      if(up.error){
+        var msg = up.error.message||'';
+        if(/mime|content.?type|not supported/i.test(msg)) toast('That image format isn’t supported. Please use a JPG or PNG.');
+        else if(/row-level security|not authorized|unauthorized/i.test(msg)) toast('Not allowed to upload. Try signing out and back in.');
+        else toast('Upload failed: '+msg);
+        return;
+      }
       var url = sb.storage.from('event-images').getPublicUrl(path).data.publicUrl;
       document.getElementById(imgId).value = url;
       document.getElementById(prevId).innerHTML = '<img src="'+esc(url)+'" alt="">';
+      if(prevId==='team-photo-prev' && window.teamPreviewPos) teamPreviewPos();   // keep the chosen face/top crop
       toast('Image uploaded');
     };
 
@@ -1133,6 +1433,15 @@
       document.getElementById('ev-summary').value = ev.summary||'';
       document.getElementById('ev-body').value = ev.body||'';
       document.getElementById('ev-published').checked = id ? !!ev.published : true;
+      // Default ON for brand-new posts; OFF when editing (avoids re-blasting, and
+      // the API guards with notified_at anyway). Show "already sent" state on edit.
+      (function(){ var nf=document.getElementById('ev-notify'); if(!nf) return;
+        nf.checked = id ? false : true;
+        var lbl=nf.parentNode.querySelector('small');
+        if(lbl) lbl.textContent = (id && ev.notified_at)
+          ? 'Already emailed to subscribers on '+new Date(ev.notified_at).toLocaleDateString()+'. Re-sending is blocked.'
+          : 'Send this post as a job-alert email to everyone subscribed. Sent once per post.';
+      })();
       document.getElementById('ev-preview').innerHTML = ev.image_url?'<img src="'+esc(ev.image_url)+'" alt="">':'';
       document.getElementById('ev-publish-at').value = toLocalInput(ev.publish_at);
       _evImages = Array.isArray(ev.images) ? ev.images.slice() : [];
@@ -1148,11 +1457,38 @@
         images:_evImages, publish_at:fromLocalInput(document.getElementById('ev-publish-at').value),
         published:document.getElementById('ev-published').checked };
       if(!row.title){ toast('Title is required'); return; }
-      var res = id ? await sb.from('events').update(row).eq('id',id) : await sb.from('events').insert(row);
+      var res = id ? await sb.from('events').update(row).eq('id',id) : await sb.from('events').insert(row).select('id').single();
       if(res.error){ toast('Save failed: '+res.error.message); return; }
-      logAudit(id?'update':'create','event',id||null,row.title);
-      evClose(); evLoad(); toast(id?'Post updated':(row.publish_at && new Date(row.publish_at)>new Date() ? 'Post scheduled' : 'Post published'));
+      var newId = id || (res.data && res.data.id);
+      logAudit(id?'update':'create','event',newId||null,row.title);
+      evClose(); evLoad();
+      // Auto-notify subscribers of a freshly published post (best-effort; the API
+      // guards with notified_at so it can never double-send).
+      var wantNotify = document.getElementById('ev-notify') && document.getElementById('ev-notify').checked;
+      var future = row.publish_at && new Date(row.publish_at) > new Date();
+      if(wantNotify && row.published && !future && newId){
+        toast('Post published · emailing subscribers…');
+        var out = await notifySubscribers(newId);
+        if(out && out.already) toast('Already emailed for this post');
+        else if(out && out.ok) toast(out.sent ? ('📧 Emailed '+out.sent+' subscriber'+(out.sent===1?'':'s')) : 'Post published · no subscribers yet');
+        else toast('Post published · subscriber email will send once deployed');
+      } else {
+        toast(id?'Post updated':(future ? 'Post scheduled' : 'Post published'));
+      }
     };
+    async function notifySubscribers(eventId){
+      try{
+        var sess = await sb.auth.getSession();
+        var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+        if(!token) return { ok:false };
+        var r = await fetch('/api/notify-subscribers', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+          body: JSON.stringify({ event_id: eventId })
+        });
+        return await r.json().catch(function(){ return { ok:false }; });
+      }catch(e){ return { ok:false }; }
+    }
     window.evDelete = async function(id){
       var ev = _ev.filter(function(x){return x.id===id;})[0];
       if(!confirm('Delete "'+(ev?ev.title:'this post')+'" from the website?')) return;
@@ -1163,18 +1499,26 @@
     };
 
     // ── LOCATIONS / OFFICES ──
-    var OF_REGIONS = { main:'Main Branch', luzon:'Luzon', visayas:'Visayas', mindanao:'Mindanao' };
+    var OF_REGIONS = { main:'Metro Manila', luzon:'Luzon', visayas:'Visayas', mindanao:'Mindanao' };
     var PH_CENTER = [12.8797, 121.7740];
     function ofSlugify(s){ return (s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+    // ── Office-hours editor: typo-proof dropdowns → composed text ──
+    var OF_HLABEL={wk:'Monday – Friday',sat:'Saturday',sun:'Sunday'};
+    var OF_TIMES=(function(){ var a=[]; for(var h=0;h<24;h++){ for(var m=0;m<60;m+=30){ var ap=h<12?'AM':'PM',hh=h%12||12; a.push(hh+':'+(m<10?'0'+m:m)+' '+ap); } } return a; })();
+    function ofFillTimes(){ document.querySelectorAll('#of-hours-editor select').forEach(function(sel){ if(sel.options.length) return; sel.innerHTML='<option value="">—</option>'+OF_TIMES.map(function(t){return '<option>'+t+'</option>';}).join(''); }); }
+    function ofSetSel(sel,v){ for(var i=0;i<sel.options.length;i++){ if(sel.options[i].text===v){ sel.selectedIndex=i; return; } } }
+    function ofComposeHours(){ var out=[]; document.querySelectorAll('#of-hours-editor .hrow').forEach(function(r){ var days=OF_HLABEL[r.getAttribute('data-key')], closed=r.querySelector('.hcl input').checked, o=r.querySelector('.ho').value, c=r.querySelector('.hc').value; r.classList.toggle('closed',closed); if(closed) out.push(days+': Closed'); else if(o&&c) out.push(days+': '+o+' – '+c); }); var el=document.getElementById('of-hours'); if(el) el.value=out.join('\n'); }
+    function ofLoadHours(text){ ofFillTimes(); document.querySelectorAll('#of-hours-editor .hrow').forEach(function(r){ r.querySelector('.hcl input').checked=false; r.querySelector('.ho').value=''; r.querySelector('.hc').value=''; r.classList.remove('closed'); }); (text||'').split('\n').forEach(function(line){ line=line.trim(); var ci=line.indexOf(':'); if(ci<0) return; var lbl=line.slice(0,ci).toLowerCase(), val=line.slice(ci+1).trim(), key=/fri|weekday/.test(lbl)?'wk':(/sat/.test(lbl)?'sat':(/sun/.test(lbl)?'sun':null)); if(!key) return; var row=document.querySelector('#of-hours-editor .hrow[data-key="'+key+'"]'); if(!row) return; if(/closed/i.test(val)){ row.querySelector('.hcl input').checked=true; return; } var p=val.split(/\s*[–-]\s*/); if(p.length>=2){ ofSetSel(row.querySelector('.ho'),p[0].trim()); ofSetSel(row.querySelector('.hc'),p[1].trim()); } }); ofComposeHours(); }
+    (function(){ ofFillTimes(); var ed=document.getElementById('of-hours-editor'); if(ed) ed.addEventListener('change', ofComposeHours); })();
 
     async function ofLoad(){
       var el=document.getElementById('of-list'); if(!el) return; el.innerHTML=SKELETON;
-      var res = await sb.from('offices').select('*').order('sort_order',{ascending:true}).order('name',{ascending:true});
+      var res = await sb.from('offices').select('*').order('is_main',{ascending:false}).order('name',{ascending:true});
       if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
       _of = res.data||[];
       if(!_of.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">place</span></div><h3>No locations yet</h3><p>Add your head office and satellite branches.</p><button class="btn" onclick="ofForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Add your first location</button></div>'; return; }
       el.innerHTML=_of.map(function(o){
-        var photo = (Array.isArray(o.photos)&&o.photos[0]) ? o.photos[0] : '';
+        var photo = o.hero || (Array.isArray(o.photos)&&o.photos[0]) || '';
         var thumb = photo ? '<div class="thumb"><img src="'+esc(photo)+'" alt=""></div>'
           : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;"><span class="material-icons-outlined" style="color:var(--red)">'+(o.is_main?'apartment':'place')+'</span></div>';
         var pill = o.is_main ? '<span class="pill pill-live">Head office</span>'
@@ -1196,7 +1540,7 @@
     function ofEnsureMap(){
       if(_ofMap || !window.L) return;
       _ofMap = L.map('of-map',{scrollWheelZoom:true}).setView(PH_CENTER,5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'&copy; OpenStreetMap contributors'}).addTo(_ofMap);
+      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Tiles &copy; Esri'}).addTo(_ofMap);
       _ofMap.on('click',function(e){ ofSetPin(e.latlng.lat,e.latlng.lng,false); });
     }
     function ofPlaceMarker(lat,lng,recenter){
@@ -1226,8 +1570,10 @@
     window.ofGalleryRemove=function(i){ _ofImages.splice(i,1); renderOfGallery(); };
     window.ofGalleryUpload=async function(input){
       var files = input&&input.files?Array.prototype.slice.call(input.files):[]; if(!files.length) return;
-      toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
+      if(_ofImages.length>=9){ toast('Maximum of 9 photos in the gallery.'); input.value=''; return; }
+      toast('Uploading…');
       for(var i=0;i<files.length;i++){ var f=files[i];
+        if(_ofImages.length>=9){ toast('Gallery limit reached (9) — extra photos skipped.'); break; }
         if(!/^image\//.test(f.type)||f.size>5*1048576) continue;
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='offices/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
@@ -1250,12 +1596,8 @@
       document.getElementById('of-address').value = o.address||'';
       document.getElementById('of-person').value = o.person||'';
       document.getElementById('of-phone').value = o.phone||'';
-      document.getElementById('of-tel').value = o.tel||'';
       document.getElementById('of-email').value = o.email||'';
-      document.getElementById('of-email-note').value = o.email_note||'';
-      document.getElementById('of-hours').value = o.hours||'';
-      document.getElementById('of-maps').value = o.maps||'';
-      document.getElementById('of-mapq').value = o.mapq||'';
+      ofLoadHours(o.hours||'');
       document.getElementById('of-hasdata').checked = !!o.has_data;
       document.getElementById('of-main').checked = !!o.is_main;
       document.getElementById('of-visible').checked = slug ? !!o.visible : true;
@@ -1263,9 +1605,9 @@
       document.getElementById('of-hero-prev').innerHTML = o.hero?'<img src="'+esc(o.hero)+'" alt="">':'';
       _ofImages = Array.isArray(o.photos)?o.photos.slice():[];
       renderOfGallery();
-      // auto-fill slug from name only for NEW entries
-      var nameEl=document.getElementById('of-name'), slugEl=document.getElementById('of-slug');
-      nameEl.oninput = slug ? null : function(){ slugEl.value = ofSlugify(nameEl.value); };
+      // slug is automatic (hidden): keep the existing one on edit, derive from the
+      // branch name on save for a new location.
+      document.getElementById('of-slug').value = o.slug||'';
       document.getElementById('of-modal').classList.add('on');
       setTimeout(function(){
         ofEnsureMap();
@@ -1281,10 +1623,12 @@
     window.ofClose=function(){ document.getElementById('of-modal').classList.remove('on'); };
     window.ofSave=async function(){
       var origSlug=document.getElementById('of-orig-slug').value;
-      var slug = ofSlugify(document.getElementById('of-slug').value);
       var name = document.getElementById('of-name').value.trim();
+      // Automatic slug: keep the existing one when editing (URLs stay stable),
+      // derive it from the branch name for a new location.
+      var slug = origSlug ? ofSlugify(origSlug) : ofSlugify(name);
       if(!name){ toast('Branch name is required'); return; }
-      if(!slug){ toast('URL id (slug) is required'); return; }
+      if(!slug){ toast('Please use letters or numbers in the branch name'); return; }
       var lat=parseFloat(document.getElementById('of-lat').value), lng=parseFloat(document.getElementById('of-lng').value);
       var row = { slug:slug, name:name,
         role:document.getElementById('of-role').value.trim()||null,
@@ -1295,12 +1639,10 @@
         address:document.getElementById('of-address').value.trim()||null,
         person:document.getElementById('of-person').value.trim()||null,
         phone:document.getElementById('of-phone').value.trim()||null,
-        tel:document.getElementById('of-tel').value.trim()||null,
+        tel:(function(p){var t=p.replace(/[^\d+]/g,'');return t||null;})(document.getElementById('of-phone').value.trim()),
         hours:document.getElementById('of-hours').value.replace(/\r/g,'').trim()||null,
         email:document.getElementById('of-email').value.trim()||null,
-        email_note:document.getElementById('of-email-note').value.trim()||null,
-        maps:document.getElementById('of-maps').value.trim()||null,
-        mapq:document.getElementById('of-mapq').value.trim()||null,
+        maps:(isFinite(lat)&&isFinite(lng))?('https://www.google.com/maps/search/?api=1&query='+lat.toFixed(6)+','+lng.toFixed(6)):null,
         hero:document.getElementById('of-hero').value.trim()||null,
         photos:_ofImages,
         visible:document.getElementById('of-visible').checked };
@@ -1428,6 +1770,352 @@
       tsLoad(); toast('Testimonial deleted');
     };
 
+    // ── FAQ ──
+    async function faqLoad(){
+      var el=document.getElementById('faq-list'); if(!el) return; el.innerHTML=SKELETON;
+      var res = await sb.from('faqs').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _faq = res.data||[];
+      if(!_faq.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">help_outline</span></div><h3>No questions yet</h3><p>Add FAQs shown on your public /faq page.</p><button class="btn" onclick="faqForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Add your first question</button></div>'; return; }
+      el.innerHTML='<div class="reorder-note">Drag rows to reorder — this is the order shown on the website.</div>'+_faq.map(function(f){
+        var pill = f.published ? '<span class="pill pill-live">Live</span>' : '<span class="pill pill-draft">Draft</span>';
+        var ans = String(f.answer||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim(); if(ans.length>90) ans=ans.slice(0,90)+'…';
+        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span><div class="thumb" style="color:var(--red);"><span class="material-icons-outlined">help_outline</span></div>'
+          +'<div class="t"><b>'+esc(f.question||'Untitled')+'</b>'+pill+'<small>'+esc(ans)+'</small></div>'
+          +'<div class="row-actions"><button class="iconbtn" onclick="faqForm('+f.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
+          +'<button class="iconbtn del" onclick="faqDelete('+f.id+')" title="Delete"><span class="material-icons-outlined">delete</span></button></div></div>';
+      }).join('');
+      makeReorderable('faq-list', _faq, 'faqs');
+    }
+    window.faqForm = function(id){
+      var f = id ? (_faq.filter(function(x){return x.id===id;})[0]||{}) : {};
+      document.getElementById('faq-modal-title').textContent = id?'Edit question':'New question';
+      document.getElementById('faq-id').value = id||'';
+      document.getElementById('faq-question').value = f.question||'';
+      document.getElementById('faq-answer').value = f.answer||'';
+      document.getElementById('faq-published').checked = id ? !!f.published : true;
+      document.getElementById('faq-modal').classList.add('on');
+    };
+    window.faqClose = function(){ document.getElementById('faq-modal').classList.remove('on'); };
+    window.faqSave = async function(){
+      var id = document.getElementById('faq-id').value;
+      var row = { question:document.getElementById('faq-question').value.trim(),
+        answer:document.getElementById('faq-answer').value.trim(),
+        published:document.getElementById('faq-published').checked };
+      if(!row.question){ toast('Question is required'); return; }
+      if(!row.answer){ toast('Answer is required'); return; }
+      var res = id ? await sb.from('faqs').update(row).eq('id',id) : await sb.from('faqs').insert(row);
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      logAudit(id?'update':'create','faq',id||null,row.question);
+      faqClose(); faqLoad(); toast(id?'Question updated':'Question published');
+    };
+    window.faqDelete = async function(id){
+      var f = _faq.filter(function(x){return x.id===id;})[0];
+      if(!confirm('Delete this question?')) return;
+      var res = await sb.from('faqs').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      logAudit('delete','faq',id,f?f.question:null);
+      faqLoad(); toast('Question deleted');
+    };
+
+    // ── TEAM ──
+    async function teamLoad(){
+      var el=document.getElementById('team-list'); if(!el) return; el.innerHTML=SKELETON;
+      var res = await sb.from('team_members').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _team = res.data||[];
+      if(!_team.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">groups</span></div><h3>No team members yet</h3><p>Add leadership shown on your /about page.</p><button class="btn" onclick="teamForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Add your first member</button></div>'; return; }
+      el.innerHTML='<div class="reorder-note">Drag rows to reorder — this is the order shown on the website.</div>'+_team.map(function(m){
+        var pill = m.published ? '<span class="pill pill-live">Live</span>' : '<span class="pill pill-draft">Draft</span>';
+        var thumb = m.photo_url ? '<div class="thumb"><img src="'+esc(m.photo_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;object-position:'+esc(m.photo_pos||'50% 20%')+';border-radius:inherit;"></div>'
+          : '<div class="thumb" style="font-family:\'Manrope\',sans-serif;font-weight:800;font-size:.9rem;">'+esc(initials(m.name))+'</div>';
+        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span>'+thumb
+          +'<div class="t"><b>'+esc(m.name||'Unnamed')+'</b>'+pill+'<small>'+esc(m.role||'')+'</small></div>'
+          +'<div class="row-actions"><button class="iconbtn" onclick="teamForm('+m.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
+          +'<button class="iconbtn del" onclick="teamDelete('+m.id+')" title="Delete"><span class="material-icons-outlined">delete</span></button></div></div>';
+      }).join('');
+      makeReorderable('team-list', _team, 'team_members');
+    }
+    window.teamForm = function(id){
+      var m = id ? (_team.filter(function(x){return x.id===id;})[0]||{}) : {};
+      document.getElementById('team-modal-title').textContent = id?'Edit member':'New member';
+      document.getElementById('team-id') && (document.getElementById('team-id').value = id||'');
+      document.getElementById('team-name').value = m.name||'';
+      document.getElementById('team-role').value = m.role||'';
+      document.getElementById('team-photo').value = m.photo_url||'';
+      document.getElementById('team-photo-pos').value = m.photo_pos||'50% 20%';
+      document.getElementById('team-bio').value = m.bio||'';
+      teamRenderPhotoPrev(m.photo_url, m.name, m.photo_pos);
+      document.getElementById('team-published').checked = id ? !!m.published : true;
+      document.getElementById('team-modal').setAttribute('data-id', id||'');
+      document.getElementById('team-modal').classList.add('on');
+    };
+    // Preview shows the real photo (cropped with the chosen focus). When there's
+    // no photo yet, leave it blank — just the Upload button below.
+    function teamRenderPhotoPrev(url, name, pos){
+      var el = document.getElementById('team-photo-prev'); if(!el) return;
+      el.innerHTML = url ? '<img src="'+esc(url)+'" alt="" style="object-position:'+esc(pos||'50% 20%')+'">' : '';
+    }
+    window.teamPreviewPos = function(){
+      var img = document.querySelector('#team-photo-prev img');
+      if(img) img.style.objectPosition = document.getElementById('team-photo-pos').value;
+    };
+    window.teamClose = function(){ document.getElementById('team-modal').classList.remove('on'); };
+    window.teamSave = async function(){
+      var id = document.getElementById('team-modal').getAttribute('data-id');
+      var row = { name:document.getElementById('team-name').value.trim(),
+        role:document.getElementById('team-role').value.trim()||null,
+        photo_url:document.getElementById('team-photo').value.trim()||null,
+        photo_pos:document.getElementById('team-photo-pos').value||null,
+        bio:document.getElementById('team-bio').value.trim()||null,
+        published:document.getElementById('team-published').checked };
+      if(!row.name){ toast('Name is required'); return; }
+      var doSave = function(r){ return id ? sb.from('team_members').update(r).eq('id',id) : sb.from('team_members').insert(r); };
+      var res = await doSave(row);
+      // If the bio / photo_pos columns haven't been added yet (migration not run),
+      // don't fail the whole save — retry with just the original fields.
+      if(res.error && /(bio|photo_pos)/.test(res.error.message||'')){
+        var slim = { name:row.name, role:row.role, photo_url:row.photo_url, published:row.published };
+        res = await doSave(slim);
+        if(!res.error) toast('Saved. Run the team_bio_photopos migration to enable bio & photo focus.');
+      }
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      logAudit(id?'update':'create','team',id||null,row.name);
+      teamClose(); teamLoad(); toast(id?'Member updated':'Member added');
+    };
+    window.teamDelete = async function(id){
+      var m = _team.filter(function(x){return x.id===id;})[0];
+      if(!confirm('Delete '+(m&&m.name?m.name:'this member')+'?')) return;
+      var res = await sb.from('team_members').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      logAudit('delete','team',id,m?m.name:null);
+      teamLoad(); toast('Member deleted');
+    };
+
+    // ── Clients (homepage logo marquee) ──
+    async function clientsLoad(){
+      var el=document.getElementById('clients-list'); if(!el) return; el.innerHTML=SKELETON;
+      var res = await sb.from('clients').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _clients = res.data||[];
+      if(!_clients.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">domain</span></div><h3>No clients yet</h3><p>Add the client logos shown on your homepage.</p><button class="btn" onclick="clientsForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Add your first client</button></div>'; return; }
+      el.innerHTML='<div class="reorder-note">Drag rows to reorder — this is the order shown on the website.</div>'+_clients.map(function(c){
+        var pill = c.published ? '<span class="pill pill-live">Live</span>' : '<span class="pill pill-draft">Hidden</span>';
+        var thumb = c.logo_url ? '<div class="thumb" style="background:#fff;padding:6px;"><img src="'+esc(c.logo_url)+'" alt="" style="width:100%;height:100%;object-fit:contain;"></div>'
+          : '<div class="thumb" style="font-family:\'Manrope\',sans-serif;font-weight:800;font-size:.9rem;">'+esc(initials(c.name))+'</div>';
+        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span>'+thumb
+          +'<div class="t"><b>'+esc(c.name||'Unnamed')+'</b>'+pill+'</div>'
+          +'<div class="row-actions"><button class="iconbtn" onclick="clientsForm('+c.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
+          +'<button class="iconbtn del" onclick="clientsDelete('+c.id+')" title="Delete"><span class="material-icons-outlined">delete</span></button></div></div>';
+      }).join('');
+      makeReorderable('clients-list', _clients, 'clients');
+    }
+    window.clientsForm = function(id){
+      var c = id ? (_clients.filter(function(x){return x.id===id;})[0]||{}) : {};
+      document.getElementById('clients-modal-title').textContent = id?'Edit client':'New client';
+      document.getElementById('clients-name').value = c.name||'';
+      document.getElementById('clients-logo').value = c.logo_url||'';
+      document.getElementById('clients-logo-prev').innerHTML = c.logo_url?'<img src="'+esc(c.logo_url)+'" alt="">':'';
+      document.getElementById('clients-published').checked = id ? !!c.published : true;
+      document.getElementById('clients-modal').setAttribute('data-id', id||'');
+      document.getElementById('clients-modal').classList.add('on');
+    };
+    window.clientsClose = function(){ document.getElementById('clients-modal').classList.remove('on'); };
+    window.clientsSave = async function(){
+      var id = document.getElementById('clients-modal').getAttribute('data-id');
+      var row = { name:document.getElementById('clients-name').value.trim(),
+        logo_url:document.getElementById('clients-logo').value.trim()||null,
+        published:document.getElementById('clients-published').checked };
+      if(!row.name){ toast('Client name is required'); return; }
+      var res = id ? await sb.from('clients').update(row).eq('id',id) : await sb.from('clients').insert(row);
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      logAudit(id?'update':'create','client',id||null,row.name);
+      clientsClose(); clientsLoad(); toast(id?'Client updated':'Client added');
+    };
+    window.clientsDelete = async function(id){
+      var c = _clients.filter(function(x){return x.id===id;})[0];
+      if(!confirm('Delete '+(c&&c.name?c.name:'this client')+'?')) return;
+      var res = await sb.from('clients').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      logAudit('delete','client',id,c?c.name:null);
+      clientsLoad(); toast('Client deleted');
+    };
+
+    // ── SERVICES (detail pages /service?s=… + overview cards) ──
+    var _services = [], _svImages = [];
+    function renderSvGallery(){
+      var el=document.getElementById('sv-gallery'); if(!el) return;
+      el.innerHTML=_svImages.map(function(u,i){ return '<div class="gthumb"><img src="'+esc(u)+'" alt=""><button class="rm" title="Remove" onclick="svGalleryRemove('+i+')"><span class="material-icons-outlined">close</span></button></div>'; }).join('');
+    }
+    window.svGalleryRemove=function(i){ _svImages.splice(i,1); renderSvGallery(); };
+    window.svGalleryUpload=async function(input){
+      var files=input&&input.files?Array.prototype.slice.call(input.files):[]; if(!files.length) return;
+      toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
+      for(var i=0;i<files.length;i++){ var f=files[i];
+        if(!/^image\//.test(f.type)||f.size>5*1048576){ toast('Skipped '+f.name+' (use an image under 5MB)'); continue; }
+        var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
+        var path='services/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        if(up.error){ toast('Upload failed: '+up.error.message); continue; }
+        _svImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl);
+        renderSvGallery();
+      }
+      input.value='';
+    };
+    async function svLoad(){
+      var el=document.getElementById('services-list'); if(!el) return; el.innerHTML=SKELETON;
+      var res = await sb.from('services').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
+      if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
+      _services = res.data||[];
+      if(!_services.length){ el.innerHTML='<div class="empty"><div class="ic"><span class="material-icons-outlined">design_services</span></div><h3>No services yet</h3><p>Add the services shown on your website.</p><button class="btn" onclick="svForm()" style="margin:0 auto;"><span class="material-icons-outlined">add</span>Add your first service</button></div>'; return; }
+      el.innerHTML='<div class="reorder-note">Drag rows to reorder — this is the order shown on the website.</div>'+_services.map(function(s){
+        var pill = s.published ? '<span class="pill pill-live">Live</span>' : '<span class="pill pill-draft">Hidden</span>';
+        var n = Array.isArray(s.highlights)?s.highlights.length:0;
+        var thumb = s.image_url ? '<div class="thumb"><img src="'+esc(s.image_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;"></div>'
+          : '<div class="thumb" style="font-family:\'Manrope\',sans-serif;font-weight:800;">'+esc((s.title||'?').slice(0,1).toUpperCase())+'</div>';
+        return '<div class="row"><span class="drag" title="Drag to reorder"><span class="material-icons-outlined">drag_indicator</span></span>'+thumb
+          +'<div class="t"><b>'+esc(s.title||'Untitled')+'</b>'+pill+'<small>'+esc(s.category||'')+' · '+n+' highlight'+(n===1?'':'s')+'</small></div>'
+          +'<div class="row-actions"><button class="iconbtn" onclick="svForm('+s.id+')" title="Edit"><span class="material-icons-outlined">edit</span></button>'
+          +'<button class="iconbtn del" onclick="svDelete('+s.id+')" title="Delete"><span class="material-icons-outlined">delete</span></button></div></div>';
+      }).join('');
+      if(typeof makeReorderable==='function') makeReorderable('services-list', _services, 'services');
+    }
+    function svHlRow(t,d){
+      return '<div class="sv-hl-row" style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;margin-bottom:8px;">'
+        +'<div style="display:grid;gap:6px;min-width:0;">'
+          +'<input class="sv-hl-t" placeholder="Highlight title" value="'+esc(t||'')+'">'
+          +'<textarea class="sv-hl-d" rows="2" placeholder="Short description">'+esc(d||'')+'</textarea>'
+        +'</div>'
+        +'<button type="button" class="iconbtn del" title="Remove" onclick="this.closest(\'.sv-hl-row\').remove()"><span class="material-icons-outlined">close</span></button>'
+      +'</div>';
+    }
+    function svRenderHls(arr){
+      var box=document.getElementById('sv-highlights');
+      var list=(arr&&arr.length)?arr:[{t:'',d:''}];
+      box.innerHTML=list.map(function(h){return svHlRow(h.t,h.d);}).join('');
+    }
+    window.svAddHl=function(){ document.getElementById('sv-highlights').insertAdjacentHTML('beforeend', svHlRow('','')); };
+    window.svForm=function(id){
+      var s = id ? (_services.filter(function(x){return x.id===id;})[0]||{}) : {};
+      document.getElementById('sv-modal-title').textContent = id?'Edit service':'New service';
+      document.getElementById('sv-title').value = s.title||'';
+      document.getElementById('sv-red').value = s.red_word||'';
+      document.getElementById('sv-tagline').value = s.tagline||'';
+      document.getElementById('sv-overview').value = s.overview||'';
+      document.getElementById('sv-image').value = s.image_url||'';
+      document.getElementById('sv-image-prev').innerHTML = s.image_url?'<img src="'+esc(s.image_url)+'" alt="">':'';
+      _svImages = Array.isArray(s.images)?s.images.slice():[]; renderSvGallery();
+      document.getElementById('sv-published').checked = id ? !!s.published : true;
+      svRenderHls(Array.isArray(s.highlights)?s.highlights:[]);
+      document.getElementById('sv-who').value = (Array.isArray(s.who_for)?s.who_for:[]).join('\n');
+      document.getElementById('sv-scope').value = (Array.isArray(s.scope)?s.scope:[]).join('\n');
+      document.getElementById('sv-client').value = (Array.isArray(s.client_benefits)?s.client_benefits:[]).join('\n');
+      document.getElementById('sv-applicant').value = (Array.isArray(s.applicant_benefits)?s.applicant_benefits:[]).join('\n');
+      document.getElementById('sv-stats').value = (Array.isArray(s.stats)?s.stats:[]).map(function(t){return (t.v||'')+' | '+(t.l||'');}).join('\n');
+      document.getElementById('sv-modal').setAttribute('data-id', id||'');
+      document.getElementById('sv-modal').classList.add('on');
+    };
+    window.svClose=function(){ document.getElementById('sv-modal').classList.remove('on'); };
+    window.svSave=async function(){
+      var id=document.getElementById('sv-modal').getAttribute('data-id');
+      var title=document.getElementById('sv-title').value.trim();
+      // Slug is automatic: keep the existing one when editing (URLs stay stable),
+      // derive it from the title for a new service.
+      var existing = id ? (_services.filter(function(x){return String(x.id)===String(id);})[0]||{}) : {};
+      var slug = id ? (existing.slug||'') : title.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+      var highlights=[].slice.call(document.querySelectorAll('#sv-highlights .sv-hl-row')).map(function(r){
+        return { t:r.querySelector('.sv-hl-t').value.trim(), d:r.querySelector('.sv-hl-d').value.trim() };
+      }).filter(function(h){return h.t||h.d;});
+      var lines=function(fid){ return (document.getElementById(fid).value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean); };
+      var stats=(document.getElementById('sv-stats').value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean).map(function(x){var p=x.split('|');return { v:(p[0]||'').trim(), l:(p.slice(1).join('|')||'').trim() };}).filter(function(t){return t.v||t.l;});
+      var row={ slug:slug, category:existing.category||'Staffing Solutions',
+        title:title,
+        red_word:document.getElementById('sv-red').value.trim()||null,
+        tagline:document.getElementById('sv-tagline').value.trim()||null,
+        overview:document.getElementById('sv-overview').value.trim()||null,
+        icon:existing.icon||'search',
+        image_url:document.getElementById('sv-image').value.trim()||null,
+        images:_svImages,
+        highlights:highlights,
+        who_for:lines('sv-who'),
+        scope:lines('sv-scope'),
+        client_benefits:lines('sv-client'),
+        applicant_benefits:lines('sv-applicant'),
+        stats:stats,
+        sort_order:(id ? (existing.sort_order!=null?existing.sort_order:0) : _services.length),
+        published:document.getElementById('sv-published').checked };
+      if(!row.title){ toast('Title is required'); return; }
+      if(!row.slug){ toast('Please use letters or numbers in the title'); return; }
+      var res = id ? await sb.from('services').update(row).eq('id',id) : await sb.from('services').insert(row);
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      logAudit(id?'update':'create','service',id||row.slug,row.title);
+      svClose(); svLoad(); toast(id?'Service updated':'Service added');
+    };
+    window.svDelete=async function(id){
+      var s=_services.filter(function(x){return x.id===id;})[0];
+      if(!confirm('Delete '+(s&&s.title?s.title:'this service')+'?')) return;
+      var res=await sb.from('services').delete().eq('id',id);
+      if(res.error){ toast('Delete failed: '+res.error.message); return; }
+      logAudit('delete','service',id,s?s.title:null);
+      svLoad(); toast('Service deleted');
+    };
+
+    // ── Legal pages (Privacy / Terms) ──
+    var LEGAL_PAGES = [{slug:'privacy', title:'Privacy Policy'}, {slug:'terms', title:'Terms of Service'}];
+    async function legalLoad(){
+      var el=document.getElementById('legal-list'); if(!el) return; el.innerHTML=SKELETON;
+      var res = await sb.from('legal_pages').select('slug,updated_label,body_html,updated_at');
+      _legal = {};
+      if(!res.error && res.data){ res.data.forEach(function(r){ _legal[r.slug]=r; }); }
+      el.innerHTML = LEGAL_PAGES.map(function(p){
+        var row=_legal[p.slug];
+        var status = row ? '<span class="pill pill-live">Saved</span>' : '<span class="pill pill-draft">Built-in</span>';
+        var when = (row&&row.updated_at) ? '<small>Updated '+new Date(row.updated_at).toLocaleDateString()+'</small>' : '<small>Using the built-in copy until you save</small>';
+        return '<div class="row"><span class="material-icons-outlined" style="color:var(--muted);">description</span>'
+          +'<div class="t"><b>'+esc(p.title)+'</b>'+status+when+'</div>'
+          +'<div class="row-actions"><a class="chiplink" href="/'+p.slug+'" target="_blank" rel="noopener"><span class="material-icons-outlined">open_in_new</span>View</a>'
+          +'<button class="iconbtn" onclick="legalForm(\''+p.slug+'\')" title="Edit"><span class="material-icons-outlined">edit</span></button></div></div>';
+      }).join('');
+    }
+    window.legalForm = async function(slug){
+      var title = (LEGAL_PAGES.filter(function(p){return p.slug===slug;})[0]||{}).title || slug;
+      document.getElementById('legal-modal-title').textContent = 'Edit — '+title;
+      document.getElementById('legal-modal').setAttribute('data-slug', slug);
+      var up=document.getElementById('legal-updated'), body=document.getElementById('legal-body'), hint=document.getElementById('legal-hint');
+      up.value=''; body.innerHTML=''; hint.textContent='Loading current content…';
+      document.getElementById('legal-modal').classList.add('on');
+      var row=_legal[slug];
+      if(row && (row.body_html||row.updated_label)){
+        up.value=row.updated_label||''; body.innerHTML=row.body_html||''; hint.textContent='Editing your saved version.';
+        return;
+      }
+      // No saved row yet — prefill from the live page so you start from the current copy.
+      try{
+        var html = await fetch('/'+slug, {cache:'no-store'}).then(function(r){return r.text();});
+        var doc = new DOMParser().parseFromString(html,'text/html');
+        var p = doc.querySelector('.legal-hero .container p'), b = doc.querySelector('main.legal-body');
+        up.value = p?p.textContent.trim():''; body.innerHTML = b?b.innerHTML.trim():'';
+        hint.textContent='Prefilled from the current page — edit the text and save to take over.';
+      }catch(e){ hint.textContent='Could not load the current content; you can paste your own HTML.'; }
+    };
+    window.legalClose = function(){ document.getElementById('legal-modal').classList.remove('on'); };
+    window.legalSave = async function(){
+      var slug = document.getElementById('legal-modal').getAttribute('data-slug'); if(!slug) return;
+      var row = { slug:slug, updated_label:document.getElementById('legal-updated').value.trim()||null, body_html:(document.getElementById('legal-body').innerHTML||'').trim()||null, updated_at:new Date().toISOString() };
+      var res = await sb.from('legal_pages').upsert(row, {onConflict:'slug'});
+      if(res.error){ toast('Save failed: '+res.error.message); return; }
+      logAudit('update','legal',slug,slug);
+      legalClose(); legalLoad(); toast('Saved — /'+slug+' updated');
+    };
+    // Rich-text toolbar for the legal editor (contenteditable). execCommand is
+    // deprecated but universally supported and fine for this internal tool.
+    window.rteCmd = function(cmd, val){ try{ document.getElementById('legal-body').focus(); document.execCommand(cmd, false, val||null); }catch(_){} };
+    window.rteLink = function(){
+      var url = prompt('Link URL — e.g. https://example.com or mailto:someone@cnt…');
+      if(!url) return;
+      try{ document.getElementById('legal-body').focus(); document.execCommand('createLink', false, url.trim()); }catch(_){}
+    };
+
     // ── MESSAGES ──
     async function msgLoad(){
       var el=document.getElementById('msg-list'); el.innerHTML=SKELETON;
@@ -1531,7 +2219,8 @@
       if(v==='custom'){ if(cust) cust.style.display=''; return; }
       if(cust) cust.style.display='none';
       var now=new Date(), from, to=new Date(); to.setHours(23,59,59,999);
-      if(v==='tm'){ from=new Date(now.getFullYear(),now.getMonth(),1); }
+      if(v==='today'){ from=new Date(); from.setHours(0,0,0,0); to=new Date(); }
+      else if(v==='tm'){ from=new Date(now.getFullYear(),now.getMonth(),1); }
       else if(v==='lm'){ from=new Date(now.getFullYear(),now.getMonth()-1,1); to=new Date(now.getFullYear(),now.getMonth(),0,23,59,59,999); }
       else if(v==='ytd'){ from=new Date(now.getFullYear(),0,1); }
       else { from=new Date(Date.now()-(+v-1)*86400000); from.setHours(0,0,0,0); }

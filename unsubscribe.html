@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unsubscribe — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="/assets/img/icon.png" />
+  <link rel="preconnect" href="https://mtaknpmvvldmnsizvtuy.supabase.co" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <style>
+    :root{--red:#C8102E;--red-lt:#E5213F;--ink:#14161b;--muted:#5b6472;--line:#e7eaf0;--bg:#f4f5f7}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:28px;
+      background:var(--bg);color:var(--ink);
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased}
+    .card{width:100%;max-width:480px;background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+      box-shadow:0 1px 2px rgba(16,24,40,.04),0 24px 60px -24px rgba(16,24,40,.28)}
+    .card-head{background:#14161b;background-image:linear-gradient(120deg,#1c1e25 0%,#111318 100%);
+      border-bottom:3px solid var(--red);padding:26px 32px}
+    .card-head img{height:40px;width:auto;display:block}
+    .card-body{padding:38px 34px 34px;text-align:center}
+    .icon{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;margin:0 auto 20px}
+    .icon svg{width:30px;height:30px;fill:none;stroke-width:2.2}
+    .icon.ok{background:rgba(34,197,94,.12)}.icon.ok svg{stroke:#16a34a}
+    .icon.warn{background:#FDE7EA}.icon.warn svg{stroke:var(--red)}
+    .icon.load{background:#eef1f5}.icon.load svg{stroke:#94a3b8;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    h1{font-family:'Manrope',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin:0 0 10px}
+    p{color:var(--muted);font-size:.98rem;line-height:1.6;margin:0 auto;max-width:34ch}
+    .actions{margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;font-family:'Manrope',sans-serif;
+      font-weight:700;font-size:.9rem;padding:12px 22px;border-radius:11px;transition:transform .18s,box-shadow .18s}
+    .btn-primary{color:#fff;background:linear-gradient(100deg,#FF3D51 0%,#E5213F 38%,#C8102E 72%,#A50D24 100%);
+      box-shadow:0 8px 20px -6px rgba(200,16,46,.5)}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px -8px rgba(200,16,46,.6)}
+    .btn-ghost{color:var(--ink);background:#f1f3f6;border:1px solid var(--line)}
+    .btn-ghost:hover{background:#e9ecf1}
+    .foot{padding:16px 34px;text-align:center;font-size:.72rem;color:#9aa2ae;border-top:1px solid var(--line)}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-head"><img src="/assets/img/cnt-logo-white.png" alt="CNT Promo &amp; Ads Specialists, Inc." /></div>
+    <div class="card-body">
+      <!-- Loading -->
+      <div id="state-load">
+        <div class="icon load"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg></div>
+        <h1>One moment…</h1>
+        <p>Updating your subscription preferences.</p>
+      </div>
+      <!-- Success -->
+      <div id="state-ok" hidden>
+        <div class="icon ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h1>You&rsquo;ve been unsubscribed</h1>
+        <p>You won&rsquo;t receive any more job alerts or announcements from CNT. Sorry to see you go!</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="/#subscribe">Changed your mind? Resubscribe</a>
+          <a class="btn btn-ghost" href="/">Back to home</a>
+        </div>
+      </div>
+      <!-- Invalid / error -->
+      <div id="state-err" hidden>
+        <div class="icon warn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <h1 id="err-title">Link expired or invalid</h1>
+        <p id="err-msg">This unsubscribe link is no longer valid. If you keep receiving emails, contact us and we&rsquo;ll remove you right away.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="mailto:hrdadmin@cntpromoads.com">Email us</a>
+          <a class="btn btn-ghost" href="/">Back to home</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot">&copy; <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc.</div>
+  </div>
+  <script>
+    (function(){
+      document.getElementById('yr').textContent = new Date().getFullYear();
+      var load=document.getElementById('state-load'), ok=document.getElementById('state-ok'),
+          err=document.getElementById('state-err');
+      function show(el){ [load,ok,err].forEach(function(x){ x.hidden = x!==el; }); }
+      function showErr(title,body){ if(title) document.getElementById('err-title').textContent=title;
+        if(body) document.getElementById('err-msg').textContent=body; show(err); }
+
+      var token=new URLSearchParams(location.search).get('token');
+      var isUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token||'');
+      if(!isUuid){ showErr(); return; }
+
+      var sb=window.getSupabase && window.getSupabase();
+      if(!sb){ showErr('Something went wrong','We couldn’t reach our servers. Please try again in a moment.'); return; }
+
+      sb.rpc('cnt_unsubscribe',{ p_token:token }).then(function(res){
+        if(res.error){ showErr('Something went wrong','We couldn’t process that just now. Please try again, or email us and we’ll remove you right away.'); return; }
+        if(res.data===true) show(ok);
+        else showErr(); // token not found → treat as invalid/expired
+      }, function(){ showErr('Something went wrong','We couldn’t process that just now. Please try again later.'); });
+    })();
+  </script>
+</body>
+</html>

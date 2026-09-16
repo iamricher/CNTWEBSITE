@@ -36,8 +36,6 @@
   }
   /* Screen-reader-only + skip link */
   .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
-  .skip-link { position:fixed; left:12px; top:-48px; z-index:1000; background:#C8102E; color:#fff; padding:9px 16px; border-radius:8px; font-size:13px; font-weight:600; transition:top .15s; }
-  .skip-link:focus { top:12px; }
   /* Respect reduced-motion preference */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
@@ -260,19 +258,17 @@
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen" style="display:flex;flex-direction:column;">
-<a href="#main-content" class="skip-link no-print">Skip to main content</a>
-
 <!-- ── HR LOGIN GATE (shown only when Supabase is configured) ── -->
-<div id="cnt-login" class="fixed inset-0 z-[500] items-center justify-center px-4 no-print" style="display:none;background:#0f172a;">
+<div id="cnt-login" class="fixed inset-0 z-[500] items-center justify-center px-4 no-print" style="display:none;background:radial-gradient(125% 120% at 50% 38%, transparent 0%, rgba(9,10,13,.5) 100%), linear-gradient(180deg, rgba(9,10,13,.74) 0%, rgba(10,11,14,.54) 45%, rgba(9,10,13,.82) 100%), url('/assets/img/hero_banner.jpg') center/cover no-repeat fixed;">
   <div class="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8">
     <div class="flex flex-col items-center text-center mb-6">
-      <img src="/assets/img/cnt-logo.png" alt="CNT" class="h-12 mb-4" />
+      <img src="/assets/img/cnt-logo.png" alt="CNT Promo &amp; Ads Specialists, Inc." class="h-14 mb-5" />
       <h1 class="text-lg font-extrabold text-slate-900">Applicant Tracking System</h1>
       <p class="text-xs text-slate-500 mt-1">Sign in to access recruitment data</p>
     </div>
     <form id="cnt-login-form">
       <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
-      <input id="cnt-email" type="email" required autocomplete="username" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm mb-4 focus:outline-none focus:border-red-800" placeholder="Username">
+      <input id="cnt-email" type="email" required autocomplete="username" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm mb-4 focus:outline-none focus:border-red-800" placeholder="you@cntpromoads.com">
       <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
       <input id="cnt-pass" type="password" required autocomplete="current-password" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm mb-2 focus:outline-none focus:border-red-800" placeholder="Password">
       <div id="cnt-login-err" class="text-xs text-red-600 mb-2" style="display:none;"></div>
@@ -517,27 +513,9 @@
           </div>
           <select id="filter-role" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
             <option value="all">All Positions</option>
-            <option value="Sales Promoter">Sales Promoter</option>
-            <option value="Merchandiser">Merchandiser</option>
-            <option value="Area Supervisor">Area Supervisor</option>
-            <option value="Brand Ambassador">Brand Ambassador</option>
-            <option value="Trade Marketing Specialist">Trade Marketing Specialist</option>
-            <option value="Field Sales Representative">Field Sales Representative</option>
-            <option value="Product Demonstrator">Product Demonstrator</option>
-            <option value="Store Supervisor">Store Supervisor</option>
-            <option value="In-Store Activator">In-Store Activator</option>
-            <option value="Content Marketer">Content Marketer</option>
-            <option value="Logistics Coordinator">Logistics Coordinator</option>
           </select>
           <select id="filter-location" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
             <option value="all">All Locations</option>
-            <option value="Manila">Manila (NCR)</option>
-            <option value="Tarlac">Tarlac</option>
-            <option value="Bulacan">Bulacan</option>
-            <option value="Pampanga">Pampanga</option>
-            <option value="Cavite">Cavite</option>
-            <option value="Pangasinan">Pangasinan</option>
-            <option value="Batangas">Batangas</option>
           </select>
           <select id="filter-stage" onchange="renderAll()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer" style="max-width:150px;">
             <option value="all">All Stages</option>
@@ -732,7 +710,7 @@
     <div id="view-job" class="hidden space-y-4">
       <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200">
         <div><h2 class="text-lg font-bold text-slate-900">Job Positions</h2><p class="text-xs text-slate-500">Active openings across all client accounts and locations</p></div>
-        <button onclick="openCreateJobModal()" class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer flex items-center gap-1 shadow-sm">
+        <button id="job-create-btn" onclick="openCreateJobModal()" class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer flex items-center gap-1 shadow-sm">
           <span class="material-icons-outlined" style="font-size:15px;">add_box</span> Post Position
         </button>
       </div>
@@ -1059,7 +1037,7 @@
       </div>
 
       <!-- Website content (events, success stories) is managed on a separate
-           super-admin page: /events-admin.html -->
+           super-admin page: /content-studio -->
     </div>
 
   </main>
@@ -1203,6 +1181,7 @@
             <div class="space-y-3.5">
               <div class="cnt-jrow"><label>Target Headcount</label><input type="number" id="job-needed" required min="1" value="5"></div>
               <div class="cnt-jrow"><label>Priority</label><select id="job-priority"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+              <div class="cnt-jrow"><label>Pin to top</label><label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#334155;"><input type="checkbox" id="job-pinned" style="width:16px;height:16px;accent-color:#C8102E;cursor:pointer;"><span>Show this priority job at the top of the careers page</span></label></div>
               <div class="cnt-jrow"><label>Deadline to Fill</label><input type="date" id="job-deadline"></div>
               <div class="cnt-jrow"><label>Recruiter</label><select id="job-recruiter"><option value="">Unassigned</option></select></div>
               <div class="cnt-jrow" style="align-items:start;"><label style="padding-top:6px;">Interviewers</label>

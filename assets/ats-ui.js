@@ -830,6 +830,7 @@ window.cntAdvanceStage = cntAdvanceStage;
 
 function renderAll(){
   buildClientDropdown();
+  fillPipelineFilters();
   const filtered=getFilteredDataset();
   const pipeline=filtered.filter(a=>a.stage!=='pool'&&a.stage!=='rejected');
   const pool=filtered.filter(a=>a.stage==='pool');
@@ -1388,9 +1389,15 @@ function appsForJob(accId, job){
   }
   return list.filter(a=>a.role===job.role && a.location===job.location);
 }
+// Full job management (create / edit / delete / publish) is limited to
+// super_admin and recruiter. Recruitment Manager & Supervisor get the Jobs view
+// for PINNING only (view + pin, no create/edit/delete/publish).
+function cntCanEditJobs(){ return ['super_admin','recruiter'].indexOf(window.cntRole)>-1; }
+window.cntCanEditJobs = cntCanEditJobs;
 function renderJobPositions(){
   const jc=document.getElementById('job-cards-container');
   if(!jc)return;
+  { const cb=document.getElementById('job-create-btn'); if(cb) cb.style.display = cntCanEditJobs()?'':'none'; }
   if(typeof fillJobFilters==='function') fillJobFilters();
   const gv=id=>{ const el=document.getElementById(id); return el?el.value:'all'; };
   const cliF=gv('job-f-client'), roleF=gv('job-f-position'), locF=gv('job-f-location'), stF=gv('job-f-status');
@@ -1438,19 +1445,28 @@ function renderJobPositions(){
       const toRecruit=Math.max(0,(job.needed||1)-hiredCount);
       const published=job.status!=='closed';
       const isFav=job.favorite||job.priority==='urgent';
+      const pinned=!!job.pinned;
       const rc=s=>String(s==null?'':s).replace(/'/g,"\\'");
+      // Publish toggle for editors; a read-only status dot for pin-only roles.
+      const pubBtn = cntCanEditJobs()
+        ? '<button onclick="cntTogglePublish(\''+accId+'\',\''+(job._sid||'')+'\',\''+rc(job.role)+'\',\''+rc(job.location)+'\')" title="'+(published?'Published — click to unpublish':'Not published — click to publish')+'" class="flex items-center gap-1.5 cursor-pointer">'
+            + '<span style="width:30px;height:16px;border-radius:99px;background:'+(published?'#16a34a':'#cbd5e1')+';position:relative;display:inline-block;transition:.15s;"><span style="position:absolute;top:2px;left:'+(published?'16px':'2px')+';width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s;"></span></span>'
+            + '<span class="text-[11px] font-semibold '+(published?'text-emerald-700':'text-slate-400')+'">'+(published?'Published':'Not Published')+'</span></button>'
+        : '<span class="flex items-center gap-1.5" title="'+(published?'Published on the website':'Not published')+'"><span style="width:9px;height:9px;border-radius:50%;background:'+(published?'#16a34a':'#cbd5e1')+';display:inline-block;"></span><span class="text-[11px] font-semibold '+(published?'text-emerald-700':'text-slate-400')+'">'+(published?'Published':'Not Published')+'</span></span>';
       jc.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl hover:shadow-md transition cursor-pointer hover:border-slate-300 group" style="position:relative;" onclick="quickJump('${rc(job.role)}','${rc(job.location)}','${rc(job.account)}',null,'${job._sid||''}')">
         ${published?`<div style="position:absolute;top:0;right:0;width:104px;height:104px;overflow:hidden;pointer-events:none;border-top-right-radius:12px;"><div style="position:absolute;transform:rotate(45deg);background:#16a34a;color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;text-align:center;width:150px;top:20px;right:-42px;padding:3px 0;box-shadow:0 1px 3px rgba(0,0,0,.25);">PUBLISHED</div></div>`:''}
         <div class="p-4">
           <div class="flex items-start gap-2 mb-1">
             <button onclick="event.stopPropagation();cntToggleFav('${accId}','${rc(job.role)}','${rc(job.location)}')" title="Mark as favorite" class="flex-shrink-0 mt-0.5 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:17px;color:${isFav?'#f59e0b':'#cbd5e1'};">${isFav?'star':'star_border'}</span></button>
+            <button onclick="event.stopPropagation();cntTogglePin('${accId}','${job._sid||''}','${rc(job.role)}','${rc(job.location)}')" title="${pinned?'Pinned to top of the careers page — click to unpin':'Pin this priority job to the top of the careers page'}" class="flex-shrink-0 mt-0.5 cursor-pointer leading-none"><span class="material-icons-outlined" style="font-size:16px;color:${pinned?'#C8102E':'#cbd5e1'};">push_pin</span></button>
             <div class="min-w-0 flex-1">
+              ${pinned?'<span style="display:inline-flex;align-items:center;gap:3px;background:#FDE7EA;color:#C8102E;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;margin-bottom:3px;"><span class="material-icons-outlined" style="font-size:11px;">push_pin</span>Priority</span><br>':''}
               <h3 class="font-bold text-slate-900 text-[13px] leading-tight group-hover:text-red-800 transition">${job.role}</h3>
               <p class="text-[11px] text-slate-500 mt-0.5">${job.recruiter?job.recruiter:'<span class="text-slate-300">Unassigned recruiter</span>'}</p>
               <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1"><span class="material-icons-outlined" style="font-size:12px;">business</span>${job.account} <span class="text-slate-300">(${job.location})</span></p>
               <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">${jobAgeChip(job)}${jobDeadlineChip(job)}</div>
             </div>
-            ${job._sid?`<div style="position:relative;" class="flex-shrink-0 mr-6">
+            ${(job._sid && cntCanEditJobs())?`<div style="position:relative;" class="flex-shrink-0 mr-6">
               <button onclick="event.stopPropagation();var m=this.nextElementSibling;m.style.display=m.style.display==='block'?'none':'block';" class="text-slate-300 hover:text-slate-600 cursor-pointer p-0.5 leading-none"><span class="material-icons-outlined" style="font-size:17px;">more_vert</span></button>
               <div style="display:none;position:absolute;right:0;top:24px;z-index:30;background:#fff;border:1px solid #e2e8f0;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:130px;overflow:hidden;">
                 <button onclick="event.stopPropagation();this.parentElement.style.display='none';editJobPosition(${job._sid})" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-2"><span class="material-icons-outlined" style="font-size:14px;">edit</span>Edit</button>
@@ -1468,10 +1484,7 @@ function renderJobPositions(){
           </div>
         </div>
         <div class="px-4 py-2.5 border-t border-slate-100 flex items-center justify-between gap-2" onclick="event.stopPropagation()">
-          <button onclick="cntTogglePublish('${accId}','${job._sid||''}','${rc(job.role)}','${rc(job.location)}')" title="${published?'Published — click to unpublish':'Not published — click to publish'}" class="flex items-center gap-1.5 cursor-pointer">
-            <span style="width:30px;height:16px;border-radius:99px;background:${published?'#16a34a':'#cbd5e1'};position:relative;display:inline-block;transition:.15s;"><span style="position:absolute;top:2px;left:${published?'16px':'2px'};width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s;"></span></span>
-            <span class="text-[11px] font-semibold ${published?'text-emerald-700':'text-slate-400'}">${published?'Published':'Not Published'}</span>
-          </button>
+          ${pubBtn}
           ${job._sid?`<span class="flex items-center gap-3">
             <button onclick="cntCopyJobLink('${job._sid}')" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1 cursor-pointer" title="Copy the public link to share on Facebook or JobStreet"><span class="material-icons-outlined" style="font-size:13px;">link</span>Copy link</button>
             <a href="/job?job=${job._sid}" target="_blank" rel="noopener" class="text-[11px] text-slate-500 hover:text-red-700 flex items-center gap-1" title="Open public job page"><span class="material-icons-outlined" style="font-size:13px;">open_in_new</span>Job Page</a>
@@ -1481,7 +1494,7 @@ function renderJobPositions(){
       rendered++;
     }
   });
-  if(!rendered)jc.innerHTML=`<div class="col-span-full bg-white rounded-xl border p-10 text-center text-slate-400 text-sm">No positions match these filters. <button onclick="cntClearJobFilters()" class="text-red-700 font-semibold hover:underline cursor-pointer">Clear filters</button> or <button onclick="openCreateJobModal()" class="text-red-700 font-semibold hover:underline cursor-pointer">post one now.</button></div>`;
+  if(!rendered)jc.innerHTML=`<div class="col-span-full bg-white rounded-xl border p-10 text-center text-slate-400 text-sm">No positions match these filters. <button onclick="cntClearJobFilters()" class="text-red-700 font-semibold hover:underline cursor-pointer">Clear filters</button>${cntCanEditJobs()?` or <button onclick="openCreateJobModal()" class="text-red-700 font-semibold hover:underline cursor-pointer">post one now.</button>`:'.'}</div>`;
   const cnt=document.getElementById('job-filter-count');
   if(cnt) cnt.textContent = rendered ? (rendered+' position'+(rendered!==1?'s':'')) : '';
 }
@@ -1507,6 +1520,24 @@ function fillJobFilters(){
   fill('job-f-client',   tally(j=>j.account),  'All Clients');
   fill('job-f-position', tally(j=>j.role),     'All Positions');
   fill('job-f-location', tally(j=>j.location), 'All Locations');
+}
+// Keep the pipeline Position & Location filters in sync with real data — every
+// role/location on a candidate or a posting, incl. settings additions — instead
+// of a fixed hard-coded list that silently drifts out of date.
+function fillPipelineFilters(){
+  const all=[];
+  try{ (getAllApplicants()||[]).forEach(a=>all.push({role:a.role, location:a.location})); }catch(_){}
+  Object.keys(jobDatabase||{}).forEach(k=>(jobDatabase[k]||[]).forEach(j=>all.push({role:j.role, location:j.location})));
+  const tally=fn=>{ const m={}; all.forEach(x=>{ const v=fn(x); if(v==null||v==='') return; m[v]=(m[v]||0)+1; }); return m; };
+  const fill=(id,counts,allLabel)=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="all">'+allLabel+'</option>'
+      +Object.keys(counts).sort().map(k=>'<option value="'+_escForm(k)+'">'+_escForm(k)+'</option>').join('');
+    sel.value=[...sel.options].some(o=>o.value===cur)?cur:'all';
+  };
+  fill('filter-role', tally(x=>x.role), 'All Positions');
+  fill('filter-location', tally(x=>x.location), 'All Locations');
 }
 function _setSelect(id,value){
   const sel=document.getElementById(id); if(!sel) return;

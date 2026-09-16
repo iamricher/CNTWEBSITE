@@ -60,13 +60,15 @@
     @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 
     /* Hero */
-    .faq-hero{position:relative;background:linear-gradient(160deg,#1f1f1f,#0d0d0d);color:#fff;padding:clamp(78px,12vw,140px) 0 clamp(44px,7vw,74px);overflow:hidden}
+    .faq-hero{position:relative;background:linear-gradient(160deg,rgba(15,15,17,.58),rgba(11,11,13,.82)),url('/assets/img/faqs.jpg') center/cover no-repeat;color:#fff;padding:clamp(78px,12vw,140px) 0 clamp(44px,7vw,74px);overflow:hidden}
     .faq-hero::after{content:"";position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.32),transparent 62%)}
     .faq-hero .wrap{position:relative;z-index:2}
-    .faq-hero .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--red-lt);margin-bottom:1.1rem;display:flex;align-items:center;gap:.7rem}
-    .faq-hero .eyebrow::before{content:'';width:30px;height:2px;background:var(--red-lt)}
+    .faq-hero .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.9);margin-bottom:1.1rem;line-height:1;padding:.42rem .82rem .42rem .68rem;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015))}
+    .faq-hero .eyebrow::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;flex:none;background:var(--red-lt);box-shadow:0 0 0 3px rgba(229,33,63,.18),0 0 9px rgba(229,33,63,.7);animation:cntPulse 2.2s ease-out infinite}
+    @keyframes cntPulse{0%{box-shadow:0 0 0 0 rgba(229,33,63,.55),0 0 9px rgba(229,33,63,.6)}70%{box-shadow:0 0 0 8px rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}100%{box-shadow:0 0 0 0 rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}}
+    @media(prefers-reduced-motion:reduce){.faq-hero .eyebrow::before{animation:none}}
     .faq-hero h1{font-family:'Manrope',sans-serif;font-size:clamp(2.3rem,6vw,3.7rem);font-weight:800;letter-spacing:-.03em;line-height:1.05;max-width:18ch}
-    .faq-hero h1 em{font-style:normal;color:var(--red-lt)}
+    .faq-hero h1 em{font-style:normal;background:linear-gradient(100deg,#FF3D51 0%,#E5213F 38%,#C8102E 72%,#A50D24 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
     .faq-hero p{color:rgba(255,255,255,.66);margin-top:1.25rem;font-size:clamp(1rem,2vw,1.14rem);max-width:56ch}
 
     /* Free-to-apply reassurance banner */
@@ -105,7 +107,7 @@
   </style>
 </head>
 <body>
-  <div id="site-header" data-active=""></div>
+  <div id="site-header" data-active="" data-overlay="1"></div>
 
   <header class="faq-hero">
     <div class="wrap">
@@ -169,12 +171,28 @@
     var plus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
     var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
     var list = document.getElementById('faq-list');
-    list.innerHTML = FAQ.map(function(qa){
-      // Questions are our own trusted copy; answers contain intentional safe HTML.
-      return '<details class="qa"><summary><span class="ic">'+plus+'</span>'
-        + '<span class="q">'+esc(qa[0])+'</span></summary>'
-        + '<div class="a">'+qa[1]+'</div></details>';
-    }).join('');
+    // Questions are trusted copy; answers contain intentional safe HTML (staff-authored).
+    function render(items){
+      list.innerHTML = items.map(function(qa){
+        return '<details class="qa"><summary><span class="ic">'+plus+'</span>'
+          + '<span class="q">'+esc(qa[0])+'</span></summary>'
+          + '<div class="a">'+qa[1]+'</div></details>';
+      }).join('');
+    }
+    render(FAQ);   // instant fallback — always works even if the DB is unreachable
+    // Live content managed in Content Studio → FAQ (overrides the copy above).
+    try {
+      var sb = window.getSupabase && window.getSupabase();
+      if (sb) {
+        sb.from('faqs').select('question,answer').eq('published', true)
+          .order('sort_order', { ascending: true }).order('created_at', { ascending: true })
+          .then(function(res){
+            if (res && res.data && res.data.length) {
+              render(res.data.map(function(r){ return [r.question, r.answer]; }));
+            }
+          }, function(){});
+      }
+    } catch (_) {}
   })();
   </script>
 </body>

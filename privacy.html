@@ -20,10 +20,13 @@
     body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.75}
     a{color:var(--red);text-decoration:none;font-weight:600}
     a:hover{text-decoration:underline}
-    .legal-hero{background:linear-gradient(160deg,#1c1c1c,#0d0d0d);color:#fff;padding:clamp(70px,10vw,120px) 0 clamp(40px,6vw,64px)}
-    .legal-hero .container{width:min(860px,100% - 40px);margin-inline:auto}
-    .legal-hero .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--red-lt);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
-    .legal-hero .eyebrow::before{content:'';width:26px;height:2px;background:var(--red-lt)}
+    .legal-hero{position:relative;overflow:hidden;background:linear-gradient(100deg,rgba(11,11,13,.84) 0%,rgba(11,11,13,.52) 50%,rgba(11,11,13,.32) 100%),url('/assets/img/dataprivacy.jpg') center/cover no-repeat;color:#fff;padding:clamp(70px,10vw,120px) 0 clamp(40px,6vw,64px)}
+    .legal-hero::after{content:"";position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.32),transparent 62%);pointer-events:none;z-index:1}
+    .legal-hero .container{position:relative;z-index:2;width:min(860px,100% - 40px);margin-inline:auto}
+    .legal-hero .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.9);margin-bottom:1rem;line-height:1;padding:.42rem .82rem .42rem .68rem;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015))}
+    .legal-hero .eyebrow::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;flex:none;background:var(--red-lt);box-shadow:0 0 0 3px rgba(229,33,63,.18),0 0 9px rgba(229,33,63,.7);animation:cntPulse 2.2s ease-out infinite}
+    @keyframes cntPulse{0%{box-shadow:0 0 0 0 rgba(229,33,63,.55),0 0 9px rgba(229,33,63,.6)}70%{box-shadow:0 0 0 8px rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}100%{box-shadow:0 0 0 0 rgba(229,33,63,0),0 0 9px rgba(229,33,63,.6)}}
+    @media(prefers-reduced-motion:reduce){.legal-hero .eyebrow::before{animation:none}}
     .legal-hero h1{font-family:'Manrope',sans-serif;font-size:clamp(2.2rem,5vw,3.4rem);font-weight:800;letter-spacing:-.03em;line-height:1.05}
     .legal-hero p{color:rgba(255,255,255,.6);margin-top:1rem;font-size:.95rem}
     .legal-body{width:min(820px,100% - 40px);margin:clamp(48px,7vw,80px) auto clamp(60px,9vw,110px)}
@@ -53,7 +56,7 @@
   <meta name="twitter:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
 </head>
 <body>
-  <div id="site-header" data-active=""></div>
+  <div id="site-header" data-active="" data-overlay="1"></div>
 
   <div class="legal-hero">
     <div class="container">
@@ -125,9 +128,22 @@
     <h2 id="contact">9. Contact us</h2>
     <p>Questions or requests about your personal data? Reach our team at <a href="mailto:hrdadmin@cntpromoads.com">hrdadmin@cntpromoads.com</a>, or through our <a href="/#contact">contact page</a>.</p>
 
-    <div class="legal-note">This Privacy Policy is provided for transparency and should be reviewed by your legal counsel before you rely on it publicly. Update the effective date, company details, and any specifics (e.g., your registered address and Data Protection Officer) to match your operations.</div>
   </main>
 
   <div id="site-footer"></div>
+  <script>
+    // Content managed in Content Studio → Legal (overrides the hardcoded copy above).
+    (function(){
+      try{
+        var sb = window.getSupabase && window.getSupabase(); if(!sb) return;
+        sb.from('legal_pages').select('updated_label,body_html').eq('slug','privacy').maybeSingle()
+          .then(function(res){
+            if(!res || !res.data) return;   // keep hardcoded fallback
+            if(res.data.updated_label){ var p=document.querySelector('.legal-hero .container p'); if(p) p.textContent=res.data.updated_label; }
+            if(res.data.body_html){ var b=document.querySelector('main.legal-body'); if(b) b.innerHTML=res.data.body_html; }
+          }, function(){});
+      }catch(_){}
+    })();
+  </script>
 </body>
 </html>

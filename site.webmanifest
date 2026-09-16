@@ -1,0 +1,13 @@
+{
+  "name": "CNT Promo & Ads Specialists, Inc.",
+  "short_name": "CNT",
+  "description": "Philippines' trusted manpower, recruitment and staffing agency — executive search, mass hiring, HR outsourcing and contractual staffing.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#C8102E",
+  "icons": [
+    { "src": "/assets/img/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News &amp; Events — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="Job fairs, hiring drives and company announcements from CNT Promo & Ads Specialists, Inc. — follow the latest opportunities across the Philippines." />
+  <link rel="canonical" href="https://cnt-website-ats.vercel.app/events" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="News & Events — CNT Promo & Ads Specialists, Inc." />
+  <meta property="og:description" content="Job fairs, hiring drives and company announcements from CNT across the Philippines." />
+  <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
+  <meta property="og:url" content="https://cnt-website-ats.vercel.app/events" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="/assets/img/icon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
+  <style>
+    :root{--red:#C8102E;--red-deep:#A50D24;--red-lt:#E5213F;--red-pale:#FFF0F2;--charcoal:#1A1A1A;--ink:#161616;--sub:#4A4A4A;--muted:#6B7280;--line:#ECECEC}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;line-height:1.7}
+    a{text-decoration:none;color:inherit}
+    .wrap{width:min(1140px,100% - 44px);margin-inline:auto}
+    /* Hero */
+    .ev-hero{position:relative;background:linear-gradient(120deg,#14161b 0%,#0e0f13 100%);color:#fff;padding:clamp(70px,11vw,128px) 0 clamp(44px,7vw,72px);overflow:hidden}
+    .ev-hero::after{content:"";position:absolute;right:-8%;top:-30%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.30),transparent 62%)}
+    .ev-hero .wrap{position:relative;z-index:2}
+    .ev-hero .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.9);margin-bottom:1.15rem;line-height:1;padding:.42rem .82rem .42rem .68rem;border:1px solid rgba(255,255,255,.14);border-radius:999px}
+    .ev-hero .eyebrow::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;flex:none;background:var(--red-lt);box-shadow:0 0 0 3px rgba(229,33,63,.18),0 0 9px rgba(229,33,63,.7)}
+    .ev-hero h1{font-family:'Manrope',sans-serif;font-size:clamp(2.3rem,5.6vw,3.7rem);font-weight:800;letter-spacing:-.03em;line-height:1.05;max-width:16ch}
+    .ev-hero h1 em{font-style:normal;background:linear-gradient(100deg,#FF3D51 0%,#E5213F 38%,#C8102E 72%,#A50D24 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .ev-hero p{color:rgba(255,255,255,.66);margin-top:1.2rem;font-size:clamp(1rem,2vw,1.14rem);max-width:60ch}
+    /* Grid */
+    .ev-sec{padding:clamp(48px,7vw,84px) 0}
+    .ev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.4vw,28px)}
+    .ev-card{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+    .ev-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(16,24,40,.10);border-color:#F3B6BF}
+    .ev-card .thumb{width:100%;aspect-ratio:16/10;background:#f3f4f6 center/cover no-repeat;position:relative;overflow:hidden}
+    .ev-card .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+    .ev-card:hover .thumb img{transform:scale(1.05)}
+    .ev-card .body{padding:clamp(1.3rem,2vw,1.6rem);display:flex;flex-direction:column;flex:1}
+    .ev-tags{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+    .ev-date{font-size:.7rem;font-weight:800;letter-spacing:.04em;color:#fff;background:#C8102E;padding:4px 10px;border-radius:6px}
+    .ev-cat{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C8102E}
+    .ev-card h3{font-family:'Manrope',sans-serif;font-size:1.18rem;font-weight:800;letter-spacing:-.01em;color:var(--charcoal);margin-bottom:.5rem;line-height:1.25}
+    .ev-card p{font-size:.92rem;color:var(--sub);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .ev-card .go{margin-top:auto;padding-top:1.1rem;font-size:.85rem;font-weight:700;color:var(--red);display:inline-flex;align-items:center;gap:.4rem}
+    .ev-card .go svg{width:15px;height:15px;transition:transform .18s ease}
+    .ev-card:hover .go svg{transform:translateX(4px)}
+    .state{padding:80px 0;text-align:center;color:var(--muted)}
+    .state h3{font-family:'Manrope',sans-serif;font-size:1.3rem;color:var(--charcoal);margin-bottom:.5rem}
+    /* Newsletter strip */
+    .ev-sub{background:#FAFAF9;border-top:1px solid var(--line);padding:clamp(44px,7vw,72px) 0;text-align:center}
+    .ev-sub h2{font-family:'Manrope',sans-serif;font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:800;letter-spacing:-.02em;color:var(--charcoal)}
+    .ev-sub p{color:var(--sub);margin:.7rem auto 0;max-width:48ch}
+    .ev-nl{display:flex;align-items:center;gap:8px;max-width:440px;margin:1.7rem auto 0;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 6px 6px 20px;box-shadow:0 2px 12px rgba(16,24,40,.06);transition:border-color .18s,box-shadow .18s}
+    .ev-nl:focus-within{border-color:var(--red-lt);box-shadow:0 0 0 3px rgba(229,33,63,.14)}
+    .ev-nl input{flex:1;min-width:0;border:none;background:transparent;font-size:.95rem;color:var(--ink);outline:none;font-family:inherit}
+    .ev-nl button{flex:none;width:44px;height:44px;border:none;border-radius:999px;background:var(--red);color:#fff;cursor:pointer;display:grid;place-items:center;transition:background .18s ease,transform .18s ease}
+    .ev-nl button:hover{background:var(--red-deep);transform:translateX(2px)}
+    .ev-nl button:disabled{opacity:.6;cursor:default}
+    .ev-nl button svg{width:18px;height:18px}
+    .ev-nl-msg{margin-top:.85rem;font-size:.86rem;color:var(--muted);min-height:1.2em}
+    @media(max-width:900px){.ev-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){.ev-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="site-header" data-active="events" data-overlay="1"></div>
+
+  <header class="ev-hero">
+    <div class="wrap">
+      <div class="eyebrow">News &amp; Events</div>
+      <h1>Latest from <em>CNT</em></h1>
+      <p>Job fairs, hiring drives and company announcements — follow along for the newest opportunities across the Philippines.</p>
+    </div>
+  </header>
+
+  <section class="ev-sec">
+    <div class="wrap">
+      <div id="ev-grid" class="ev-grid"><div class="state">Loading the latest events…</div></div>
+    </div>
+  </section>
+
+  <section class="ev-sub">
+    <div class="wrap">
+      <h2>Never miss an opening</h2>
+      <p>New job openings, events and company announcements — straight to your inbox.</p>
+      <form class="ev-nl" onsubmit="return false;">
+        <input type="email" id="ev-nl-email" placeholder="you@email.com" autocomplete="email" aria-label="Email for job alerts and events" />
+        <button type="submit" id="ev-nl-btn" aria-label="Subscribe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </form>
+      <p id="ev-nl-msg" class="ev-nl-msg" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script>
+  (function(){
+    var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    var grid=document.getElementById('ev-grid');
+    var sb=window.getSupabase && window.getSupabase();
+
+    var arrow='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+    function card(ev){
+      var link='/event?id='+encodeURIComponent(ev.id);
+      var img=ev.image_url
+        ? '<div class="thumb"><img src="'+esc(ev.image_url)+'" alt="'+esc(ev.title||'CNT event')+'" loading="lazy" decoding="async"></div>'
+        : '';
+      return '<article class="ev-card" onclick="location.href=\''+link+'\'">'
+        + img
+        + '<div class="body">'
+          + '<div class="ev-tags">'
+            + (ev.event_date?'<span class="ev-date">'+esc(ev.event_date)+'</span>':'')
+            + '<span class="ev-cat">'+esc(ev.category||'Update')+'</span>'
+          + '</div>'
+          + '<h3>'+esc(ev.title||'')+'</h3>'
+          + '<p>'+esc(ev.summary||'')+'</p>'
+          + '<a href="'+link+'" class="go" onclick="event.stopPropagation()">Read more '+arrow+'</a>'
+        + '</div>'
+      + '</article>';
+    }
+
+    function empty(){
+      grid.className='';
+      grid.innerHTML='<div class="state"><h3>No events yet</h3><p>New job fairs, hiring drives and announcements will appear here. In the meantime, explore our <a href="/careers" style="color:var(--red);font-weight:600;">open positions</a>.</p></div>';
+    }
+
+    if(!sb){ empty(); return; }
+    sb.from('events').select('*').eq('published',true)
+      .order('created_at',{ascending:false})
+      .then(function(res){
+        var data=res && res.data;
+        if(res.error || !data || !data.length){ empty(); return; }
+        grid.className='ev-grid';
+        grid.innerHTML=data.map(card).join('');
+      }, function(){ empty(); });
+
+    // Stay Updated — same cnt_subscribe RPC as the footer form (source 'events').
+    (function(){
+      var input=document.getElementById('ev-nl-email'), btn=document.getElementById('ev-nl-btn'), msg=document.getElementById('ev-nl-msg');
+      if(!input || !btn) return;
+      var say=function(t,ok){ if(msg){ msg.textContent=t; msg.style.color=ok?'#16A34A':'var(--muted)'; } };
+      var submit=function(){
+        var email=(input.value||'').trim();
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ say('Please enter a valid email.'); return; }
+        if(!sb){ say('Unable to subscribe right now.'); return; }
+        btn.disabled=true;
+        Promise.resolve(sb.rpc('cnt_subscribe',{ p_email:email, p_source:'events' })).then(function(res){
+          btn.disabled=false;
+          if(res && res.error){ say('Something went wrong. Try again.'); return; }
+          input.value=''; say('Subscribed! We’ll keep you posted. ✓', true);
+        }, function(){ btn.disabled=false; say('Something went wrong. Try again.'); });
+      };
+      btn.addEventListener('click', submit);
+      input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); submit(); } });
+    })();
+  })();
+  </script>
+</body>
+</html>
