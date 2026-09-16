@@ -365,6 +365,16 @@ input, select, textarea { font-family: var(--font-body); }
   50%      { transform: rotate(-40deg) translateY(-50px); }
 }
 
+/* Scroll-to-explore cue — mouse indicator with an animated red wheel */
+.hero-scroll { position: absolute; z-index: 12; left: 50%; bottom: clamp(18px,2.4vw,30px); transform: translateX(-50%); display: inline-flex; flex-direction: column; align-items: center; gap: 9px; color: rgba(255,255,255,.6); font-family: var(--font-display); font-size: .64rem; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; transition: color .22s ease; }
+.hero-scroll:hover { color: #fff; }
+.hero-scroll .mouse { width: 24px; height: 38px; border: 2px solid rgba(255,255,255,.32); border-radius: 14px; position: relative; transition: border-color .22s ease; }
+.hero-scroll:hover .mouse { border-color: rgba(255,255,255,.7); }
+.hero-scroll .mouse::after { content: ''; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; border-radius: 2px; background: var(--red-lt,#E5213F); transform: translateX(-50%); animation: heroWheel 1.9s ease-in-out infinite; }
+@keyframes heroWheel { 0% { opacity: 0; transform: translate(-50%,0); } 28% { opacity: 1; } 60% { opacity: 1; transform: translate(-50%,11px); } 100% { opacity: 0; transform: translate(-50%,11px); } }
+@media (prefers-reduced-motion: reduce) { .hero-scroll .mouse::after { animation: none; top: 12px; } }
+@media (max-width: 768px) { .hero-scroll { display: none; } }
+
 /* Content side */
 .hero-content {
   position: relative; z-index: 10;
@@ -1326,6 +1336,11 @@ input, select, textarea { font-family: var(--font-body); }
       <div class="hero-img-overlay"></div>
     </div>
   </div>
+
+  <a class="hero-scroll" href="#why" aria-label="Scroll down to explore">
+    <span class="mouse" aria-hidden="true"></span>
+    <span class="hs-label">Explore</span>
+  </a>
 
 </section>
 

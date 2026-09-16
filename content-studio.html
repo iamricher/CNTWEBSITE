@@ -1264,12 +1264,17 @@
       var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
       var path='events/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
       toast('Uploading image…');
+      // Instant local preview: show the picked image right away (dimmed) while it
+      // uploads in the background, so the editor feels responsive on slow links.
+      try{ var _pvEl=document.getElementById(prevId); if(_pvEl){ _pvEl.innerHTML='<img src="'+URL.createObjectURL(f)+'" alt="" style="opacity:.55">'; } }catch(_){}
       var up = await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
       if(up.error){
         var msg = up.error.message||'';
         if(/mime|content.?type|not supported/i.test(msg)) toast('That image format isn’t supported. Please use a JPG or PNG.');
         else if(/row-level security|not authorized|unauthorized/i.test(msg)) toast('Not allowed to upload. Try signing out and back in.');
         else toast('Upload failed: '+msg);
+        // Roll the preview back to whatever was saved before (or clear it).
+        try{ var _old=(document.getElementById(imgId)||{}).value; document.getElementById(prevId).innerHTML=_old?'<img src="'+esc(_old)+'" alt="">':''; }catch(_){}
         return;
       }
       var url = sb.storage.from('event-images').getPublicUrl(path).data.publicUrl;

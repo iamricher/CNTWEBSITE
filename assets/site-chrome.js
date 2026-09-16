@@ -77,8 +77,8 @@ window.CNT_STATS = [
     '    </div>' +
     '    <div class="footer-col"><h5>Services</h5><ul>' +
     '      <li><a href="/service?s=executive-search">Executive Search</a></li><li><a href="/service?s=mass-hiring">Mass &amp; Bulk Hiring</a></li>' +
-    '      <li><a href="/service?s=hr-outsourcing">HR Outsourcing</a></li><li><a href="/service?s=contractual-staffing">Contractual Staffing</a></li>' +
-    '      <li><a href="/service?s=background-screening">Background Screening</a></li><li><a href="/service?s=training">Training &amp; Development</a></li></ul></div>' +
+    '      <li><a href="/service?s=hr-outsourcing">HR Outsourcing</a></li><li><a href="/service?s=payroll">Payroll Management</a></li>' +
+    '      <li><a href="/service?s=training">Training &amp; Development</a></li><li><a href="/service?s=consulting">Workforce Consulting</a></li></ul></div>' +
     '    <div class="footer-col"><h5>Industries</h5><ul>' +
     '      <li><a href="' + h('industries') + '">Banking &amp; Finance</a></li><li><a href="' + h('industries') + '">Healthcare</a></li>' +
     '      <li><a href="' + h('industries') + '">Government</a></li><li><a href="' + h('industries') + '">Technology</a></li>' +
