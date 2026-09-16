@@ -1161,6 +1161,22 @@ input, select, textarea { font-family: var(--font-body); }
 #services .services-grid .service-card .svc-arrow{ position:absolute; z-index:2; top:18px; right:18px; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); transition:background .22s, transform .22s, border-color .22s; }
 #services .services-grid .service-card:hover .svc-arrow{ background:var(--red); border-color:var(--red); transform:translateY(-2px) rotate(-2deg); }
 #services .services-grid .service-card .svc-arrow svg{ width:17px; height:17px; }
+/* ---- Skeleton loaders: dark service cards + light event cards ---- */
+@keyframes cntSheen{100%{transform:translateX(100%)}}
+#services .services-grid .svc-skel{ position:relative; overflow:hidden; min-height:clamp(300px,33vw,380px); border-radius:16px; background:linear-gradient(150deg,#1c2028 0%,#12141a 100%); box-shadow:0 14px 34px -18px rgba(16,24,40,.5); display:flex; flex-direction:column; justify-content:flex-end; padding:0 28px clamp(26px,3vw,34px); }
+#services .services-grid .svc-skel .sk{ border-radius:7px; background:rgba(255,255,255,.08); }
+#services .services-grid .svc-skel .sk-t{ height:26px; width:60%; margin-bottom:15px; }
+#services .services-grid .svc-skel .sk-l{ height:13px; width:90%; margin-bottom:9px; }
+#services .services-grid .svc-skel .sk-l2{ height:13px; width:70%; }
+#events-grid .ev-skel{ position:relative; overflow:hidden; border-radius:16px; background:#fff; border:1px solid #EAECEF; padding:22px; min-height:230px; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+#events-grid .ev-skel .sk{ border-radius:6px; background:#EAECEF; }
+#events-grid .ev-skel .sk-tag{ height:18px; width:38%; margin-bottom:22px; }
+#events-grid .ev-skel .sk-t{ height:20px; width:82%; margin-bottom:16px; }
+#events-grid .ev-skel .sk-l{ height:12px; width:96%; margin-bottom:10px; }
+#events-grid .ev-skel .sk-l2{ height:12px; width:64%; }
+.svc-skel::after,.ev-skel::after{ content:''; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(100deg,transparent 32%,rgba(255,255,255,.10) 50%,transparent 68%); animation:cntSheen 1.5s ease-in-out infinite; }
+#events-grid .ev-skel::after{ background:linear-gradient(100deg,transparent 32%,rgba(255,255,255,.55) 50%,transparent 68%); }
+@media(prefers-reduced-motion:reduce){ .svc-skel::after,.ev-skel::after{ animation:none; } }
 /* For Employers / Jobseekers paths */
 .paths-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 2.5vw, 28px); }
 .path-card { border: 1px solid var(--gray-100); border-radius: 20px; padding: clamp(1.8rem, 3vw, 2.6rem); background: var(--white); transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease; }
@@ -1476,12 +1492,21 @@ input, select, textarea { font-family: var(--font-body); }
 // clickable to the service detail page. Dark gradient shows until a photo is uploaded.
 (function(){
   var grid=document.querySelector('#services .services-grid'); if(!grid) return;
+  var fallbackHTML=grid.innerHTML;   // hardcoded cards, kept for no-JS / DB-down
   var arrow='<span class="svc-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
   var esc=function(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
   function bind(c,slug){ c.setAttribute('role','link'); c.setAttribute('tabindex','0'); c.addEventListener('click',function(){ location.href='/service?s='+slug; }); c.addEventListener('keydown',function(e){ if(e.key==='Enter') location.href='/service?s='+slug; }); }
 
+  function skeleton(){
+    var one='<div class="svc-skel"><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div>';
+    grid.setAttribute('aria-busy','true');
+    grid.innerHTML=new Array(7).join(one);   // 6 placeholder cards
+  }
+
   // Fallback: enrich the hardcoded cards (only runs if the DB is unreachable).
   function enrichFallback(){
+    grid.removeAttribute('aria-busy');
+    if(grid.querySelector('.svc-skel')) grid.innerHTML=fallbackHTML;   // restore if skeleton was shown
     var slugs=['executive-search','mass-hiring','hr-outsourcing','payroll','consulting','training'];
     [].slice.call(grid.querySelectorAll('.service-card')).forEach(function(c,i){
       var slug=slugs[i]; if(!slug) return;
@@ -1494,10 +1519,12 @@ input, select, textarea { font-family: var(--font-body); }
 
   var sb=window.getSupabase && window.getSupabase();
   if(!sb){ enrichFallback(); return; }
+  skeleton();
   // DB-driven: show only PUBLISHED services, sorted alphabetically by title. Deleting
   // or unpublishing a service in Content Studio removes it from the homepage automatically.
   sb.from('services').select('slug,title,category,tagline,overview,image_url').eq('published',true).order('title',{ascending:true}).then(function(res){
     if(res.error || !res.data || !res.data.length){ enrichFallback(); return; }
+    grid.removeAttribute('aria-busy');
     grid.innerHTML=res.data.map(function(s){
       var desc=esc(s.tagline||s.overview||'');
       var bg=s.image_url ? ' style="background-image:url(\''+String(s.image_url).replace(/["\\']/g,'')+'\')"' : '';
@@ -3221,9 +3248,14 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
   var grid=document.getElementById('events-grid');
   if(!grid){ /* nothing to do */ }
   else if(!sb){ hideSection('events'); }
-  else sb.from('events').select('*').eq('published',true).order('created_at',{ascending:false}).limit(9).then(function(res){
+  else {
+    var _evSkel='<div class="ev-skel"><div class="sk sk-tag"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div>';
+    grid.setAttribute('aria-busy','true');
+    grid.innerHTML=new Array(4).join(_evSkel);   // 3 placeholder cards while loading
+    sb.from('events').select('*').eq('published',true).order('created_at',{ascending:false}).limit(9).then(function(res){
     var data=res.data;
     if(res.error||!data||!data.length){ hideSection('events'); return; }
+    grid.removeAttribute('aria-busy');
     grid.innerHTML=data.map(function(ev){
       var date=esc(ev.event_date||''), cat=esc(ev.category||'Update'), link='/event?id='+encodeURIComponent(ev.id);
       return '<div class="service-card" style="cursor:pointer;" onclick="location.href=\''+link+'\'">'
@@ -3237,7 +3269,8 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
         +'<a href="'+link+'" class="service-link">Read more <span>→</span></a>'
       +'</div>';
     }).join('');
-  }, function(){ hideSection('events'); });
+    }, function(){ hideSection('events'); });
+  }
 
   // Latest Openings — pull the newest open jobs from the same table careers.html
   // uses, and show them as cards linking straight to the role. Hidden if none.

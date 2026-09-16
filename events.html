@@ -54,6 +54,18 @@
     .ev-card:hover .go svg{transform:translateX(4px)}
     .state{padding:80px 0;text-align:center;color:var(--muted)}
     .state h3{font-family:'Manrope',sans-serif;font-size:1.3rem;color:var(--charcoal);margin-bottom:.5rem}
+    /* Skeleton loader — mirrors .ev-card while the events load */
+    .ev-skel{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#fff}
+    .ev-skel .sk-thumb{aspect-ratio:16/10;background:#EAECEF}
+    .ev-skel .sk-body{padding:clamp(1.3rem,2vw,1.6rem)}
+    .ev-skel .sk{border-radius:6px;background:#EAECEF}
+    .ev-skel .sk-tag{height:16px;width:36%;margin-bottom:18px}
+    .ev-skel .sk-t{height:20px;width:84%;margin-bottom:16px}
+    .ev-skel .sk-l{height:12px;width:96%;margin-bottom:10px}
+    .ev-skel .sk-l2{height:12px;width:62%}
+    .ev-skel::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(100deg,transparent 32%,rgba(255,255,255,.55) 50%,transparent 68%);animation:cntSheen 1.5s ease-in-out infinite}
+    @keyframes cntSheen{100%{transform:translateX(100%)}}
+    @media(prefers-reduced-motion:reduce){.ev-skel::after{animation:none}}
     /* Newsletter strip */
     .ev-sub{background:#FAFAF9;border-top:1px solid var(--line);padding:clamp(44px,7vw,72px) 0;text-align:center}
     .ev-sub h2{font-family:'Manrope',sans-serif;font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:800;letter-spacing:-.02em;color:var(--charcoal)}
@@ -83,7 +95,14 @@
 
   <section class="ev-sec">
     <div class="wrap">
-      <div id="ev-grid" class="ev-grid"><div class="state">Loading the latest events…</div></div>
+      <div id="ev-grid" class="ev-grid" aria-busy="true">
+        <article class="ev-skel"><div class="sk-thumb"></div><div class="sk-body"><div class="sk sk-tag"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div></article>
+        <article class="ev-skel"><div class="sk-thumb"></div><div class="sk-body"><div class="sk sk-tag"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div></article>
+        <article class="ev-skel"><div class="sk-thumb"></div><div class="sk-body"><div class="sk sk-tag"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div></article>
+        <article class="ev-skel"><div class="sk-thumb"></div><div class="sk-body"><div class="sk sk-tag"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div></article>
+        <article class="ev-skel"><div class="sk-thumb"></div><div class="sk-body"><div class="sk sk-tag"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div></article>
+        <article class="ev-skel"><div class="sk-thumb"></div><div class="sk-body"><div class="sk sk-tag"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div></div></article>
+      </div>
     </div>
   </section>
 
@@ -130,6 +149,7 @@
 
     function empty(){
       grid.className='';
+      grid.removeAttribute('aria-busy');
       grid.innerHTML='<div class="state"><h3>No events yet</h3><p>New job fairs, hiring drives and announcements will appear here. In the meantime, explore our <a href="/careers" style="color:var(--red);font-weight:600;">open positions</a>.</p></div>';
     }
 
@@ -140,6 +160,7 @@
         var data=res && res.data;
         if(res.error || !data || !data.length){ empty(); return; }
         grid.className='ev-grid';
+        grid.removeAttribute('aria-busy');
         grid.innerHTML=data.map(card).join('');
       }, function(){ empty(); });
 

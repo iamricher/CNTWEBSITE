@@ -47,6 +47,17 @@
     .cat-head h2{font-family:'Manrope',sans-serif;font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:800;letter-spacing:-.02em;color:var(--charcoal)}
     .cat-head p{color:var(--sub);margin-top:.6rem;max-width:60ch}
     .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.4vw,28px)}
+    /* Skeleton loader — shown while services load from Content Studio */
+    .svc-skel{position:relative;overflow:hidden;border:1px solid #E9ECEF;border-radius:16px;background:#fff;padding:28px;min-height:250px}
+    .svc-skel .sk{border-radius:6px;background:#EAECEF}
+    .svc-skel .sk-ic{width:44px;height:44px;border-radius:12px;margin-bottom:22px}
+    .svc-skel .sk-t{height:22px;width:62%;margin-bottom:18px}
+    .svc-skel .sk-l{height:12px;width:96%;margin-bottom:10px}
+    .svc-skel .sk-l2{height:12px;width:80%;margin-bottom:24px}
+    .svc-skel .sk-row{height:12px;width:72%;margin-bottom:11px}
+    .svc-skel::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(100deg,transparent 32%,rgba(255,255,255,.55) 50%,transparent 68%);animation:cntSheen 1.5s ease-in-out infinite}
+    @keyframes cntSheen{100%{transform:translateX(100%)}}
+    @media(prefers-reduced-motion:reduce){.svc-skel::after{animation:none}}
     .svc-card{border:1px solid var(--line);border-radius:16px;padding:clamp(1.5rem,2.4vw,2rem);background:#fff;display:flex;flex-direction:column;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
     .svc-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(16,24,40,.10);border-color:#F3B6BF}
     .svc-ic{display:none}
@@ -196,15 +207,24 @@
         else go.insertBefore(document.createTextNode('Learn more '), go.firstChild);
       });
     }
+    var grid=document.querySelector('.svc-grid');
+    var fallbackHTML=grid?grid.innerHTML:'';   // keep the hardcoded cards for no-JS / DB-down
+    function restoreFallback(){ if(grid){ grid.removeAttribute('aria-busy'); if(grid.querySelector('.svc-skel')) grid.innerHTML=fallbackHTML; } fallbackLinks(); }
+    function skeleton(){
+      if(!grid) return;
+      var one='<div class="svc-skel"><div class="sk sk-ic"></div><div class="sk sk-t"></div><div class="sk sk-l"></div><div class="sk sk-l2"></div><div class="sk sk-row"></div><div class="sk sk-row" style="width:60%"></div><div class="sk sk-row" style="width:66%"></div></div>';
+      grid.setAttribute('aria-busy','true');
+      grid.innerHTML=new Array(7).join(one);   // 6 placeholder cards
+    }
     var sb=window.getSupabase && window.getSupabase();
-    if(!sb){ fallbackLinks(); return; }
+    if(!sb){ restoreFallback(); return; }
+    skeleton();
     // One unified list of all published services, sorted alphabetically by title.
     sb.from('services').select('*').eq('published',true).order('title',{ascending:true}).then(function(res){
       var rows=res && res.data;
-      if(res.error || !rows || !rows.length){ fallbackLinks(); return; }
-      var grid=document.querySelector('.svc-grid');
-      if(grid) grid.innerHTML=rows.map(card).join('');
-    }, function(){ fallbackLinks(); });
+      if(res.error || !rows || !rows.length){ restoreFallback(); return; }
+      if(grid){ grid.removeAttribute('aria-busy'); grid.innerHTML=rows.map(card).join(''); }
+    }, function(){ restoreFallback(); });
   })();
   </script>
 </body>
