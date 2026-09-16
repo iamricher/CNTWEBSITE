@@ -2261,6 +2261,17 @@ input, select, textarea { font-family: var(--font-body); }
 </section>
 
 <!-- ============================= CONTACT ============================= -->
+<style>
+  /* Messenger CTA — the #1 contact channel for the PH audience */
+  .msgr-cta{display:flex;align-items:center;gap:13px;width:100%;margin-top:18px;padding:14px 18px;border-radius:14px;background:linear-gradient(92deg,#00B2FF 0%,#0A7CFF 55%,#006AFF 100%);color:#fff;text-decoration:none;box-shadow:0 12px 26px -12px rgba(0,106,255,.6);transition:transform .18s ease,box-shadow .18s ease}
+  .msgr-cta:hover{transform:translateY(-2px);box-shadow:0 18px 34px -14px rgba(0,106,255,.7)}
+  .msgr-cta:focus-visible{outline:3px solid rgba(0,106,255,.5);outline-offset:2px}
+  .msgr-cta .mi-ic{flex:none;width:36px;height:36px;display:grid;place-items:center;background:rgba(255,255,255,.2);border-radius:50%}
+  .msgr-cta .mi-ic svg{width:21px;height:21px}
+  .msgr-cta .mi-tx{display:flex;flex-direction:column;line-height:1.22}
+  .msgr-cta .mi-tx b{font-family:var(--font-display,'Manrope',sans-serif);font-weight:800;font-size:.98rem}
+  .msgr-cta .mi-tx small{font-size:.76rem;opacity:.88}
+</style>
 <section class="contact section" id="contact" aria-label="Contact CNT">
   <div class="container">
     <div class="contact-head" data-reveal>
@@ -2296,7 +2307,7 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
             <div>
               <strong>Email</strong>
-              <span>hrdadmin@cntpromoads.com</span>
+              <a href="mailto:hrdadmin@cntpromoads.com">hrdadmin@cntpromoads.com</a>
             </div>
           </div>
           <div class="contact-item">
@@ -2309,6 +2320,11 @@ input, select, textarea { font-family: var(--font-body); }
             </div>
           </div>
         </div>
+
+        <a class="msgr-cta" href="https://m.me/CntPromoAds" target="_blank" rel="noopener" aria-label="Message CNT on Facebook Messenger">
+          <span class="mi-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.19 5.44 3.14 7.17.16.14.26.35.27.56l.05 1.78c.02.57.6.94 1.12.71l1.99-.88c.16-.07.34-.09.5-.04.91.25 1.88.39 2.83.39 5.64 0 10-4.13 10-9.7C22 6.13 17.64 2 12 2zm6 7.46l-2.93 4.65c-.47.74-1.47.93-2.17.4l-2.33-1.75a.6.6 0 0 0-.72 0l-3.15 2.39c-.42.32-.97-.18-.69-.62l2.93-4.65c.47-.74 1.47-.92 2.17-.4l2.33 1.75c.21.16.5.16.72 0l3.15-2.39c.42-.32.97.18.69.62z"/></svg></span>
+          <span class="mi-tx"><b>Message us on Messenger</b><small>The fastest way to reach us</small></span>
+        </a>
 
         <div class="contact-map-wrap">
           <iframe
