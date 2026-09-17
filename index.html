@@ -1025,45 +1025,16 @@ input, select, textarea { font-family: var(--font-body); }
 
 /* ── BACK TO TOP ───────────────────────────────────────────── */
 .back-to-top {
-  position: fixed; bottom: calc(2rem + 66px); right: 2rem;   /* stacked above the Messenger FAB */
-  width: 50px; height: 50px; background: #1f232b; border-radius: 50%;
+  position: fixed; bottom: 2rem; right: 2rem;
+  width: 50px; height: 50px; background: var(--red); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: var(--white); box-shadow: 0 10px 26px -10px rgba(16,24,40,.6);
+  color: var(--white); box-shadow: var(--shadow-red);
   z-index: 100; opacity: 0; transform: translateY(12px);
   transition: opacity var(--transition), transform var(--transition), background var(--transition-fast);
 }
 .back-to-top svg { width: 20px; height: 20px; }
 .back-to-top.visible { opacity: 1; transform: translateY(0); }
-.back-to-top:hover { background: #2b3038; }
-
-/* Floating Messenger button — always reachable; the PH audience's #1 channel */
-.msgr-fab {
-  position: fixed; bottom: 2rem; right: 2rem;
-  width: 54px; height: 54px; border-radius: 50%; z-index: 101;
-  display: flex; align-items: center; justify-content: center; color: #fff;
-  background: linear-gradient(135deg, #E5213F 0%, #C8102E 55%, #A50D24 100%);
-  box-shadow: 0 12px 28px -8px rgba(200,16,46,.55);
-  transition: transform .2s ease, box-shadow .2s ease;
-}
-.msgr-fab svg { width: 26px; height: 26px; }
-.msgr-fab:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 18px 36px -10px rgba(200,16,46,.66); }
-.msgr-fab:focus-visible { outline: 3px solid rgba(200,16,46,.5); outline-offset: 3px; }
-.msgr-fab::after {
-  content: attr(data-tip); position: absolute; right: calc(100% + 12px); top: 50%;
-  transform: translateY(-50%) translateX(6px);
-  background: #12141a; color: #fff; font-size: .8rem; font-weight: 600; white-space: nowrap;
-  padding: 7px 11px; border-radius: 9px; opacity: 0; pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease; box-shadow: 0 8px 20px rgba(0,0,0,.25);
-}
-.msgr-fab:hover::after, .msgr-fab:focus-visible::after { opacity: 1; transform: translateY(-50%) translateX(0); }
-@media (prefers-reduced-motion: no-preference) {
-  .msgr-fab { animation: msgrPulse 2.8s ease-out infinite; }
-  @keyframes msgrPulse {
-    0%   { box-shadow: 0 12px 28px -8px rgba(200,16,46,.55), 0 0 0 0 rgba(200,16,46,.45); }
-    70%  { box-shadow: 0 12px 28px -8px rgba(200,16,46,.55), 0 0 0 14px rgba(200,16,46,0); }
-    100% { box-shadow: 0 12px 28px -8px rgba(200,16,46,.55), 0 0 0 0 rgba(200,16,46,0); }
-  }
-}
+.back-to-top:hover { background: var(--red-lt); }
 
 /* ── REVEAL ANIMATIONS ─────────────────────────────────────── */
 [data-reveal] {
@@ -1125,11 +1096,8 @@ input, select, textarea { font-family: var(--font-body); }
   .cta-actions    { flex-direction: column; align-items: center; }
   .section-header { flex-direction: column; align-items: flex-start; }
   .trust-bar-inner { gap: 1.5rem; }
-  /* tuck the FABs into the corner so they clear the swiper controls */
-  .msgr-fab { bottom: 1rem; right: 1rem; width: 48px; height: 48px; }
-  .msgr-fab svg { width: 23px; height: 23px; }
-  .msgr-fab::after { display: none; }   /* no hover tooltip on touch */
-  .back-to-top { bottom: calc(1rem + 58px); right: 1rem; width: 44px; height: 44px; }
+  /* tuck the back-to-top into the corner so it clears the swiper controls */
+  .back-to-top { bottom: 1rem; right: 1rem; width: 44px; height: 44px; }
   /* on touch, swiping is natural — drop the side arrows so nothing overlaps */
   .testimonials-carousel { padding: 0; }
   .testimonials-carousel .swiper-button-prev,
@@ -2423,9 +2391,6 @@ input, select, textarea { font-family: var(--font-body); }
 <div id="site-footer"></div>
 
 <!-- BACK TO TOP -->
-<a class="msgr-fab" id="msgrFab" href="https://m.me/CntPromoAds" target="_blank" rel="noopener" data-tip="Chat with us on Messenger" aria-label="Message CNT on Facebook Messenger">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.19 5.44 3.14 7.17.16.14.26.35.27.56l.05 1.78c.02.57.6.94 1.12.71l1.99-.88c.16-.07.34-.09.5-.04.91.25 1.88.39 2.83.39 5.64 0 10-4.13 10-9.7C22 6.13 17.64 2 12 2zm6 7.46l-2.93 4.65c-.47.74-1.47.93-2.17.4l-2.33-1.75a.6.6 0 0 0-.72 0l-3.15 2.39c-.42.32-.97-.18-.69-.62l2.93-4.65c.47-.74 1.47-.92 2.17-.4l2.33 1.75c.21.16.5.16.72 0l3.15-2.39c.42-.32.97.18.69.62z"/></svg>
-</a>
 <button class="back-to-top" id="backToTop" aria-label="Back to top">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
 </button>
