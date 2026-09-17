@@ -95,7 +95,7 @@ window.CNT_STATS = [
     '  </div></div></div>' +
     '  <div class="footer-bottom"><div class="container">' +
     '    <p>&copy; ' + YEAR + ' CNT Promo &amp; Ads Specialists, Inc. All rights reserved.</p>' +
-    '    <div class="footer-bottom-links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/content-studio">Content Studio</a></div>' +
+    '    <div class="footer-bottom-links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a></div>' +
     '  </div></div>' +
     '  <div class="footer-red-bar"></div>' +
     '</footer>';
