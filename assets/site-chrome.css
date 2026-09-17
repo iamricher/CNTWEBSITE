@@ -60,7 +60,8 @@
   box-shadow:0 1px 0 rgba(0,0,0,.06), 0 8px 32px rgba(0,0,0,.07);
 }
 .nav-container{
-  width:min(1300px, 100% - 40px); margin-inline:auto;
+  width:100%; max-width:none; margin:0; box-sizing:border-box;
+  padding-inline:var(--gutter, clamp(20px,5vw,80px));   /* align the logo with the page's content gutter (matches the overlay nav) */
   display:flex; align-items:center; gap:1.25rem;
 }
 .nav-logo img{ height:36px; width:auto; }
