@@ -66,6 +66,18 @@
       .gallery a:nth-child(6n+5){grid-column:span 2}
     }
     .state{padding:80px 0;text-align:center;color:var(--gray-600)}
+    /* Other events & updates */
+    .more-events{margin-top:clamp(44px,6vw,72px);padding-top:clamp(30px,4vw,44px);border-top:1px solid #ECEFF3}
+    .more-events .me-title{font-family:'Manrope',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--charcoal);margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid var(--red);display:inline-block}
+    .me-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .me-card{display:block;border:1px solid #ECEFF3;border-radius:14px;overflow:hidden;background:#fff;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+    .me-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px -20px rgba(16,24,40,.28);border-color:#F3B6BF}
+    .me-card .me-thumb{aspect-ratio:16/10;background:#f3f4f6 center/cover no-repeat}
+    .me-card .me-body{padding:14px 16px 16px}
+    .me-card .me-date{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--red)}
+    .me-card .me-h{font-family:'Manrope',sans-serif;font-size:1rem;font-weight:800;color:#12141a;line-height:1.25;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    @media(max-width:640px){.me-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:440px){.me-grid{grid-template-columns:1fr}}
     /* Lightbox — click a photo to open a full viewer with prev/next */
     .lb{position:fixed;inset:0;z-index:9000;background:rgba(10,10,12,.94);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .22s ease;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
     .lb.open{display:flex;opacity:1}
@@ -160,6 +172,16 @@
       }
       el.innerHTML='<div class="body">'+(paras||'<p></p>')+'</div>'+gallery;
       if(pics.length) initLightbox(pics, el);
+      // Other events & updates — a few more published events to explore.
+      Promise.resolve(sb.from('events').select('id,title,event_date,category,image_url').eq('published',true).neq('id',id).order('created_at',{ascending:false}).limit(3)).then(function(r){
+        var rows=r&&r.data; if(!rows||!rows.length) return;
+        var card=function(o){
+          var link='/event?id='+encodeURIComponent(o.id);
+          var bg=o.image_url?' style="background-image:url(\''+esc(o.image_url)+'\')"':'';
+          return '<a class="me-card" href="'+link+'"><div class="me-thumb"'+bg+'></div><div class="me-body"><div class="me-date">'+esc(o.event_date||o.category||'Update')+'</div><div class="me-h">'+esc(o.title||'')+'</div></div></a>';
+        };
+        el.insertAdjacentHTML('beforeend','<div class="more-events"><div class="me-title">Other events &amp; updates</div><div class="me-grid">'+rows.map(card).join('')+'</div></div>');
+      }, function(){});
     });
 
     // Full-screen photo viewer: click any gallery photo, then step through

@@ -267,8 +267,10 @@
           + '<a class="oc-btn" href="/careers">See open positions '+arrowSvg+'</a>'
           + '</div></div></section>';
         var SVCS=[['executive-search','Executive Search'],['mass-hiring','Mass & Bulk Hiring'],['hr-outsourcing','HR Outsourcing'],['payroll','Payroll Management'],['training','Training & Development'],['consulting','Workforce Consulting']];
-        var servicesChips = '<section class="section tight"><div class="wrap"><div class="sec-head"><span class="eyebrow">Explore more</span><h2>Our services</h2></div><div class="svc-chips">'
-          + SVCS.map(function(s){ return '<a class="svc-chip" href="/service?s='+s[0]+'">'+esc(s[1])+'</a>'; }).join('')
+        var svcChip=function(slug,title){ return '<a class="svc-chip" href="/service?s='+encodeURIComponent(slug)+'">'+esc(title)+'</a>'; };
+        var shuffle=function(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)),t=a[i]; a[i]=a[j]; a[j]=t; } return a; };
+        var servicesChips = '<section class="section tight"><div class="wrap"><div class="sec-head"><span class="eyebrow">Explore more</span><h2>Our services</h2></div><div class="svc-chips" id="svc-chip-row">'
+          + shuffle(SVCS).map(function(s){ return svcChip(s[0],s[1]); }).join('')   /* hardcoded fallback (shuffled); replaced by the DB list below */
           + '</div></div></section>';
 
         mount.innerHTML = crumb
@@ -295,6 +297,17 @@
             + '<button class="lb-btn lb-next" id="lb-next" aria-label="Next photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>'
             + '<div class="lb-count" id="lb-count"></div>'
           + '</div>';
+
+        // Services chips: pull the live published services from the DB and show
+        // them in a random order (falls back to the hardcoded shuffled list).
+        var sbx = window.getSupabase && window.getSupabase();
+        if (sbx) {
+          Promise.resolve(sbx.from('services').select('slug,title').eq('published', true)).then(function (r) {
+            var rows = r && r.data, rowEl = document.getElementById('svc-chip-row');
+            if (!rowEl || !rows || !rows.length) return;
+            rowEl.innerHTML = shuffle(rows).map(function (s) { return svcChip(s.slug, s.title); }).join('');
+          }, function () {});
+        }
 
         // ── lightbox: click any gallery photo → fullscreen with prev/next ──
         if(ph.length){
