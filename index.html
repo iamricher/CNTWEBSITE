@@ -370,9 +370,7 @@ input, select, textarea { font-family: var(--font-body); }
 .hero-scroll:hover { color: #fff; }
 .hero-scroll .mouse { width: 24px; height: 38px; border: 2px solid rgba(255,255,255,.32); border-radius: 14px; position: relative; transition: border-color .22s ease; }
 .hero-scroll:hover .mouse { border-color: rgba(255,255,255,.7); }
-.hero-scroll .mouse::after { content: ''; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; border-radius: 2px; background: var(--red-lt,#E5213F); transform: translateX(-50%); animation: heroWheel 1.9s ease-in-out infinite; }
-@keyframes heroWheel { 0% { opacity: 0; transform: translate(-50%,0); } 28% { opacity: 1; } 60% { opacity: 1; transform: translate(-50%,11px); } 100% { opacity: 0; transform: translate(-50%,11px); } }
-@media (prefers-reduced-motion: reduce) { .hero-scroll .mouse::after { animation: none; top: 12px; } }
+.hero-scroll .mouse::after { content: ''; position: absolute; left: 50%; top: 12px; width: 3px; height: 7px; border-radius: 2px; background: var(--red-lt,#E5213F); transform: translateX(-50%); }
 @media (max-width: 768px) { .hero-scroll { display: none; } }
 
 /* Content side */
