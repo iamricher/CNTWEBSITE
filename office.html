@@ -93,6 +93,18 @@
     .btn-maps:hover{background:var(--red-lt);transform:translateY(-2px)}
     .btn-apply{background:#fff;color:var(--charcoal);border:1px solid #E3E7EE}
     .btn-apply:hover{border-color:var(--red);color:var(--red);transform:translateY(-2px)}
+    /* Careers CTA band + services chips (after the gallery) */
+    .office-cta{display:flex;align-items:center;justify-content:space-between;gap:clamp(20px,4vw,40px);flex-wrap:wrap;background:linear-gradient(120deg,#16181d 0%,#0e0f13 100%);color:#fff;border-radius:20px;padding:clamp(28px,4vw,46px) clamp(26px,4vw,50px);position:relative;overflow:hidden}
+    .office-cta::after{content:'';position:absolute;right:-6%;top:-40%;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.28),transparent 62%);pointer-events:none}
+    .office-cta .oc-tx{position:relative;z-index:1;max-width:52ch}
+    .office-cta h2{font-family:var(--display);font-size:clamp(1.4rem,2.6vw,2rem);font-weight:800;letter-spacing:-.02em;line-height:1.12;margin-top:14px;color:#fff}
+    .office-cta p{color:rgba(255,255,255,.72);margin-top:10px;font-size:1.02rem}
+    .office-cta .oc-btn{position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:.95rem;padding:14px 26px;border-radius:12px;background:#fff;color:var(--charcoal);transition:transform .16s,box-shadow .16s,color .16s}
+    .office-cta .oc-btn:hover{transform:translateY(-2px);color:var(--red);box-shadow:0 16px 34px -14px rgba(0,0,0,.5)}
+    .svc-chips{display:flex;flex-wrap:wrap;gap:12px}
+    .svc-chip{display:inline-flex;align-items:center;padding:11px 20px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:700;font-size:.95rem;color:var(--charcoal);transition:border-color .16s,color .16s,transform .16s,box-shadow .16s}
+    .svc-chip:hover{border-color:var(--red);color:var(--red);transform:translateY(-2px);box-shadow:0 10px 24px -12px rgba(200,16,46,.4)}
+    @media(max-width:600px){.office-cta .oc-btn{width:100%;justify-content:center}}
     /* ── Editorial photo mosaic ── */
     .showcase{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:clamp(138px,14.5vw,188px);gap:14px;grid-auto-flow:dense}
     .showcase figure{position:relative;margin:0;border-radius:16px;overflow:hidden;background:#e9edf2;box-shadow:0 1px 2px rgba(16,24,40,.04),0 22px 48px -28px rgba(16,24,40,.32);cursor:zoom-in}
@@ -249,6 +261,16 @@
           + '</div></div></section>'
           : '';
 
+        // After the gallery: a careers CTA + a chip row linking to our services.
+        var careersCta = '<section class="section tight"><div class="wrap"><div class="office-cta">'
+          + '<div class="oc-tx"><span class="eyebrow">We\'re hiring</span><h2>Looking for your next opportunity?</h2><p>Explore our open positions and apply online in minutes — no fees, ever.</p></div>'
+          + '<a class="oc-btn" href="/careers">See open positions '+arrowSvg+'</a>'
+          + '</div></div></section>';
+        var SVCS=[['executive-search','Executive Search'],['mass-hiring','Mass & Bulk Hiring'],['hr-outsourcing','HR Outsourcing'],['payroll','Payroll Management'],['training','Training & Development'],['consulting','Workforce Consulting']];
+        var servicesChips = '<section class="section tight"><div class="wrap"><div class="sec-head"><span class="eyebrow">Explore more</span><h2>Our services</h2></div><div class="svc-chips">'
+          + SVCS.map(function(s){ return '<a class="svc-chip" href="/service?s='+s[0]+'">'+esc(s[1])+'</a>'; }).join('')
+          + '</div></div></section>';
+
         mount.innerHTML = crumb
           + mapHero
           + '<div class="office-body"><div class="wrap">'
@@ -264,6 +286,8 @@
             + (soon?'<div class="cta-row"><a class="btn-maps" href="/careers">Apply online '+arrowSvg+'</a><a class="btn-apply" href="/office?id=mandaluyong">Visit our head office</a></div>':'')
           + '</div></div>'
           + gallerySection
+          + careersCta
+          + servicesChips
           + '<div class="lb" id="lb" aria-hidden="true">'
             + '<button class="lb-btn lb-close" id="lb-close" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
             + '<button class="lb-btn lb-prev" id="lb-prev" aria-label="Previous photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>'
