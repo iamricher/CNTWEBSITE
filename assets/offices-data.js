@@ -22,7 +22,7 @@ window.CNT_OFFICES = [
     address:'219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St., Brgy. Bagong Silang, 1550 Mandaluyong, Philippines',
     person:'',
     phone:'(02) 8293-5269', tel:'+63282935269',
-    hours:'Monday – Friday: 8:30 AM – 6:30 PM\nSaturday: 8:30 AM – 3:00 PM',
+    hours:'Monday – Friday: 8:30 AM – 7:00 PM\nSaturday & Sunday: Closed',
     email:'hrdadmin@cntpromoads.com',
     emailNote:'Temporary — a dedicated branch email is coming soon.',
     maps:'https://maps.app.goo.gl/Ud5JvjJwZJmpBLyM7',
