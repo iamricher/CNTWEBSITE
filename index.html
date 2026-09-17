@@ -1024,17 +1024,7 @@ input, select, textarea { font-family: var(--font-body); }
 /* Footer styles live in assets/site-chrome.css (shared chrome) */
 
 /* ── BACK TO TOP ───────────────────────────────────────────── */
-.back-to-top {
-  position: fixed; bottom: 2rem; right: 2rem;
-  width: 50px; height: 50px; background: var(--red); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--white); box-shadow: var(--shadow-red);
-  z-index: 100; opacity: 0; transform: translateY(12px);
-  transition: opacity var(--transition), transform var(--transition), background var(--transition-fast);
-}
-.back-to-top svg { width: 20px; height: 20px; }
-.back-to-top.visible { opacity: 1; transform: translateY(0); }
-.back-to-top:hover { background: var(--red-lt); }
+/* Back-to-top is now injected site-wide by assets/site-chrome.js (.cnt-totop). */
 
 /* ── REVEAL ANIMATIONS ─────────────────────────────────────── */
 [data-reveal] {
@@ -1096,8 +1086,6 @@ input, select, textarea { font-family: var(--font-body); }
   .cta-actions    { flex-direction: column; align-items: center; }
   .section-header { flex-direction: column; align-items: flex-start; }
   .trust-bar-inner { gap: 1.5rem; }
-  /* tuck the back-to-top into the corner so it clears the swiper controls */
-  .back-to-top { bottom: 1rem; right: 1rem; width: 44px; height: 44px; }
   /* on touch, swiping is natural — drop the side arrows so nothing overlaps */
   .testimonials-carousel { padding: 0; }
   .testimonials-carousel .swiper-button-prev,
@@ -2391,9 +2379,6 @@ input, select, textarea { font-family: var(--font-body); }
 <div id="site-footer"></div>
 
 <!-- BACK TO TOP -->
-<button class="back-to-top" id="backToTop" aria-label="Back to top">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
-</button>
 
 <script>
 /* ==========================================================
@@ -2850,25 +2835,7 @@ function initHeroAnimations() {
   });
 })();
 
-// ── BACK TO TOP ────────────────────────────────────────────
-(function initBackToTop() {
-  const btn = qs('#backToTop');
-  if (!btn) return;
-
-  // Show the back-to-top only near the very bottom of the page (the Messenger
-  // FAB below it is always visible; this keeps the corner clear mid-scroll).
-  const toggleBtt = () => {
-    const nearBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 600);
-    btn.classList.toggle('visible', nearBottom);
-  };
-  window.addEventListener('scroll', toggleBtt, { passive: true });
-  window.addEventListener('resize', toggleBtt, { passive: true });
-  toggleBtt();
-
-  btn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-})();
+// Back-to-top is injected site-wide by assets/site-chrome.js (.cnt-totop).
 
 // ── SERVICE CARD hover enhancement ─────────────────────────
 (function initServiceCards() {

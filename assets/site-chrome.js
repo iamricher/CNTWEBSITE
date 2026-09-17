@@ -172,6 +172,26 @@ window.CNT_STATS = [
     });
   }
 
+  // Back-to-top button — injected on every page. Appears only once the visitor
+  // has scrolled near the very bottom, then smooth-scrolls back to the top.
+  function backToTop() {
+    if (document.querySelector('.cnt-totop, .back-to-top')) return; // never double up
+    var btn = document.createElement('button');
+    btn.className = 'cnt-totop';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Back to top');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg>';
+    document.body.appendChild(btn);
+    var toggle = function () {
+      var nearBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 600);
+      btn.classList.toggle('visible', nearBottom);
+    };
+    window.addEventListener('scroll', toggle, { passive: true });
+    window.addEventListener('resize', toggle, { passive: true });
+    toggle();
+    btn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  }
+
   function init() {
     // PWA + mobile chrome (site-wide, once): brand theme-color for the mobile
     // browser UI, and the web app manifest for "Add to Home Screen".
@@ -199,6 +219,7 @@ window.CNT_STATS = [
     wireOverlayScroll(nav);
     ensureHeroClearsNav(nav);
     wireSmoothScroll(nav);
+    backToTop();
     handleInitialHash();
     wireNewsletter();
     // Respect a prior "Decline" choice: skip first-party analytics entirely.

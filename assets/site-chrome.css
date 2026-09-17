@@ -174,3 +174,20 @@
 @media (max-width:768px){
   .footer-grid{ grid-template-columns:1fr; }
 }
+
+/* Back-to-top button (injected by site-chrome.js on every page).
+   Hidden until the visitor scrolls near the bottom, then fades in. */
+.cnt-totop{
+  position:fixed; bottom:2rem; right:2rem; width:50px; height:50px;
+  border:0; border-radius:50%; background:#C8102E; color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; z-index:1000;
+  box-shadow:0 14px 30px -12px rgba(200,16,46,.55);
+  opacity:0; transform:translateY(12px); pointer-events:none;
+  transition:opacity .3s ease, transform .3s ease, background .18s ease;
+}
+.cnt-totop.visible{ opacity:1; transform:translateY(0); pointer-events:auto; }
+.cnt-totop:hover{ background:#E5213F; }
+.cnt-totop:focus-visible{ outline:3px solid rgba(200,16,46,.5); outline-offset:3px; }
+.cnt-totop svg{ width:20px; height:20px; }
+@media (max-width:768px){ .cnt-totop{ bottom:1rem; right:1rem; width:44px; height:44px; } }
+@media (prefers-reduced-motion:reduce){ .cnt-totop, .cnt-totop.visible{ transform:none; } }
