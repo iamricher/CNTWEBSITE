@@ -270,7 +270,7 @@
         var svcChip=function(slug,title){ return '<a class="svc-chip" href="/service?s='+encodeURIComponent(slug)+'">'+esc(title)+'</a>'; };
         var shuffle=function(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)),t=a[i]; a[i]=a[j]; a[j]=t; } return a; };
         var servicesChips = '<section class="section tight"><div class="wrap"><div class="sec-head"><span class="eyebrow">Explore more</span><h2>Our services</h2></div><div class="svc-chips" id="svc-chip-row">'
-          + shuffle(SVCS).map(function(s){ return svcChip(s[0],s[1]); }).join('')   /* hardcoded fallback (shuffled); replaced by the DB list below */
+          + shuffle(SVCS).slice(0,6).map(function(s){ return svcChip(s[0],s[1]); }).join('')   /* hardcoded fallback (shuffled, max 6); replaced by the DB list below */
           + '</div></div></section>';
 
         mount.innerHTML = crumb
@@ -305,7 +305,7 @@
           Promise.resolve(sbx.from('services').select('slug,title').eq('published', true)).then(function (r) {
             var rows = r && r.data, rowEl = document.getElementById('svc-chip-row');
             if (!rowEl || !rows || !rows.length) return;
-            rowEl.innerHTML = shuffle(rows).map(function (s) { return svcChip(s.slug, s.title); }).join('');
+            rowEl.innerHTML = shuffle(rows).slice(0, 6).map(function (s) { return svcChip(s.slug, s.title); }).join('');
           }, function () {});
         }
 

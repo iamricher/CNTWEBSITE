@@ -173,8 +173,10 @@
       el.innerHTML='<div class="body">'+(paras||'<p></p>')+'</div>'+gallery;
       if(pics.length) initLightbox(pics, el);
       // Other events & updates — a few more published events to explore.
-      Promise.resolve(sb.from('events').select('id,title,event_date,category,image_url').eq('published',true).neq('id',id).order('created_at',{ascending:false}).limit(3)).then(function(r){
+      Promise.resolve(sb.from('events').select('id,title,event_date,category,image_url').eq('published',true).neq('id',id).order('created_at',{ascending:false}).limit(24)).then(function(r){
         var rows=r&&r.data; if(!rows||!rows.length) return;
+        for(var i=rows.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)),t=rows[i]; rows[i]=rows[j]; rows[j]=t; }   // random order
+        rows=rows.slice(0,3);   // show up to 3
         var card=function(o){
           var link='/event?id='+encodeURIComponent(o.id);
           var bg=o.image_url?' style="background-image:url(\''+esc(o.image_url)+'\')"':'';
