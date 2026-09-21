@@ -698,17 +698,27 @@
       const { data, error } = await sb.rpc('cnt_notifications',{ p_limit:30 });
       if(error || !Array.isArray(data)) return;
       // Reverse so unshift leaves newest on top; sync read-state on ones we hold.
+      // Only ever promote to read — never resurrect a notification the user has
+      // already marked read locally (e.g. via "Mark all read") just because the
+      // server's read_at hasn't caught up yet.
       data.slice().reverse().forEach(n=>{
         const existing=notifStore.find(x=>x.key==='srv-'+n.id);
-        if(existing) existing.read=!!n.read_at;
+        if(existing){ if(n.read_at) existing.read=true; }
         else addNotif(notifFromServer(n));
       });
       renderBell();
     }catch(e){ /* offline / RPC missing: bell stays quiet */ }
   }
   function markAllRead(){
+    // Capture the server ids that are still unread BEFORE we flip them, so we can
+    // also mark each one individually — a fallback in case the bulk (p_id:null)
+    // variant of the RPC isn't deployed. Per-id is the same call single-read uses.
+    const unreadSrvIds = notifStore.filter(n=>!n.read && n._srvId!=null).map(n=>n._srvId);
     notifStore.forEach(n=>n.read=true); _setLastSeen(); renderBell();
-    if(sb) sb.rpc('cnt_notifications_read',{p_id:null}).catch(()=>{});
+    if(sb){
+      Promise.resolve(sb.rpc('cnt_notifications_read',{p_id:null})).catch(()=>{});
+      unreadSrvIds.forEach(id=>{ Promise.resolve(sb.rpc('cnt_notifications_read',{p_id:id})).catch(()=>{}); });
+    }
   }
   function injectBell(){
     if(document.getElementById('cnt-bell-wrap')){ renderBell(); return; }
