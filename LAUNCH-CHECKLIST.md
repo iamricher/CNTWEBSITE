@@ -73,9 +73,22 @@ replace it with the real domain everywhere:
 
 ## 9. SEO & monitoring
 
-- [ ] Google Search Console: add the property, submit `sitemap.xml`.
-- [ ] (Optional) Confirm analytics is recording.
-- [ ] Google Jobs: careers already emits `JobPosting` structured data — verify with Google's Rich Results Test.
+- [ ] **Google Search Console** — add the property. To verify by HTML tag: in
+      `index.html` `<head>`, uncomment the `google-site-verification` meta and
+      paste your code. Then **submit `sitemap.xml`**.
+- [ ] **Google Analytics 4 (optional)** — in `assets/site-chrome.js` set
+      `GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'` (from Analytics → Admin → Data
+      Streams). It loads on every page, only after cookie consent, and never on
+      localhost or for bots. The GA domains are already allowed in `vercel.json`
+      (CSP). The site also keeps its own first-party analytics (Content Studio →
+      Dashboard) regardless.
+- [ ] **Registration numbers (trust)** — in `assets/site-chrome.js` fill
+      `LICENSE = { dole, dti, sec }` with your real numbers; a footer line
+      appears automatically (blank fields stay hidden). Important for PH
+      recruitment credibility.
+- [ ] **Google Jobs** — careers already emits `JobPosting` structured data;
+      the homepage emits `EmploymentAgency` (LocalBusiness) data. Verify both
+      with Google's Rich Results Test after launch.
 
 ## 10. Content (via Content Studio) — see `CONTENT-GUIDE.md`
 

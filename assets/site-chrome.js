@@ -22,6 +22,15 @@ window.CNT_STATS = [
   var FOOTER_LOGO = '/assets/img/cnt-logo-white.png';
   var YEAR = new Date().getFullYear();
 
+  // ── LAUNCH CONFIG — fill these in before go-live ──────────────────────────
+  // Google Analytics 4 Measurement ID (from analytics.google.com → Admin →
+  // Data Streams). Leave blank to keep GA off. Loads only after cookie consent
+  // and never on localhost / for bots (see analyticsEnabled + initGA).
+  var GA_MEASUREMENT_ID = '';   // e.g. 'G-XXXXXXXXXX'
+  // Registration numbers shown in the footer for trust (a big deal in PH
+  // recruitment). Leave a field blank to hide it — nothing shows until set.
+  var LICENSE = { dole: '', dti: '', sec: '' };   // e.g. dole: 'NCR-MDLYNG-123456-2026'
+
   function navHTML(active, base, overlay) {
     var a = active || '';
     // base is '' on the homepage (same-page anchors) or '/index' on sub-pages.
@@ -94,6 +103,7 @@ window.CNT_STATS = [
     '    </div>' +
     '  </div></div></div>' +
     '  <div class="footer-bottom"><div class="container">' +
+    licenseHTML() +
     '    <p>&copy; ' + YEAR + ' CNT Promo &amp; Ads Specialists, Inc. All rights reserved.</p>' +
     '    <div class="footer-bottom-links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a></div>' +
     '  </div></div>' +
@@ -192,6 +202,31 @@ window.CNT_STATS = [
     btn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
   }
 
+  // Google Analytics 4 — loads only when a real ID is configured, the visitor
+  // hasn't declined cookies, and it's a real public visit (not localhost/bots).
+  function initGA() {
+    if (!GA_MEASUREMENT_ID || !/^G-/.test(GA_MEASUREMENT_ID)) return;
+    if (!analyticsEnabled() || cookieConsent() === 'declined') return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_MEASUREMENT_ID);
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', GA_MEASUREMENT_ID, { anonymize_ip: true });
+  }
+
+  // Footer registration line — renders only the numbers that are filled in.
+  function licenseHTML() {
+    var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var parts = [];
+    if (LICENSE.dole) parts.push('DOLE Reg. No. ' + esc(LICENSE.dole));
+    if (LICENSE.dti)  parts.push('DTI Reg. No. ' + esc(LICENSE.dti));
+    if (LICENSE.sec)  parts.push('SEC Reg. No. ' + esc(LICENSE.sec));
+    return parts.length ? '<p class="footer-license">' + parts.join(' &nbsp;&middot;&nbsp; ') + '</p>' : '';
+  }
+
   function init() {
     // PWA + mobile chrome (site-wide, once): brand theme-color for the mobile
     // browser UI, and the web app manifest for "Add to Home Screen".
@@ -224,6 +259,7 @@ window.CNT_STATS = [
     wireNewsletter();
     // Respect a prior "Decline" choice: skip first-party analytics entirely.
     if (analyticsEnabled() && cookieConsent() !== 'declined') { countVisit(); logPageView(); }
+    initGA();
     cookieBanner();
   }
 
