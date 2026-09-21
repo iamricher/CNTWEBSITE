@@ -28,7 +28,15 @@ const TYPES = {
 
 const server = http.createServer((req, res) => {
   let rel = decodeURIComponent((req.url || '/').split('?')[0]);
-  if (rel === '/') rel = '/index.html';
+  if (rel === '/') {
+    // Local dev shows the REAL homepage at `/`, even though the deployed
+    // index.html is the coming-soon gate (see vercel.json). index-real.html is
+    // the full homepage; at launch it's renamed back to index.html and this
+    // falls back to it. To preview the coming-soon locally, open /index.html.
+    try {
+      rel = fs.existsSync(path.join(ROOT, 'index-real.html')) ? '/index-real.html' : '/index.html';
+    } catch (_) { rel = '/index.html'; }
+  }
   // Local stand-ins for the Vercel rewrites (api/job-og, api/event-og): serve
   // the static shell so job/event share URLs work in local dev + E2E too.
   else if (rel === '/job') rel = '/careers.html';
