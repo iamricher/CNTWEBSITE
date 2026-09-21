@@ -6,7 +6,7 @@
     { "source": "/home.html", "destination": "/", "permanent": true },
     { "source": "/events-admin", "destination": "/content-studio", "permanent": true },
     { "source": "/events-admin.html", "destination": "/content-studio", "permanent": true },
-    { "source": "/((?!assets/|coming-soon-deploy/).*)", "destination": "/coming-soon-deploy/", "permanent": false }
+    { "source": "/((?!assets/).+)", "destination": "/", "permanent": false }
   ],
   "rewrites": [
     { "source": "/event", "destination": "/api/event-og" },
