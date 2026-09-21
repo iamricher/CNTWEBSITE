@@ -11,19 +11,18 @@ touches the live site until **Step 5 (Deploy)**. Tick each box as you go.
 - [ ] Decide on `assets/img/hero-people.png` (the transparent professionals cutout) — commit it if you'll use it, or leave it out. It's currently uncommitted.
 - [ ] Final local smoke test: `node scripts/serve.js 3000`, then click through every page + submit the contact form once.
 
-## 2. Domain swap in the code  ⚠️ important
+## 2. Domain swap in the code  ✅ done (commit `5c642ca`, local, not yet pushed)
 
-Right now ~20 files hard-code the placeholder domain **`cnt-website-ats.vercel.app`**
-(canonical tags, Open Graph URLs, `sitemap.xml`, email templates). Before launch,
-replace it with the real domain everywhere:
+All `cnt-website-ats.vercel.app` references were replaced with the production
+domain **`www.cntpromoads.com.ph`** (www is primary — the apex 308-redirects to
+it). Covered: HTML canonical/OG/Twitter tags + JSON-LD, `sitemap.xml`,
+`robots.txt`, the `/api` OG + email routes, and the Supabase Edge Functions.
 
-- [ ] Find every reference:
-  ```bash
-  grep -rl "cnt-website-ats.vercel.app" --include=*.html --include=*.xml --include=*.js --include=*.ts .
-  ```
-- [ ] Replace with `cntpromoads.com.ph` (or the final domain) in all of them — HTML meta/canonical/OG, `sitemap.xml`, `robots.txt`, and the `/api` + Supabase Edge Function files.
-- [ ] Update `robots.txt` sitemap line and `sitemap.xml` `<loc>` URLs to the new domain.
-- [ ] Commit the change.
+- [x] Replaced across every HTML/XML/txt/js/ts site file (21 files).
+- [x] `sitemap.xml` `<loc>` and `robots.txt` sitemap line updated.
+- [x] Committed locally (`5c642ca`). Ships on the next push / at launch.
+- [ ] If the final canonical is the **apex** (`cntpromoads.com.ph`) instead of
+      `www`, re-run the swap with that host and flip the Vercel redirect direction.
 
 ## 3. Vercel — project + environment variables
 
