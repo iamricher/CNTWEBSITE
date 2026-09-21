@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
   const first = name.split(/\s+/)[0] || 'there';
   const role = String(app.role ?? 'the role').trim();
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const SITE = 'https://cnt-website-ats.vercel.app';
-  const LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
+  const SITE = 'https://www.cntpromoads.com.ph';
+  const LOGO = 'https://www.cntpromoads.com.ph/assets/img/cnt-logo-white.png';
   const YEAR = new Date().getFullYear();
 
   const subject = `We received your application — ${role}`;

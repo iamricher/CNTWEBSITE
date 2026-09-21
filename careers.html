@@ -7,17 +7,17 @@
   <meta name="description" content="A Million Jobs for a Million Filipinos. Explore open positions and apply online at CNT Promo & Ads Specialists, Inc." />
 
   <!-- SEO / social preview -->
-  <link rel="canonical" href="https://cnt-website-ats.vercel.app/careers" />
+  <link rel="canonical" href="https://www.cntpromoads.com.ph/careers" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="CNT Promo & Ads Specialists, Inc." />
   <meta property="og:title" content="Careers — A Million Jobs for a Million Filipinos" />
   <meta property="og:description" content="Explore open positions across leading client brands and apply online in minutes — no account needed." />
-  <meta property="og:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
-  <meta property="og:url" content="https://cnt-website-ats.vercel.app/careers" />
+  <meta property="og:image" content="https://www.cntpromoads.com.ph/assets/img/og-cover.jpg" />
+  <meta property="og:url" content="https://www.cntpromoads.com.ph/careers" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Careers at CNT — A Million Jobs for a Million Filipinos" />
   <meta name="twitter:description" content="Browse open roles and apply online in minutes." />
-  <meta name="twitter:image" content="https://cnt-website-ats.vercel.app/assets/img/og-cover.jpg" />
+  <meta name="twitter:image" content="https://www.cntpromoads.com.ph/assets/img/og-cover.jpg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -693,7 +693,7 @@
      Emits schema.org JobPosting JSON-LD so openings can surface in Google
      Search's jobs experience. One posting per detail page (?job=id); the
      list page emits all open jobs so they're discoverable either way. */
-  const ORG_URL='https://cnt-website-ats.vercel.app';
+  const ORG_URL='https://www.cntpromoads.com.ph';
   function jobPostingLD(job){
     const info=ROLE_INFO[job.role]||{};
     const about=(job.about&&job.about.trim())||info.summary||('Open '+job.role+' position at CNT Promo & Ads Specialists, Inc.');
@@ -711,7 +711,7 @@
       "title":job.role,"description":desc,"datePosted":posted,"validThrough":through,
       "employmentType":"FULL_TIME","directApply":true,
       "identifier":{"@type":"PropertyValue","name":"CNT","value":String(job.id)},
-      "hiringOrganization":{"@type":"Organization","name":"CNT Promo & Ads Specialists, Inc.","sameAs":ORG_URL,"logo":"https://cnt-website-ats.vercel.app/assets/img/icon.png"},
+      "hiringOrganization":{"@type":"Organization","name":"CNT Promo & Ads Specialists, Inc.","sameAs":ORG_URL,"logo":"https://www.cntpromoads.com.ph/assets/img/icon.png"},
       "jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","addressLocality":job.location||"Metro Manila","addressCountry":"PH"}},
       "url":ORG_URL+"/job?job="+job.id
     };

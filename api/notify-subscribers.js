@@ -20,7 +20,7 @@
 // ============================================================
 const SB_URL = process.env.SUPABASE_URL || 'https://mtaknpmvvldmnsizvtuy.supabase.co';
 const SB_ANON = process.env.SUPABASE_ANON_KEY || 'sb_publishable_GYmTJWeUriWXjFkO9j2J7w_cwJNV0Au';
-const SITE = 'https://cnt-website-ats.vercel.app';
+const SITE = 'https://www.cntpromoads.com.ph';
 const BRAND_LOGO = SITE + '/assets/img/cnt-logo-white.png';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));

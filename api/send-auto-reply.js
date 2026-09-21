@@ -25,9 +25,9 @@ function readBody(req) {
   });
 }
 
-const SITE = 'https://cnt-website-ats.vercel.app';
+const SITE = 'https://www.cntpromoads.com.ph';
 // White CNT logo (reads on the dark header); &amp; keeps the URL valid in HTML.
-const BRAND_LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
+const BRAND_LOGO = 'https://www.cntpromoads.com.ph/assets/img/cnt-logo-white.png';
 
 // Bulletproof-ish red button (table cell → works in most email clients).
 const BTN = (href, label) =>

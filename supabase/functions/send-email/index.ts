@@ -74,8 +74,8 @@ Deno.serve(async (req) => {
 
   // Plain text -> branded HTML (matches the website's transactional emails).
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const LOGO = 'https://cnt-website-ats.vercel.app/assets/img/cnt-logo-white.png';
-  const SITE = 'https://cnt-website-ats.vercel.app';
+  const LOGO = 'https://www.cntpromoads.com.ph/assets/img/cnt-logo-white.png';
+  const SITE = 'https://www.cntpromoads.com.ph';
   const YEAR = new Date().getFullYear();
   const linkify = (s: string) => s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#C8102E;font-weight:600;">$1</a>');
   const paras = esc(text).split(/\n{2,}/).map((blk) => `<p style="margin:0 0 14px;">${linkify(blk.trim().replace(/\n/g, '<br>'))}</p>`).join('');

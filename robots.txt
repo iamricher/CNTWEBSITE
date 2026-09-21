@@ -6,4 +6,4 @@ Disallow: /client.html
 Disallow: /event-shell.html
 Disallow: /api/
 
-Sitemap: https://cnt-website-ats.vercel.app/sitemap.xml
+Sitemap: https://www.cntpromoads.com.ph/sitemap.xml

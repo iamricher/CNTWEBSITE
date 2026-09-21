@@ -12,7 +12,7 @@
 //        (SUPABASE_URL / SUPABASE_ANON_KEY already exist from the apply proxy)
 //   2. Create an inbound route at your email provider that forwards a mailbox
 //      (e.g. jobs@cntpromoads.com) to:
-//        POST https://cnt-website-ats.vercel.app/api/inbound-application?token=YOUR_SECRET
+//        POST https://www.cntpromoads.com.ph/api/inbound-application?token=YOUR_SECRET
 //      Providers that POST JSON or url-encoded form fields work out of the box —
 //      Mailgun Routes ("store and notify"), CloudMailin (JSON format), Postmark
 //      inbound, etc. (SendGrid Inbound Parse posts multipart/form-data, which
