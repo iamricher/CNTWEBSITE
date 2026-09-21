@@ -5,10 +5,13 @@
     { "source": "/home", "destination": "/", "permanent": true },
     { "source": "/home.html", "destination": "/", "permanent": true },
     { "source": "/events-admin", "destination": "/content-studio", "permanent": true },
-    { "source": "/events-admin.html", "destination": "/content-studio", "permanent": true }
+    { "source": "/events-admin.html", "destination": "/content-studio", "permanent": true },
+    { "source": "/((?!assets/|coming-soon-deploy/).*)", "destination": "/coming-soon-deploy/", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/((?!assets/|coming-soon-deploy/).*)", "destination": "/coming-soon-deploy/index.html" }
+    { "source": "/event", "destination": "/api/event-og" },
+    { "source": "/event.html", "destination": "/api/event-og" },
+    { "source": "/job", "destination": "/api/job-og" }
   ],
   "headers": [
     {
