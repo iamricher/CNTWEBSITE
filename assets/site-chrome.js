@@ -26,7 +26,7 @@ window.CNT_STATS = [
   // Google Analytics 4 Measurement ID (from analytics.google.com → Admin →
   // Data Streams). Leave blank to keep GA off. Loads only after cookie consent
   // and never on localhost / for bots (see analyticsEnabled + initGA).
-  var GA_MEASUREMENT_ID = '';   // e.g. 'G-XXXXXXXXXX'
+  var GA_MEASUREMENT_ID = 'G-E9TMHJC0XY';   // CNT Website GA4 stream
   // Registration numbers shown in the footer for trust (a big deal in PH
   // recruitment). Leave a field blank to hide it — nothing shows until set.
   var LICENSE = { dole: '', dti: '', sec: '' };   // e.g. dole: 'NCR-MDLYNG-123456-2026'
