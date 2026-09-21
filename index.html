@@ -125,32 +125,9 @@
     }
     @media(prefers-reduced-motion:reduce){ .ticker-track{ animation:none; } .status .dot{ animation:none; } }
 
-    /* ---- Intro preloader (matches /home) ---- */
-    .loader{ position:fixed; inset:0; z-index:60;
-      background:
-        radial-gradient(92% 60% at 82% 6%, rgba(200,16,46,.2), transparent 58%),
-        radial-gradient(80% 55% at 12% 96%, rgba(200,16,46,.11), transparent 60%),
-        var(--ink);
-      display:flex; align-items:center; justify-content:center; }
-    .loader-inner{ display:flex; flex-direction:column; align-items:center; gap:clamp(20px,4vw,30px); }
-    .loader-logo{ width:clamp(150px,42vw,200px); height:auto; display:block; opacity:.92; }
-    .loader-bar{ width:clamp(180px,52vw,240px); height:2px; border-radius:99px; overflow:hidden;
-      background:rgba(255,255,255,.1); }
-    .loader-fill{ height:100%; width:0%;
-      background:linear-gradient(90deg, #9c0c22, var(--red-lt)); transition:width .05s linear; }
-    .loader-text{ font-family:'Manrope',sans-serif; font-weight:600;
-      color:rgba(255,255,255,.4); font-size:.75rem; letter-spacing:.1em; }
   </style>
 </head>
 <body>
-  <div class="loader" id="loader">
-    <div class="loader-inner">
-      <img class="loader-logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
-      <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
-      <span class="loader-text" id="loaderText">0%</span>
-    </div>
-  </div>
-
   <div class="photo"></div>
   <div class="scrim"></div>
   <div class="grain"></div>
@@ -186,31 +163,5 @@
     <span class="rt">Copyright &copy; 2026 CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</span>
   </footer>
 
-  <script>
-    /* Intro loader — same behavior as /home: a random-stepped % counter
-       fills the bar, then the overlay lifts and fades away. */
-    (function(){
-      var loader = document.getElementById('loader');
-      var fill = document.getElementById('loaderFill');
-      var text = document.getElementById('loaderText');
-      if(!loader || !fill || !text) return;
-      var progress = 0;
-      var interval = setInterval(function(){
-        progress += Math.random() * 18 + 5;
-        if(progress > 100) progress = 100;
-        fill.style.width = progress + '%';
-        text.textContent = Math.round(progress) + '%';
-        if(progress >= 100){
-          clearInterval(interval);
-          setTimeout(function(){
-            loader.style.transition = 'opacity .6s ease, transform .6s ease';
-            loader.style.opacity = '0';
-            loader.style.transform = 'translateY(-8px)';
-            setTimeout(function(){ loader.style.display = 'none'; }, 600);
-          }, 300);
-        }
-      }, 60);
-    })();
-  </script>
 </body>
 </html>
