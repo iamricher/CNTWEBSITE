@@ -3,6 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Google tag (gtag.js) — coming-soon page ONLY. The full site loads GA4
+       via assets/site-chrome.js, so it must NOT be pasted onto other pages
+       (that would be a duplicate Google tag). Skips local dev so previews
+       don't pollute the data. -->
+  <script>
+    (function(){
+      var h = location.hostname;
+      if (h === 'localhost' || h === '127.0.0.1' || h === '' || h.endsWith('.local')) return;
+      var s = document.createElement('script');
+      s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-E9TMHJC0XY';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){ window.dataLayer.push(arguments); };
+      gtag('js', new Date());
+      gtag('config', 'G-E9TMHJC0XY', { anonymize_ip: true });
+    })();
+  </script>
   <title>Coming Soon — CNT Promo &amp; Ads Specialists, Inc.</title>
   <meta name="description" content="CNT Promo & Ads Specialists, Inc. — our new website is launching soon. A Million Jobs for a Million Filipinos." />
   <meta name="robots" content="noindex" />
