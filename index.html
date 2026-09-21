@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <!-- Google tag (gtag.js) — coming-soon page ONLY. The full site loads GA4
        via assets/site-chrome.js, so it must NOT be pasted onto other pages
        (that would be a duplicate Google tag). Skips local dev so previews
@@ -21,96 +21,196 @@
     })();
   </script>
   <title>Coming Soon — CNT Promo &amp; Ads Specialists, Inc.</title>
-  <meta name="description" content="CNT Promo & Ads Specialists, Inc. — our new website is launching soon. A Million Jobs for a Million Filipinos." />
+  <meta name="description" content="CNT Promo & Ads Specialists, Inc. — an authorized employment agency connecting the Philippines' leading brands with exceptional Filipino talent. Our new website is launching soon." />
   <meta name="robots" content="noindex" />
   <link rel="icon" type="image/png" href="/assets/img/icon.png" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Coming Soon — CNT Promo &amp; Ads Specialists, Inc." />
-  <meta property="og:description" content="Our new website is launching soon." />
+  <meta property="og:title" content="CNT Promo &amp; Ads Specialists, Inc. — Launching Soon" />
+  <meta property="og:description" content="An authorized employment agency. Our new website is on its way." />
   <meta property="og:image" content="https://www.cntpromoads.com.ph/assets/img/og-cover.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    :root{ --red:#C8102E; --red-lt:#e5213f; --ink:#0f0f12; }
+    :root{ --red:#C8102E; --red-lt:#e5213f; --ink:#0a0b0e; --muted:#a4a7af; --label:#767a83; --line:rgba(255,255,255,.1); }
     *{ box-sizing:border-box; margin:0; padding:0; }
-    html,body{ height:100%; }
+    html,body{ min-height:100%; }
     body{
       font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-      color:#fff; background:#0c0c0f;
-      min-height:100dvh; display:flex; align-items:center; justify-content:center;
-      padding:32px 20px; position:relative; overflow:hidden;
+      color:#fff; background:var(--ink);
+      min-height:100dvh; overflow-x:hidden; position:relative;
+      display:flex; flex-direction:column;
+      -webkit-font-smoothing:antialiased;
     }
-    /* Hero-style background: the LYFE tower photo merged into a dark, brand-red wash */
-    .bg{ position:fixed; inset:0; z-index:0;
+
+    /* Ambient brand aura + faint grid + grain */
+    .photo{ position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:#0a0b0e url('/assets/img/background-comingsoon.jpg') center center / cover no-repeat; }
+    /* Legibility scrim: deep on the left (copy) → the recruitment scene reads on the right. */
+    .scrim{ position:fixed; inset:0; z-index:0; pointer-events:none;
       background:
-        radial-gradient(70% 62% at 50% 44%, rgba(10,10,13,.40), rgba(9,9,12,.88) 100%),
-        radial-gradient(55% 50% at 82% 8%, rgba(200,16,46,.32), transparent 58%),
-        linear-gradient(160deg, rgba(12,12,16,.52) 0%, rgba(10,10,12,.80) 100%),
-        #0a0a0c url('/assets/img/hero_banner.jpg') center/cover no-repeat;
-    }
-    .grid{ position:fixed; inset:0; z-index:0; opacity:.05;
-      background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
-      background-size:64px 64px; -webkit-mask-image:radial-gradient(circle at 50% 40%,#000,transparent 78%); mask-image:radial-gradient(circle at 50% 40%,#000,transparent 78%); }
-    .wrap{ position:relative; z-index:1; width:100%; max-width:660px; text-align:center; }
-    .logo{ height:56px; width:auto; margin:0 auto 40px; display:block; }
-    .badge{ display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:700;
-      letter-spacing:.16em; text-transform:uppercase; color:#ffd0d8;
-      background:rgba(200,16,46,.14); border:1px solid rgba(200,16,46,.4);
-      padding:8px 16px; border-radius:100px; margin-bottom:28px; }
-    .dot{ width:8px; height:8px; border-radius:50%; background:var(--red-lt); box-shadow:0 0 0 0 rgba(229,33,63,.7); animation:pulse 2s infinite; }
-    @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(229,33,63,.55)} 70%{box-shadow:0 0 0 12px rgba(229,33,63,0)} 100%{box-shadow:0 0 0 0 rgba(229,33,63,0)} }
-    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.03em; line-height:1.03;
-      font-size:clamp(2.7rem,8vw,4.6rem); margin-bottom:22px; }
-    h1 .em{ color:var(--red-lt); }
-    .lead{ font-size:clamp(1rem,2.4vw,1.18rem); line-height:1.65; color:#c9cbd2; max-width:520px; margin:0 auto 14px; }
-    .tag{ font-size:.86rem; font-weight:600; letter-spacing:.02em; color:#8b8e97; margin-bottom:40px; }
-    .tag b{ color:#fff; }
-    .cta{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:center; }
-    .btn{ display:inline-flex; align-items:center; gap:9px; font-weight:700; font-size:.95rem;
-      padding:14px 26px; border-radius:12px; text-decoration:none; transition:transform .15s ease, filter .15s ease; }
-    .btn-red{ background:var(--red); color:#fff; box-shadow:0 10px 30px rgba(200,16,46,.35); }
-    .btn-red:hover{ transform:translateY(-2px); filter:brightness(1.08); }
-    .btn-ghost{ color:#e7e8ec; border:1px solid rgba(255,255,255,.18); }
-    .btn-ghost:hover{ border-color:rgba(255,255,255,.4); }
-    .social{ display:flex; gap:14px; justify-content:center; margin-top:44px; }
-    .social a{ width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
-      color:#c9cbd2; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); transition:all .15s ease; }
+        radial-gradient(58% 55% at 90% 6%, rgba(200,16,46,.22), transparent 60%),
+        linear-gradient(90deg, rgba(10,11,14,.96) 0%, rgba(10,11,14,.9) 32%, rgba(10,11,14,.72) 56%, rgba(10,11,14,.5) 80%, rgba(10,11,14,.6) 100%),
+        linear-gradient(180deg, rgba(10,11,14,.55) 0%, rgba(10,11,14,0) 22%, rgba(10,11,14,0) 66%, rgba(10,11,14,.9) 100%); }
+    .grain{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    /* Masthead */
+    .mast{ position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:clamp(20px,3.4vw,32px) clamp(22px,5vw,64px); }
+    .mast .logo{ height:clamp(40px,3.4vw,52px); width:auto; display:block; }
+    .status{ display:inline-flex; align-items:center; gap:9px; padding:8px 15px; border-radius:99px;
+      background:rgba(255,255,255,.05); border:1px solid var(--line); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      font-size:clamp(9px,2vw,11px); letter-spacing:.2em; text-transform:uppercase; font-weight:600; color:#e7e9ee; white-space:nowrap; }
+    .status .dot{ width:8px; height:8px; border-radius:50%; background:var(--red-lt); flex:none;
+      box-shadow:0 0 0 0 rgba(229,33,63,.6); animation:pulse 2.2s infinite; }
+    @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(229,33,63,.55); } 70%{ box-shadow:0 0 0 10px rgba(229,33,63,0); } 100%{ box-shadow:0 0 0 0 rgba(229,33,63,0); } }
+
+    /* Hero — left-aligned editorial */
+    .hero{ position:relative; z-index:2; flex:1; display:flex; flex-direction:column; justify-content:center;
+      padding:clamp(20px,3vw,40px) clamp(22px,5vw,64px); max-width:1120px; }
+    .eyebrow{ font-size:clamp(10px,1vw,12px); letter-spacing:.22em; text-transform:uppercase; font-weight:600; color:var(--label);
+      display:inline-flex; align-items:center; gap:11px; margin-bottom:clamp(16px,2.2vw,26px); }
+    .eyebrow b{ color:#c6c9d0; font-weight:600; }
+    .eyebrow .sep{ width:5px; height:5px; border-radius:2px; background:var(--red); box-shadow:0 0 8px rgba(200,16,46,.6); }
+
+    h1{ font-family:'Manrope',sans-serif; font-weight:800; letter-spacing:-.034em; line-height:1.03;
+      font-size:clamp(2rem,7vw,5.4rem); margin-bottom:clamp(20px,2.4vw,30px); }
+    h1 .em{ background:linear-gradient(96deg, #ff5a70, var(--red) 82%);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+
+    .lead{ font-size:clamp(1.02rem,1.35vw,1.24rem); line-height:1.65; color:var(--muted); max-width:600px;
+      margin-bottom:clamp(26px,3.2vw,38px); }
+    .lead b{ color:#eceef1; font-weight:600; }
+
+    .actions{ display:flex; align-items:center; gap:clamp(14px,2.4vw,20px); flex-wrap:wrap; }
+    .cta{ display:inline-flex; align-items:center; gap:10px; font-weight:700;
+      font-size:clamp(.95rem,1.1vw,1.04rem); padding:clamp(14px,1.2vw,16px) clamp(28px,2.6vw,34px);
+      border-radius:11px; text-decoration:none; color:#fff;
+      background:linear-gradient(180deg, var(--red-lt), var(--red));
+      box-shadow:0 12px 32px rgba(200,16,46,.4), inset 0 1px 0 rgba(255,255,255,.18);
+      transition:transform .16s ease, filter .16s ease; }
+    .cta:hover{ transform:translateY(-2px); filter:brightness(1.08); }
+    .social{ display:flex; gap:10px; }
+    .social a{ width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+      color:#c0c3ca; background:rgba(255,255,255,.05); border:1px solid var(--line); transition:all .16s ease; }
     .social a:hover{ color:#fff; background:var(--red); border-color:var(--red); transform:translateY(-2px); }
     .social svg{ width:19px; height:19px; }
-    .foot{ margin-top:52px; font-size:.76rem; color:#6b6e77; letter-spacing:.01em; line-height:1.7; }
-    .foot a{ color:#c9cbd2; text-decoration:none; }
+
+    /* Signature — nationwide city ticker */
+    .ticker{ position:relative; z-index:2; overflow:hidden; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+      padding:clamp(11px,1.4vw,15px) 0;
+      -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+      mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); }
+    .ticker-track{ display:inline-flex; align-items:center; white-space:nowrap; will-change:transform;
+      animation:marquee 42s linear infinite; }
+    .ticker-track span{ display:inline-flex; align-items:center; gap:clamp(18px,3vw,34px); padding-right:clamp(18px,3vw,34px);
+      font-family:'Manrope',sans-serif; font-weight:600; font-size:clamp(.78rem,1.1vw,.95rem); letter-spacing:.12em; text-transform:uppercase; color:#8b8e96; }
+    .ticker-track i{ font-style:normal; color:var(--red-lt); }
+    @keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+    /* Footer */
+    .foot{ position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:8px 20px; flex-wrap:wrap;
+      padding:clamp(16px,2.6vw,26px) clamp(22px,5vw,64px);
+      font-size:clamp(.7rem,.85vw,.78rem); color:var(--label); line-height:1.6; }
+    .foot a{ color:#b7bac1; text-decoration:none; }
     .foot a:hover{ color:#fff; }
-    @media(max-width:520px){ .logo{ height:44px; margin-bottom:32px; } .btn{ width:100%; justify-content:center; } }
+    .foot .rt{ text-align:right; }
+
+    @media(max-width:600px){
+      .mast{ padding-bottom:8px; }
+      .cta{ flex:1; justify-content:center; min-width:0; }
+      .foot{ justify-content:center; text-align:center; }
+      .foot .rt{ text-align:center; }
+    }
+    @media(prefers-reduced-motion:reduce){ .ticker-track{ animation:none; } .status .dot{ animation:none; } }
+
+    /* ---- Intro preloader (matches /home) ---- */
+    .loader{ position:fixed; inset:0; z-index:60;
+      background:
+        radial-gradient(92% 60% at 82% 6%, rgba(200,16,46,.2), transparent 58%),
+        radial-gradient(80% 55% at 12% 96%, rgba(200,16,46,.11), transparent 60%),
+        var(--ink);
+      display:flex; align-items:center; justify-content:center; }
+    .loader-inner{ display:flex; flex-direction:column; align-items:center; gap:clamp(20px,4vw,30px); }
+    .loader-logo{ width:clamp(150px,42vw,200px); height:auto; display:block; opacity:.92; }
+    .loader-bar{ width:clamp(180px,52vw,240px); height:2px; border-radius:99px; overflow:hidden;
+      background:rgba(255,255,255,.1); }
+    .loader-fill{ height:100%; width:0%;
+      background:linear-gradient(90deg, #9c0c22, var(--red-lt)); transition:width .05s linear; }
+    .loader-text{ font-family:'Manrope',sans-serif; font-weight:600;
+      color:rgba(255,255,255,.4); font-size:.75rem; letter-spacing:.1em; }
   </style>
 </head>
 <body>
-  <div class="bg"></div>
-  <div class="grid"></div>
-  <main class="wrap">
+  <div class="loader" id="loader">
+    <div class="loader-inner">
+      <img class="loader-logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
+      <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+      <span class="loader-text" id="loaderText">0%</span>
+    </div>
+  </div>
+
+  <div class="photo"></div>
+  <div class="scrim"></div>
+  <div class="grain"></div>
+
+  <header class="mast">
     <img class="logo" src="/assets/img/cnt-logo-white.png" alt="CNT Promo & Ads Specialists, Inc." />
-    <span class="badge"><span class="dot"></span> Launching Soon</span>
-    <h1>Something great is <span class="em">coming.</span></h1>
-    <p class="lead">We're building a brand-new home for CNT Promo &amp; Ads Specialists, Inc. — a faster, smarter way to connect Filipino talent with the country's leading brands.</p>
-    <p class="tag"><b>A Million Jobs for a Million Filipinos.</b> &nbsp;·&nbsp; #TatakCNT</p>
+    <span class="status"><span class="dot"></span> Launching Soon</span>
+  </header>
 
-    <div class="cta">
-      <a class="btn btn-red" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <a class="btn btn-ghost" href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener">Follow our page</a>
+  <main class="hero">
+    <div class="eyebrow"><b>Connecting Talent Nationwide</b> <span class="sep"></span> Authorized Employment Agency</div>
+    <h1>A Million Jobs for a<br><span class="em">Million Filipinos.</span></h1>
+    <p class="lead">Get ready — <b>CNT Promo &amp; Ads Specialists, Inc.</b> is launching a brand-new website and online application system. Finding your next opportunity and applying to CNT is about to get faster, simpler, and smarter than ever.</p>
+    <div class="actions">
+      <a class="cta" href="mailto:hrdadmin@cntpromoads.com">Get in touch <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <div class="social">
+        <a href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+        <a href="https://www.linkedin.com/in/cnt-promo-and-ads-specialists-inc-24b7633a7/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        <a href="https://www.tiktok.com/@cnt.jobhiring" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.26 2.2 1.6 3.63 3.8 3.9v2.63c-1.3.13-2.48-.3-3.8-1.03v5.9c0 3.4-2.55 5.83-5.87 5.42-2.9-.36-4.77-2.7-4.6-5.68.16-2.74 2.5-4.82 5.3-4.6v2.7c-.5-.1-1-.1-1.5.03-1.1.3-1.76 1.28-1.57 2.45.18 1.1 1.16 1.83 2.35 1.66 1.02-.15 1.72-1.06 1.72-2.2V3h2.44z"/></svg></a>
+      </div>
     </div>
-
-    <div class="social">
-      <a href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-      <a href="https://www.linkedin.com/company/cnt-promo-ads-specialists-inc/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
-      <a href="https://www.tiktok.com/@cnt.jobhiring" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.26 2.2 1.6 3.63 3.8 3.9v2.63c-1.3.13-2.48-.3-3.8-1.03v5.9c0 3.4-2.55 5.83-5.87 5.42-2.9-.36-4.77-2.7-4.6-5.68.16-2.74 2.5-4.82 5.3-4.6v2.7c-.5-.1-1-.1-1.5.03-1.1.3-1.76 1.28-1.57 2.45.18 1.1 1.16 1.83 2.35 1.66 1.02-.15 1.72-1.06 1.72-2.2V3h2.44z"/></svg></a>
-    </div>
-
-    <p class="foot">
-      DOLE-Licensed Manpower &amp; Recruitment Agency<br>
-      219 Lyfe Tower, Shaw Blvd., Mandaluyong City &nbsp;·&nbsp; <a href="mailto:hrdadmin@cntpromoads.com">hrdadmin@cntpromoads.com</a><br>
-      &copy; <span id="yr"></span> CNT Promo &amp; Ads Specialists, Inc. All rights reserved.
-    </p>
   </main>
-  <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+
+  <div class="ticker">
+    <div class="ticker-track">
+      <span>Tacloban <i>·</i> Pangasinan <i>·</i> Isabela <i>·</i> Iloilo <i>·</i> Davao <i>·</i> Cagayan de Oro <i>·</i> Bicol <i>·</i> Cebu <i>·</i> Mandaluyong <i>·</i> Tacloban <i>·</i> Pangasinan <i>·</i> Isabela <i>·</i> Iloilo <i>·</i> Davao <i>·</i> Cagayan de Oro <i>·</i> Bicol <i>·</i> Cebu <i>·</i> Mandaluyong <i>·</i></span>
+      <span aria-hidden="true">Tacloban <i>·</i> Pangasinan <i>·</i> Isabela <i>·</i> Iloilo <i>·</i> Davao <i>·</i> Cagayan de Oro <i>·</i> Bicol <i>·</i> Cebu <i>·</i> Mandaluyong <i>·</i> Tacloban <i>·</i> Pangasinan <i>·</i> Isabela <i>·</i> Iloilo <i>·</i> Davao <i>·</i> Cagayan de Oro <i>·</i> Bicol <i>·</i> Cebu <i>·</i> Mandaluyong <i>·</i></span>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <span>219 LYFE Tower, Shaw Blvd. cor. E. Jacinto St., Brgy. Bagong Silang, 1550 Mandaluyong, Philippines</span>
+    <span class="rt">Copyright &copy; 2026 CNT Promo &amp; Ads Specialists, Inc. All Rights Reserved.</span>
+  </footer>
+
+  <script>
+    /* Intro loader — same behavior as /home: a random-stepped % counter
+       fills the bar, then the overlay lifts and fades away. */
+    (function(){
+      var loader = document.getElementById('loader');
+      var fill = document.getElementById('loaderFill');
+      var text = document.getElementById('loaderText');
+      if(!loader || !fill || !text) return;
+      var progress = 0;
+      var interval = setInterval(function(){
+        progress += Math.random() * 18 + 5;
+        if(progress > 100) progress = 100;
+        fill.style.width = progress + '%';
+        text.textContent = Math.round(progress) + '%';
+        if(progress >= 100){
+          clearInterval(interval);
+          setTimeout(function(){
+            loader.style.transition = 'opacity .6s ease, transform .6s ease';
+            loader.style.opacity = '0';
+            loader.style.transform = 'translateY(-8px)';
+            setTimeout(function(){ loader.style.display = 'none'; }, 600);
+          }, 300);
+        }
+      }, 60);
+    })();
+  </script>
 </body>
 </html>
