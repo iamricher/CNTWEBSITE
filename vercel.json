@@ -8,9 +8,7 @@
     { "source": "/events-admin.html", "destination": "/content-studio", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/event", "destination": "/api/event-og" },
-    { "source": "/event.html", "destination": "/api/event-og" },
-    { "source": "/job", "destination": "/api/job-og" }
+    { "source": "/((?!assets/|coming-soon-deploy/).*)", "destination": "/coming-soon-deploy/index.html" }
   ],
   "headers": [
     {
