@@ -173,6 +173,26 @@
   .state{text-align:center;padding:70px 20px;color:var(--gray-600)}
   .spinner{width:38px;height:38px;border:3px solid var(--gray-100);border-top-color:var(--red);border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* No open positions — an intentional, on-brand empty state (not an error) */
+  .no-jobs{max-width:600px;margin:14px auto;text-align:center;padding:clamp(40px,6vw,60px) clamp(22px,4vw,34px);background:#fff;border:1px solid var(--gray-100,#eceef1);border-radius:22px;box-shadow:var(--shadow-md,0 18px 44px rgba(20,24,31,.09));animation:njUp .5s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes njUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .no-jobs-badge{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red,#C8102E);background:var(--red-pale,#fef2f4);border:1px solid var(--red-muted,#f6d4da);padding:6px 13px;border-radius:99px;margin-bottom:22px}
+  .no-jobs-badge .pd{width:7px;height:7px;border-radius:50%;background:var(--red,#C8102E);box-shadow:0 0 0 0 rgba(200,16,46,.55);animation:njPulse 2.2s infinite}
+  @keyframes njPulse{0%{box-shadow:0 0 0 0 rgba(200,16,46,.5)}70%{box-shadow:0 0 0 10px rgba(200,16,46,0)}100%{box-shadow:0 0 0 0 rgba(200,16,46,0)}}
+  .no-jobs-icon{width:78px;height:78px;margin:0 auto 22px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#fff,var(--red-pale,#fef2f4));border:1px solid var(--red-muted,#f6d4da);color:var(--red,#C8102E);box-shadow:0 12px 30px rgba(200,16,46,.14)}
+  .no-jobs-icon svg{width:38px;height:38px}
+  .no-jobs h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(1.45rem,3.4vw,2rem);font-weight:800;letter-spacing:-.025em;line-height:1.1;color:var(--charcoal,#14151a)}
+  .no-jobs p{margin:12px auto 0;color:var(--gray-600,#5a5f6a);font-size:1rem;line-height:1.7;max-width:44ch}
+  .no-jobs-actions{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .no-jobs .njbtn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.95rem;padding:13px 24px;border-radius:99px;cursor:pointer;font-family:inherit;text-decoration:none;transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease}
+  .no-jobs .njbtn svg{width:16px;height:16px}
+  .no-jobs .njbtn-red{background:var(--red,#C8102E);color:#fff;border:1px solid var(--red,#C8102E);box-shadow:0 12px 28px rgba(200,16,46,.28)}
+  .no-jobs .njbtn-red:hover{background:var(--red-lt,#E5213F);transform:translateY(-2px)}
+  .no-jobs .njbtn-ghost{background:#fff;border:1px solid var(--gray-100,#dfe2e7);color:var(--charcoal,#14151a)}
+  .no-jobs .njbtn-ghost:hover{border-color:var(--red,#C8102E);color:var(--red,#C8102E);transform:translateY(-2px)}
+  .no-jobs .nj-fine{margin-top:22px;font-size:.82rem;font-weight:600;letter-spacing:.01em;color:var(--gray-400,#9aa0a9)}
+  .no-jobs .nj-fine b{color:var(--gray-600,#5a5f6a)}
   .notice{background:var(--red-pale);border:1px solid var(--red-muted);color:var(--red-deep);border-radius:var(--radius-md);padding:13px 17px;font-size:.85rem;margin-bottom:22px;display:flex;gap:10px;align-items:flex-start}
   .notice svg{width:18px;height:18px;flex-shrink:0;margin-top:1px}
 
@@ -859,7 +879,38 @@
     [/\b(nurse|caregiver|medical|health|pharmac)\b/i,'Healthcare']
   ];
   function jobCategory(role){ const r=String(role||''); for(const [re,cat] of JOB_CATS){ if(re.test(r)) return cat; } return 'General'; }
+  function renderNoOpenings(){
+    // Genuinely zero published roles (not a filtered-out result) — show an
+    // intentional, on-brand empty state instead of the "no filter match" line.
+    var hide=function(sel){ var el=document.querySelector(sel); if(el) el.style.display='none'; };
+    hide('.jobsearch'); hide('.list-head');
+    var dc=document.querySelector('.detail-col'); if(dc) dc.style.display='none';
+    var bs=document.querySelector('.board-split'); if(bs) bs.style.gridTemplateColumns='1fr';
+    var af=$('#active-filters'); if(af){ af.innerHTML=''; af.style.display='none'; }
+    $('#groups').innerHTML=''; $('#pager').innerHTML='';
+    var as=$('#also-searched'); if(as) as.innerHTML='';
+    var rc=$('#results-count'); if(rc) rc.innerHTML='';
+    $('#list-state').innerHTML=
+      '<div class="no-jobs">'
+      + '<span class="no-jobs-badge"><span class="pd"></span> Careers</span>'
+      + '<div class="no-jobs-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/></svg></div>'
+      + '<h3>No open positions right now</h3>'
+      + '<p>We&rsquo;re between hiring drives at the moment &mdash; but new roles for our client brands open all the time. Be the first to know when the next one goes live.</p>'
+      + '<div class="no-jobs-actions">'
+      +   '<button type="button" class="njbtn njbtn-red" id="nj-alerts">Get job alerts <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>'
+      +   '<a class="njbtn njbtn-ghost" href="mailto:hrdadmin@cntpromoads.com?subject=R%C3%A9sum%C3%A9%20for%20future%20openings">Send your r&eacute;sum&eacute;</a>'
+      + '</div>'
+      + '<div class="nj-fine"><b>A Million Jobs for a Million Filipinos.</b> &middot; #TatakCNT</div>'
+      + '</div>';
+    var a=$('#nj-alerts');
+    if(a) a.addEventListener('click',function(){
+      var el=document.getElementById('nl-email');
+      if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){ try{ el.focus(); }catch(e){} },420); }
+      else { window.location.href='mailto:hrdadmin@cntpromoads.com?subject=Job%20alerts'; }
+    });
+  }
   function renderList(){
+    if(!ALL_JOBS.length){ renderNoOpenings(); return; }
     // Smart search: match the query against each job's full corpus (role, client,
     // description, and the role's known responsibilities/skills) with forgiving
     // stem matching, and rank results by relevance — not just a title substring.
