@@ -174,25 +174,32 @@
   .spinner{width:38px;height:38px;border:3px solid var(--gray-100);border-top-color:var(--red);border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* No open positions — an intentional, on-brand empty state (not an error) */
-  .no-jobs{max-width:600px;margin:14px auto;text-align:center;padding:clamp(40px,6vw,60px) clamp(22px,4vw,34px);background:#fff;border:1px solid var(--gray-100,#eceef1);border-radius:22px;box-shadow:var(--shadow-md,0 18px 44px rgba(20,24,31,.09));animation:njUp .5s cubic-bezier(.2,.7,.2,1) both}
-  @keyframes njUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  .no-jobs-badge{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red,#C8102E);background:var(--red-pale,#fef2f4);border:1px solid var(--red-muted,#f6d4da);padding:6px 13px;border-radius:99px;margin-bottom:22px}
-  .no-jobs-badge .pd{width:7px;height:7px;border-radius:50%;background:var(--red,#C8102E);box-shadow:0 0 0 0 rgba(200,16,46,.55);animation:njPulse 2.2s infinite}
-  @keyframes njPulse{0%{box-shadow:0 0 0 0 rgba(200,16,46,.5)}70%{box-shadow:0 0 0 10px rgba(200,16,46,0)}100%{box-shadow:0 0 0 0 rgba(200,16,46,0)}}
-  .no-jobs-icon{width:78px;height:78px;margin:0 auto 22px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#fff,var(--red-pale,#fef2f4));border:1px solid var(--red-muted,#f6d4da);color:var(--red,#C8102E);box-shadow:0 12px 30px rgba(200,16,46,.14)}
-  .no-jobs-icon svg{width:38px;height:38px}
-  .no-jobs h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(1.45rem,3.4vw,2rem);font-weight:800;letter-spacing:-.025em;line-height:1.1;color:var(--charcoal,#14151a)}
-  .no-jobs p{margin:12px auto 0;color:var(--gray-600,#5a5f6a);font-size:1rem;line-height:1.7;max-width:44ch}
-  .no-jobs-actions{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-  .no-jobs .njbtn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.95rem;padding:13px 24px;border-radius:99px;cursor:pointer;font-family:inherit;text-decoration:none;transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease}
+  /* No open positions — a refined, professional empty state (not an error) */
+  .nj-wrap{position:relative;padding:clamp(20px,4vw,44px) 0}
+  .nj-wrap::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 78% at 50% -12%,rgba(200,16,46,.055),transparent 60%)}
+  .no-jobs{position:relative;max-width:680px;margin:0 auto;text-align:center;padding:clamp(40px,5vw,66px) clamp(24px,4.5vw,54px);background:#fff;border:1px solid var(--gray-100,#eceef1);border-radius:24px;box-shadow:0 1px 0 rgba(20,24,31,.02),0 34px 64px -30px rgba(20,24,31,.24);animation:njUp .55s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes njUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .nj-eyebrow{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:26px;font-size:11px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--red,#C8102E)}
+  .nj-eyebrow::before,.nj-eyebrow::after{content:"";height:1px;width:32px}
+  .nj-eyebrow::before{background:linear-gradient(90deg,transparent,var(--red-muted,#f0c9d0))}
+  .nj-eyebrow::after{background:linear-gradient(90deg,var(--red-muted,#f0c9d0),transparent)}
+  .no-jobs-icon{width:74px;height:74px;margin:0 auto 24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red,#C8102E);background:radial-gradient(circle at 50% 34%,#fff,var(--red-pale,#fef2f4));border:1px solid var(--red-muted,#f4cdd4);box-shadow:0 0 0 8px rgba(200,16,46,.045),0 16px 32px -14px rgba(200,16,46,.34)}
+  .no-jobs-icon svg{width:31px;height:31px}
+  .no-jobs h3{font-family:var(--font-display,'Manrope',sans-serif);font-size:clamp(1.55rem,3.6vw,2.15rem);font-weight:800;letter-spacing:-.03em;line-height:1.08;color:var(--charcoal,#14151a)}
+  .no-jobs .nj-lead{margin:14px auto 0;color:var(--gray-600,#5a5f6a);font-size:1.02rem;line-height:1.72;max-width:47ch}
+  .no-jobs-actions{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .no-jobs .njbtn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.95rem;padding:14px 26px;border-radius:12px;cursor:pointer;font-family:inherit;text-decoration:none;transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease}
   .no-jobs .njbtn svg{width:16px;height:16px}
-  .no-jobs .njbtn-red{background:var(--red,#C8102E);color:#fff;border:1px solid var(--red,#C8102E);box-shadow:0 12px 28px rgba(200,16,46,.28)}
-  .no-jobs .njbtn-red:hover{background:var(--red-lt,#E5213F);transform:translateY(-2px)}
+  .no-jobs .njbtn-red{background:var(--red,#C8102E);color:#fff;border:1px solid var(--red,#C8102E);box-shadow:0 14px 30px -10px rgba(200,16,46,.5)}
+  .no-jobs .njbtn-red:hover{background:var(--red-lt,#E5213F);transform:translateY(-2px);box-shadow:0 18px 38px -10px rgba(200,16,46,.55)}
   .no-jobs .njbtn-ghost{background:#fff;border:1px solid var(--gray-100,#dfe2e7);color:var(--charcoal,#14151a)}
-  .no-jobs .njbtn-ghost:hover{border-color:var(--red,#C8102E);color:var(--red,#C8102E);transform:translateY(-2px)}
-  .no-jobs .nj-fine{margin-top:22px;font-size:.82rem;font-weight:600;letter-spacing:.01em;color:var(--gray-400,#9aa0a9)}
-  .no-jobs .nj-fine b{color:var(--gray-600,#5a5f6a)}
+  .no-jobs .njbtn-ghost:hover{border-color:var(--gray-300,#c3c8d0);transform:translateY(-2px)}
+  .nj-divider{margin:36px auto 0;max-width:360px;height:1px;background:linear-gradient(90deg,transparent,var(--gray-100,#e6e8ec) 26%,var(--gray-100,#e6e8ec) 74%,transparent)}
+  .nj-cats-label{margin-top:26px;font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gray-400,#9aa0a9)}
+  .nj-cats{margin-top:16px;display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .nj-cats span{font-size:.85rem;font-weight:600;color:#3a3f48;background:#f7f8fa;border:1px solid var(--gray-100,#e6e8ec);border-radius:99px;padding:8px 15px}
+  .nj-fine{margin-top:30px;font-size:.8rem;font-weight:700;letter-spacing:.02em;color:var(--gray-400,#9aa0a9)}
+  .nj-fine b{color:var(--red,#C8102E)}
   .notice{background:var(--red-pale);border:1px solid var(--red-muted);color:var(--red-deep);border-radius:var(--radius-md);padding:13px 17px;font-size:.85rem;margin-bottom:22px;display:flex;gap:10px;align-items:flex-start}
   .notice svg{width:18px;height:18px;flex-shrink:0;margin-top:1px}
 
@@ -891,17 +898,20 @@
     var as=$('#also-searched'); if(as) as.innerHTML='';
     var rc=$('#results-count'); if(rc) rc.innerHTML='';
     $('#list-state').innerHTML=
-      '<div class="no-jobs">'
-      + '<span class="no-jobs-badge"><span class="pd"></span> Careers</span>'
+      '<div class="nj-wrap"><div class="no-jobs">'
+      + '<div class="nj-eyebrow">Careers at CNT</div>'
       + '<div class="no-jobs-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/></svg></div>'
-      + '<h3>No open positions right now</h3>'
-      + '<p>We&rsquo;re between hiring drives at the moment &mdash; but new roles for our client brands open all the time. Be the first to know when the next one goes live.</p>'
+      + '<h3>No open roles at the moment</h3>'
+      + '<p class="nj-lead">We&rsquo;re between hiring drives right now &mdash; but new positions across our client brands open all the time. Get notified the moment one goes live, or send your r&eacute;sum&eacute; so we can reach out when a match comes up.</p>'
       + '<div class="no-jobs-actions">'
       +   '<button type="button" class="njbtn njbtn-red" id="nj-alerts">Get job alerts <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>'
       +   '<a class="njbtn njbtn-ghost" href="mailto:hrdadmin@cntpromoads.com?subject=R%C3%A9sum%C3%A9%20for%20future%20openings">Send your r&eacute;sum&eacute;</a>'
       + '</div>'
+      + '<div class="nj-divider"></div>'
+      + '<div class="nj-cats-label">Fields we regularly recruit for</div>'
+      + '<div class="nj-cats"><span>Administration</span><span>Customer Service</span><span>Sales &amp; Merchandising</span><span>Engineering &amp; Technical</span><span>Safety &amp; Security</span><span>Healthcare</span></div>'
       + '<div class="nj-fine"><b>A Million Jobs for a Million Filipinos.</b> &middot; #TatakCNT</div>'
-      + '</div>';
+      + '</div></div>';
     var a=$('#nj-alerts');
     if(a) a.addEventListener('click',function(){
       var el=document.getElementById('nl-email');
