@@ -1903,7 +1903,10 @@ input, select, textarea { font-family: var(--font-body); }
 
 
 <!-- ============================= SUCCESS STORIES (PROJECTS) ============================= -->
-<section class="projects section" id="projects" aria-label="Success Stories">
+<!-- Success Stories: content comes ONLY from Content Studio → Stories. The
+     section stays hidden until real, published stories exist (see the
+     stories loader below) — no hardcoded/sample case studies ship. -->
+<section class="projects section" id="projects" aria-label="Success Stories" style="display:none">
   <div class="container">
     <div class="section-header">
       <div>
@@ -1913,72 +1916,7 @@ input, select, textarea { font-family: var(--font-body); }
       <a href="#contact" class="btn-ghost-dark" data-reveal>Work With Us</a>
     </div>
 
-    <div class="projects-grid" data-reveal id="stories-grid">
-      <div class="project-card large">
-        <div class="project-img">
-          <img src="/assets/img/case-4.jpg" alt="Banking sector mass hiring success story" loading="lazy" />
-          <div class="project-overlay">
-            <div class="project-info">
-              <span class="project-cat">Banking &amp; Finance</span>
-              <h4>Metro Bank: 200-Person Branch Rollout</h4>
-              <p>Recruited and onboarded 200 branch staff across 15 new locations in 60 days</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-img">
-          <img src="/assets/img/case-5.jpg" alt="Healthcare staffing success story" loading="lazy" />
-          <div class="project-overlay">
-            <div class="project-info">
-              <span class="project-cat">Healthcare</span>
-              <h4>Hospital Chain Nationwide Staffing</h4>
-              <p>1,200 medical and administrative staff placed across 8 hospital facilities</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-img">
-          <img src="/assets/img/case-6.jpg" alt="Government sector staffing" loading="lazy" />
-          <div class="project-overlay">
-            <div class="project-info">
-              <span class="project-cat">Government</span>
-              <h4>LGU Workforce Modernization</h4>
-              <p>Placed 350 contractual specialists for local government digital transformation</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card">
-        <div class="project-img">
-          <img src="/assets/img/case-7.jpg" alt="Retail staffing project" loading="lazy" />
-          <div class="project-overlay">
-            <div class="project-info">
-              <span class="project-cat">Retail &amp; FMCG</span>
-              <h4>National Retail Chain Holiday Surge</h4>
-              <p>500 seasonal retail staff deployed across 40 branches within 3 weeks</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card large">
-        <div class="project-img">
-          <img src="/assets/img/case-8.jpg" alt="Technology company executive search" loading="lazy" />
-          <div class="project-overlay">
-            <div class="project-info">
-              <span class="project-cat">Technology</span>
-              <h4>Tech Company C-Suite Placement</h4>
-              <p>Successfully placed CEO, CTO, and CFO for a growing Philippine fintech company</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="projects-grid" data-reveal id="stories-grid"></div>
   </div>
 </section>
 
@@ -2079,109 +2017,37 @@ input, select, textarea { font-family: var(--font-body); }
 .g-rev-cta{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.05em}
 @media(max-width:480px){.g-rev{gap:13px;padding:14px 16px}.g-rev-div,.g-rev-cta{display:none}}
 </style>
-<section class="clients section" id="clients" aria-label="Our Clients">
+<!-- Our Clients: logos come ONLY from Content Studio → Clients. Hidden until
+     real, permission-cleared client logos are published — no hardcoded brand
+     marks ship (avoids displaying logos we may not have the rights to use). -->
+<section class="clients section" id="clients" aria-label="Our Clients" style="display:none">
   <div class="container">
     <div class="section-eyebrow center" data-reveal>Trusted by Industry Leaders Across the Philippines</div>
     <div class="client-logos" data-reveal>
-    <div class="logo-track" id="logo-track">
-
-        <!-- Original Logos (fallback — Content Studio → Clients overrides these) -->
-        <div class="client-logo">
-            <img src="/assets/img/urc.png"
-                 alt="Universal Robina Corporation"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/uncle-johns.png"
-                 alt="Uncle John's"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/sony.png"
-                 alt="Sony"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/skyworth.png"
-                 alt="Skyworth"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/hisense.png"
-                 alt="Hisense"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/client-290663.png"
-                 alt="CNT corporate client"
-                 loading="lazy">
-        </div>
-
-        <!-- Duplicate for Infinite Loop -->
-        <div class="client-logo">
-            <img src="/assets/img/urc.png"
-                 alt="Universal Robina Corporation"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/uncle-johns.png"
-                 alt="Uncle John's"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/sony.png"
-                 alt="Sony"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/skyworth.png"
-                 alt="Skyworth"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/hisense.png"
-                 alt="Hisense"
-                 loading="lazy">
-        </div>
-
-        <div class="client-logo">
-            <img src="/assets/img/client-290663.png"
-                 alt="CNT corporate client"
-                 loading="lazy">
-        </div>
-
-    </div>
-</div>
+      <div class="logo-track" id="logo-track"></div>
     </div>
   </div>
 </section>
 <script>
-  // Client logos managed in Content Studio → Clients (falls back to the hardcoded
-  // logos above). Duplicated once so the marquee scrolls seamlessly.
+  // Client logos are managed in Content Studio → Clients. The section stays
+  // hidden until at least one published client has a logo, so no unconfirmed
+  // brand marks appear. Logos are duplicated once for a seamless marquee loop.
   (function(){
     var track = document.getElementById('logo-track');
-    if(!track) return;
+    var section = document.getElementById('clients');
+    if(!track || !section) return;
     try{
       var sb = window.getSupabase && window.getSupabase();
       if(!sb) return;
       sb.from('clients').select('name,logo_url').eq('published', true)
         .order('sort_order', { ascending: true }).order('created_at', { ascending: true })
         .then(function(res){
-          if(!res || !res.data || !res.data.length) return;   // keep fallback logos
+          if(!res || !res.data || !res.data.length) return;   // no clients → stay hidden
           var esc = function(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
           var one = res.data.filter(function(c){ return c.logo_url; }).map(function(c){
             return '<div class="client-logo"><img src="'+esc(c.logo_url)+'" alt="'+esc(c.name||'CNT corporate client')+'" loading="lazy"></div>';
           }).join('');
-          if(one) track.innerHTML = one + one;   // duplicate for the infinite loop
+          if(one){ track.innerHTML = one + one; section.style.display = ''; }   // reveal only with real logos
         }, function(){});
     }catch(_){}
   })();
@@ -2733,8 +2599,14 @@ function initHeroAnimations() {
   sb.from('testimonials').select('*').eq('published', true)
     .order('sort_order', { ascending: true }).order('created_at', { ascending: false })
     .then(res => {
-      const rows = res && res.data;
-      if (!rows || !rows.length) { hide(); return; }
+      const raw = res && res.data;
+      // Safety net: skip any leftover Content Studio template rows so placeholder
+      // quotes never render even if they were accidentally left published.
+      const rows = (raw || []).filter(t => {
+        const a = String(t.author||''), q = String(t.quote||'');
+        return !/^\s*Template\b/i.test(a) && !/^\s*Replace this with\b/i.test(q);
+      });
+      if (!rows.length) { hide(); return; }
       const cards = rows.map(t => {
         const stars = '★★★★★'.slice(0, Math.max(1, Math.min(5, Number(t.rating||5))));
         return '<div class="swiper-slide"><div class="testimonial-card">'
@@ -3332,6 +3204,7 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
           +(s.description?'<p>'+esc(s.description)+'</p>':'')
         +'</div></div></div>';
     }).join('');
+    var ps=document.getElementById('projects'); if(ps) ps.style.display='';  // reveal only when real stories exist
   }, function(){ hideSection('projects'); });
 })();
 </script>
