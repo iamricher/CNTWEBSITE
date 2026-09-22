@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Success Story — CNT Promo &amp; Ads Specialists, Inc.</title>
+  <meta name="description" content="A client win from CNT Promo & Ads Specialists, Inc. — real workforce results across the Philippines." />
+  <link rel="canonical" href="https://www.cntpromoads.com.ph/story" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Success Story — CNT Promo &amp; Ads Specialists, Inc." />
+  <meta property="og:description" content="A client win from CNT Promo & Ads Specialists, Inc." />
+  <meta property="og:image" content="https://www.cntpromoads.com.ph/assets/img/og-cover.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="/assets/img/icon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <!-- Shared site header + footer (same as the homepage) -->
+  <link rel="stylesheet" href="assets/site-chrome.css" />
+  <script src="assets/site-chrome.js" defer></script>
+  <style>
+    :root{--red:#C8102E;--red-deep:#A50D24;--red-pale:#FFF0F2;--charcoal:#1A1A1A;--gray-400:#9CA3AF;--gray-600:#6B7280;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;color:#111;background:#FAFAFA;-webkit-font-smoothing:antialiased;line-height:1.7}
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%;height:auto}
+    .container{width:min(760px,100% - 40px);margin-inline:auto}
+    /* Premium editorial header (light, title-first) */
+    .article{padding:clamp(26px,4vw,44px) 0 90px}
+    .ev-back{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;color:#8a90a0;margin-bottom:clamp(26px,4vw,44px);transition:color .16s}
+    .ev-back:hover{color:var(--red)}
+    .ev-back svg{width:15px;height:15px}
+    .ev-kick{display:flex;align-items:center;gap:11px;font-family:'Manrope',sans-serif;font-weight:800;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px}
+    .ev-kick .cat{display:inline-flex;align-items:center;gap:9px;color:var(--red)}
+    .ev-kick .cat::before{content:"";width:22px;height:2px;background:var(--red);border-radius:2px}
+    .ev-kick .tag{color:#9aa3b2}
+    .ev-head h1{font-family:'Manrope',sans-serif;font-weight:800;font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:1.1;letter-spacing:-.025em;color:#12141a}
+    .ev-dek{font-size:1.125rem;line-height:1.8;color:#3a4250;margin-top:18px;max-width:64ch}
+    .ev-meta{display:flex;align-items:center;gap:14px;margin-top:26px;padding-top:18px;border-top:1px solid #ECEFF3}
+    .ev-share-lbl{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9aa3b2}
+    .ev-share{display:flex;gap:9px;margin-left:auto}
+    .ev-share .sh{width:38px;height:38px;border-radius:50%;border:1px solid #E5E9F0;background:#fff;color:#5A6474;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .16s,color .16s,transform .16s,box-shadow .16s}
+    .ev-share .sh svg{width:16px;height:16px}
+    .ev-share .sh:hover{border-color:var(--red);color:var(--red);transform:translateY(-2px);box-shadow:0 8px 20px -8px rgba(200,16,46,.4)}
+    .ev-share .sh-cp.copied{border-color:#15803D;color:#15803D}
+    figure.ev-cover{margin:clamp(26px,4vw,40px) 0 0}
+    .ev-cover .frame{border-radius:18px;overflow:hidden;height:clamp(240px,40vw,440px);background:#0b0b0d;box-shadow:0 30px 68px -34px rgba(16,24,40,.5)}
+    .ev-cover img{width:100%;height:100%;object-fit:cover;object-position:center 38%}
+    .ev-cover figcaption{margin-top:12px;font-size:.85rem;font-style:italic;color:#98a0ad;text-align:center}
+    @media(max-width:560px){.ev-share-lbl{display:none}}
+    /* Premium article body */
+    .body{margin-top:clamp(30px,4vw,46px)}
+    .body p{font-size:1.125rem;line-height:1.8;color:#3a4250;margin-bottom:1.3rem}
+    .body p.lead{font-size:1.125rem;line-height:1.8;color:#3a4250;font-weight:400}
+    .body .subhead{font-family:'Manrope',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin:2.6rem 0 1rem}
+    .body img{width:100%;border-radius:14px;margin:14px 0;box-shadow:0 10px 34px rgba(0,0,0,.10)}
+    /* Result highlight strip */
+    .st-result{display:flex;gap:14px;align-items:flex-start;margin:clamp(24px,3vw,34px) 0 0;padding:18px 20px;background:#fff;border:1px solid #ECEFF3;border-left:3px solid var(--red);border-radius:12px;box-shadow:0 10px 30px -22px rgba(16,24,40,.4)}
+    .st-result .ic{width:30px;height:30px;flex:none;border-radius:9px;background:var(--red-pale);color:var(--red);display:flex;align-items:center;justify-content:center;margin-top:1px}
+    .st-result .ic svg{width:17px;height:17px}
+    .st-result .k{font-family:'Manrope',sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9aa3b2;margin-bottom:3px}
+    .st-result p{font-size:1.02rem;line-height:1.6;color:#2b333f;font-weight:600;margin:0}
+    /* Newspaper-style photo spread */
+    .gallery-title{font-family:'Manrope',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--charcoal);margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--red);display:inline-block}
+    .gallery{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:96px;grid-auto-flow:dense;gap:10px}
+    .gallery a{grid-column:span 2;grid-row:span 2;overflow:hidden;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);position:relative;background:#eee}
+    .gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+    .gallery a:hover img{transform:scale(1.05)}
+    .gallery a:first-child{grid-column:span 4;grid-row:span 4}
+    .gallery a:nth-child(4n+3){grid-row:span 3}
+    .gallery a:nth-child(6n+5){grid-column:span 3}
+    @media(max-width:640px){
+      .gallery{grid-template-columns:repeat(4,1fr);grid-auto-rows:78px}
+      .gallery a:first-child{grid-column:span 4;grid-row:span 3}
+      .gallery a:nth-child(6n+5){grid-column:span 2}
+    }
+    .state{padding:80px 0;text-align:center;color:var(--gray-600)}
+    /* Other success stories */
+    .more-events{margin-top:clamp(44px,6vw,72px);padding-top:clamp(30px,4vw,44px);border-top:1px solid #ECEFF3}
+    .more-events .me-title{font-family:'Manrope',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--charcoal);margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid var(--red);display:inline-block}
+    .me-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .me-card{display:block;border:1px solid #ECEFF3;border-radius:14px;overflow:hidden;background:#fff;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+    .me-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px -20px rgba(16,24,40,.28);border-color:#F3B6BF}
+    .me-card .me-thumb{aspect-ratio:16/10;background:#f3f4f6 center/cover no-repeat}
+    .me-card .me-body{padding:14px 16px 16px}
+    .me-card .me-date{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--red)}
+    .me-card .me-h{font-family:'Manrope',sans-serif;font-size:1rem;font-weight:800;color:#12141a;line-height:1.25;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    @media(max-width:640px){.me-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:440px){.me-grid{grid-template-columns:1fr}}
+    /* CTA band */
+    .st-cta{margin-top:clamp(44px,6vw,72px);background:linear-gradient(135deg,#1A1A1A,#000);border-radius:20px;padding:clamp(30px,4vw,44px);text-align:center;color:#fff;position:relative;overflow:hidden}
+    .st-cta::after{content:"";position:absolute;right:-8%;top:-40%;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(200,16,46,.34),transparent 62%)}
+    .st-cta h3{position:relative;font-family:'Manrope',sans-serif;font-size:clamp(1.4rem,3vw,1.9rem);font-weight:800;letter-spacing:-.02em}
+    .st-cta p{position:relative;color:rgba(255,255,255,.72);margin-top:10px;font-size:1rem;max-width:52ch;margin-inline:auto}
+    .st-cta .row{position:relative;margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+    .st-cta .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.95rem;padding:13px 26px;border-radius:12px;transition:transform .16s ease,background .16s ease,border-color .16s ease}
+    .st-cta .btn-red{background:var(--red);color:#fff;box-shadow:0 14px 30px -10px rgba(200,16,46,.5)}
+    .st-cta .btn-red:hover{background:#E5213F;transform:translateY(-2px)}
+    .st-cta .btn-ghost{border:1px solid rgba(255,255,255,.22);color:#fff}
+    .st-cta .btn-ghost:hover{border-color:#fff;transform:translateY(-2px)}
+    /* Lightbox */
+    .lb{position:fixed;inset:0;z-index:9000;background:rgba(10,10,12,.94);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .22s ease;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+    .lb.open{display:flex;opacity:1}
+    .lb-stage{position:relative;width:min(1100px,calc(100vw - 168px));height:min(84vh,900px);display:flex;align-items:center;justify-content:center}
+    .lb-stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 24px 80px rgba(0,0,0,.6);user-select:none}
+    .lb-btn{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s ease;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+    .lb-btn:hover{background:var(--red)}
+    .lb-prev{left:-66px}.lb-next{right:-66px}
+    .lb-close{position:absolute;top:20px;right:24px;width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;transition:background .18s ease}
+    .lb-close:hover{background:var(--red)}
+    .lb-count{position:absolute;bottom:-38px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.85);font-size:.85rem;font-weight:700;letter-spacing:.06em;white-space:nowrap}
+    .gallery a{cursor:zoom-in}
+    @media(max-width:640px){.lb-stage{width:calc(100vw - 112px)}.lb-btn{width:44px;height:44px}.lb-prev{left:-50px}.lb-next{right:-50px}}
+  </style>
+</head>
+<body>
+  <!-- Shared site header (injected by assets/site-chrome.js) -->
+  <div id="site-header"></div>
+
+  <main class="article">
+    <div class="container">
+      <div id="story-hero" class="ev-head"></div>
+      <div id="story-content"><div class="state">Loading…</div></div>
+    </div>
+  </main>
+
+  <!-- Photo lightbox -->
+  <div class="lb" id="lb" aria-hidden="true">
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+    <div class="lb-stage">
+      <button class="lb-btn lb-prev" id="lb-prev" aria-label="Previous photo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <img id="lb-img" src="" alt="">
+      <button class="lb-btn lb-next" id="lb-next" aria-label="Next photo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+      <div class="lb-count" id="lb-count"></div>
+    </div>
+  </div>
+
+  <!-- Shared site footer (injected by assets/site-chrome.js) -->
+  <div id="site-footer"></div>
+
+  <script>
+  (function(){
+    var esc=function(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    // Copy the current story link (used by the Share row's copy button).
+    window.cntCopyLink=function(btn){
+      var revert=function(){ btn.classList.add('copied'); btn.setAttribute('title','Link copied!'); setTimeout(function(){ btn.classList.remove('copied'); btn.setAttribute('title','Copy link'); },1600); };
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(location.href).then(revert,revert); return; } }catch(_){}
+      try{ var t=document.createElement('textarea'); t.value=location.href; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); revert(); }catch(_){}
+    };
+    var el=document.getElementById('story-content');
+    var hero=document.getElementById('story-hero');
+    var id=new URLSearchParams(location.search).get('id');
+    var sb=(window.getSupabase&&window.getSupabase());
+    if(!id){ el.innerHTML='<div class="state">No story selected. <a href="/#projects" style="color:var(--red);font-weight:600;">Back to success stories</a></div>'; return; }
+    if(!sb){ el.innerHTML='<div class="state">Unable to load right now. Please try again later.</div>'; return; }
+    sb.from('stories').select('*').eq('id',id).eq('published',true).single().then(function(res){
+      var st=res.data;
+      if(res.error||!st){ el.innerHTML='<div class="state">This success story was not found or is no longer available.<br><a href="/#projects" style="color:var(--red);font-weight:600;">Back to success stories</a></div>'; return; }
+      document.title=(st.title||'Success Story')+' — CNT';
+      // Premium editorial header (light): back, kicker, title, share, cover
+      var _su=location.href;
+      var _fb='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(_su);
+      var _li='https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(_su);
+      hero.innerHTML=
+        '<a class="ev-back" href="/#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All success stories</a>'
+        +'<div class="ev-kick">'
+          +'<span class="cat">'+esc(st.category||'Success Story')+'</span>'
+        +'</div>'
+        +'<h1>'+esc(st.title||'')+'</h1>'
+        +'<div class="ev-meta"><span class="ev-share-lbl">Share</span><div class="ev-share">'
+          +'<a class="sh" href="'+_fb+'" target="_blank" rel="noopener" aria-label="Share on Facebook" title="Share on Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 22v-8h2.7l.4-3H13V9.1c0-.9.3-1.5 1.6-1.5H16V5c-.3 0-1.2-.1-2.2-.1-2.2 0-3.8 1.4-3.8 3.9V11H7.5v3H10v8h3z"/></svg></a>'
+          +'<a class="sh" href="'+_li+'" target="_blank" rel="noopener" aria-label="Share on LinkedIn" title="Share on LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.94 5A1.94 1.94 0 1 1 3.06 5a1.94 1.94 0 0 1 3.88 0zM3.3 8.4h3.3V21H3.3V8.4zM9.4 8.4h3.16v1.72h.05c.44-.83 1.52-1.72 3.13-1.72 3.35 0 3.97 2.2 3.97 5.06V21h-3.3v-4.9c0-1.17-.02-2.67-1.63-2.67-1.63 0-1.88 1.27-1.88 2.58V21H9.4V8.4z"/></svg></a>'
+          +'<button class="sh sh-cp" type="button" onclick="cntCopyLink(this)" aria-label="Copy link" title="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></button>'
+        +'</div></div>'
+        +(st.image_url?'<figure class="ev-cover"><div class="frame"><img src="'+esc(st.image_url)+'" alt="'+esc(st.title||'')+'"></div></figure>':'');
+      // Body: prefer the full write-up (body); when there is none, use the
+      // short result/description so the page never reads empty. The one-line
+      // result is also pinned as a highlight strip above the article.
+      var resultLine=(st.description&&st.description.trim())||'';
+      var bodySrc=(st.body&&st.body.trim())||resultLine;
+      var _leadDone=false;
+      var paras=String(bodySrc).split(/\n{1,}/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){
+        if(p.length<=44 && p===p.toUpperCase() && /[A-Z]/.test(p)) return '<h2 class="subhead">'+esc(p)+'</h2>';
+        var cls=_leadDone?'':' class="lead"'; _leadDone=true; return '<p'+cls+'>'+esc(p)+'</p>';
+      }).join('');
+      var resultStrip = (resultLine && st.body && st.body.trim())
+        ? '<div class="st-result"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="k">The result</div><p>'+esc(resultLine)+'</p></div></div>'
+        : '';
+      var gallery='';
+      var pics=Array.isArray(st.images)?st.images.filter(Boolean):[];
+      if(pics.length){
+        gallery='<h3 class="gallery-title">In Photos</h3><div class="gallery">'+pics.map(function(u,i){return '<a href="'+esc(u)+'" data-i="'+i+'"><img src="'+esc(u)+'" alt="Photo '+(i+1)+'" loading="lazy"></a>';}).join('')+'</div>';
+      }
+      el.innerHTML=resultStrip+'<div class="body">'+(paras||'<p></p>')+'</div>'+gallery
+        +'<div class="st-cta"><h3>Need a workforce that delivers?</h3><p>From a single specialist to a nationwide deployment, CNT builds the team your business needs.</p><div class="row"><a class="btn btn-red" href="/#contact">Partner with us</a><a class="btn btn-ghost" href="/careers">Browse open roles</a></div></div>';
+      if(pics.length) initLightbox(pics, el);
+      // Other success stories — a few more published wins to explore.
+      Promise.resolve(sb.from('stories').select('id,title,category,image_url').eq('published',true).neq('id',id).order('created_at',{ascending:false}).limit(24)).then(function(r){
+        var rows=r&&r.data; if(!rows||!rows.length) return;
+        for(var i=rows.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)),t=rows[i]; rows[i]=rows[j]; rows[j]=t; }   // random order
+        rows=rows.slice(0,3);   // show up to 3
+        var card=function(o){
+          var link='/story?id='+encodeURIComponent(o.id);
+          var bg=o.image_url?' style="background-image:url(\''+esc(o.image_url)+'\')"':'';
+          return '<a class="me-card" href="'+link+'"><div class="me-thumb"'+bg+'></div><div class="me-body"><div class="me-date">'+esc(o.category||'Success Story')+'</div><div class="me-h">'+esc(o.title||'')+'</div></div></a>';
+        };
+        el.insertAdjacentHTML('beforeend','<div class="more-events"><div class="me-title">Other success stories</div><div class="me-grid">'+rows.map(card).join('')+'</div></div>');
+      }, function(){});
+    });
+
+    // Full-screen photo viewer: click any gallery photo, then step through
+    // every uploaded image with the arrows, keyboard, or by tapping the edges.
+    function initLightbox(pics, root){
+      var lb=document.getElementById('lb'), img=document.getElementById('lb-img'),
+          count=document.getElementById('lb-count'), cur=0;
+      function show(i){
+        cur=(i+pics.length)%pics.length;
+        img.src=pics[cur];
+        img.alt='Photo '+(cur+1)+' of '+pics.length;
+        count.textContent=(cur+1)+' / '+pics.length;
+      }
+      function open(i){ show(i); lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+      function close(){ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+      root.querySelectorAll('.gallery a').forEach(function(a){
+        a.addEventListener('click',function(e){ e.preventDefault(); open(+a.getAttribute('data-i')); });
+      });
+      document.getElementById('lb-prev').addEventListener('click',function(e){ e.stopPropagation(); show(cur-1); });
+      document.getElementById('lb-next').addEventListener('click',function(e){ e.stopPropagation(); show(cur+1); });
+      document.getElementById('lb-close').addEventListener('click',close);
+      lb.addEventListener('click',function(e){ if(e.target===lb) close(); });
+      document.addEventListener('keydown',function(e){
+        if(!lb.classList.contains('open')) return;
+        if(e.key==='Escape') close();
+        else if(e.key==='ArrowLeft') show(cur-1);
+        else if(e.key==='ArrowRight') show(cur+1);
+      });
+      // Swipe on touch devices
+      var x0=null;
+      lb.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+      lb.addEventListener('touchend',function(e){ if(x0===null) return; var dx=e.changedTouches[0].clientX-x0; if(Math.abs(dx)>40) show(cur+(dx<0?1:-1)); x0=null; },{passive:true});
+    }
+  })();
+  </script>
+
+</body>
+</html>

@@ -3197,12 +3197,12 @@ console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ',
     sgrid.innerHTML=rows.map(function(s){
       var img=s.image_url?'<img src="'+esc(s.image_url)+'" alt="'+esc(s.title||'Success story')+'" loading="lazy" decoding="async">':'';
       var imgBg=s.image_url?'':'style="background:linear-gradient(135deg,#1A1A1A,#C8102E);"';
-      return '<div class="project-card"><div class="project-img" '+imgBg+'>'+img+'</div>'
+      return '<a class="project-card" href="/story?id='+encodeURIComponent(s.id)+'"><div class="project-img" '+imgBg+'>'+img+'</div>'
         +'<div class="project-overlay"><div class="project-info">'
           +(s.category?'<span class="project-cat">'+esc(s.category)+'</span>':'')
           +'<h4>'+esc(s.title||'')+'</h4>'
           +(s.description?'<p>'+esc(s.description)+'</p>':'')
-        +'</div></div></div>';
+        +'</div></div></a>';
     }).join('');
     var ps=document.getElementById('projects'); if(ps) ps.style.display='';  // reveal only when real stories exist
   }, function(){ hideSection('projects'); });

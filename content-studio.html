@@ -906,7 +906,12 @@
           <input id="st-image" type="hidden">
           <div id="st-preview"></div>
         </div>
-        <div class="field"><label>Result / description</label><textarea id="st-desc" rows="3" placeholder="Recruited and onboarded 200 branch staff across 15 new locations in 60 days"></textarea></div>
+        <div class="field"><label>Result — the one-line win (shown on the card &amp; pinned on the story page)</label><textarea id="st-desc" rows="2" placeholder="Recruited, trained and deployed 500+ merchandisers nationwide in 8 weeks"></textarea></div>
+        <div class="field"><label>Full write-up — the story on its own page (optional)</label><textarea id="st-body" rows="6" placeholder="The full story. Separate paragraphs with a blank line. Leave empty to just use the result line above."></textarea></div>
+        <div class="field"><label>More photos — gallery (optional)</label>
+          <label class="up"><span class="material-icons-outlined">add_photo_alternate</span>Add photos<input type="file" accept="image/*" multiple style="display:none;" onchange="stGalleryUpload(this)"></label>
+          <div id="st-gallery" class="gallery-grid"></div>
+        </div>
         <label class="chk"><input type="checkbox" id="st-published" checked><span>Published<small>Visible on the website. Uncheck to save as a draft.</small></span></label>
       </div>
       <div class="box-foot"><button class="btn btn-ghost" onclick="stClose()">Cancel</button><button class="btn" onclick="stSave()"><span class="material-icons-outlined">check</span>Save story</button></div>
@@ -1693,8 +1698,10 @@
       document.getElementById('st-category').value = s.category||'';
       document.getElementById('st-image').value = s.image_url||'';
       document.getElementById('st-desc').value = s.description||'';
+      document.getElementById('st-body').value = s.body||'';
       document.getElementById('st-published').checked = id ? !!s.published : true;
       document.getElementById('st-preview').innerHTML = s.image_url?'<img src="'+esc(s.image_url)+'" alt="">':'';
+      _stImages = Array.isArray(s.images)?s.images.slice():[]; renderStGallery();
       document.getElementById('st-modal').classList.add('on');
     };
     window.stClose = function(){ document.getElementById('st-modal').classList.remove('on'); };
@@ -1702,9 +1709,18 @@
       var id = document.getElementById('st-id').value;
       var row = { title:document.getElementById('st-title').value.trim(), category:document.getElementById('st-category').value.trim()||null,
         image_url:document.getElementById('st-image').value.trim()||null, description:document.getElementById('st-desc').value.trim()||null,
+        body:document.getElementById('st-body').value.trim()||null, images:_stImages.slice(),
         published:document.getElementById('st-published').checked };
       if(!row.title){ toast('Title is required'); return; }
-      var res = id ? await sb.from('stories').update(row).eq('id',id) : await sb.from('stories').insert(row);
+      var save=function(r){ return id ? sb.from('stories').update(r).eq('id',id) : sb.from('stories').insert(r); };
+      var res = await save(row);
+      // If the body/images columns aren't migrated yet, save the core fields so
+      // nothing is lost — the write-up & gallery start working once the migration runs.
+      if(res.error && /body|images|column|schema cache/i.test(res.error.message||'')){
+        var core=Object.assign({},row); delete core.body; delete core.images;
+        res = await save(core);
+        if(!res.error) toast('Saved. Apply the stories-detail migration to keep the write-up & gallery.');
+      }
       if(res.error){ toast('Save failed: '+res.error.message); return; }
       logAudit(id?'update':'create','story',id||null,row.title);
       stClose(); stLoad(); toast(id?'Story updated':'Story published');
@@ -1716,6 +1732,30 @@
       if(res.error){ toast('Delete failed: '+res.error.message); return; }
       logAudit('delete','story',id,s?s.title:null);
       stLoad(); toast('Story deleted');
+    };
+    // Story photo gallery — own state so it coexists with the event gallery.
+    var _stImages = [];
+    function renderStGallery(){
+      var el=document.getElementById('st-gallery'); if(!el) return;
+      el.innerHTML=_stImages.map(function(u,i){ return '<div class="gthumb"><img src="'+esc(u)+'" alt=""><button class="rm" title="Remove" onclick="stGalleryRemove('+i+')"><span class="material-icons-outlined">close</span></button></div>'; }).join('');
+    }
+    window.stGalleryRemove = function(i){ _stImages.splice(i,1); renderStGallery(); };
+    window.stGalleryUpload = async function(input){
+      var files = input && input.files ? Array.prototype.slice.call(input.files) : [];
+      if(!files.length) return;
+      toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
+      for(var i=0;i<files.length;i++){
+        var f=files[i];
+        if(!/^image\//.test(f.type) || f.size>5*1048576) continue;
+        var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
+        var path='stories/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        if(up.error){ toast('Upload failed: '+up.error.message); continue; }
+        _stImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl);
+        renderStGallery();
+      }
+      input.value='';
+      toast('Photos added');
     };
 
     // ── TESTIMONIALS ──
