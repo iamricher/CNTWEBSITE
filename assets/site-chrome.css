@@ -195,3 +195,15 @@
 
 /* Footer registration line (DOLE/DTI/SEC) — shown only when configured */
 .footer-license{ font-size:.76rem; color:rgba(255,255,255,.55); letter-spacing:.01em; margin-bottom:.6rem; }
+
+/* ── Print: clean paper output (esp. Privacy/Terms). Drops the nav, footer,
+   floating widgets and back-to-top; forces high-contrast body text. ── */
+@media print {
+  .nav, .footer, .cnt-totop, .newsletter-form,
+  #tawkchat-container, .reamaze-widget, [id^="tawk"], [class*="reamaze"] { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; }
+  a { color: #000 !important; text-decoration: underline; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .85em; color: #444; word-break: break-all; }
+  main, .wrap, .container { max-width: none !important; width: auto !important; }
+  * { box-shadow: none !important; text-shadow: none !important; }
+}
