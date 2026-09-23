@@ -1012,6 +1012,8 @@
           <label class="up"><span class="material-icons-outlined">upload</span>Upload photo<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'sv-image','sv-image-prev')"></label>
           <input id="sv-image" type="hidden">
         </div>
+        <div class="field"><label>Video <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— optional; paste a YouTube link and it plays on the service page</small></label>
+          <input id="sv-video" placeholder="https://www.youtube.com/watch?v=… or https://youtu.be/…"></div>
         <div class="field"><label>Gallery photos <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— shown in the “See it in action” section on the service page</small></label>
           <label class="up"><span class="material-icons-outlined">add_photo_alternate</span>Add photos<input type="file" accept="image/*" multiple style="display:none;" onchange="svGalleryUpload(this)"></label>
           <div id="sv-gallery" class="gallery-grid"></div>
@@ -2049,6 +2051,7 @@
       document.getElementById('sv-overview').value = s.overview||'';
       document.getElementById('sv-image').value = s.image_url||'';
       document.getElementById('sv-image-prev').innerHTML = s.image_url?'<img src="'+esc(s.image_url)+'" alt="">':'';
+      document.getElementById('sv-video').value = s.video_url||'';
       _svImages = Array.isArray(s.images)?s.images.slice():[]; renderSvGallery();
       document.getElementById('sv-published').checked = id ? !!s.published : true;
       svRenderHls(Array.isArray(s.highlights)?s.highlights:[]);
@@ -2080,6 +2083,7 @@
         overview:document.getElementById('sv-overview').value.trim()||null,
         icon:existing.icon||'search',
         image_url:document.getElementById('sv-image').value.trim()||null,
+        video_url:document.getElementById('sv-video').value.trim()||null,
         images:_svImages,
         highlights:highlights,
         who_for:lines('sv-who'),
@@ -2092,6 +2096,12 @@
       if(!row.title){ toast('Title is required'); return; }
       if(!row.slug){ toast('Please use letters or numbers in the title'); return; }
       var res = id ? await sb.from('services').update(row).eq('id',id) : await sb.from('services').insert(row);
+      // Tolerate the video_url column not existing yet (before its migration is
+      // applied): retry once without it so saving never breaks.
+      if(res.error && /video_url|column|schema cache|does not exist/i.test(res.error.message||'')){
+        var r2=Object.assign({},row); delete r2.video_url;
+        res = id ? await sb.from('services').update(r2).eq('id',id) : await sb.from('services').insert(r2);
+      }
       if(res.error){ toast('Save failed: '+res.error.message); return; }
       logAudit(id?'update':'create','service',id||row.slug,row.title);
       svClose(); svLoad(); toast(id?'Service updated':'Service added');
