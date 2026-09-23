@@ -15,9 +15,12 @@
 // ============================================================
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mtaknpmvvldmnsizvtuy.supabase.co';
 const ANON = process.env.SUPABASE_ANON_KEY || 'sb_publishable_GYmTJWeUriWXjFkO9j2J7w_cwJNV0Au';
+const guard = require('../lib/api-guard');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+  // Cheap gate before any work: real CNT-site posts only, capped per IP.
+  if (guard(req, res, { max: 6, windowMs: 60000, globalMax: 300 })) return;
 
   // Optional Vercel BotID check (active only when installed + enabled).
   try {

@@ -5,13 +5,14 @@
 //  application. Runs server-side so the Resend API key is never exposed to
 //  the browser. Configure two Vercel environment variables:
 //    RESEND_API_KEY  – your Resend API key (secret)
-//    RESEND_FROM     – verified sender, e.g. "CNT Promo & Ads <noreply@mail.cntpromoads.com>"
+//    RESEND_FROM     – verified sender, e.g. "CNT Promo & Ads <noreply@cntpromoads.com.ph>"
 //  The sending domain/subdomain must be verified in Resend (add the DNS
 //  records it gives you at GoDaddy, exactly like your payroll subdomain).
 //
 //  Best-effort: if the key isn't set or Resend fails, it returns 200 so the
 //  form submission itself is never blocked by the email step.
 // ============================================================
+const guard = require('../lib/api-guard');
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const validEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || ''));
 
@@ -151,6 +152,9 @@ function staffTemplate(data) {
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   if (req.method !== 'POST') { res.status(405).json({ ok: false, error: 'method' }); return; }
+  // Only real CNT-site form posts, capped per IP + globally (protects the Resend
+  // quota and stops this branded sender being used as an open relay).
+  if (guard(req, res, { max: 4, windowMs: 60000, globalMax: 120 })) return;
 
   const body = await readBody(req);
   const type = body.type === 'application' ? 'application' : 'contact';
