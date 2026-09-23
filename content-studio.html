@@ -2207,7 +2207,9 @@
     // ── SUBSCRIBERS ──
     async function subLoad(){
       var el=document.getElementById('sub-list'); el.innerHTML=SKELETON;
-      var res = await sb.from('newsletter_subscribers').select('*').order('created_at',{ascending:false});
+      // The `subscribers` table (fed by the footer + careers cnt_subscribe RPC)
+      // is the same list api/notify-subscribers.js emails. Show active ones only.
+      var res = await sb.from('subscribers').select('*').eq('active',true).order('created_at',{ascending:false});
       if(res.error){ el.innerHTML='<div class="muted">'+esc(res.error.message)+'</div>'; return; }
       _sub = res.data||[];
       var ss=document.getElementById('stat-subs'); if(ss) ss.textContent=_sub.length.toLocaleString();
@@ -2223,7 +2225,7 @@
     window.subDelete = async function(id){
       if(!confirm('Remove this subscriber?')) return;
       var s=_sub.filter(function(x){return x.id===id;})[0];
-      var res=await sb.from('newsletter_subscribers').delete().eq('id',id);
+      var res=await sb.from('subscribers').delete().eq('id',id);
       if(res.error){ toast('Delete failed: '+res.error.message); return; }
       logAudit('delete','subscriber',id,s?s.email:null);
       subLoad(); toast('Subscriber removed');

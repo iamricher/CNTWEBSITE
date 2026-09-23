@@ -1407,12 +1407,13 @@
       var sb=(window.getSupabase&&window.getSupabase());
       if(!sb){ msg.textContent='Unable to subscribe right now. Please try again later.'; msg.className='ja-msg err'; return; }
       btn.disabled=true; btn.textContent='Subscribing…'; msg.textContent=''; msg.className='ja-msg';
-      var res=await sb.from('newsletter_subscribers').insert({ email: email });
+      // Same path as the footer: cnt_subscribe() RPC → the `subscribers` table
+      // that api/notify-subscribers.js emails on every new job/event. (The RPC is
+      // idempotent, so re-subscribing just succeeds.)
+      var res=await sb.rpc('cnt_subscribe', { p_email: email, p_source: 'careers' });
       btn.disabled=false; btn.textContent='Notify me';
       if(res.error){
-        if(res.error.code==='23505' || /duplicate|unique/i.test(res.error.message||'')){
-          msg.textContent='You’re already on the list — we’ll keep you posted!'; msg.className='ja-msg ok'; f.reset();
-        } else { msg.textContent='Couldn’t subscribe. Please try again.'; msg.className='ja-msg err'; }
+        msg.textContent='Couldn’t subscribe. Please try again.'; msg.className='ja-msg err';
         return;
       }
       msg.textContent='Done! We’ll email you when new jobs go live.'; msg.className='ja-msg ok'; f.reset();
