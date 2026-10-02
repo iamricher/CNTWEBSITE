@@ -259,6 +259,12 @@
     .gthumb img{width:100%;height:100%;object-fit:cover;display:block}
     .gthumb .rm{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:6px;border:none;background:rgba(15,23,42,.62);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .gthumb .rm .material-icons-outlined{font-size:15px}
+    /* Experts / SMEs repeater */
+    .sv-ex-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-bottom:8px}
+    .sv-ex-pic{width:52px;height:52px;border-radius:10px;overflow:hidden;border:1px solid var(--line-soft);background:var(--panel-2);display:grid;place-items:center;flex:none}
+    .sv-ex-pic img{width:100%;height:100%;object-fit:cover;display:block}
+    .sv-ex-pic .material-icons-outlined{color:var(--faint);font-size:24px}
+    .sv-ex-fields{display:grid;gap:6px;min-width:0}
 
     /* ── Drag-to-reorder rows ── */
     .row[draggable=true]{cursor:grab}
@@ -1017,6 +1023,10 @@
         <div class="field"><label>Gallery photos <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— shown in the “See it in action” section on the service page</small></label>
           <label class="up"><span class="material-icons-outlined">add_photo_alternate</span>Add photos<input type="file" accept="image/*" multiple style="display:none;" onchange="svGalleryUpload(this)"></label>
           <div id="sv-gallery" class="gallery-grid"></div>
+        </div>
+        <div class="field"><label>Experts / SMEs <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— optional; profile cards (photo + name) shown on the service page</small></label>
+          <div id="sv-experts"></div>
+          <button type="button" class="btn btn-ghost" onclick="svAddExpert()" style="margin-top:8px;"><span class="material-icons-outlined">person_add</span>Add expert</button>
         </div>
         <div class="field"><label>What’s included — highlights</label>
           <div id="sv-highlights"></div>
@@ -2009,6 +2019,38 @@
       }
       input.value='';
     };
+    // ── Experts / SMEs: photo + name profile cards (DOM-based, collected on save) ──
+    function svExpertRow(name, photo){
+      var pic = photo ? '<img src="'+esc(photo)+'" alt="">' : '<span class="material-icons-outlined">person</span>';
+      return '<div class="sv-ex-item">'
+        + '<div class="sv-ex-pic">'+pic+'</div>'
+        + '<div class="sv-ex-fields">'
+          + '<input class="sv-ex-name" placeholder="Name (e.g. Maria Santos)" value="'+esc(name||'')+'">'
+          + '<label class="up" style="font-size:11px;padding:6px 10px;"><span class="material-icons-outlined" style="font-size:15px;">upload</span>'+(photo?'Change photo':'Upload photo')+'<input type="file" accept="image/*" style="display:none;" onchange="svExpertUpload(this)"></label>'
+          + '<input type="hidden" class="sv-ex-photo" value="'+esc(photo||'')+'">'
+        + '</div>'
+        + '<button type="button" class="iconbtn del" title="Remove" onclick="this.closest(\'.sv-ex-item\').remove()"><span class="material-icons-outlined">close</span></button>'
+      + '</div>';
+    }
+    function renderSvExperts(arr){
+      var box=document.getElementById('sv-experts'); if(!box) return;
+      box.innerHTML=(arr&&arr.length)?arr.map(function(e){return svExpertRow(e.name,e.photo);}).join(''):'';
+    }
+    window.svAddExpert=function(){ document.getElementById('sv-experts').insertAdjacentHTML('beforeend', svExpertRow('','')); };
+    window.svExpertUpload=async function(input){
+      var f=input&&input.files&&input.files[0]; if(!f) return;
+      if(!/^image\//.test(f.type)||f.size>5*1048576){ toast('Use an image under 5MB'); input.value=''; return; }
+      var item=input.closest('.sv-ex-item');
+      toast('Uploading photo…');
+      var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
+      var path='services/experts/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+      var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+      if(up.error){ toast('Upload failed: '+up.error.message); input.value=''; return; }
+      var url=sb.storage.from('event-images').getPublicUrl(path).data.publicUrl;
+      item.querySelector('.sv-ex-photo').value=url;
+      var pic=item.querySelector('.sv-ex-pic'); if(pic) pic.innerHTML='<img src="'+esc(url)+'" alt="">';
+      input.value=''; toast('Photo added');
+    };
     async function svLoad(){
       var el=document.getElementById('services-list'); if(!el) return; el.innerHTML=SKELETON;
       var res = await sb.from('services').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
@@ -2052,6 +2094,7 @@
       document.getElementById('sv-image').value = s.image_url||'';
       document.getElementById('sv-image-prev').innerHTML = s.image_url?'<img src="'+esc(s.image_url)+'" alt="">':'';
       document.getElementById('sv-video').value = s.video_url||'';
+      renderSvExperts(Array.isArray(s.experts)?s.experts:[]);
       _svImages = Array.isArray(s.images)?s.images.slice():[]; renderSvGallery();
       document.getElementById('sv-published').checked = id ? !!s.published : true;
       svRenderHls(Array.isArray(s.highlights)?s.highlights:[]);
@@ -2076,6 +2119,9 @@
       }).filter(function(h){return h.t||h.d;});
       var lines=function(fid){ return (document.getElementById(fid).value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean); };
       var stats=(document.getElementById('sv-stats').value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean).map(function(x){var p=x.split('|');return { v:(p[0]||'').trim(), l:(p.slice(1).join('|')||'').trim() };}).filter(function(t){return t.v||t.l;});
+      var experts=[].slice.call(document.querySelectorAll('#sv-experts .sv-ex-item')).map(function(r){
+        return { name:(r.querySelector('.sv-ex-name').value||'').trim(), photo:(r.querySelector('.sv-ex-photo').value||'').trim() };
+      }).filter(function(e){return e.name||e.photo;});
       var row={ slug:slug, category:existing.category||'Staffing Solutions',
         title:title,
         red_word:document.getElementById('sv-red').value.trim()||null,
@@ -2084,6 +2130,7 @@
         icon:existing.icon||'search',
         image_url:document.getElementById('sv-image').value.trim()||null,
         video_url:document.getElementById('sv-video').value.trim()||null,
+        experts:experts,
         images:_svImages,
         highlights:highlights,
         who_for:lines('sv-who'),
@@ -2096,11 +2143,13 @@
       if(!row.title){ toast('Title is required'); return; }
       if(!row.slug){ toast('Please use letters or numbers in the title'); return; }
       var res = id ? await sb.from('services').update(row).eq('id',id) : await sb.from('services').insert(row);
-      // Tolerate the video_url column not existing yet (before its migration is
-      // applied): retry once without it so saving never breaks.
-      if(res.error && /video_url|column|schema cache|does not exist/i.test(res.error.message||'')){
-        var r2=Object.assign({},row); delete r2.video_url;
-        res = id ? await sb.from('services').update(r2).eq('id',id) : await sb.from('services').insert(r2);
+      // Tolerate an optional column not existing yet (before its migration is
+      // applied): drop the column(s) the error names and retry so saving never breaks.
+      if(res.error && /column|schema cache|does not exist/i.test(res.error.message||'')){
+        var r2=Object.assign({},row), m=res.error.message||'';
+        if(/video_url/i.test(m)) delete r2.video_url;
+        if(/experts/i.test(m)) delete r2.experts;
+        if(JSON.stringify(r2)!==JSON.stringify(row)) res = id ? await sb.from('services').update(r2).eq('id',id) : await sb.from('services').insert(r2);
       }
       if(res.error){ toast('Save failed: '+res.error.message); return; }
       logAudit(id?'update':'create','service',id||row.slug,row.title);
