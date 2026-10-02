@@ -143,6 +143,14 @@
     .scope{list-style:none;margin:clamp(22px,3vw,30px) 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px 30px}
     .scope li{display:flex;gap:12px;align-items:flex-start;font-size:.98rem;line-height:1.5;color:var(--ink)}
     .scope li svg{width:20px;height:20px;flex:none;color:var(--red);margin-top:1px}
+    .scope.scope-mt{margin-top:clamp(20px,2.6vw,30px)}
+    /* Tiered level cards (e.g. training levels) */
+    .svc-levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:clamp(14px,1.8vw,20px);margin-top:clamp(24px,3vw,36px)}
+    .lvl{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 22px 20px;transition:transform .2s,box-shadow .2s,border-color .2s}
+    .lvl:hover{transform:translateY(-3px);box-shadow:0 18px 40px -22px rgba(16,24,40,.28);border-color:#DfE4EC}
+    .lvl-n{font-family:var(--font-display);font-size:2.3rem;font-weight:800;line-height:1;letter-spacing:-.02em;background:linear-gradient(130deg,#FF3D51,#C8102E);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .lvl h3{font-family:var(--font-display);font-size:1.1rem;font-weight:800;letter-spacing:-.01em;margin:9px 0 7px;color:var(--ink)}
+    .lvl p{color:var(--muted);font-size:.93rem;line-height:1.55;margin:0}
 
     /* By the numbers — stats band */
     .svc-stats{background:linear-gradient(158deg,#141319,#0e0d12);color:#fff;padding:clamp(40px,6vw,64px) 0}
@@ -319,6 +327,16 @@
       {h:'Present & decide',p:'You review a qualified shortlist and make the call, with our input where you want it.'},
       {h:'Deploy & support',p:'We handle onboarding and the paperwork, and stay engaged after placement.'}
     ];
+    // Per-service process overrides (fall back to STEPS). Training is a learning
+    // service, not a staffing one, so its process is TNA → design → deliver → evaluate.
+    var PROCESS_BY_SLUG={
+      training:[
+        {h:'Training needs analysis',p:'We begin with a TNA — assessing roles, skill gaps, and goals to pinpoint exactly what your people need.'},
+        {h:'Design the program',p:'We build a tailored curriculum and materials around your context, audience level, and the outcomes you want.'},
+        {h:'Facilitate & deliver',p:'Our trainers run engaging, practical sessions — in person or online — that turn concepts into real workplace skills.'},
+        {h:'Evaluate & follow through',p:'We measure results, gather feedback, and share insights so the learning sticks and keeps improving.'}
+      ]
+    };
 
     function related(slug){
       return Object.keys(SERVICES).filter(function(k){return k!==slug;}).map(function(k){
@@ -367,14 +385,24 @@
         var rate = h.r ? '<span class="hi-rate">'+star+esc(h.r)+'</span>' : '';
         return '<div class="hi-card">'+rate+'<div class="hi-ic">'+check+'</div><h3>'+esc(h.t)+'</h3><p>'+esc(h.d)+'</p></div>';
       }).join('');
-      var steps=STEPS.map(function(st,i){
+      var steps=(PROCESS_BY_SLUG[slug]||STEPS).map(function(st,i){
         return '<div class="step"><div class="n">0'+(i+1)+'</div><h4>'+esc(st.h)+'</h4><p>'+esc(st.p)+'</p></div>';
       }).join('');
 
       // Portfolio sections (rendered only when content exists).
       var liChk=function(x){return '<li>'+check+'<span>'+esc(x)+'</span></li>';};
       var secWho=(s.who&&s.who.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">Who it’s for</div><h2>Who we build this for</h2></div><div class="chips">'+s.who.map(function(w){return '<span class="chip">'+esc(w)+'</span>';}).join('')+'</div></div></section>'):'';
-      var secScope=(s.scope&&s.scope.length)?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Scope</div><h2>What’s covered</h2></div><ul class="scope">'+s.scope.map(liChk).join('')+'</ul></div></section>'):'';
+      // Scope — if items look like "Level N (Name) — description", surface them as
+      // tiered level cards (training framework); the rest stay a checklist.
+      var secScope='';
+      if(s.scope&&s.scope.length){
+        var _lvls=[], _other=[];
+        s.scope.forEach(function(x){ var m=String(x).match(/^Level\s*(\d+)\s*\(([^)]+)\)\s*[—\-:]\s*(.+)$/i); if(m) _lvls.push({n:m[1],name:m[2],d:m[3]}); else _other.push(x); });
+        var _lvlHtml=(_lvls.length>=2)?('<div class="svc-levels">'+_lvls.map(function(l){return '<div class="lvl"><span class="lvl-n">'+esc(('0'+l.n).slice(-2))+'</span><h3>'+esc(l.name)+'</h3><p>'+esc(l.d)+'</p></div>';}).join('')+'</div>'):'';
+        var _listItems=_lvlHtml?_other:s.scope;
+        var _listHtml=_listItems.length?('<ul class="scope'+(_lvlHtml?' scope-mt':'')+'">'+_listItems.map(liChk).join('')+'</ul>'):'';
+        secScope='<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Scope</div><h2>What’s covered</h2></div>'+_lvlHtml+_listHtml+'</div></section>';
+      }
       var secStats=(s.stats&&s.stats.length)?('<section class="svc-stats"><div class="wrap"><div class="statgrid">'+s.stats.map(function(t){return '<div class="stat"><b>'+esc(t.v)+'</b><span>'+esc(t.l)+'</span></div>';}).join('')+'</div></div></section>'):'';
       var hasHelp=(s.client&&s.client.length)||(s.applicant&&s.applicant.length);
       var secHelp=hasHelp?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">How it helps</div><h2>Value on both sides</h2></div><div class="help-grid">'
