@@ -1050,6 +1050,10 @@
           <div class="field"><label>How it helps — For candidates <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— one per line</small></label><textarea id="sv-applicant" rows="4" placeholder="A clear picture of the role&#10;A respectful, professional process"></textarea></div>
         </div>
         <div class="field"><label>By the numbers <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— one per line, format: value | label. Leave blank to use the default company stats.</small></label><textarea id="sv-stats" rows="3" placeholder="30+ | Years in manpower services&#10;10,000+ | Workers deployed nationwide&#10;Nationwide | Luzon · Visayas · Mindanao"></textarea></div>
+        <div class="field"><label>How we work — process steps <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— optional; leave empty to use the default process for this service</small></label>
+          <div id="sv-proc"></div>
+          <button type="button" class="btn btn-ghost" onclick="svAddProc()" style="margin-top:8px;"><span class="material-icons-outlined">add</span>Add step</button>
+        </div>
         <div class="grid2">
           <label class="chk" style="align-self:end;"><input type="checkbox" id="sv-published" checked><span>Published<small>Visible on the website. Uncheck to hide.</small></span></label>
         </div>
@@ -2076,6 +2080,21 @@
       box.innerHTML=(arr&&arr.length)?arr.map(function(t){return svTstRow(t.quote||t.q,t.author||t.a);}).join(''):'';
     }
     window.svAddTst=function(){ document.getElementById('sv-tst').insertAdjacentHTML('beforeend', svTstRow('','')); };
+    // ── How we work: process steps (title + description), DOM-based ──
+    function svProcRow(h, p){
+      return '<div class="sv-proc-row" style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;margin-bottom:8px;">'
+        + '<div style="display:grid;gap:6px;min-width:0;">'
+          + '<input class="sv-proc-h" placeholder="Step title (e.g. Training needs analysis)" value="'+esc(h||'')+'">'
+          + '<textarea class="sv-proc-p" rows="2" placeholder="Short description of this step">'+esc(p||'')+'</textarea>'
+        + '</div>'
+        + '<button type="button" class="iconbtn del" title="Remove" onclick="this.closest(\'.sv-proc-row\').remove()"><span class="material-icons-outlined">close</span></button>'
+      + '</div>';
+    }
+    function renderSvProc(arr){
+      var box=document.getElementById('sv-proc'); if(!box) return;
+      box.innerHTML=(arr&&arr.length)?arr.map(function(s){return svProcRow(s.h,s.p);}).join(''):'';
+    }
+    window.svAddProc=function(){ document.getElementById('sv-proc').insertAdjacentHTML('beforeend', svProcRow('','')); };
     async function svLoad(){
       var el=document.getElementById('services-list'); if(!el) return; el.innerHTML=SKELETON;
       var res = await sb.from('services').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
@@ -2122,6 +2141,7 @@
       document.getElementById('sv-video').value = s.video_url||'';
       renderSvExperts(Array.isArray(s.experts)?s.experts:[]);
       renderSvTst(Array.isArray(s.testimonials)?s.testimonials:[]);
+      renderSvProc(Array.isArray(s.process_steps)?s.process_steps:[]);
       document.getElementById('sv-partners').value = s.partners_image||'';
       document.getElementById('sv-partners-prev').innerHTML = s.partners_image?'<img src="'+esc(s.partners_image)+'" alt="">':'';
       _svImages = Array.isArray(s.images)?s.images.slice():[]; renderSvGallery();
@@ -2156,6 +2176,9 @@
       var testimonials=[].slice.call(document.querySelectorAll('#sv-tst .sv-tst-row')).map(function(r){
         return { quote:(r.querySelector('.sv-tst-q').value||'').trim(), author:(r.querySelector('.sv-tst-a').value||'').trim() };
       }).filter(function(t){return t.quote;});
+      var process=[].slice.call(document.querySelectorAll('#sv-proc .sv-proc-row')).map(function(r){
+        return { h:(r.querySelector('.sv-proc-h').value||'').trim(), p:(r.querySelector('.sv-proc-p').value||'').trim() };
+      }).filter(function(x){return x.h||x.p;});
       var row={ slug:slug, category:existing.category||'Staffing Solutions',
         title:title,
         red_word:document.getElementById('sv-red').value.trim()||null,
@@ -2166,6 +2189,7 @@
         video_url:document.getElementById('sv-video').value.trim()||null,
         experts:experts,
         testimonials:testimonials,
+        process_steps:process,
         partners_image:document.getElementById('sv-partners').value.trim()||null,
         images:_svImages,
         highlights:highlights,
@@ -2187,6 +2211,7 @@
         if(/experts/i.test(m)) delete r2.experts;
         if(/testimonials/i.test(m)) delete r2.testimonials;
         if(/partners_image/i.test(m)) delete r2.partners_image;
+        if(/process_steps/i.test(m)) delete r2.process_steps;
         if(JSON.stringify(r2)!==JSON.stringify(row)) res = id ? await sb.from('services').update(r2).eq('id',id) : await sb.from('services').insert(r2);
       }
       if(res.error){ toast('Save failed: '+res.error.message); return; }

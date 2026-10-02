@@ -385,7 +385,7 @@
         var rate = h.r ? '<span class="hi-rate">'+star+esc(h.r)+'</span>' : '';
         return '<div class="hi-card">'+rate+'<div class="hi-ic">'+check+'</div><h3>'+esc(h.t)+'</h3><p>'+esc(h.d)+'</p></div>';
       }).join('');
-      var steps=(PROCESS_BY_SLUG[slug]||STEPS).map(function(st,i){
+      var steps=((s.process&&s.process.length)?s.process:(PROCESS_BY_SLUG[slug]||STEPS)).map(function(st,i){
         return '<div class="step"><div class="n">0'+(i+1)+'</div><h4>'+esc(st.h)+'</h4><p>'+esc(st.p)+'</p></div>';
       }).join('');
 
@@ -538,6 +538,7 @@
         experts:Array.isArray(r.experts)?r.experts:[],
         testimonials:Array.isArray(r.testimonials)?r.testimonials:[],
         partners:r.partners_image||'',
+        process:Array.isArray(r.process_steps)?r.process_steps:[],
         images:Array.isArray(r.images)?r.images:[],
         who:Array.isArray(r.who_for)?r.who_for:[],
         scope:Array.isArray(r.scope)?r.scope:[],
