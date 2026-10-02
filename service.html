@@ -390,13 +390,13 @@
           +'<div class="hi-grid">'+hi+'</div>'
         +'</div></section>'
         +secStats
-        +secExperts
         +((s.images&&s.images.length)?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Gallery</div><h2>See it in action</h2></div><div class="svc-gallery">'+s.images.map(function(u,i){return '<figure data-lb="'+i+'"><img src="'+esc(u)+'" alt="'+esc(s.title||'')+'" loading="lazy"></figure>';}).join('')+'</div></div></section>'):'')
         +secHelp
         +'<section class="sec"><div class="wrap">'
           +'<div class="sec-head"><div class="k">How we work</div><h2>A simple, managed process</h2></div>'
           +'<div class="steps">'+steps+'</div>'
         +'</div></section>'
+        +secExperts
         +'<section class="sec sec-gray"><div class="wrap">'
           +'<div class="sec-head"><div class="k">Explore more</div><h2>Other services</h2></div>'
           +'<div class="other">'+related(slug)+'</div>'
