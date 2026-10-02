@@ -1028,6 +1028,15 @@
           <div id="sv-experts"></div>
           <button type="button" class="btn btn-ghost" onclick="svAddExpert()" style="margin-top:8px;"><span class="material-icons-outlined">person_add</span>Add expert</button>
         </div>
+        <div class="field"><label>Testimonials <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— optional; participant / client quotes shown on the service page</small></label>
+          <div id="sv-tst"></div>
+          <button type="button" class="btn btn-ghost" onclick="svAddTst()" style="margin-top:8px;"><span class="material-icons-outlined">add_comment</span>Add quote</button>
+        </div>
+        <div class="field"><label>Partners / “Trusted by” image <small style="font-weight:500;color:var(--faint);text-transform:none;letter-spacing:0;">— optional; a client-logo wall shown on the service page</small></label>
+          <div id="sv-partners-prev" class="img-prev" style="margin-bottom:8px;"></div>
+          <label class="up"><span class="material-icons-outlined">upload</span>Upload logo wall<input type="file" accept="image/*" style="display:none;" onchange="imgUpload(this,'sv-partners','sv-partners-prev')"></label>
+          <input id="sv-partners" type="hidden">
+        </div>
         <div class="field"><label>What’s included — highlights</label>
           <div id="sv-highlights"></div>
           <button type="button" class="btn btn-ghost" onclick="svAddHl()" style="margin-top:8px;"><span class="material-icons-outlined">add</span>Add highlight</button>
@@ -2052,6 +2061,21 @@
       var pic=item.querySelector('.sv-ex-pic'); if(pic) pic.innerHTML='<img src="'+esc(url)+'" alt="">';
       input.value=''; toast('Photo added');
     };
+    // ── Testimonials: quote + author (DOM-based, collected on save) ──
+    function svTstRow(quote, author){
+      return '<div class="sv-tst-row" style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;margin-bottom:8px;">'
+        + '<div style="display:grid;gap:6px;min-width:0;">'
+          + '<textarea class="sv-tst-q" rows="2" placeholder="Quote (what they said)">'+esc(quote||'')+'</textarea>'
+          + '<input class="sv-tst-a" placeholder="Author / source — optional (e.g. 360° program participant)" value="'+esc(author||'')+'">'
+        + '</div>'
+        + '<button type="button" class="iconbtn del" title="Remove" onclick="this.closest(\'.sv-tst-row\').remove()"><span class="material-icons-outlined">close</span></button>'
+      + '</div>';
+    }
+    function renderSvTst(arr){
+      var box=document.getElementById('sv-tst'); if(!box) return;
+      box.innerHTML=(arr&&arr.length)?arr.map(function(t){return svTstRow(t.quote||t.q,t.author||t.a);}).join(''):'';
+    }
+    window.svAddTst=function(){ document.getElementById('sv-tst').insertAdjacentHTML('beforeend', svTstRow('','')); };
     async function svLoad(){
       var el=document.getElementById('services-list'); if(!el) return; el.innerHTML=SKELETON;
       var res = await sb.from('services').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:true});
@@ -2070,21 +2094,22 @@
       }).join('');
       if(typeof makeReorderable==='function') makeReorderable('services-list', _services, 'services');
     }
-    function svHlRow(t,d){
+    function svHlRow(t,d,r){
       return '<div class="sv-hl-row" style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;margin-bottom:8px;">'
         +'<div style="display:grid;gap:6px;min-width:0;">'
           +'<input class="sv-hl-t" placeholder="Highlight title" value="'+esc(t||'')+'">'
           +'<textarea class="sv-hl-d" rows="2" placeholder="Short description">'+esc(d||'')+'</textarea>'
+          +'<input class="sv-hl-r" placeholder="Rating badge — optional (e.g. 4.8)" value="'+esc(r||'')+'" style="max-width:240px;">'
         +'</div>'
         +'<button type="button" class="iconbtn del" title="Remove" onclick="this.closest(\'.sv-hl-row\').remove()"><span class="material-icons-outlined">close</span></button>'
       +'</div>';
     }
     function svRenderHls(arr){
       var box=document.getElementById('sv-highlights');
-      var list=(arr&&arr.length)?arr:[{t:'',d:''}];
-      box.innerHTML=list.map(function(h){return svHlRow(h.t,h.d);}).join('');
+      var list=(arr&&arr.length)?arr:[{t:'',d:'',r:''}];
+      box.innerHTML=list.map(function(h){return svHlRow(h.t,h.d,h.r);}).join('');
     }
-    window.svAddHl=function(){ document.getElementById('sv-highlights').insertAdjacentHTML('beforeend', svHlRow('','')); };
+    window.svAddHl=function(){ document.getElementById('sv-highlights').insertAdjacentHTML('beforeend', svHlRow('','','')); };
     window.svForm=function(id){
       var s = id ? (_services.filter(function(x){return x.id===id;})[0]||{}) : {};
       document.getElementById('sv-modal-title').textContent = id?'Edit service':'New service';
@@ -2096,6 +2121,9 @@
       document.getElementById('sv-image-prev').innerHTML = s.image_url?'<img src="'+esc(s.image_url)+'" alt="">':'';
       document.getElementById('sv-video').value = s.video_url||'';
       renderSvExperts(Array.isArray(s.experts)?s.experts:[]);
+      renderSvTst(Array.isArray(s.testimonials)?s.testimonials:[]);
+      document.getElementById('sv-partners').value = s.partners_image||'';
+      document.getElementById('sv-partners-prev').innerHTML = s.partners_image?'<img src="'+esc(s.partners_image)+'" alt="">':'';
       _svImages = Array.isArray(s.images)?s.images.slice():[]; renderSvGallery();
       document.getElementById('sv-published').checked = id ? !!s.published : true;
       svRenderHls(Array.isArray(s.highlights)?s.highlights:[]);
@@ -2115,14 +2143,19 @@
       // derive it from the title for a new service.
       var existing = id ? (_services.filter(function(x){return String(x.id)===String(id);})[0]||{}) : {};
       var slug = id ? (existing.slug||'') : title.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-      var highlights=[].slice.call(document.querySelectorAll('#sv-highlights .sv-hl-row')).map(function(r){
-        return { t:r.querySelector('.sv-hl-t').value.trim(), d:r.querySelector('.sv-hl-d').value.trim() };
+      var highlights=[].slice.call(document.querySelectorAll('#sv-highlights .sv-hl-row')).map(function(row){
+        var o={ t:row.querySelector('.sv-hl-t').value.trim(), d:row.querySelector('.sv-hl-d').value.trim() };
+        var rr=(row.querySelector('.sv-hl-r')?row.querySelector('.sv-hl-r').value:'').trim(); if(rr) o.r=rr;
+        return o;
       }).filter(function(h){return h.t||h.d;});
       var lines=function(fid){ return (document.getElementById(fid).value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean); };
       var stats=(document.getElementById('sv-stats').value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean).map(function(x){var p=x.split('|');return { v:(p[0]||'').trim(), l:(p.slice(1).join('|')||'').trim() };}).filter(function(t){return t.v||t.l;});
       var experts=[].slice.call(document.querySelectorAll('#sv-experts .sv-ex-item')).map(function(r){
         return { name:(r.querySelector('.sv-ex-name').value||'').trim(), role:(r.querySelector('.sv-ex-role').value||'').trim(), photo:(r.querySelector('.sv-ex-photo').value||'').trim() };
       }).filter(function(e){return e.name||e.photo;});
+      var testimonials=[].slice.call(document.querySelectorAll('#sv-tst .sv-tst-row')).map(function(r){
+        return { quote:(r.querySelector('.sv-tst-q').value||'').trim(), author:(r.querySelector('.sv-tst-a').value||'').trim() };
+      }).filter(function(t){return t.quote;});
       var row={ slug:slug, category:existing.category||'Staffing Solutions',
         title:title,
         red_word:document.getElementById('sv-red').value.trim()||null,
@@ -2132,6 +2165,8 @@
         image_url:document.getElementById('sv-image').value.trim()||null,
         video_url:document.getElementById('sv-video').value.trim()||null,
         experts:experts,
+        testimonials:testimonials,
+        partners_image:document.getElementById('sv-partners').value.trim()||null,
         images:_svImages,
         highlights:highlights,
         who_for:lines('sv-who'),
@@ -2150,6 +2185,8 @@
         var r2=Object.assign({},row), m=res.error.message||'';
         if(/video_url/i.test(m)) delete r2.video_url;
         if(/experts/i.test(m)) delete r2.experts;
+        if(/testimonials/i.test(m)) delete r2.testimonials;
+        if(/partners_image/i.test(m)) delete r2.partners_image;
         if(JSON.stringify(r2)!==JSON.stringify(row)) res = id ? await sb.from('services').update(r2).eq('id',id) : await sb.from('services').insert(r2);
       }
       if(res.error){ toast('Save failed: '+res.error.message); return; }
