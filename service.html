@@ -402,7 +402,7 @@
       // Partners marquee — multi-row scrolling logo wall (rows sliced from the
       // shared client collage). Shown when a partners image is set on the service.
       var PARTNER_ROWS=['/assets/img/partners-row-1.png','/assets/img/partners-row-2.png','/assets/img/partners-row-3.png','/assets/img/partners-row-4.png','/assets/img/partners-row-5.png'];
-      var secPartners=s.partners?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Trusted by</div><h2>Brands we’ve worked with</h2></div>'
+      var secPartners=s.partners?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">Trusted by</div><h2>Brands we’ve worked with</h2></div>'
         +'<div class="pmq" role="img" aria-label="Brands CNT has worked with">'+PARTNER_ROWS.map(function(src,i){ return '<div class="pmq-row'+((i%2)?' rev':'')+'" style="animation-duration:'+(30+i*5)+'s"><img src="'+src+'" alt="" aria-hidden="true"><img src="'+src+'" alt="" aria-hidden="true"></div>'; }).join('')+'</div>'
         +'</div></section>'):'';
 
@@ -417,7 +417,6 @@
           +'<div class="sec-head"><div class="k">Overview</div><h2>What this covers</h2><p>'+esc(s.overview)+'</p></div>'
         +'</div></section>'
         +secVideo
-        +secPartners
         +secWho
         +secScope
         +'<section class="sec'+(secScope?' sec-gray':'')+'"><div class="wrap">'
@@ -425,13 +424,14 @@
           +'<div class="hi-grid">'+hi+'</div>'
         +'</div></section>'
         +secStats
-        +((s.images&&s.images.length)?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Gallery</div><h2>See it in action</h2></div><div class="svc-gallery">'+s.images.map(function(u,i){return '<figure data-lb="'+i+'"><img src="'+esc(u)+'" alt="'+esc(s.title||'')+'" loading="lazy"></figure>';}).join('')+'</div></div></section>'):'')
         +secHelp
-        +secTestimonials
         +'<section class="sec"><div class="wrap">'
           +'<div class="sec-head"><div class="k">How we work</div><h2>A simple, managed process</h2></div>'
           +'<div class="steps">'+steps+'</div>'
         +'</div></section>'
+        +((s.images&&s.images.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">Gallery</div><h2>See it in action</h2></div><div class="svc-gallery">'+s.images.map(function(u,i){return '<figure data-lb="'+i+'"><img src="'+esc(u)+'" alt="'+esc(s.title||'')+'" loading="lazy"></figure>';}).join('')+'</div></div></section>'):'')
+        +secTestimonials
+        +secPartners
         +secExperts
         +'<section class="sec sec-gray"><div class="wrap">'
           +'<div class="sec-head"><div class="k">Explore more</div><h2>Other services</h2></div>'
