@@ -2020,12 +2020,13 @@
       input.value='';
     };
     // ── Experts / SMEs: photo + name profile cards (DOM-based, collected on save) ──
-    function svExpertRow(name, photo){
+    function svExpertRow(name, role, photo){
       var pic = photo ? '<img src="'+esc(photo)+'" alt="">' : '<span class="material-icons-outlined">person</span>';
       return '<div class="sv-ex-item">'
         + '<div class="sv-ex-pic">'+pic+'</div>'
         + '<div class="sv-ex-fields">'
-          + '<input class="sv-ex-name" placeholder="Name (e.g. Maria Santos)" value="'+esc(name||'')+'">'
+          + '<input class="sv-ex-name" placeholder="Name / nickname (e.g. ELI)" value="'+esc(name||'')+'">'
+          + '<input class="sv-ex-role" placeholder="Role — shown under the name (e.g. Training Manager)" value="'+esc(role||'')+'">'
           + '<label class="up" style="font-size:11px;padding:6px 10px;"><span class="material-icons-outlined" style="font-size:15px;">upload</span>'+(photo?'Change photo':'Upload photo')+'<input type="file" accept="image/*" style="display:none;" onchange="svExpertUpload(this)"></label>'
           + '<input type="hidden" class="sv-ex-photo" value="'+esc(photo||'')+'">'
         + '</div>'
@@ -2034,9 +2035,9 @@
     }
     function renderSvExperts(arr){
       var box=document.getElementById('sv-experts'); if(!box) return;
-      box.innerHTML=(arr&&arr.length)?arr.map(function(e){return svExpertRow(e.name,e.photo);}).join(''):'';
+      box.innerHTML=(arr&&arr.length)?arr.map(function(e){return svExpertRow(e.name,e.role,e.photo);}).join(''):'';
     }
-    window.svAddExpert=function(){ document.getElementById('sv-experts').insertAdjacentHTML('beforeend', svExpertRow('','')); };
+    window.svAddExpert=function(){ document.getElementById('sv-experts').insertAdjacentHTML('beforeend', svExpertRow('','','')); };
     window.svExpertUpload=async function(input){
       var f=input&&input.files&&input.files[0]; if(!f) return;
       if(!/^image\//.test(f.type)||f.size>5*1048576){ toast('Use an image under 5MB'); input.value=''; return; }
@@ -2120,7 +2121,7 @@
       var lines=function(fid){ return (document.getElementById(fid).value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean); };
       var stats=(document.getElementById('sv-stats').value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean).map(function(x){var p=x.split('|');return { v:(p[0]||'').trim(), l:(p.slice(1).join('|')||'').trim() };}).filter(function(t){return t.v||t.l;});
       var experts=[].slice.call(document.querySelectorAll('#sv-experts .sv-ex-item')).map(function(r){
-        return { name:(r.querySelector('.sv-ex-name').value||'').trim(), photo:(r.querySelector('.sv-ex-photo').value||'').trim() };
+        return { name:(r.querySelector('.sv-ex-name').value||'').trim(), role:(r.querySelector('.sv-ex-role').value||'').trim(), photo:(r.querySelector('.sv-ex-photo').value||'').trim() };
       }).filter(function(e){return e.name||e.photo;});
       var row={ slug:slug, category:existing.category||'Staffing Solutions',
         title:title,

@@ -75,12 +75,13 @@
     .svc-video{position:relative;width:100%;aspect-ratio:16/9;margin-top:clamp(28px,4vw,42px);border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--line);box-shadow:0 14px 40px -16px rgba(16,24,40,.35)}
     .svc-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
     /* Experts / SMEs cards */
-    .svc-experts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:clamp(16px,2.4vw,26px);margin-top:clamp(28px,4vw,42px)}
-    .svc-expert{margin:0;text-align:center}
+    .svc-experts{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(16px,2.4vw,28px);margin-top:clamp(28px,4vw,42px)}
+    .svc-expert{margin:0;text-align:center;width:clamp(140px,16vw,172px)}
     .svc-expert img,.svc-expert .noimg{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:16px;background:var(--gray-50);border:1px solid var(--line);display:block}
     .svc-expert .noimg{display:grid;place-items:center;color:var(--line)}
     .svc-expert .noimg svg{width:44%;height:44%}
     .svc-expert figcaption{margin-top:11px;font-weight:700;font-size:.96rem;color:var(--ink);line-height:1.3}
+    .svc-expert .role{display:block;margin-top:3px;font-weight:500;font-size:.82rem;color:var(--muted)}
     /* Photo gallery */
     .svc-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:clamp(28px,4vw,42px)}
     .svc-gallery figure{margin:0;border-radius:14px;overflow:hidden;aspect-ratio:4/3;background:var(--gray-50);border:1px solid var(--line)}
@@ -364,7 +365,7 @@
       // Optional per-service experts / SMEs (photo + name) → profile cards.
       var expList=(s.experts||[]).filter(function(e){return e&&(e.name||e.photo);});
       var secExperts=expList.length?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Experts</div><h2>Meet the experts</h2></div><div class="svc-experts">'
-        +expList.map(function(e){ return '<figure class="svc-expert">'+(e.photo?'<img src="'+esc(e.photo)+'" alt="'+esc(e.name||'')+'" loading="lazy">':'<div class="noimg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>')+(e.name?'<figcaption>'+esc(e.name)+'</figcaption>':'')+'</figure>'; }).join('')
+        +expList.map(function(e){ return '<figure class="svc-expert">'+(e.photo?'<img src="'+esc(e.photo)+'" alt="'+esc(e.name||'')+'" loading="lazy">':'<div class="noimg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>')+((e.name||e.role)?'<figcaption>'+esc(e.name||'')+(e.role?'<span class="role">'+esc(e.role)+'</span>':'')+'</figcaption>':'')+'</figure>'; }).join('')
         +'</div></div></section>'):'';
 
       body.innerHTML=
