@@ -266,34 +266,35 @@
     .wv-l5{width:48px;height:48px;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);bottom:2%;right:33%;transform:rotate(30deg)}
     @media(max-width:860px){.help-visual{min-height:300px}}
 
-    /* Process — premium dark timeline */
-    .sec-proc{position:relative;overflow:hidden;color:#fff;background:radial-gradient(120% 120% at 86% -10%,rgba(120,24,34,.5),transparent 46%),linear-gradient(162deg,#17191f 0%,#111318 56%,#0c0d11 100%)}
-    .sec-proc::after{content:"";position:absolute;left:-6%;bottom:-30%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(229,33,63,.16),transparent 62%);pointer-events:none}
-    .sec-proc .wrap{position:relative;z-index:1}
-    .sec-proc .sec-head .k{color:#FF6675}
-    .sec-proc .sec-head h2{color:#fff}
-    .sec-head--c{text-align:center}
-    .sec-head--c .k{justify-content:center}
-    .steps{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.4vw,24px);margin-top:clamp(44px,6vw,72px)}
-    .steps::before{content:"";position:absolute;top:35px;left:10%;right:10%;height:1.5px;background:linear-gradient(90deg,rgba(255,255,255,.16),rgba(255,120,135,.55) 60%,#E5213F);z-index:0}
-    @media(max-width:900px){.steps{grid-template-columns:repeat(3,1fr);gap:clamp(26px,4vw,38px) 10px}.steps::before{display:none}}
+    /* Process — numbered header cards */
+    .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(12px,1.4vw,18px);margin-top:clamp(30px,4vw,46px);align-items:stretch}
+    @media(max-width:900px){.steps{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:560px){.steps{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:400px){.steps{grid-template-columns:1fr}}
-    .pstep{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 8px}
-    .pnode{position:relative;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;margin-bottom:22px;background:linear-gradient(160deg,#20222b,#15161c);border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 30px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);transition:transform .25s,box-shadow .25s,border-color .25s}
-    .pnode span{font-family:var(--font-display);font-size:1.5rem;font-weight:800;letter-spacing:.01em;background:linear-gradient(130deg,#fff,#FFC2C9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#fff}
-    .pstep:hover .pnode{transform:translateY(-4px);border-color:rgba(255,120,135,.5);box-shadow:0 22px 44px -16px rgba(0,0,0,.7)}
-    .pbody h4{font-family:var(--font-display);font-size:1.08rem;font-weight:800;letter-spacing:-.01em;margin:0 0 .5rem;color:#fff}
-    .pbody p{color:rgba(255,255,255,.6);font-size:.92rem;line-height:1.62;margin:0;max-width:30ch;margin-inline:auto}
-    .pbody p strong{color:#FF7A88;font-weight:800}
+    .step{position:relative;display:flex;flex-direction:column;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:visible;box-shadow:0 12px 32px -22px rgba(16,24,40,.45);transition:transform .22s,box-shadow .22s}
+    .step:hover{transform:translateY(-6px);box-shadow:0 30px 56px -24px rgba(16,24,40,.42)}
+    /* flow arrow between steps (only while all five share one row) */
+    .step:not(:last-child)::after{content:"";position:absolute;top:44px;right:-15px;width:12px;height:12px;border-top:3px solid var(--c,#C8102E);border-right:3px solid var(--c,#C8102E);transform:rotate(45deg);z-index:4}
+    @media(max-width:900px){.step:not(:last-child)::after{display:none}}
+    .step-hd{position:relative;border-radius:14px 14px 0 0;padding:24px 14px 30px;background:linear-gradient(160deg,var(--c2,#F14255),var(--c,#C8102E))}
+    .step-no{font-family:var(--font-display);font-size:clamp(1.9rem,2.6vw,2.3rem);font-weight:800;color:#fff;line-height:1;letter-spacing:.01em}
+    .step-hd::after{content:"";position:absolute;left:50%;bottom:-8px;width:17px;height:17px;background:var(--c,#C8102E);transform:translateX(-50%) rotate(45deg)}
+    .step-bd{flex:1;padding:26px 18px 28px}
+    .step h4{font-family:var(--font-display);font-size:1.04rem;font-weight:800;letter-spacing:-.01em;margin:0 0 .5rem;color:var(--ink)}
+    .step p{color:var(--muted);font-size:.9rem;line-height:1.6;margin:0}
+    .step p strong{color:var(--red);font-weight:800}
+    .step::before{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;border-radius:0 0 13px 13px;background:linear-gradient(90deg,var(--c2,#F14255),var(--c,#C8102E))}
     /* emphasized final step (Delivery & Follow Up) */
-    .pstep-on .pnode{background:linear-gradient(155deg,#FF4D5F,#E5213F 60%,#C8102E);border-color:transparent;box-shadow:0 20px 44px -14px rgba(229,33,63,.7),inset 0 1px 0 rgba(255,255,255,.3)}
-    .pstep-on .pnode span{background:none;-webkit-text-fill-color:#fff;color:#fff}
-    .pstep-on .pnode::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1.5px solid rgba(229,33,63,.55);animation:hotPulse 2.6s ease-out infinite;pointer-events:none}
-    .pstep-on .pbody h4{color:#fff}
-    .pstep-on .pbody p strong{color:#fff;background:rgba(255,255,255,.16);padding:1px 7px;border-radius:6px}
-    @keyframes hotPulse{0%{opacity:.8;transform:scale(1)}70%{opacity:0;transform:scale(1.28)}100%{opacity:0}}
-    @media(prefers-reduced-motion:reduce){.pstep-on .pnode::after{animation:none;opacity:.5}}
+    .step.step-hot{transform:translateY(-12px);box-shadow:0 36px 66px -18px rgba(229,33,63,.62);z-index:2}
+    .step.step-hot:hover{transform:translateY(-16px);box-shadow:0 44px 78px -18px rgba(229,33,63,.7)}
+    .step.step-hot .step-hd{padding:28px 14px 32px}
+    .step.step-hot .step-no{font-size:clamp(2.1rem,3vw,2.6rem)}
+    .step.step-hot .step-bd{padding-top:30px}
+    .step.step-hot h4{font-size:1.1rem}
+    .step.step-hot p strong{color:var(--red);background:#FDE7EA;padding:1px 6px;border-radius:6px}
+    .step.step-hot::after{content:"";position:absolute;inset:-7px;border:2px solid rgba(229,33,63,.5);border-radius:19px;z-index:-1;animation:hotPulse 2.4s ease-out infinite;pointer-events:none}
+    @keyframes hotPulse{0%{opacity:.85;transform:scale(1)}70%{opacity:0;transform:scale(1.05)}100%{opacity:0}}
+    @media(prefers-reduced-motion:reduce){.step.step-hot::after{animation:none;opacity:.5}}
 
     /* CTA */
     .svc-cta{background:linear-gradient(158deg,#6C0E1A,#2A0C12);color:#fff;text-align:center;padding:clamp(56px,8vw,96px) 0}
@@ -566,10 +567,11 @@
       var hiImg=s.hiImage||(s.images&&s.images[0])||s.image||'';
       var hiMediaCls=s.hiImage?' hi-media--feature':'';
       var hiCap=s.hiImage?('<div class="hi-cap"><span class="hi-cap-k">'+esc(s.title||'')+'</span><p>'+esc(s.tagline||'')+'</p></div>'):'';
+      var PROC_COLORS=[['#FFA7AF','#FF8793'],['#FF8793','#F6586A'],['#F6586A','#EC334B'],['#EC334B','#D11832'],['#FF4D5F','#E5213F']];
       var boldSpan=function(t){return esc(t).replace(/30-60-90/g,'<strong>30-60-90</strong>');};
       var steps=((s.process&&s.process.length)?s.process:(PROCESS_BY_SLUG[slug]||STEPS)).map(function(st,i){
-        var n=('0'+(i+1)).slice(-2);
-        return '<div class="pstep'+(st.hot?' pstep-on':'')+'"><div class="pnode"><span>'+n+'</span></div><div class="pbody"><h4>'+esc(st.h)+'</h4>'+(st.p?'<p>'+boldSpan(st.p)+'</p>':'')+'</div></div>';
+        var c=PROC_COLORS[i]||PROC_COLORS[PROC_COLORS.length-1];
+        return '<div class="step'+(st.hot?' step-hot':'')+'" style="--c2:'+c[0]+';--c:'+c[1]+'"><div class="step-hd"><span class="step-no">'+('0'+(i+1)).slice(-2)+'</span></div><div class="step-bd"><h4>'+esc(st.h)+'</h4>'+(st.p?'<p>'+boldSpan(st.p)+'</p>':'')+'</div></div>';
       }).join('');
 
       // Portfolio sections (rendered only when content exists).
@@ -674,8 +676,8 @@
           +'</div>'
         +'</div></section>'
         +secHelp
-        +'<section class="sec sec-proc"><div class="wrap">'
-          +'<div class="sec-head sec-head--c"><div class="k">'+esc(L.procK)+'</div><h2>'+esc(L.procH)+'</h2></div>'
+        +'<section class="sec"><div class="wrap">'
+          +'<div class="sec-head"><div class="k">'+esc(L.procK)+'</div><h2>'+esc(L.procH)+'</h2></div>'
           +'<div class="steps">'+steps+'</div>'
         +'</div></section>'
         +((s.images&&s.images.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">Gallery</div><h2>See it in action</h2></div><div class="svc-gallery">'+s.images.map(function(u,i){return '<figure data-lb="'+i+'"><img src="'+esc(u)+'" alt="'+esc(s.title||'')+'" loading="lazy"></figure>';}).join('')+'</div></div></section>'):'')
