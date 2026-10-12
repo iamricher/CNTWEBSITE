@@ -78,6 +78,9 @@
     .hi-media{position:relative;min-height:360px;border-radius:20px;overflow:hidden;background:radial-gradient(120% 90% at 100% 0%,rgba(229,33,63,.32),transparent 55%),linear-gradient(160deg,#17191f,#0e0f13);box-shadow:0 30px 60px -30px rgba(16,24,40,.5)}
     .hi-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     .hi-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 46%,rgba(10,11,15,.42))}
+    /* feature photo: softened + darkened so faces stay private and it reads as atmosphere */
+    .hi-media--feature img{filter:blur(5px) brightness(.74) saturate(1.05);transform:scale(1.12)}
+    .hi-media--feature::after{background:linear-gradient(165deg,rgba(16,18,24,.35),rgba(10,11,15,.5))}
     @media(max-width:860px){.hi-media{min-height:260px}}
     .hi-list{display:grid;gap:clamp(16px,2.2vw,24px);align-content:start}
     .hi-item{display:flex;gap:14px;align-items:flex-start}
@@ -426,6 +429,7 @@
     var CONTENT_OVERRIDE={
       training:{
         tagline:'Hyperspecialized training. Built around you.',
+        hiImage:'/assets/img/training-lead-beyond-limits.jpg',
         overview:'CNT Training Solutions designs and delivers hyperspecialized, application-based training programs built around your own workforce and goals, supported by in-house multimedia production and a structured 30-60-90 post-training follow-up.',
         who:['Frontline Deployed Workforce','Supervisors and Field Supervisors','Specialists','Subject Matter Experts (SMEs)','Team Leaders and Managers','Senior Managers and Executives'],
         scope:['Level 1: Basic - Essential knowledge, workplace behavior, and core competencies for frontline and sales staff in customer-facing roles.','Level 2: Intermediate - Performance, problem-solving, and day-to-day execution for senior staff and specialists.','Level 3: Advanced - Leadership and the management of daily operations for team leaders and supervisors.','Level 4: Highly Advanced - Departmental performance, planning, and resource management for managers.','Level 5: Elite - High-impact training built on specialized methodologies for leaders who drive organizational strategy, transformation, and business growth.'],
@@ -501,7 +505,8 @@
         var rate = h.r ? '<span class="hi-rate">'+star+esc(h.r)+'</span>' : '';
         return '<div class="hi-item"><span class="hi-check">'+check+'</span><div class="hi-tx"><h3>'+esc(h.t)+rate+'</h3><p>'+esc(h.d)+'</p></div></div>';
       }).join('');
-      var hiImg=(s.images&&s.images[0])||s.image||'';
+      var hiImg=s.hiImage||(s.images&&s.images[0])||s.image||'';
+      var hiMediaCls=s.hiImage?' hi-media--feature':'';
       var PROC_COLORS=[['#FF8793','#F14255'],['#F35367','#E5213F'],['#EC334B','#C8102E'],['#C2122F','#9E0C22'],['#7E1420','#5C0E18']];
       var steps=((s.process&&s.process.length)?s.process:(PROCESS_BY_SLUG[slug]||STEPS)).map(function(st,i){
         var c=PROC_COLORS[i]||PROC_COLORS[PROC_COLORS.length-1];
@@ -584,7 +589,7 @@
         +'<section class="sec'+(secScope?' sec-gray':'')+'"><div class="wrap">'
           +'<div class="sec-head"><div class="k">'+esc(L.hiK)+'</div><h2>'+esc(L.hiH)+'</h2></div>'
           +'<div class="hi-split">'
-            +'<div class="hi-media">'+(hiImg?'<img src="'+esc(hiImg)+'" alt="'+esc(s.title||'')+'" loading="lazy">':'')+'</div>'
+            +'<div class="hi-media'+hiMediaCls+'">'+(hiImg?'<img src="'+esc(hiImg)+'" alt="'+esc(s.title||'')+'" loading="lazy">':'')+'</div>'
             +'<div class="hi-list">'+hi+'</div>'
           +'</div>'
         +'</div></section>'
