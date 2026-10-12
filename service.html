@@ -71,7 +71,20 @@
     .hi-card::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,#FF3D51,#C8102E);transform:scaleX(0);transform-origin:left;transition:transform .25s}
     .hi-card:hover{transform:translateY(-4px);box-shadow:0 20px 44px -22px rgba(16,24,40,.3);border-color:#DfE4EC}
     .hi-card:hover::before{transform:scaleX(1)}
-    .hi-rate{position:absolute;top:18px;right:18px;display:inline-flex;align-items:center;gap:4px;background:#FFF7E6;color:#B7791F;border:1px solid #F3E2BC;border-radius:100px;padding:4px 10px 4px 8px;font-size:.78rem;font-weight:800;line-height:1}
+    .hi-rate{display:inline-flex;align-items:center;gap:4px;background:#FFF7E6;color:#B7791F;border:1px solid #F3E2BC;border-radius:100px;padding:3px 9px 3px 7px;font-size:.72rem;font-weight:800;line-height:1}
+    /* Highlights — split feature layout */
+    .hi-split{display:grid;grid-template-columns:.92fr 1.08fr;gap:clamp(26px,4vw,52px);align-items:stretch;margin-top:clamp(28px,4vw,42px)}
+    @media(max-width:860px){.hi-split{grid-template-columns:1fr}}
+    .hi-media{position:relative;min-height:360px;border-radius:20px;overflow:hidden;background:radial-gradient(120% 90% at 100% 0%,rgba(229,33,63,.32),transparent 55%),linear-gradient(160deg,#17191f,#0e0f13);box-shadow:0 30px 60px -30px rgba(16,24,40,.5)}
+    .hi-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .hi-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 46%,rgba(10,11,15,.42))}
+    @media(max-width:860px){.hi-media{min-height:260px}}
+    .hi-list{display:grid;gap:clamp(16px,2.2vw,24px);align-content:start}
+    .hi-item{display:flex;gap:14px;align-items:flex-start}
+    .hi-check{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,#FDE7EA,#FCEFF1);border:1px solid #F7D4DA;color:var(--red);margin-top:1px}
+    .hi-check svg{width:15px;height:15px}
+    .hi-tx h3{font-family:var(--font-display);font-size:1.05rem;font-weight:800;letter-spacing:-.01em;margin:0 0 .3rem;color:var(--ink);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+    .hi-tx p{color:var(--muted);font-size:.95rem;line-height:1.62;margin:0}
     .hi-rate svg{width:13px;height:13px;color:#F0A91C}
     /* Partners / trusted-by — animated multi-row logo marquee */
     .pmq{position:relative;margin:clamp(26px,3.6vw,46px) auto 0;max-width:1020px;display:flex;flex-direction:column;gap:clamp(12px,1.8vw,24px);padding:clamp(24px,3.4vw,44px) 0;border-radius:24px;background:radial-gradient(130% 150% at 50% -10%,#ffffff 0%,#f6f8fc 72%);border:1px solid var(--line);box-shadow:0 30px 70px -40px rgba(16,24,40,.38);overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
@@ -486,8 +499,9 @@
       var star='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.27 6.1 20.37l1.13-6.57L2.45 9.14l6.6-.96z"/></svg>';
       var hi=s.highlights.map(function(h){
         var rate = h.r ? '<span class="hi-rate">'+star+esc(h.r)+'</span>' : '';
-        return '<div class="hi-card">'+rate+'<div class="hi-ic">'+check+'</div><h3>'+esc(h.t)+'</h3><p>'+esc(h.d)+'</p></div>';
+        return '<div class="hi-item"><span class="hi-check">'+check+'</span><div class="hi-tx"><h3>'+esc(h.t)+rate+'</h3><p>'+esc(h.d)+'</p></div></div>';
       }).join('');
+      var hiImg=(s.images&&s.images[0])||s.image||'';
       var PROC_COLORS=[['#FF8793','#F14255'],['#F35367','#E5213F'],['#EC334B','#C8102E'],['#C2122F','#9E0C22'],['#7E1420','#5C0E18']];
       var steps=((s.process&&s.process.length)?s.process:(PROCESS_BY_SLUG[slug]||STEPS)).map(function(st,i){
         var c=PROC_COLORS[i]||PROC_COLORS[PROC_COLORS.length-1];
@@ -569,7 +583,10 @@
         +secScope
         +'<section class="sec'+(secScope?' sec-gray':'')+'"><div class="wrap">'
           +'<div class="sec-head"><div class="k">'+esc(L.hiK)+'</div><h2>'+esc(L.hiH)+'</h2></div>'
-          +'<div class="hi-grid">'+hi+'</div>'
+          +'<div class="hi-split">'
+            +'<div class="hi-media">'+(hiImg?'<img src="'+esc(hiImg)+'" alt="'+esc(s.title||'')+'" loading="lazy">':'')+'</div>'
+            +'<div class="hi-list">'+hi+'</div>'
+          +'</div>'
         +'</div></section>'
         +secHelp
         +'<section class="sec"><div class="wrap">'
