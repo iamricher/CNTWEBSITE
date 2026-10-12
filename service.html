@@ -349,6 +349,38 @@
     var LABELS_BY_SLUG={
       training:{ ovH:'What We’re All About', whoK:'Training Audience', whoH:'Who It’s For', scopeH:'What We Offer', hiK:'Training Highlights', hiH:'What Went On', helpK:'Value', helpH:'What’s In It For You', helpBiz:'For Your Business', helpPpl:'For Participants', procK:'Engagement Process', procH:'How We Work', tstK:'Feedback', tstH:'In Their Words' }
     };
+    // Code-authoritative TEXT content per service (overrides the DB row for these
+    // fields; experts, hero photo, video, gallery stay DB/CMS-driven). Used while
+    // the DB content pipeline is unreliable — editing here is a code change.
+    var CONTENT_OVERRIDE={
+      training:{
+        tagline:'Hyperspecialized training. Built around you.',
+        overview:'CNT Training Solutions designs and delivers hyperspecialized, application-based training programs built around your own workforce and goals, supported by in-house multimedia production and a structured 30-60-90 post-training follow-up.',
+        who:['Frontline Deployed Workforce','Supervisors and Field Supervisors','Specialists','Subject Matter Experts (SMEs)','Team Leaders and Managers','Senior Managers and Executives'],
+        scope:['Level 1: Basic - Essential knowledge, workplace behavior, and core competencies for frontline and sales staff in customer-facing roles.','Level 2: Intermediate - Performance, problem-solving, and day-to-day execution for senior staff and specialists.','Level 3: Advanced - Leadership and the management of daily operations for team leaders and supervisors.','Level 4: Highly Advanced - Departmental performance, planning, and resource management for managers.','Level 5: Elite - High-impact training built on specialized methodologies for leaders who drive organizational strategy, transformation, and business growth.'],
+        client:['Programs designed around your goals and your workforce, never off the shelf.','Five levels of training you can pick and choose from, from frontline staff to senior executives.','Results you can see: a post-training report and a structured 30-60-90 follow-up.','In-house multimedia coverage included.'],
+        applicant:['Sessions built around your actual role and daily work.','Practical skills you can apply the next day.','An engaging, event-style experience with approachable trainers.'],
+        stats:[{v:'5',l:'Training levels'},{v:'7',l:'Flagship programs'},{v:'30-60-90',l:'Post-training follow-up'}],
+        highlights:[
+          {t:'360° Approach to Retail Excellence',d:'An interactive sales training session provided for newly sourced Sales Promoters.'},
+          {t:'OWN IT! Accountability, Time Management, and Professionalism',d:'A competency-based training program developed to address the company’s identified behavioral and performance gaps.'},
+          {t:'Lead Beyond Limits: Leadership Training',d:'Leadership training conducted for managers of different business units to effectively break the silos in communication, accountability, and boundaries.'},
+          {t:'SOP Writing Workshop',d:'A guided session with the help of CNT’s Quality Assurance SME for leaders to analyze their current processes.'},
+          {t:'Apprentice Program',d:'A journey for upcoming leaders to equip them with higher technical and leadership skills in preparation for the next level in their company ranking.'},
+          {t:'Train the Trainer “T3”: For Subject Matter Experts (SMEs)',d:'A training program for employees expert in their own craft to effectively deliver their learning points to their own training recipients.'},
+          {t:'Go Big! Go Premium! Go Further',d:'A cross-generational sales training that equips Sales Promoters to put humility, genuine listening, and teamwork at the center of selling their products, while representing the brand’s reputation through their image.'}
+        ],
+        testimonials:[
+          {quote:'Nakakatulong talaga sa pag-prepare sa actual work. Mabait at approachable ang trainers, at malinaw ang kanilang pagpapaliwanag.',author:'360° Approach to Retail Excellence'},
+          {quote:'Mas nauunawaan ko ang kahalagahan ng pagsasa-puso ng aking trabaho hindi lamang bilang responsibilidad kundi bilang pagkakataon na makapagbigay ng dekalidad na serbisyo.',author:'Own It! — Accountability, Time Management & Professionalism'},
+          {quote:'Walang tapon, lahat ng discussions ay magagamit sa araw-araw.',author:'Lead Beyond Limits: Leadership Training'},
+          {quote:'Mas ok na may ganitong learning experience to uplift our ability to make process in our department.',author:'SOP Writing Workshop'},
+          {quote:'I appreciated the clear explanations and interactive discussions, which helped me understand the topics better.',author:'SOP Writing Workshop'},
+          {quote:'Mas naintindihan ko po yung training kung paano mag-train ng sales promoter na wala pang experience, like kung paano i-handle ang customer.',author:'Train the Trainer “T3” for SMEs'},
+          {quote:'Through the coaching experience, I became more aware of our team’s weaknesses and learned the importance of addressing problems at the right time and in the right way.',author:'Apprenticeship Program'}
+        ]
+      }
+    };
 
     function related(slug){
       return Object.keys(SERVICES).filter(function(k){return k!==slug;}).map(function(k){
@@ -576,7 +608,7 @@
       if(sb){
         try{
           var r=await sb.from('services').select('*').eq('slug',slug).eq('published',true).maybeSingle();
-          if(!r.error && r.data){ render(withPortfolio(fromDb(r.data), slug), slug); return; }
+          if(!r.error && r.data){ var _s=fromDb(r.data); if(CONTENT_OVERRIDE[slug]) _s=Object.assign(_s, CONTENT_OVERRIDE[slug]); render(withPortfolio(_s, slug), slug); return; }
         }catch(e){}
       }
       if(SERVICES[slug]) render(withPortfolio(SERVICES[slug], slug), slug);
