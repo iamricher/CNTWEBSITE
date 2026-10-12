@@ -75,6 +75,14 @@
     /* Highlights — split feature layout */
     .hi-split{display:grid;grid-template-columns:.82fr 1.18fr;gap:clamp(26px,4vw,52px);align-items:center;margin-top:clamp(28px,4vw,42px)}
     @media(max-width:860px){.hi-split{grid-template-columns:1fr}}
+    .hi-media-wrap{position:relative}
+    .hm-leaf{position:absolute;z-index:3;border-radius:62% 0 62% 0;box-shadow:0 14px 30px -14px rgba(16,24,40,.3);pointer-events:none}
+    .hm-l1{width:clamp(60px,6.5vw,86px);aspect-ratio:1;background:linear-gradient(150deg,#FF8793,#F6586A);top:-7%;left:-6%;transform:rotate(16deg)}
+    .hm-l2{width:clamp(44px,5vw,62px);aspect-ratio:1;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);top:-3%;left:16%;transform:rotate(-26deg)}
+    .hm-l3{width:clamp(36px,4vw,50px);aspect-ratio:1;background:linear-gradient(150deg,#FBD36B,#F5B91F);top:12%;left:-11%;transform:rotate(42deg)}
+    .hm-l4{width:clamp(56px,6vw,80px);aspect-ratio:1;background:linear-gradient(150deg,#FF8793,#F6586A);bottom:-6%;right:-6%;transform:rotate(-20deg)}
+    .hm-l5{width:clamp(42px,4.6vw,58px);aspect-ratio:1;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);bottom:5%;right:-11%;transform:rotate(28deg)}
+    @media(max-width:860px){.hm-l3,.hm-l5{display:none}}
     .hi-media{position:relative;height:clamp(380px,42vw,460px);border-radius:20px;overflow:hidden;background:radial-gradient(120% 90% at 100% 0%,rgba(229,33,63,.32),transparent 55%),linear-gradient(160deg,#17191f,#0e0f13);box-shadow:0 30px 60px -30px rgba(16,24,40,.5)}
     .hi-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     .hi-media::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 46%,rgba(10,11,15,.42))}
@@ -627,7 +635,10 @@
         +'<section class="sec'+(secScope?' sec-gray':'')+'"><div class="wrap">'
           +'<div class="sec-head"><div class="k">'+esc(L.hiK)+'</div><h2>'+esc(L.hiH)+'</h2></div>'
           +'<div class="hi-split">'
-            +'<div class="hi-media'+hiMediaCls+'">'+(hiImg?'<img src="'+esc(hiImg)+'" alt="'+esc(s.title||'')+'" loading="lazy">':'')+hiCap+'</div>'
+            +'<div class="hi-media-wrap">'
+              +(hiMediaCls?'<span class="hm-leaf hm-l1" aria-hidden="true"></span><span class="hm-leaf hm-l2" aria-hidden="true"></span><span class="hm-leaf hm-l3" aria-hidden="true"></span><span class="hm-leaf hm-l4" aria-hidden="true"></span><span class="hm-leaf hm-l5" aria-hidden="true"></span>':'')
+              +'<div class="hi-media'+hiMediaCls+'">'+(hiImg?'<img src="'+esc(hiImg)+'" alt="'+esc(s.title||'')+'" loading="lazy">':'')+hiCap+'</div>'
+            +'</div>'
             +'<div class="hi-list">'+hi+'</div>'
           +'</div>'
         +'</div></section>'
