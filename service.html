@@ -710,7 +710,7 @@
       }
       if(prevBtn) prevBtn.addEventListener('click', function(){ prev(); restart(); });
       if(nextBtn) nextBtn.addEventListener('click', function(){ next(); restart(); });
-      function start(){ if(reduce || n<=perView) return; stop(); timer=setInterval(next, 5500); }
+      function start(){ if(reduce || n<=perView) return; stop(); timer=setInterval(next, 3000); }
       function stop(){ if(timer){ clearInterval(timer); timer=null; } }
       function restart(){ stop(); start(); }
       tq.addEventListener('mouseenter', stop);
