@@ -221,16 +221,30 @@
     .svc-stats .stat b{font-family:var(--font-display);display:block;font-size:clamp(2rem,4.5vw,3rem);font-weight:800;letter-spacing:-.02em;background:linear-gradient(100deg,#FF3D51,#C8102E);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
     .svc-stats .stat span{display:block;margin-top:.4rem;font-size:.86rem;color:rgba(255,255,255,.6);font-weight:600}
 
-    /* How it helps — client vs candidate */
-    .help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(16px,2.5vw,24px);margin-top:clamp(26px,4vw,38px)}
-    .help-card{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(26px,3vw,36px);box-shadow:0 1px 2px rgba(16,18,24,.04);transition:transform .2s,box-shadow .2s}
-    .help-card::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,#FF3D51,#C8102E)}
-    .help-card:hover{transform:translateY(-3px);box-shadow:0 24px 48px -26px rgba(16,24,40,.26)}
-    .help-card h3{font-family:var(--font-display);font-size:1.18rem;font-weight:800;letter-spacing:-.01em;margin:0 0 1.2rem;display:flex;align-items:center;gap:.6rem}
-    .help-card h3::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--red);flex:none}
-    .help-card ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
-    .help-card li{display:flex;gap:12px;align-items:center;font-size:.96rem;line-height:1.5;color:var(--ink)}
-    .help-card li svg{width:26px;height:26px;flex:none;color:var(--red);padding:6px;border-radius:8px;background:#FDE7EA;box-sizing:border-box}
+    /* Value — split checklist + decorative circular visual */
+    .help-split{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(30px,5vw,64px);align-items:center}
+    @media(max-width:860px){.help-split{grid-template-columns:1fr;gap:clamp(28px,6vw,40px)}}
+    .help-copy .sec-head{margin-bottom:clamp(20px,3vw,30px)}
+    .help-groups{display:grid;gap:clamp(20px,3vw,28px)}
+    .help-grp h3{font-family:var(--font-display);font-size:1.06rem;font-weight:800;letter-spacing:-.01em;margin:0 0 .9rem;display:flex;align-items:center;gap:.55rem;color:var(--ink)}
+    .help-grp h3::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--red);flex:none}
+    .help-grp ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+    .help-grp li{display:flex;gap:11px;align-items:flex-start;font-size:.96rem;line-height:1.5;color:var(--ink)}
+    .help-grp li svg{width:24px;height:24px;flex:none;color:var(--red);padding:5px;border-radius:7px;background:#FDE7EA;box-sizing:border-box;margin-top:1px}
+    .help-cta{display:inline-flex;align-items:center;gap:.5rem;margin-top:clamp(22px,3vw,30px);background:linear-gradient(100deg,#FF3D51,#C8102E 72%,#A50D24);color:#fff;font-family:var(--font-display);font-weight:800;font-size:.95rem;padding:14px 26px;border-radius:12px;box-shadow:0 10px 26px -10px rgba(200,16,46,.55);transition:transform .18s,box-shadow .18s}
+    .help-cta:hover{transform:translateY(-2px);box-shadow:0 16px 34px -12px rgba(200,16,46,.65)}
+    .help-cta svg{width:17px;height:17px}
+    .help-visual{position:relative;display:grid;place-items:center;min-height:clamp(290px,34vw,400px)}
+    .wv-ring{position:absolute;z-index:1;width:clamp(248px,27vw,344px);height:clamp(248px,27vw,344px);border-radius:50%;border:1.5px dashed #F3C6CC}
+    .wv-circle{position:relative;z-index:2;width:clamp(210px,24vw,300px);height:clamp(210px,24vw,300px);border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(120% 120% at 30% 20%,#FF5567,#C8102E 70%,#A50D24);box-shadow:0 30px 60px -24px rgba(200,16,46,.5),inset 0 2px 12px rgba(255,255,255,.2)}
+    .wv-circle svg{width:clamp(74px,9vw,104px);height:auto;stroke-width:1.5}
+    .wv-leaf{position:absolute;z-index:1;border-radius:62% 0 62% 0;box-shadow:0 10px 24px -12px rgba(16,24,40,.3)}
+    .wv-l1{width:72px;height:72px;background:linear-gradient(150deg,#FF8793,#F6586A);top:4%;left:14%;transform:rotate(16deg)}
+    .wv-l2{width:52px;height:52px;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);top:0;left:33%;transform:rotate(-28deg)}
+    .wv-l3{width:42px;height:42px;background:linear-gradient(150deg,#FBD36B,#F5B91F);top:15%;left:4%;transform:rotate(44deg)}
+    .wv-l4{width:66px;height:66px;background:linear-gradient(150deg,#FF8793,#F6586A);bottom:6%;right:14%;transform:rotate(-18deg)}
+    .wv-l5{width:48px;height:48px;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);bottom:2%;right:33%;transform:rotate(30deg)}
+    @media(max-width:860px){.help-visual{min-height:300px}}
 
     /* Process — numbered header cards */
     .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(12px,1.4vw,18px);margin-top:clamp(30px,4vw,46px);align-items:stretch}
@@ -533,9 +547,21 @@
       }
       var secStats=(s.stats&&s.stats.length)?('<section class="svc-stats"><div class="wrap"><div class="statgrid">'+s.stats.map(function(t){return '<div class="stat"><b>'+esc(t.v)+'</b><span>'+esc(t.l)+'</span></div>';}).join('')+'</div></div></section>'):'';
       var hasHelp=(s.client&&s.client.length)||(s.applicant&&s.applicant.length);
-      var secHelp=hasHelp?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.helpK)+'</div><h2>'+esc(L.helpH)+'</h2></div><div class="help-grid">'
-        +((s.client&&s.client.length)?('<div class="help-card"><h3>'+esc(L.helpBiz)+'</h3><ul>'+s.client.map(liChk).join('')+'</ul></div>'):'')
-        +((s.applicant&&s.applicant.length)?('<div class="help-card"><h3>'+esc(L.helpPpl)+'</h3><ul>'+s.applicant.map(liChk).join('')+'</ul></div>'):'')
+      var secHelp=hasHelp?('<section class="sec sec-gray"><div class="wrap"><div class="help-split">'
+        +'<div class="help-copy">'
+          +'<div class="sec-head"><div class="k">'+esc(L.helpK)+'</div><h2>'+esc(L.helpH)+'</h2></div>'
+          +'<div class="help-groups">'
+            +((s.client&&s.client.length)?('<div class="help-grp"><h3>'+esc(L.helpBiz)+'</h3><ul>'+s.client.map(liChk).join('')+'</ul></div>'):'')
+            +((s.applicant&&s.applicant.length)?('<div class="help-grp"><h3>'+esc(L.helpPpl)+'</h3><ul>'+s.applicant.map(liChk).join('')+'</ul></div>'):'')
+          +'</div>'
+          +'<a class="help-cta" href="/#contact">Request a consultation '+arrow+'</a>'
+        +'</div>'
+        +'<div class="help-visual" aria-hidden="true">'
+          +'<span class="wv-leaf wv-l1"></span><span class="wv-leaf wv-l2"></span><span class="wv-leaf wv-l3"></span>'
+          +'<span class="wv-leaf wv-l4"></span><span class="wv-leaf wv-l5"></span>'
+          +'<span class="wv-ring"></span>'
+          +'<div class="wv-circle">'+LEVEL_ICOS[4]+'</div>'
+        +'</div>'
         +'</div></div></section>'):'';
 
       // Optional per-service video (YouTube). Rendered as a privacy-friendly
