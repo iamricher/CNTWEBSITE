@@ -174,6 +174,9 @@
     .svc-expert:hover .pic img{transform:scale(1.06)}
     .svc-expert figcaption{margin-top:14px;font-weight:700;font-size:1.02rem;color:var(--ink);line-height:1.3}
     .svc-expert .role{display:block;margin-top:3px;font-weight:500;font-size:.85rem;color:var(--muted)}
+    .svc-expert .etag{display:block;margin-top:7px;font-family:var(--font-display);font-weight:700;font-size:.76rem;letter-spacing:.01em;color:var(--red)}
+    .svc-sme-note{text-align:center;max-width:46ch;margin:clamp(26px,3.4vw,38px) auto 0;color:var(--muted);font-size:.94rem;line-height:1.55;display:flex;align-items:center;justify-content:center;gap:.55rem}
+    .svc-sme-note::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--red)}
     @media (prefers-reduced-motion:reduce){.svc-expert{opacity:1;transform:none;transition:none}.svc-expert .pic,.svc-expert .pic img{transition:none}.svc-expert:hover .pic,.svc-expert:hover .pic img{transform:none}}
     /* Photo gallery */
     .svc-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:clamp(28px,4vw,42px)}
@@ -480,6 +483,12 @@
         tagline:'Hyperspecialized training. Built around you.',
         hiImage:'/assets/img/training-lead-beyond-limits.jpg',
         valImage:'/assets/img/training-value.jpg',
+        expertMeta:{
+          'ELI':{name:'Elika Tady',tagline:'Seasoned. Engaging. Outcome-Driven.'},
+          'JO':{name:'Joie Salazar',tagline:'Practical. Results-Driven. Team-Focused.'},
+          'RED':{name:'Red Vinas',tagline:'Strategic. Creative. People-Centered.'}
+        },
+        smeNote:'In-house SMEs are available at CNT depending on the training topic.',
         overview:'CNT Training Solutions designs and delivers hyperspecialized, application-based training programs built around your own workforce and goals, supported by in-house multimedia production and a structured 30-60-90 post-training follow-up.',
         who:['Frontline Deployed Workforce','Supervisors and Field Supervisors','Specialists','Subject Matter Experts (SMEs)','Team Leaders and Managers','Senior Managers and Executives'],
         scope:['Level 1: Basic - Essential knowledge, workplace behavior, and core competencies for frontline and sales staff in customer-facing roles.','Level 2: Intermediate - Performance, problem-solving, and day-to-day execution for senior staff and specialists.','Level 3: Advanced - Leadership and the management of daily operations for team leaders and supervisors.','Level 4: Highly Advanced - Departmental performance, planning, and resource management for managers.','Level 5: Elite - High-impact training built on specialized methodologies for leaders who drive organizational strategy, transformation, and business growth.'],
@@ -614,9 +623,11 @@
       var _slots='';
       for(var _si=0; _si<(s.smeSlots||0); _si++){ _slots+='<figure class="svc-expert svc-expert--slot"><div class="pic noimg">'+_sil+'</div><figcaption>Subject Matter Expert<span class="role">Coming soon</span></figcaption></figure>'; }
       var secExperts=expList.length?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Our Team</div><h2>Who we are</h2></div><div class="svc-experts">'
-        +expList.map(function(e){ return '<figure class="svc-expert"><div class="pic'+(e.photo?'':' noimg')+'">'+(e.photo?'<img src="'+esc(e.photo)+'" alt="'+esc(e.name||'')+'" loading="lazy">':_sil)+'</div>'+((e.name||e.role)?'<figcaption>'+esc(e.name||'')+(e.role?'<span class="role">'+esc(e.role)+'</span>':'')+'</figcaption>':'')+'</figure>'; }).join('')
+        +expList.map(function(e){ var meta=(s.expertMeta||{})[e.name]||{}; var nm=meta.name||e.name||''; var tag=meta.tagline||e.tagline||''; return '<figure class="svc-expert"><div class="pic'+(e.photo?'':' noimg')+'">'+(e.photo?'<img src="'+esc(e.photo)+'" alt="'+esc(nm)+'" loading="lazy">':_sil)+'</div>'+((nm||e.role||tag)?'<figcaption>'+esc(nm)+(e.role?'<span class="role">'+esc(e.role)+'</span>':'')+(tag?'<span class="etag">'+esc(tag)+'</span>':'')+'</figcaption>':'')+'</figure>'; }).join('')
         +_slots
-        +'</div></div></section>'):'';
+        +'</div>'
+        +(s.smeNote?'<p class="svc-sme-note">'+esc(s.smeNote)+'</p>':'')
+        +'</div></section>'):'';
 
       // Optional per-service partners / "trusted by" logo wall.
       // Partners marquee — multi-row scrolling logo wall (rows sliced from the
