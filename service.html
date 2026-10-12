@@ -76,14 +76,15 @@
     .hi-split{display:grid;grid-template-columns:.82fr 1.18fr;gap:clamp(26px,4vw,52px);align-items:center;margin-top:clamp(28px,4vw,42px)}
     @media(max-width:860px){.hi-split{grid-template-columns:1fr}}
     .hi-media-wrap{position:relative}
+    .hm-ring{position:absolute;inset:-13px;border:1.6px dashed #F3C6CC;border-radius:32px;z-index:0;pointer-events:none}
     .hm-leaf{position:absolute;z-index:3;border-radius:62% 0 62% 0;box-shadow:0 14px 30px -14px rgba(16,24,40,.3);pointer-events:none}
     .hm-l1{width:clamp(60px,6.5vw,86px);aspect-ratio:1;background:linear-gradient(150deg,#FF8793,#F6586A);top:-7%;left:-6%;transform:rotate(16deg)}
     .hm-l2{width:clamp(44px,5vw,62px);aspect-ratio:1;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);top:-3%;left:16%;transform:rotate(-26deg)}
     .hm-l3{width:clamp(36px,4vw,50px);aspect-ratio:1;background:linear-gradient(150deg,#FBD36B,#F5B91F);top:12%;left:-11%;transform:rotate(42deg)}
-    .hm-l4{width:clamp(56px,6vw,80px);aspect-ratio:1;background:linear-gradient(150deg,#FF8793,#F6586A);bottom:-6%;right:-6%;transform:rotate(-20deg)}
-    .hm-l5{width:clamp(42px,4.6vw,58px);aspect-ratio:1;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);bottom:5%;right:-11%;transform:rotate(28deg)}
+    .hm-l4{width:clamp(54px,5.6vw,76px);aspect-ratio:1;background:linear-gradient(150deg,#FF8793,#F6586A);bottom:-9%;right:6%;transform:rotate(-18deg)}
+    .hm-l5{width:clamp(40px,4.4vw,54px);aspect-ratio:1;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);bottom:-13%;right:22%;transform:rotate(30deg)}
     @media(max-width:860px){.hm-l3,.hm-l5{display:none}}
-    .hi-media{position:relative;height:clamp(380px,42vw,460px);border-radius:20px;overflow:hidden;background:radial-gradient(120% 90% at 100% 0%,rgba(229,33,63,.32),transparent 55%),linear-gradient(160deg,#17191f,#0e0f13);box-shadow:0 30px 60px -30px rgba(16,24,40,.5)}
+    .hi-media{position:relative;z-index:1;height:clamp(380px,42vw,460px);border-radius:20px;overflow:hidden;background:radial-gradient(120% 90% at 100% 0%,rgba(229,33,63,.32),transparent 55%),linear-gradient(160deg,#17191f,#0e0f13);box-shadow:0 30px 60px -30px rgba(16,24,40,.5)}
     .hi-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     .hi-media::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 46%,rgba(10,11,15,.42))}
     /* feature photo: lightly softened + darkened so overlay text stays readable */
@@ -247,8 +248,8 @@
     .wv-circle{position:relative;z-index:2;width:clamp(210px,24vw,300px);height:clamp(210px,24vw,300px);border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(120% 120% at 30% 20%,#FF5567,#C8102E 70%,#A50D24);box-shadow:0 30px 60px -24px rgba(200,16,46,.5),inset 0 2px 12px rgba(255,255,255,.2)}
     .wv-circle svg{width:clamp(74px,9vw,104px);height:auto;stroke-width:1.5}
     .wv-circle--photo{overflow:hidden}
-    .wv-circle--photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.03)}
-    .wv-circle--photo::after{content:"";position:absolute;inset:0;background:linear-gradient(150deg,rgba(255,61,81,.2) 0%,rgba(200,16,46,.3) 45%,rgba(126,15,24,.52) 100%)}
+    .wv-circle--photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.42) contrast(1.05)}
+    .wv-circle--photo::after{content:"";position:absolute;inset:0;background:linear-gradient(150deg,rgba(255,61,81,.4) 0%,rgba(229,33,63,.5) 50%,rgba(185,20,46,.58) 100%)}
     .wv-circle--photo{box-shadow:0 30px 60px -24px rgba(200,16,46,.5),inset 0 0 0 1px rgba(255,255,255,.28)}
     .wv-leaf{position:absolute;z-index:1;border-radius:62% 0 62% 0;box-shadow:0 10px 24px -12px rgba(16,24,40,.3)}
     .wv-l1{width:72px;height:72px;background:linear-gradient(150deg,#FF8793,#F6586A);top:4%;left:14%;transform:rotate(16deg)}
@@ -636,7 +637,7 @@
           +'<div class="sec-head"><div class="k">'+esc(L.hiK)+'</div><h2>'+esc(L.hiH)+'</h2></div>'
           +'<div class="hi-split">'
             +'<div class="hi-media-wrap">'
-              +(hiMediaCls?'<span class="hm-leaf hm-l1" aria-hidden="true"></span><span class="hm-leaf hm-l2" aria-hidden="true"></span><span class="hm-leaf hm-l3" aria-hidden="true"></span><span class="hm-leaf hm-l4" aria-hidden="true"></span><span class="hm-leaf hm-l5" aria-hidden="true"></span>':'')
+              +(hiMediaCls?'<span class="hm-ring" aria-hidden="true"></span><span class="hm-leaf hm-l1" aria-hidden="true"></span><span class="hm-leaf hm-l2" aria-hidden="true"></span><span class="hm-leaf hm-l3" aria-hidden="true"></span><span class="hm-leaf hm-l4" aria-hidden="true"></span><span class="hm-leaf hm-l5" aria-hidden="true"></span>':'')
               +'<div class="hi-media'+hiMediaCls+'">'+(hiImg?'<img src="'+esc(hiImg)+'" alt="'+esc(s.title||'')+'" loading="lazy">':'')+hiCap+'</div>'
             +'</div>'
             +'<div class="hi-list">'+hi+'</div>'
