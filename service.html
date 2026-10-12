@@ -238,6 +238,10 @@
     .wv-ring{position:absolute;z-index:1;width:clamp(248px,27vw,344px);height:clamp(248px,27vw,344px);border-radius:50%;border:1.5px dashed #F3C6CC}
     .wv-circle{position:relative;z-index:2;width:clamp(210px,24vw,300px);height:clamp(210px,24vw,300px);border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(120% 120% at 30% 20%,#FF5567,#C8102E 70%,#A50D24);box-shadow:0 30px 60px -24px rgba(200,16,46,.5),inset 0 2px 12px rgba(255,255,255,.2)}
     .wv-circle svg{width:clamp(74px,9vw,104px);height:auto;stroke-width:1.5}
+    .wv-circle--photo{overflow:hidden}
+    .wv-circle--photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.03)}
+    .wv-circle--photo::after{content:"";position:absolute;inset:0;background:linear-gradient(150deg,rgba(255,61,81,.2) 0%,rgba(200,16,46,.3) 45%,rgba(126,15,24,.52) 100%)}
+    .wv-circle--photo{box-shadow:0 30px 60px -24px rgba(200,16,46,.5),inset 0 0 0 1px rgba(255,255,255,.28)}
     .wv-leaf{position:absolute;z-index:1;border-radius:62% 0 62% 0;box-shadow:0 10px 24px -12px rgba(16,24,40,.3)}
     .wv-l1{width:72px;height:72px;background:linear-gradient(150deg,#FF8793,#F6586A);top:4%;left:14%;transform:rotate(16deg)}
     .wv-l2{width:52px;height:52px;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);top:0;left:33%;transform:rotate(-28deg)}
@@ -447,6 +451,7 @@
       training:{
         tagline:'Hyperspecialized training. Built around you.',
         hiImage:'/assets/img/training-lead-beyond-limits.jpg',
+        valImage:'/assets/img/training-value.jpg',
         overview:'CNT Training Solutions designs and delivers hyperspecialized, application-based training programs built around your own workforce and goals, supported by in-house multimedia production and a structured 30-60-90 post-training follow-up.',
         who:['Frontline Deployed Workforce','Supervisors and Field Supervisors','Specialists','Subject Matter Experts (SMEs)','Team Leaders and Managers','Senior Managers and Executives'],
         scope:['Level 1: Basic - Essential knowledge, workplace behavior, and core competencies for frontline and sales staff in customer-facing roles.','Level 2: Intermediate - Performance, problem-solving, and day-to-day execution for senior staff and specialists.','Level 3: Advanced - Leadership and the management of daily operations for team leaders and supervisors.','Level 4: Highly Advanced - Departmental performance, planning, and resource management for managers.','Level 5: Elite - High-impact training built on specialized methodologies for leaders who drive organizational strategy, transformation, and business growth.'],
@@ -560,7 +565,7 @@
           +'<span class="wv-leaf wv-l1"></span><span class="wv-leaf wv-l2"></span><span class="wv-leaf wv-l3"></span>'
           +'<span class="wv-leaf wv-l4"></span><span class="wv-leaf wv-l5"></span>'
           +'<span class="wv-ring"></span>'
-          +'<div class="wv-circle">'+LEVEL_ICOS[4]+'</div>'
+          +'<div class="wv-circle'+(s.valImage?' wv-circle--photo':'')+'">'+(s.valImage?'<img src="'+esc(s.valImage)+'" alt="'+esc(s.title||'')+'">':LEVEL_ICOS[4])+'</div>'
         +'</div>'
         +'</div></div></section>'):'';
 
