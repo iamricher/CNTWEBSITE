@@ -173,6 +173,11 @@
     .step .n{font-family:var(--font-display);font-size:.8rem;font-weight:800;color:var(--red);letter-spacing:.1em}
     .step h4{font-family:var(--font-display);font-size:1.08rem;font-weight:800;margin:.5rem 0 .4rem;letter-spacing:-.01em}
     .step p{color:var(--muted);font-size:.93rem;line-height:1.6;margin:0}
+    /* Highlighted process step (bright red) */
+    .step.step-hot{background:linear-gradient(135deg,#C8102E,#E5213F);color:#fff;border-radius:16px;padding:20px 20px 18px;box-shadow:0 18px 40px -18px rgba(200,16,46,.6)}
+    .step.step-hot .n{color:rgba(255,255,255,.8)}
+    .step.step-hot h4{color:#fff}
+    .step.step-hot p{color:rgba(255,255,255,.92)}
 
     /* CTA */
     .svc-cta{background:linear-gradient(158deg,#6C0E1A,#2A0C12);color:#fff;text-align:center;padding:clamp(56px,8vw,96px) 0}
@@ -331,11 +336,18 @@
     // service, not a staffing one, so its process is TNA → design → deliver → evaluate.
     var PROCESS_BY_SLUG={
       training:[
-        {h:'Training needs analysis',p:'We begin with a TNA — assessing roles, skill gaps, and goals to pinpoint exactly what your people need.'},
-        {h:'Design the program',p:'We build a tailored curriculum and materials around your context, audience level, and the outcomes you want.'},
-        {h:'Facilitate & deliver',p:'Our trainers run engaging, practical sessions — in person or online — that turn concepts into real workplace skills.'},
-        {h:'Evaluate & follow through',p:'We measure results, gather feedback, and share insights so the learning sticks and keeps improving.'}
+        {h:'Discovery',p:'We learn your goals, your workforce, and the gaps to close.'},
+        {h:'Agreement',p:'We align on scope, levels, schedule, and deliverables.'},
+        {h:'Design',p:'We build a tailored, application-based curriculum and materials for your team.'},
+        {h:'Preparation',p:'We ready the trainers, logistics, and in-house multimedia coverage.'},
+        {h:'Delivery & Follow Up',p:'We run the sessions, then report and follow through with a structured 30-60-90 check-in.',hot:true}
       ]
+    };
+    // Per-service section labels (eyebrow + heading). Falls back to the generic
+    // defaults; only the keys you override change.
+    var LABELS_DEFAULT={ ovK:'Overview', ovH:'What this covers', whoK:'Who it’s for', whoH:'Who we build this for', scopeK:'Scope', scopeH:'What’s covered', hiK:'What’s included', hiH:'The highlights', helpK:'How it helps', helpH:'Value on both sides', helpBiz:'For your business', helpPpl:'For candidates', procK:'How we work', procH:'A simple, managed process', tstK:'Testimonials', tstH:'In their words' };
+    var LABELS_BY_SLUG={
+      training:{ ovH:'What We’re All About', whoK:'Training Audience', whoH:'Who It’s For', scopeH:'What We Offer', hiK:'Training Highlights', hiH:'What Went On', helpK:'Value', helpH:'What’s In It For You', helpBiz:'For Your Business', helpPpl:'For Participants', procK:'Engagement Process', procH:'How We Work', tstK:'Feedback', tstH:'In Their Words' }
     };
 
     function related(slug){
@@ -347,6 +359,7 @@
     function render(s, slug){
       var hero=document.getElementById('svc-hero');
       var body=document.getElementById('svc-body');
+      var L=Object.assign({}, LABELS_DEFAULT, LABELS_BY_SLUG[slug]||{});
       if(!s){
         // Unknown/empty slug → send to the services overview.
         location.replace('/services');
@@ -386,28 +399,28 @@
         return '<div class="hi-card">'+rate+'<div class="hi-ic">'+check+'</div><h3>'+esc(h.t)+'</h3><p>'+esc(h.d)+'</p></div>';
       }).join('');
       var steps=((s.process&&s.process.length)?s.process:(PROCESS_BY_SLUG[slug]||STEPS)).map(function(st,i){
-        return '<div class="step"><div class="n">0'+(i+1)+'</div><h4>'+esc(st.h)+'</h4><p>'+esc(st.p)+'</p></div>';
+        return '<div class="step'+(st.hot?' step-hot':'')+'"><div class="n">0'+(i+1)+'</div><h4>'+esc(st.h)+'</h4>'+(st.p?'<p>'+esc(st.p)+'</p>':'')+'</div>';
       }).join('');
 
       // Portfolio sections (rendered only when content exists).
       var liChk=function(x){return '<li>'+check+'<span>'+esc(x)+'</span></li>';};
-      var secWho=(s.who&&s.who.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">Who it’s for</div><h2>Who we build this for</h2></div><div class="chips">'+s.who.map(function(w){return '<span class="chip">'+esc(w)+'</span>';}).join('')+'</div></div></section>'):'';
+      var secWho=(s.who&&s.who.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.whoK)+'</div><h2>'+esc(L.whoH)+'</h2></div><div class="chips">'+s.who.map(function(w){return '<span class="chip">'+esc(w)+'</span>';}).join('')+'</div></div></section>'):'';
       // Scope — if items look like "Level N (Name) — description", surface them as
       // tiered level cards (training framework); the rest stay a checklist.
       var secScope='';
       if(s.scope&&s.scope.length){
         var _lvls=[], _other=[];
-        s.scope.forEach(function(x){ var m=String(x).match(/^Level\s*(\d+)\s*\(([^)]+)\)\s*[—\-:]\s*(.+)$/i); if(m) _lvls.push({n:m[1],name:m[2],d:m[3]}); else _other.push(x); });
+        s.scope.forEach(function(x){ var m=String(x).match(/^Level\s*(\d+)\s*(?:\(([^)]+)\)|:\s*([^—\-]+?))\s*[—\-]\s*(.+)$/i); if(m) _lvls.push({n:m[1],name:(m[2]||m[3]||'').trim(),d:m[4]}); else _other.push(x); });
         var _lvlHtml=(_lvls.length>=2)?('<div class="svc-levels">'+_lvls.map(function(l){return '<div class="lvl"><span class="lvl-n">'+esc(('0'+l.n).slice(-2))+'</span><h3>'+esc(l.name)+'</h3><p>'+esc(l.d)+'</p></div>';}).join('')+'</div>'):'';
         var _listItems=_lvlHtml?_other:s.scope;
         var _listHtml=_listItems.length?('<ul class="scope'+(_lvlHtml?' scope-mt':'')+'">'+_listItems.map(liChk).join('')+'</ul>'):'';
-        secScope='<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Scope</div><h2>What’s covered</h2></div>'+_lvlHtml+_listHtml+'</div></section>';
+        secScope='<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.scopeK)+'</div><h2>'+esc(L.scopeH)+'</h2></div>'+_lvlHtml+_listHtml+'</div></section>';
       }
       var secStats=(s.stats&&s.stats.length)?('<section class="svc-stats"><div class="wrap"><div class="statgrid">'+s.stats.map(function(t){return '<div class="stat"><b>'+esc(t.v)+'</b><span>'+esc(t.l)+'</span></div>';}).join('')+'</div></div></section>'):'';
       var hasHelp=(s.client&&s.client.length)||(s.applicant&&s.applicant.length);
-      var secHelp=hasHelp?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">How it helps</div><h2>Value on both sides</h2></div><div class="help-grid">'
-        +((s.client&&s.client.length)?('<div class="help-card"><h3>For your business</h3><ul>'+s.client.map(liChk).join('')+'</ul></div>'):'')
-        +((s.applicant&&s.applicant.length)?('<div class="help-card"><h3>For candidates</h3><ul>'+s.applicant.map(liChk).join('')+'</ul></div>'):'')
+      var secHelp=hasHelp?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.helpK)+'</div><h2>'+esc(L.helpH)+'</h2></div><div class="help-grid">'
+        +((s.client&&s.client.length)?('<div class="help-card"><h3>'+esc(L.helpBiz)+'</h3><ul>'+s.client.map(liChk).join('')+'</ul></div>'):'')
+        +((s.applicant&&s.applicant.length)?('<div class="help-card"><h3>'+esc(L.helpPpl)+'</h3><ul>'+s.applicant.map(liChk).join('')+'</ul></div>'):'')
         +'</div></div></section>'):'';
 
       // Optional per-service video (YouTube). Rendered as a privacy-friendly
@@ -436,30 +449,29 @@
 
       // Optional per-service testimonials (participant / client quotes).
       var tList=(s.testimonials||[]).filter(function(t){return t&&(t.quote||t.q);});
-      var secTestimonials=tList.length?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Testimonials</div><h2>In their words</h2></div><div class="svc-quotes">'
+      var secTestimonials=tList.length?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.tstK)+'</div><h2>'+esc(L.tstH)+'</h2></div><div class="svc-quotes">'
         +tList.map(function(t){ var q=t.quote||t.q||''; var a=t.author||t.a||''; return '<figure class="svc-quote"><blockquote>'+esc(q)+'</blockquote>'+(a?'<figcaption>'+esc(a)+'</figcaption>':'')+'</figure>'; }).join('')
         +'</div></div></section>'):'';
 
       body.innerHTML=
         '<section class="sec"><div class="wrap">'
-          +'<div class="sec-head"><div class="k">Overview</div><h2>What this covers</h2><p>'+esc(s.overview)+'</p></div>'
+          +'<div class="sec-head"><div class="k">'+esc(L.ovK)+'</div><h2>'+esc(L.ovH)+'</h2><p>'+esc(s.overview)+'</p></div>'
         +'</div></section>'
         +secVideo
         +secWho
         +secScope
         +'<section class="sec'+(secScope?' sec-gray':'')+'"><div class="wrap">'
-          +'<div class="sec-head"><div class="k">What’s included</div><h2>The highlights</h2></div>'
+          +'<div class="sec-head"><div class="k">'+esc(L.hiK)+'</div><h2>'+esc(L.hiH)+'</h2></div>'
           +'<div class="hi-grid">'+hi+'</div>'
         +'</div></section>'
         +secStats
         +secHelp
         +'<section class="sec"><div class="wrap">'
-          +'<div class="sec-head"><div class="k">How we work</div><h2>A simple, managed process</h2></div>'
+          +'<div class="sec-head"><div class="k">'+esc(L.procK)+'</div><h2>'+esc(L.procH)+'</h2></div>'
           +'<div class="steps">'+steps+'</div>'
         +'</div></section>'
         +((s.images&&s.images.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">Gallery</div><h2>See it in action</h2></div><div class="svc-gallery">'+s.images.map(function(u,i){return '<figure data-lb="'+i+'"><img src="'+esc(u)+'" alt="'+esc(s.title||'')+'" loading="lazy"></figure>';}).join('')+'</div></div></section>'):'')
         +secTestimonials
-        +secPartners
         +secExperts
         +'<section class="sec sec-gray"><div class="wrap">'
           +'<div class="sec-head"><div class="k">Explore more</div><h2>Other services</h2></div>'
