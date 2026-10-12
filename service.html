@@ -255,15 +255,18 @@
     @media(max-width:900px){.steps{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:560px){.steps{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:400px){.steps{grid-template-columns:1fr}}
-    .step{position:relative;display:flex;flex-direction:column;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 12px 32px -22px rgba(16,24,40,.45);transition:transform .22s,box-shadow .22s}
+    .step{position:relative;display:flex;flex-direction:column;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:visible;box-shadow:0 12px 32px -22px rgba(16,24,40,.45);transition:transform .22s,box-shadow .22s}
     .step:hover{transform:translateY(-6px);box-shadow:0 30px 56px -24px rgba(16,24,40,.42)}
-    .step-hd{position:relative;padding:24px 14px 30px;background:linear-gradient(160deg,var(--c2,#F14255),var(--c,#C8102E))}
+    /* flow arrow between steps (only while all five share one row) */
+    .step:not(:last-child)::after{content:"";position:absolute;top:44px;right:-15px;width:12px;height:12px;border-top:3px solid var(--c,#C8102E);border-right:3px solid var(--c,#C8102E);transform:rotate(45deg);z-index:4}
+    @media(max-width:900px){.step:not(:last-child)::after{display:none}}
+    .step-hd{position:relative;border-radius:14px 14px 0 0;padding:24px 14px 30px;background:linear-gradient(160deg,var(--c2,#F14255),var(--c,#C8102E))}
     .step-no{font-family:var(--font-display);font-size:clamp(1.9rem,2.6vw,2.3rem);font-weight:800;color:#fff;line-height:1;letter-spacing:.01em}
     .step-hd::after{content:"";position:absolute;left:50%;bottom:-8px;width:17px;height:17px;background:var(--c,#C8102E);transform:translateX(-50%) rotate(45deg)}
     .step-bd{flex:1;padding:26px 18px 28px}
     .step h4{font-family:var(--font-display);font-size:1.04rem;font-weight:800;letter-spacing:-.01em;margin:0 0 .5rem;color:var(--ink)}
     .step p{color:var(--muted);font-size:.9rem;line-height:1.6;margin:0}
-    .step::before{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;background:linear-gradient(90deg,var(--c2,#F14255),var(--c,#C8102E))}
+    .step::before{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;border-radius:0 0 13px 13px;background:linear-gradient(90deg,var(--c2,#F14255),var(--c,#C8102E))}
 
     /* CTA */
     .svc-cta{background:linear-gradient(158deg,#6C0E1A,#2A0C12);color:#fff;text-align:center;padding:clamp(56px,8vw,96px) 0}
