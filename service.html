@@ -479,10 +479,16 @@
     // fields; experts, hero photo, video, gallery stay DB/CMS-driven). Used while
     // the DB content pipeline is unreliable — editing here is a code change.
     var CONTENT_OVERRIDE={
+      'executive-search':{ image:'/assets/img/services/executive-search/executive-search-05.jpg', images:['/assets/img/services/executive-search/executive-search-04.jpg','/assets/img/services/executive-search/executive-search-02.jpg','/assets/img/services/executive-search/executive-search-01.jpg'] },
+      'mass-hiring':{ image:'/assets/img/services/mass-hiring/mass-hiring-11.jpg', images:['/assets/img/services/mass-hiring/mass-hiring-06.jpg','/assets/img/services/mass-hiring/mass-hiring-01.jpg','/assets/img/services/mass-hiring/mass-hiring-09.jpg'] },
+      'hr-outsourcing':{ image:'/assets/img/services/hr-outsourcing/hr-outsourcing-03.jpg', images:['/assets/img/services/hr-outsourcing/hr-outsourcing-01.jpg','/assets/img/services/hr-outsourcing/hr-outsourcing-07.jpg','/assets/img/services/hr-outsourcing/hr-outsourcing-06.jpg'] },
+      'payroll':{ image:'/assets/img/services/payroll/payroll-05.jpg', images:['/assets/img/services/payroll/payroll-02.jpg','/assets/img/services/payroll/payroll-01.jpg','/assets/img/services/payroll/payroll-06.jpg'] },
+      'consulting':{ image:'/assets/img/services/consulting/consulting-11.jpg', images:['/assets/img/services/consulting/consulting-01.jpg','/assets/img/services/consulting/consulting-06.jpg','/assets/img/services/consulting/consulting-10.jpg'] },
       training:{
         tagline:'Hyperspecialized training. Built around you.',
         hiImage:'/assets/img/training-lead-beyond-limits.jpg',
         valImage:'/assets/img/training-value.jpg',
+        addImages:['/assets/img/services/training/training-01.jpg','/assets/img/services/training/training-03.jpg','/assets/img/services/training/training-05.jpg','/assets/img/services/training/training-07.jpg','/assets/img/services/training/training-09.jpg','/assets/img/services/training/training-10.jpg'],
         expertMeta:{
           'ELI':{name:'Elika Tady',tagline:'Seasoned. Engaging. Outcome-Driven.'},
           'JO':{name:'Joie Salazar',tagline:'Practical. Results-Driven. Team-Focused.'},
@@ -832,6 +838,14 @@
       if(!(s.stats&&s.stats.length)) s.stats=companyStats();
       return s;
     }
+    // Merge the code-authoritative overrides and, for services that ADD to an
+    // existing gallery (e.g. training), append addImages to whatever images the
+    // DB/fallback already provides.
+    function applyOverride(s, slug){
+      if(CONTENT_OVERRIDE[slug]) s=Object.assign(s, CONTENT_OVERRIDE[slug]);
+      if(s.addImages && s.addImages.length){ s.images=(s.images||[]).concat(s.addImages); }
+      return s;
+    }
     // Prefer live content from Content Studio; fall back to the built-in copy.
     async function load(slug){
       if(!slug){ location.replace('/services'); return; }
@@ -839,10 +853,10 @@
       if(sb){
         try{
           var r=await sb.from('services').select('*').eq('slug',slug).eq('published',true).maybeSingle();
-          if(!r.error && r.data){ var _s=fromDb(r.data); if(CONTENT_OVERRIDE[slug]) _s=Object.assign(_s, CONTENT_OVERRIDE[slug]); render(withPortfolio(_s, slug), slug); return; }
+          if(!r.error && r.data){ render(withPortfolio(applyOverride(fromDb(r.data), slug), slug), slug); return; }
         }catch(e){}
       }
-      if(SERVICES[slug]) render(withPortfolio(SERVICES[slug], slug), slug);
+      if(SERVICES[slug]) render(withPortfolio(applyOverride(Object.assign({}, SERVICES[slug]), slug), slug), slug);
       else location.replace('/services');
     }
     load(((new URLSearchParams(location.search)).get('s')||'').toLowerCase().trim());
