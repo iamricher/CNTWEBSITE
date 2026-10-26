@@ -1490,6 +1490,17 @@ input, select, textarea { font-family: var(--font-body); }
   var fallbackHTML=grid.innerHTML;   // hardcoded cards, kept for no-JS / DB-down
   var arrow='<span class="svc-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
   var esc=function(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  // Code-authoritative card photos (real CNT shots), keyed by slug. These win over the
+  // DB image_url so the homepage stays on-brand regardless of what's uploaded in Content Studio.
+  var PHOTO={
+    'executive-search':'/assets/img/services/executive-search/executive-search-05.jpg',
+    'mass-hiring':'/assets/img/services/mass-hiring/mass-hiring-11.jpg',
+    'hr-outsourcing':'/assets/img/services/hr-outsourcing/hr-outsourcing-03.jpg',
+    'payroll':'/assets/img/services/payroll/payroll-05.jpg',
+    'consulting':'/assets/img/services/consulting/consulting-11.jpg',
+    'training':'/assets/img/services/training/training-05.jpg'
+  };
+  function cardBg(slug,dbUrl){ var u=PHOTO[slug]||dbUrl; return u ? ' style="background-image:url(\''+String(u).replace(/["\\']/g,'')+'\')"' : ''; }
   function bind(c,slug){ c.setAttribute('role','link'); c.setAttribute('tabindex','0'); c.addEventListener('click',function(){ location.href='/service?s='+slug; }); c.addEventListener('keydown',function(e){ if(e.key==='Enter') location.href='/service?s='+slug; }); }
 
   function skeleton(){
@@ -1506,7 +1517,9 @@ input, select, textarea { font-family: var(--font-body); }
     [].slice.call(grid.querySelectorAll('.service-card')).forEach(function(c,i){
       var slug=slugs[i]; if(!slug) return;
       c.setAttribute('data-slug',slug);
-      if(!c.querySelector('.svc-bg')){ var bg=document.createElement('div'); bg.className='svc-bg'; c.insertBefore(bg,c.firstChild); }
+      var bgEl=c.querySelector('.svc-bg');
+      if(!bgEl){ bgEl=document.createElement('div'); bgEl.className='svc-bg'; c.insertBefore(bgEl,c.firstChild); }
+      if(PHOTO[slug]) bgEl.style.backgroundImage="url('"+PHOTO[slug]+"')";
       if(!c.querySelector('.svc-arrow')) c.insertAdjacentHTML('beforeend',arrow);
       bind(c,slug);
     });
@@ -1522,7 +1535,7 @@ input, select, textarea { font-family: var(--font-body); }
     grid.removeAttribute('aria-busy');
     grid.innerHTML=res.data.map(function(s){
       var desc=esc(s.tagline||s.overview||'');
-      var bg=s.image_url ? ' style="background-image:url(\''+String(s.image_url).replace(/["\\']/g,'')+'\')"' : '';
+      var bg=cardBg(s.slug, s.image_url);
       return '<div class="service-card" data-slug="'+esc(s.slug)+'">'
         +'<div class="svc-bg"'+bg+'></div>'
         +'<h3>'+esc(s.title||'')+'</h3>'
@@ -1578,7 +1591,7 @@ input, select, textarea { font-family: var(--font-body); }
 
       <div class="why-visual">
         <div class="why-img-main reveal-img">
-          <img src="/assets/img/case-3.jpg" alt="CNT team in action" loading="lazy" />
+          <img src="/assets/img/services/consulting/consulting-01.jpg" alt="CNT team in action" loading="lazy" />
         </div>
         <div class="why-stats-grid" data-reveal>
           <div class="mini-stat">
