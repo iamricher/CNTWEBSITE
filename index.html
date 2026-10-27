@@ -487,8 +487,9 @@ input, select, textarea { font-family: var(--font-body); }
 
 /* ── BRAND WALL — CNT Group of Companies (scrolling logos) ───── */
 .ticker {
-  overflow: hidden; background: var(--gray-50); padding: clamp(24px,3.4vw,38px) 0;
-  border-top: 1px solid #ECECEC; border-bottom: 1px solid #ECECEC;
+  overflow: hidden; padding: clamp(42px,5.2vw,66px) 0;
+  background: linear-gradient(180deg, #FBFBFC 0%, #F3F4F6 100%);
+  border-top: 1px solid #EFEFF1; border-bottom: 1px solid #EFEFF1;
 }
 .ticker-eyebrow {
   text-align: center; font-family: var(--font-display); font-size: .72rem; font-weight: 800;
@@ -500,25 +501,31 @@ input, select, textarea { font-family: var(--font-body); }
           mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 .ticker-track {
-  display: flex; align-items: center; gap: clamp(14px,1.6vw,22px);
+  display: flex; align-items: center; gap: clamp(20px,2.6vw,40px);
   width: max-content; white-space: nowrap; animation: tickerScroll 48s linear infinite;
 }
 .ticker:hover .ticker-track { animation-play-state: paused; }
 .ticker-logo {
   flex: none; display: flex; align-items: center; justify-content: center;
-  height: 78px; padding: 0 clamp(20px,2.2vw,32px);
-  background: #fff; border: 1px solid #EEEEEE; border-radius: 16px;
+  height: 100px; min-width: 168px; padding: 0 clamp(30px,3.2vw,48px);
+  background: #fff; border: 1px solid rgba(17,20,24,.045); border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(16,18,24,.03), 0 14px 36px -22px rgba(16,24,40,.22);
+  transition: transform .32s cubic-bezier(.22,.61,.36,1), box-shadow .32s ease;
+}
+.ticker-logo:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 3px 6px rgba(16,18,24,.05), 0 28px 52px -24px rgba(16,24,40,.32);
 }
 .ticker-logo img {
-  height: 44px; width: auto; max-width: 190px; object-fit: contain; display: block;
-  filter: grayscale(1); opacity: .55; transition: filter .3s ease, opacity .3s ease;
+  height: 52px; width: auto; max-width: 210px; object-fit: contain; display: block;
+  filter: grayscale(1); opacity: .5; transition: filter .45s ease, opacity .45s ease;
 }
 .ticker-logo:hover img { filter: none; opacity: 1; }
 @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } .ticker-viewport { overflow-x: auto; } }
 @media (max-width: 600px) {
-  .ticker-logo { height: 62px; padding: 0 16px; }
-  .ticker-logo img { height: 36px; max-width: 136px; }
+  .ticker-logo { height: 80px; min-width: 0; padding: 0 24px; border-radius: 18px; }
+  .ticker-logo img { height: 40px; max-width: 150px; }
 }
 
 /* ── TRUST BAR ─────────────────────────────────────────────── */
