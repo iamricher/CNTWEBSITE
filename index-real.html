@@ -1168,6 +1168,8 @@ input, select, textarea { font-family: var(--font-body); }
 #services .services-grid .service-card::after{ display:none !important; }
 #services .services-grid .service-card:hover{ transform:translateY(-8px); box-shadow:0 32px 64px -20px rgba(16,24,40,.6); background:linear-gradient(150deg,#1c2028 0%,#0e0f13 100%); border:none; }
 #services .services-grid .service-card:hover .svc-bg{ transform:scale(1.1); }
+/* Training photo: facilitator is on the right — frame her, not the empty screen */
+#services .services-grid .service-card[data-slug="training"] .svc-bg{ background-position:86% 50%; }
 #services .services-grid .service-card .service-icon{ display:none !important; }
 #services .services-grid .service-card .svc-eyebrow{ position:relative; z-index:2; display:flex; align-items:center; gap:9px; padding:0 28px; margin-bottom:13px; font-size:.68rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.88); }
 #services .services-grid .service-card .svc-eyebrow::before{ content:''; width:22px; height:2px; background:var(--red-lt,#E5213F); flex:none; box-shadow:0 0 10px rgba(229,33,63,.7); }
@@ -1538,7 +1540,7 @@ input, select, textarea { font-family: var(--font-body); }
     'hr-outsourcing':'/assets/img/services/hr-outsourcing/hr-outsourcing-03.jpg',
     'payroll':'/assets/img/services/payroll/payroll-05.jpg',
     'consulting':'/assets/img/services/consulting/consulting-11.jpg',
-    'training':'/assets/img/services/training/training-10.jpg'
+    'training':'/assets/img/services/training/training-11.jpg'
   };
   function cardBg(slug,dbUrl){ var u=PHOTO[slug]||dbUrl; return u ? ' style="background-image:url(\''+String(u).replace(/["\\']/g,'')+'\')"' : ''; }
   function bind(c,slug){ c.setAttribute('role','link'); c.setAttribute('tabindex','0'); c.addEventListener('click',function(){ location.href='/service?s='+slug; }); c.addEventListener('keydown',function(e){ if(e.key==='Enter') location.href='/service?s='+slug; }); }
@@ -2866,13 +2868,29 @@ function initHeroAnimations() {
   sections.forEach(s => io.observe(s));
 })();
 
-// ── TICKER pause on hover ─────────────────────────────────
+// ── BRAND WALL marquee — duplicate logos so the strip always fills the width
+// (no dead space), and keep a constant scroll speed regardless of copy count.
 (function initTicker() {
   const track = qs('.ticker-track');
   if (!track) return;
-
-  track.addEventListener('mouseenter', () => { track.style.animationPlayState = 'paused'; });
-  track.addEventListener('mouseleave', () => { track.style.animationPlayState = 'running'; });
+  const vp = track.parentElement;                 // .ticker-viewport
+  const base = track.innerHTML;                   // original 2 logo sets
+  function build() {
+    track.innerHTML = base;
+    let guard = 0;
+    // keep appending whole copies (even number of sets) until the strip is
+    // at least ~2.2× the viewport, so translateX(-50%) never reveals a gap.
+    while (track.scrollWidth < vp.offsetWidth * 2.2 && guard < 6) { track.innerHTML += base; guard++; }
+    track.style.animationDuration = Math.max(30, (track.scrollWidth / 2) / 70) + 's';  // ~70px/s
+  }
+  // Measure only once the logos have real widths, else padding-only chips over-duplicate.
+  const imgs = [].slice.call(track.querySelectorAll('img'));
+  const pending = imgs.filter(i => !(i.complete && i.naturalWidth));
+  if (pending.length) {
+    Promise.all(pending.map(i => new Promise(res => { i.addEventListener('load', res); i.addEventListener('error', res); }))).then(build);
+  }
+  build();
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 200); });
 })();
 
 console.log('%c CNT Promo & Ads Specialists, Inc. — Premium Website Loaded ', 
