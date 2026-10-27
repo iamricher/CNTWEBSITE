@@ -266,6 +266,31 @@
     .wv-l5{width:48px;height:48px;background:linear-gradient(150deg,#FFC3A1,#FF9E7D);bottom:2%;right:33%;transform:rotate(30deg)}
     @media(max-width:860px){.help-visual{min-height:300px}}
 
+    /* ── Standard (non-training) refinements: remove dead white space ── */
+    /* Overview as a two-column editorial lead (heading left, prose right) */
+    .sec-ov .ov-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:clamp(28px,5vw,64px);align-items:start}
+    .sec-ov .ov-grid .sec-head{margin:0}
+    .sec-ov .ov-body{color:var(--muted);font-size:clamp(1.05rem,1.2vw,1.18rem);line-height:1.76}
+    .sec-ov .ov-body p{margin:0;max-width:none}
+    @media(max-width:860px){.sec-ov .ov-grid{grid-template-columns:1fr;gap:14px}}
+    /* Who grid: 4 tiles fill one clean row on desktop (no 3+1 orphan) */
+    @media(min-width:761px){.aud.aud-4{grid-template-columns:repeat(4,1fr)}}
+    /* Scope checklist: centre the last row so odd counts don't orphan */
+    .scope.scope-flex{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 34px}
+    .scope.scope-flex li{flex:1 1 288px;max-width:400px}
+    @media(max-width:620px){.scope.scope-flex li{flex-basis:100%;max-width:none}}
+    /* Value on both sides → two balanced benefit cards */
+    .help-cards{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,2.2vw,26px);margin-top:clamp(26px,3vw,36px)}
+    @media(max-width:760px){.help-cards{grid-template-columns:1fr}}
+    .help-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(22px,2.6vw,34px);box-shadow:0 1px 2px rgba(16,18,24,.04);transition:transform .2s,box-shadow .2s,border-color .2s}
+    .help-card:hover{transform:translateY(-3px);box-shadow:0 22px 44px -28px rgba(16,24,40,.32);border-color:#F3C6CC}
+    .help-card h3{font-family:var(--font-display);font-size:1.12rem;font-weight:800;letter-spacing:-.01em;margin:0 0 1.1rem;display:flex;align-items:center;gap:.6rem;color:var(--ink)}
+    .help-card h3::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--red);flex:none}
+    .help-card ul{list-style:none;margin:0;padding:0;display:grid;gap:13px}
+    .help-card li{display:flex;gap:11px;align-items:flex-start;font-size:.98rem;line-height:1.5;color:var(--ink)}
+    .help-card li svg{width:24px;height:24px;flex:none;color:var(--red);padding:5px;border-radius:7px;background:#FDE7EA;box-sizing:border-box;margin-top:1px}
+    .help-cta-row{display:flex;justify-content:center;margin-top:clamp(24px,3vw,34px)}
+
     /* Process — numbered header cards */
     .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(12px,1.4vw,18px);margin-top:clamp(30px,4vw,46px);align-items:stretch}
     @media(max-width:900px){.steps{grid-template-columns:repeat(3,1fr)}}
@@ -582,7 +607,9 @@
 
       // Portfolio sections (rendered only when content exists).
       var liChk=function(x){return '<li>'+check+'<span>'+esc(x)+'</span></li>';};
-      var secWho=(s.who&&s.who.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.whoK)+'</div><h2>'+esc(L.whoH)+'</h2></div><div class="aud">'+s.who.map(function(w){return '<div class="aud-tile"><span class="aud-ic">'+roleIco+'</span><span class="aud-t">'+esc(w)+'</span></div>';}).join('')+'</div></div></section>'):'';
+      var isTr=(slug==='training');   // training keeps its bespoke layout; others get the space-filling refinements
+      var audCls='aud'+(s.who&&s.who.length===4?' aud-4':'');
+      var secWho=(s.who&&s.who.length)?('<section class="sec sec-gray"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.whoK)+'</div><h2>'+esc(L.whoH)+'</h2></div><div class="'+audCls+'">'+s.who.map(function(w){return '<div class="aud-tile"><span class="aud-ic">'+roleIco+'</span><span class="aud-t">'+esc(w)+'</span></div>';}).join('')+'</div></div></section>'):'';
       // Scope — if items look like "Level N (Name) — description", surface them as
       // tiered level cards (training framework); the rest stay a checklist.
       var secScope='';
@@ -591,17 +618,22 @@
         s.scope.forEach(function(x){ var m=String(x).match(/^Level\s*(\d+)\s*(?:\(([^)]+)\)|:\s*([^—\-]+?))\s*[—\-]\s*(.+)$/i); if(m) _lvls.push({n:m[1],name:(m[2]||m[3]||'').trim(),d:m[4]}); else _other.push(x); });
         var _lvlHtml=(_lvls.length>=2)?('<div class="svc-levels">'+_lvls.map(function(l,i){return '<div class="lvl"><span class="lvl-ic">'+(LEVEL_ICOS[i]||LEVEL_ICOS[LEVEL_ICOS.length-1])+'</span><span class="lvl-k">Level '+esc(l.n)+'</span><h3>'+esc(l.name)+'</h3><p>'+esc(l.d)+'</p></div>';}).join('')+'</div>'):'';
         var _listItems=_lvlHtml?_other:s.scope;
-        var _listHtml=_listItems.length?('<ul class="scope'+(_lvlHtml?' scope-mt':'')+'">'+_listItems.map(liChk).join('')+'</ul>'):'';
+        var _listHtml=_listItems.length?('<ul class="scope'+(_lvlHtml?' scope-mt':'')+(isTr?'':' scope-flex')+'">'+_listItems.map(liChk).join('')+'</ul>'):'';
         secScope='<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">'+esc(L.scopeK)+'</div><h2>'+esc(L.scopeH)+'</h2></div>'+_lvlHtml+_listHtml+'</div></section>';
       }
       var secStats=(s.stats&&s.stats.length)?('<section class="svc-stats"><div class="wrap"><div class="statgrid">'+s.stats.map(function(t){return '<div class="stat"><b>'+esc(t.v)+'</b><span>'+esc(t.l)+'</span></div>';}).join('')+'</div></div></section>'):'';
       var hasHelp=(s.client&&s.client.length)||(s.applicant&&s.applicant.length);
-      var secHelp=hasHelp?('<section class="sec sec-gray"><div class="wrap"><div class="help-split">'
+      var helpBiz=(s.client&&s.client.length)?('<h3>'+esc(L.helpBiz)+'</h3><ul>'+s.client.map(liChk).join('')+'</ul>'):'';
+      var helpPpl=(s.applicant&&s.applicant.length)?('<h3>'+esc(L.helpPpl)+'</h3><ul>'+s.applicant.map(liChk).join('')+'</ul>'):'';
+      var secHelp='';
+      if(hasHelp && isTr){
+        // Training keeps its bespoke split (copy + decorative value circle / seminar photo).
+        secHelp='<section class="sec sec-gray"><div class="wrap"><div class="help-split">'
         +'<div class="help-copy">'
           +'<div class="sec-head"><div class="k">'+esc(L.helpK)+'</div><h2>'+esc(L.helpH)+'</h2></div>'
           +'<div class="help-groups">'
-            +((s.client&&s.client.length)?('<div class="help-grp"><h3>'+esc(L.helpBiz)+'</h3><ul>'+s.client.map(liChk).join('')+'</ul></div>'):'')
-            +((s.applicant&&s.applicant.length)?('<div class="help-grp"><h3>'+esc(L.helpPpl)+'</h3><ul>'+s.applicant.map(liChk).join('')+'</ul></div>'):'')
+            +(helpBiz?'<div class="help-grp">'+helpBiz+'</div>':'')
+            +(helpPpl?'<div class="help-grp">'+helpPpl+'</div>':'')
           +'</div>'
           +'<a class="help-cta" href="/#contact">Request a consultation '+arrow+'</a>'
         +'</div>'
@@ -611,7 +643,18 @@
           +'<span class="wv-ring"></span>'
           +'<div class="wv-circle'+(s.valImage?' wv-circle--photo':'')+'">'+(s.valImage?'<img src="'+esc(s.valImage)+'" alt="'+esc(s.title||'')+'">':LEVEL_ICOS[4])+'</div>'
         +'</div>'
-        +'</div></div></section>'):'';
+        +'</div></div></section>';
+      } else if(hasHelp){
+        // Other services → two balanced benefit cards that fill the row (no floating-circle white space).
+        secHelp='<section class="sec sec-gray"><div class="wrap">'
+          +'<div class="sec-head"><div class="k">'+esc(L.helpK)+'</div><h2>'+esc(L.helpH)+'</h2></div>'
+          +'<div class="help-cards">'
+            +(helpBiz?'<div class="help-card">'+helpBiz+'</div>':'')
+            +(helpPpl?'<div class="help-card">'+helpPpl+'</div>':'')
+          +'</div>'
+          +'<div class="help-cta-row"><a class="help-cta" href="/#contact">Request a consultation '+arrow+'</a></div>'
+        +'</div></section>';
+      }
 
       // Optional per-service video (YouTube). Rendered as a privacy-friendly
       // youtube-nocookie responsive embed, only when a valid link is set.
@@ -664,10 +707,16 @@
         +'</div></div></div><div class="tq-dots"></div></div>'
         +'</div></section>'):'';
 
+      var secOverview=isTr
+        ? ('<section class="sec"><div class="wrap">'
+            +'<div class="sec-head"><div class="k">'+esc(L.ovK)+'</div><h2>'+esc(L.ovH)+'</h2><p>'+boldSpan(s.overview)+'</p></div>'
+          +'</div></section>')
+        : ('<section class="sec sec-ov"><div class="wrap"><div class="ov-grid">'
+            +'<div class="sec-head"><div class="k">'+esc(L.ovK)+'</div><h2>'+esc(L.ovH)+'</h2></div>'
+            +'<div class="ov-body"><p>'+boldSpan(s.overview)+'</p></div>'
+          +'</div></div></section>');
       body.innerHTML=
-        '<section class="sec"><div class="wrap">'
-          +'<div class="sec-head"><div class="k">'+esc(L.ovK)+'</div><h2>'+esc(L.ovH)+'</h2><p>'+boldSpan(s.overview)+'</p></div>'
-        +'</div></section>'
+        secOverview
         +secVideo
         +secWho
         +secScope
