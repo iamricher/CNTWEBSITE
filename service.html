@@ -292,10 +292,10 @@
     .help-cta-row{display:flex;justify-content:center;margin-top:clamp(24px,3vw,34px)}
 
     /* Process — numbered header cards */
-    .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(12px,1.4vw,18px);margin-top:clamp(30px,4vw,46px);align-items:stretch}
-    @media(max-width:900px){.steps{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:560px){.steps{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:400px){.steps{grid-template-columns:1fr}}
+    .steps{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(12px,1.4vw,18px);margin-top:clamp(30px,4vw,46px);align-items:stretch}
+    .steps .step{flex:0 1 clamp(152px,17vw,206px)}   /* uniform width; 4 or 5 cards centre (no empty 5th column) */
+    @media(max-width:560px){.steps .step{flex-basis:calc(50% - 9px)}}
+    @media(max-width:400px){.steps .step{flex-basis:100%}}
     .step{position:relative;display:flex;flex-direction:column;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:visible;box-shadow:0 12px 32px -22px rgba(16,24,40,.45);transition:transform .22s,box-shadow .22s}
     .step:hover{transform:translateY(-6px);box-shadow:0 30px 56px -24px rgba(16,24,40,.42)}
     /* flow arrow between steps (only while all five share one row) */
