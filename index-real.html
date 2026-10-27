@@ -1498,7 +1498,7 @@ input, select, textarea { font-family: var(--font-body); }
     'hr-outsourcing':'/assets/img/services/hr-outsourcing/hr-outsourcing-03.jpg',
     'payroll':'/assets/img/services/payroll/payroll-05.jpg',
     'consulting':'/assets/img/services/consulting/consulting-11.jpg',
-    'training':'/assets/img/services/training/training-05.jpg'
+    'training':'/assets/img/services/training/training-10.jpg'
   };
   function cardBg(slug,dbUrl){ var u=PHOTO[slug]||dbUrl; return u ? ' style="background-image:url(\''+String(u).replace(/["\\']/g,'')+'\')"' : ''; }
   function bind(c,slug){ c.setAttribute('role','link'); c.setAttribute('tabindex','0'); c.addEventListener('click',function(){ location.href='/service?s='+slug; }); c.addEventListener('keydown',function(e){ if(e.key==='Enter') location.href='/service?s='+slug; }); }
