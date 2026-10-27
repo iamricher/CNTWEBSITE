@@ -484,20 +484,41 @@ input, select, textarea { font-family: var(--font-body); }
 .scroll-line { width: 1px; height: 44px; background: linear-gradient(180deg, transparent, rgba(255,255,255,.35)); }
 @keyframes scrollBounce { 0%,100% { opacity:.35; transform:translateX(-50%) translateY(0); } 50%{ opacity:.7; transform:translateX(-50%) translateY(6px); } }
 
-/* ── TICKER ────────────────────────────────────────────────── */
+/* ── BRAND WALL — CNT Group of Companies (scrolling logos) ───── */
 .ticker {
-  overflow: hidden; background: var(--red); padding: .9rem 0;
+  overflow: hidden; background: var(--gray-50); padding: clamp(24px,3.4vw,38px) 0;
+  border-top: 1px solid #ECECEC; border-bottom: 1px solid #ECECEC;
+}
+.ticker-eyebrow {
+  text-align: center; font-family: var(--font-display); font-size: .72rem; font-weight: 800;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--text-sub);
+  margin: 0 0 clamp(16px,2vw,24px);
+}
+.ticker-viewport {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 .ticker-track {
-  display: flex; align-items: center; gap: 2.5rem;
-  white-space: nowrap; animation: tickerScroll 35s linear infinite;
+  display: flex; align-items: center; gap: clamp(14px,1.6vw,22px);
+  width: max-content; white-space: nowrap; animation: tickerScroll 48s linear infinite;
 }
-.ticker-track span {
-  font-size: .8rem; font-weight: 700;
-  color: rgba(255,255,255,.85); letter-spacing: .07em; text-transform: uppercase;
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker-logo {
+  flex: none; display: flex; align-items: center; justify-content: center;
+  height: 78px; padding: 0 clamp(20px,2.2vw,32px);
+  background: #fff; border: 1px solid #EEEEEE; border-radius: 16px;
 }
-.ticker-track .dot { color: rgba(255,255,255,.4); font-size: 1rem; }
+.ticker-logo img {
+  height: 44px; width: auto; max-width: 190px; object-fit: contain; display: block;
+  filter: grayscale(1); opacity: .55; transition: filter .3s ease, opacity .3s ease;
+}
+.ticker-logo:hover img { filter: none; opacity: 1; }
 @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } .ticker-viewport { overflow-x: auto; } }
+@media (max-width: 600px) {
+  .ticker-logo { height: 62px; padding: 0 16px; }
+  .ticker-logo img { height: 36px; max-width: 136px; }
+}
 
 /* ── TRUST BAR ─────────────────────────────────────────────── */
 .trust-bar {
@@ -1324,17 +1345,34 @@ input, select, textarea { font-family: var(--font-body); }
 
 </section>
 
-<!-- TICKER -->
-<div class="ticker" aria-hidden="true">
-  <div class="ticker-track">
-    <span>Executive Search</span><span class="dot">·</span>
-    <span>Mass Hiring</span><span class="dot">·</span>
-    <span>HR Outsourcing</span><span class="dot">·</span>
-    <span>Payroll Management</span><span class="dot">·</span>    <span>Workforce Consulting</span><span class="dot">·</span>    <span>Training & Development</span><span class="dot">·</span>    <span>Executive Search</span><span class="dot">·</span>
-    <span>Mass Hiring</span><span class="dot">·</span>
-    <span>HR Outsourcing</span><span class="dot">·</span>
-    <span>Payroll Management</span><span class="dot">·</span>    <span>Workforce Consulting</span><span class="dot">·</span>    <span>Training & Development</span><span class="dot">·</span>  </div>
-</div>
+<!-- BRAND WALL — CNT Group of Companies -->
+<section class="ticker" aria-label="CNT Group of Companies">
+  <p class="ticker-eyebrow">CNT Group of Companies</p>
+  <div class="ticker-viewport">
+    <div class="ticker-track">
+      <!-- set 1 (labelled) -->
+      <div class="ticker-logo"><img src="/assets/img/group/cnt-goc.png" alt="CNT Group of Companies"></div>
+      <div class="ticker-logo"><img src="/assets/img/group/cnt-promo.png" alt="CNT Promo &amp; Ads Specialists, Inc."></div>
+      <div class="ticker-logo"><img src="/assets/img/group/cnt-int.png" alt="CNT International Manpower Agency Inc."></div>
+      <div class="ticker-logo"><img src="/assets/img/group/synergy.png" alt="Synergy Experts Labor Service Cooperative"></div>
+      <div class="ticker-logo"><img src="/assets/img/group/framoto.png" alt="Framoto Inc."></div>
+      <div class="ticker-logo"><img src="/assets/img/group/frontier.png" alt="Frontier Travel and Tours OPC"></div>
+      <div class="ticker-logo"><img src="/assets/img/group/lyfe-land.png" alt="Lyfe Land"></div>
+      <div class="ticker-logo"><img src="/assets/img/group/lyfe-marketing.png" alt="Lyfe Marketing"></div>
+      <div class="ticker-logo"><img src="/assets/img/group/polari.png" alt="Polari"></div>
+      <!-- set 2 (duplicate for a seamless loop) -->
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/cnt-goc.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/cnt-promo.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/cnt-int.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/synergy.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/framoto.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/frontier.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/lyfe-land.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/lyfe-marketing.png" alt=""></div>
+      <div class="ticker-logo" aria-hidden="true"><img src="/assets/img/group/polari.png" alt=""></div>
+    </div>
+  </div>
+</section>
 
 <!-- ============================= ABOUT ============================= -->
 <section class="about section" id="about" aria-label="About CNT">
