@@ -1290,7 +1290,7 @@
         toast('Use a JPG, PNG, WEBP or GIF. iPhone HEIC photos aren’t supported — export/share it as JPG first, or set Camera → Formats to “Most Compatible”.');
         input.value=''; return;
       }
-      if(f.size>5*1048576){ toast('Image is larger than 5 MB.'); input.value=''; return; }
+      if(f.size>25*1048576){ toast('Image is larger than 25 MB.'); input.value=''; return; }
       var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
       var path='events/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
       toast('Uploading image…');
@@ -1326,7 +1326,7 @@
       toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
       for(var i=0;i<files.length;i++){
         var f=files[i];
-        if(!/^image\//.test(f.type) || f.size>5*1048576) continue;
+        if(!/^image\//.test(f.type) || f.size>25*1048576) continue;
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='events/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
         var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
@@ -1609,7 +1609,7 @@
       toast('Uploading…');
       for(var i=0;i<files.length;i++){ var f=files[i];
         if(_ofImages.length>=9){ toast('Gallery limit reached (9) — extra photos skipped.'); break; }
-        if(!/^image\//.test(f.type)||f.size>5*1048576) continue;
+        if(!/^image\//.test(f.type)||f.size>25*1048576) continue;
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='offices/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
         var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
@@ -1771,7 +1771,7 @@
       toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
       for(var i=0;i<files.length;i++){
         var f=files[i];
-        if(!/^image\//.test(f.type) || f.size>5*1048576) continue;
+        if(!/^image\//.test(f.type) || f.size>25*1048576) continue;
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='stories/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
         var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
@@ -2022,7 +2022,7 @@
       var files=input&&input.files?Array.prototype.slice.call(input.files):[]; if(!files.length) return;
       toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
       for(var i=0;i<files.length;i++){ var f=files[i];
-        if(!/^image\//.test(f.type)||f.size>5*1048576){ toast('Skipped '+f.name+' (use an image under 5MB)'); continue; }
+        if(!/^image\//.test(f.type)||f.size>25*1048576){ toast('Skipped '+f.name+' (use an image under 25MB)'); continue; }
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='services/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
         var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
@@ -2053,7 +2053,7 @@
     window.svAddExpert=function(){ document.getElementById('sv-experts').insertAdjacentHTML('beforeend', svExpertRow('','','')); };
     window.svExpertUpload=async function(input){
       var f=input&&input.files&&input.files[0]; if(!f) return;
-      if(!/^image\//.test(f.type)||f.size>5*1048576){ toast('Use an image under 5MB'); input.value=''; return; }
+      if(!/^image\//.test(f.type)||f.size>25*1048576){ toast('Use an image under 25MB'); input.value=''; return; }
       var item=input.closest('.sv-ex-item');
       toast('Uploading photo…');
       var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
