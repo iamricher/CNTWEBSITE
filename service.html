@@ -430,7 +430,7 @@
         overview:'Hiring is easier when it’s planned. We help you map the workforce your strategy actually needs — the roles, the structure, the market rates, and the timing — so growth doesn’t outrun your people plan.',
         highlights:[
           {t:'Manpower planning',d:'Forecast the headcount and roles your targets will require.'},
-          {t:'Org & role design',d:'Structures and role definitions that scale cleanly as you grow.'},
+          {t:'Organization & role design',d:'Structures and role definitions that scale cleanly as you grow.'},
           {t:'Market & salary benchmarking',d:'Know what talent costs so your offers land competitively.'},
           {t:'Scalability strategy',d:'A staffing plan that keeps pace with expansion.'}
         ]}
@@ -438,7 +438,7 @@
     // Company stats — read from the shared source of truth (site-chrome.js's
     // window.CNT_STATS) at render time so every page stays uniform; editable per
     // service in Content Studio. This local copy is the fallback if it's missing.
-    var STATS_FALLBACK=[{v:'30+',l:'Years in Business'},{v:'10,000+',l:'Workers Deployed'},{v:'Nationwide',l:'Luzon · Visayas · Mindanao'}];
+    var STATS_FALLBACK=[{v:'30+',l:'Years in Business'},{v:'11,000+',l:'Workers Deployed'},{v:'Nationwide',l:'Luzon · Visayas · Mindanao'}];
     function companyStats(){ return (window.CNT_STATS && window.CNT_STATS.length) ? window.CNT_STATS : STATS_FALLBACK; }
 
     // Portfolio content per service (draft copy). Rendered when the matching DB
@@ -472,7 +472,7 @@
         applicant:['Learn skills that grow your career','Clear expectations from day one','A real path toward leadership','Training that makes you more employable']},
       'consulting':{
         who:['Companies planning growth','New market entries','Restructuring teams','Boards & HR leaders'],
-        scope:['Manpower planning & forecasting','Org & role design','Market & salary benchmarking','Scalability & staffing strategy','Workforce cost modeling'],
+        scope:['Manpower planning & forecasting','Organization & role design','Market & salary benchmarking','Scalability & staffing strategy','Workforce cost modeling'],
         client:['Hire ahead of need, not behind it','Structures that scale cleanly as you grow','Offers priced right for the market','A staffing plan tied to your strategy'],
         applicant:['Roles designed with clear scope','Fair, benchmarked compensation','Opportunities created by real planning','Growth paths as the company scales']}
     };

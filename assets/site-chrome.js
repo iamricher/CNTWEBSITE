@@ -11,7 +11,7 @@
    same figures. Update here and all stat blocks that read it stay uniform. */
 window.CNT_STATS = [
   { v: '30+',        l: 'Years in Business' },
-  { v: '10,000+',    l: 'Workers Deployed'  },
+  { v: '11,000+',    l: 'Workers Deployed'  },
   { v: 'Nationwide', l: 'Luzon · Visayas · Mindanao' }
 ];
 
@@ -77,7 +77,7 @@ window.CNT_STATS = [
     '  <div class="footer-top"><div class="container"><div class="footer-grid">' +
     '    <div class="footer-brand">' +
     '      <img src="' + FOOTER_LOGO + '" alt="CNT Promo & Ads Specialists, Inc." class="footer-logo" />' +
-    '      <p>Philippines\' most trusted employment agency and corporate staffing solutions provider — connecting exceptional talent with leading organizations since 1992.</p>' +
+    '      <p>Philippines\' most trusted employment agency and corporate staffing solutions provider — connecting exceptional talent with leading organizations since 1991.</p>' +
     '      <div class="social-links">' +
     '        <a href="https://www.facebook.com/CntPromoAds" target="_blank" rel="noopener" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>' +
     '        <a href="https://www.linkedin.com/company/cnt-promo-ads-specialists-inc/" class="social-link" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>' +
