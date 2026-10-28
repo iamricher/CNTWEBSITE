@@ -1280,6 +1280,24 @@
     };
 
     // shared image uploader → public event-images bucket
+    // Shrink/compress large images in the browser before upload so the live site
+    // stays fast no matter what size is picked (any input -> max 2400px JPEG ~0.82).
+    // GIFs (animation) and already-small files (<900KB) pass through untouched.
+    async function shrinkImage(file, maxDim, quality){
+      maxDim = maxDim || 2400; quality = quality || 0.82;
+      if(!file || file.type === 'image/gif' || file.size <= 900*1024) return file;
+      try{
+        var bmp = await createImageBitmap(file);
+        var big = Math.max(bmp.width, bmp.height), scale = big > maxDim ? maxDim/big : 1;
+        var w = Math.round(bmp.width*scale), h = Math.round(bmp.height*scale);
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(bmp,0,0,w,h);
+        if(bmp.close) bmp.close();
+        var blob = await new Promise(function(r){ c.toBlob(r,'image/jpeg',quality); });
+        if(blob && blob.size < file.size){ try{ blob.name = (file.name||'image').replace(/\.[^.]+$/,'') + '.jpg'; }catch(_){} return blob; }
+      }catch(e){}
+      return file;
+    }
     window.imgUpload = async function(input, imgId, prevId){
       var f = input && input.files && input.files[0]; if(!f) return;
       // The storage bucket only accepts these web-displayable formats. iPhone
@@ -1291,13 +1309,14 @@
         input.value=''; return;
       }
       if(f.size>50*1048576){ toast('Image is larger than 50 MB.'); input.value=''; return; }
+      f = await shrinkImage(f);
       var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
       var path='events/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
       toast('Uploading image…');
       // Instant local preview: show the picked image right away (dimmed) while it
       // uploads in the background, so the editor feels responsive on slow links.
       try{ var _pvEl=document.getElementById(prevId); if(_pvEl){ _pvEl.innerHTML='<img src="'+URL.createObjectURL(f)+'" alt="" style="opacity:.55">'; } }catch(_){}
-      var up = await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+      var up = await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false,contentType:f.type||'image/jpeg'});
       if(up.error){
         var msg = up.error.message||'';
         if(/mime|content.?type|not supported/i.test(msg)) toast('That image format isn’t supported. Please use a JPG or PNG.');
@@ -1327,9 +1346,10 @@
       for(var i=0;i<files.length;i++){
         var f=files[i];
         if(!/^image\//.test(f.type) || f.size>50*1048576) continue;
+        f = await shrinkImage(f);
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='events/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false,contentType:f.type||'image/jpeg'});
         if(up.error){ toast('Upload failed: '+up.error.message); continue; }
         _evImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl);
         renderEvGallery();
@@ -1610,9 +1630,10 @@
       for(var i=0;i<files.length;i++){ var f=files[i];
         if(_ofImages.length>=9){ toast('Gallery limit reached (9) — extra photos skipped.'); break; }
         if(!/^image\//.test(f.type)||f.size>50*1048576) continue;
+        f = await shrinkImage(f);
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='offices/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false,contentType:f.type||'image/jpeg'});
         if(up.error){ toast('Upload failed: '+up.error.message); continue; }
         _ofImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl); renderOfGallery();
       }
@@ -1772,9 +1793,10 @@
       for(var i=0;i<files.length;i++){
         var f=files[i];
         if(!/^image\//.test(f.type) || f.size>50*1048576) continue;
+        f = await shrinkImage(f);
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='stories/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false,contentType:f.type||'image/jpeg'});
         if(up.error){ toast('Upload failed: '+up.error.message); continue; }
         _stImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl);
         renderStGallery();
@@ -2023,9 +2045,10 @@
       toast('Uploading '+files.length+' photo'+(files.length===1?'':'s')+'…');
       for(var i=0;i<files.length;i++){ var f=files[i];
         if(!/^image\//.test(f.type)||f.size>50*1048576){ toast('Skipped '+f.name+' (use an image under 50MB)'); continue; }
+        f = await shrinkImage(f);
         var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
         var path='services/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+        var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false,contentType:f.type||'image/jpeg'});
         if(up.error){ toast('Upload failed: '+up.error.message); continue; }
         _svImages.push(sb.storage.from('event-images').getPublicUrl(path).data.publicUrl);
         renderSvGallery();
@@ -2054,11 +2077,12 @@
     window.svExpertUpload=async function(input){
       var f=input&&input.files&&input.files[0]; if(!f) return;
       if(!/^image\//.test(f.type)||f.size>50*1048576){ toast('Use an image under 50MB'); input.value=''; return; }
+      f = await shrinkImage(f);
       var item=input.closest('.sv-ex-item');
       toast('Uploading photo…');
       var ext=((f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
       var path='services/experts/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
-      var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false});
+      var up=await sb.storage.from('event-images').upload(path,f,{cacheControl:'3600',upsert:false,contentType:f.type||'image/jpeg'});
       if(up.error){ toast('Upload failed: '+up.error.message); input.value=''; return; }
       var url=sb.storage.from('event-images').getPublicUrl(path).data.publicUrl;
       item.querySelector('.sv-ex-photo').value=url;
