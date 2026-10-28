@@ -673,7 +673,7 @@
       var _sil='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>';
       var _slots='';
       for(var _si=0; _si<(s.smeSlots||0); _si++){ _slots+='<figure class="svc-expert svc-expert--slot"><div class="pic noimg">'+_sil+'</div><figcaption>Subject Matter Expert<span class="role">Coming soon</span></figcaption></figure>'; }
-      var secExperts=expList.length?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Our Team</div><h2>Who we are</h2></div><div class="svc-experts">'
+      var secExperts=expList.length?('<section class="sec"><div class="wrap"><div class="sec-head"><div class="k">Our Team</div><h2>Who We Are</h2></div><div class="svc-experts">'
         +expList.map(function(e){ var meta=(s.expertMeta||{})[e.name]||{}; var nm=meta.name||e.name||''; var tag=meta.tagline||e.tagline||''; return '<figure class="svc-expert"><div class="pic'+(e.photo?'':' noimg')+'">'+(e.photo?'<img src="'+esc(e.photo)+'" alt="'+esc(nm)+'" loading="lazy">':_sil)+'</div>'+((nm||e.role||tag)?'<figcaption>'+esc(nm)+(e.role?'<span class="role">'+esc(e.role)+'</span>':'')+(tag?'<span class="etag">'+esc(tag)+'</span>':'')+'</figcaption>':'')+'</figure>'; }).join('')
         +_slots
         +'</div>'
