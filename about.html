@@ -73,8 +73,12 @@
     .tl-item p{color:var(--sub);font-size:.95rem}
 
     /* LEADERSHIP */
-    .lead-sub{color:var(--sub);font-size:1.06rem;line-height:1.6;max-width:58ch;margin:1.1rem 0 0}
-    .lead-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(22px,3vw,40px);margin-top:clamp(2.4rem,4vw,3.4rem)}
+    .lead-section{background:var(--bg)}
+    .lead-feature{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(32px,5vw,72px);align-items:center}
+    .lead-sub{color:var(--sub);font-size:1.06rem;line-height:1.6;max-width:48ch;margin:1.1rem 0 0}
+    .lead-quote{margin:1.9rem 0 0;padding:.3rem 0 .3rem 1.4rem;border-left:3px solid var(--red);font-family:var(--display);font-style:italic;font-weight:700;font-size:clamp(1.15rem,1.9vw,1.45rem);line-height:1.38;color:var(--ink)}
+    .lead-quote cite{display:block;margin-top:.7rem;font-style:normal;font-weight:700;font-size:.74rem;letter-spacing:.13em;text-transform:uppercase;color:var(--red)}
+    .lead-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(22px,3vw,40px)}
     .lead{position:relative;width:300px;max-width:100%;text-align:center;background:#fff;border:1px solid rgba(17,17,17,.07);border-radius:24px;overflow:hidden;padding-bottom:1.75rem;box-shadow:0 1px 2px rgba(17,17,17,.04),0 20px 46px -26px rgba(17,17,17,.24);transition:transform .25s ease,box-shadow .25s ease}
     .lead:hover{transform:translateY(-6px);box-shadow:0 1px 2px rgba(17,17,17,.04),0 32px 64px -30px rgba(165,13,36,.34)}
     .lead::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--red),var(--red-lt));z-index:2}
@@ -97,7 +101,7 @@
     .btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.08)}
     .note{background:var(--red-pale);border:1px solid var(--red-muted);border-radius:12px;padding:14px 18px;font-size:.85rem;color:var(--red-deep);margin-top:2rem}
 
-    @media(max-width:760px){.story-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}}
+    @media(max-width:760px){.story-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr);gap:2rem}.lead-feature{grid-template-columns:1fr;gap:2.4rem}}
   </style>
 
   <meta name="twitter:card" content="summary_large_image" />
@@ -156,11 +160,14 @@
   </section>
 
   <!-- LEADERSHIP -->
-  <section style="background:var(--bg)">
-    <div class="wrap">
-      <div class="eyebrow">Ownership &amp; Leadership</div>
-      <h2 class="h">The people behind <em>CNT</em>.</h2>
-      <p class="lead-sub">Owner-led and hands-on &mdash; personally accountable for the talent we place and the businesses that rely on us.</p>
+  <section class="lead-section">
+    <div class="wrap lead-feature">
+      <div class="lead-intro">
+        <div class="eyebrow">Ownership &amp; Leadership</div>
+        <h2 class="h">The people behind <em>CNT</em>.</h2>
+        <p class="lead-sub">Owner-led and hands-on &mdash; the people you see here run CNT themselves and stand behind every placement we make.</p>
+        <blockquote class="lead-quote">&ldquo;A million jobs for a million Filipinos.&rdquo;<cite>The goal that drives our leadership</cite></blockquote>
+      </div>
       <div class="lead-grid" id="lead-grid">
         <div class="lead"><div class="lead-photo"><img src="assets/img/cecilio-tobillo.jpg" alt="Atty. Cecilio Tobillo" loading="lazy" style="object-position:50% 14%"></div><h4>Atty. Cecilio Tobillo</h4><span>President</span></div>
         <div class="lead"><div class="lead-photo"><img src="assets/img/pj-tobillo.jpg" alt="Paul Joseph Tobillo" loading="lazy" style="object-position:50% 12%"></div><h4>Paul Joseph Tobillo</h4><span>VP, Chief Financial Officer</span></div>
