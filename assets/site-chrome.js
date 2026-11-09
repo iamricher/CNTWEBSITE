@@ -343,6 +343,9 @@ window.CNT_STATS = [
       var h = location.hostname || '';
       if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '0.0.0.0'
         || /\.local$/.test(h) || /^192\.168\./.test(h) || /^10\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h)) return false;
+      // Only the real public domain sends analytics — never Vercel preview/alias
+      // URLs (*.vercel.app) or any other host, so dev/staging never pollute the data.
+      if (!/(^|\.)cntpromoads\.com\.ph$/.test(h)) return false;
       if (navigator.webdriver) return false;
       if (/bot|crawl|spider|slurp|headless|lighthouse|pagespeed|gtmetrix|preview|monitor|scan/i.test(navigator.userAgent || '')) return false;
       try {
